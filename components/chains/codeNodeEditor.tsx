@@ -4,6 +4,7 @@ import { SingleTabHeader } from '../tabsHeader'
 import codeIcon from '@/public/code.svg'
 import { CodeChainItem } from '@/types'
 import TextInput from '../textInput'
+import { InterruptPrefix } from '@/src/common/formatting'
 
 export default function CodeNodeEditor({
   item,
@@ -35,6 +36,7 @@ export default function CodeNodeEditor({
             value={item.code}
             setValue={updateCode}
             variables={variables}
+            completions={[InterruptPrefix]}
             preformatted
           />
         </div>

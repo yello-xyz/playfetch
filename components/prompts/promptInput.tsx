@@ -62,6 +62,7 @@ export default function PromptInput({
   disabled,
   preformatted,
   variables,
+  completions,
 }: {
   value: string
   setValue: (value: string) => void
@@ -69,6 +70,7 @@ export default function PromptInput({
   disabled?: boolean
   preformatted?: boolean
   variables?: string[]
+  completions?: string[]
 }) {
   const toggleInput = useCallback(
     (selection: Selection) => {
@@ -116,6 +118,7 @@ export default function PromptInput({
       disabled={disabled}
       preformatted={preformatted}
       variables={variables}
+      completions={completions}
     />
   )
 }

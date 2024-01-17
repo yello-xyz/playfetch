@@ -11,6 +11,7 @@ import {
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
 import { CompletionContext, autocompletion } from '@codemirror/autocomplete'
 import { Inter, Roboto_Mono } from 'next/font/google'
+import { CodeModuleName, InterruptOnceFunctionName } from '@/src/common/formatting'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 const mono = Roboto_Mono({ subsets: ['latin'], weight: ['400', '500', '600'] })
@@ -59,12 +60,25 @@ const editorTheme = (preformatted: boolean, bordered: boolean, tokenStyle?: TagS
     '.cm-tooltip-autocomplete li[aria-selected] .cm-completionLabel': { backgroundColor: '#E14BD2' },
   })
 
+const buildCompletions = (regexp: RegExp, completions: string[] | undefined) =>
+  completions
+    ? [
+        (context: CompletionContext) => {
+          const word = context.matchBefore(regexp)
+          return word && word.from !== word.to
+            ? { from: word.from, options: completions.map(completion => ({ label: completion })) }
+            : null
+        },
+      ]
+    : []
+
 export default function Editor({
   value,
   setValue,
   tokenizer,
   tokenStyle,
   variables,
+  completions,
   setExtractSelection,
   className = '',
   placeholder,
@@ -81,6 +95,7 @@ export default function Editor({
   tokenizer?: (stream: StringStream) => string
   tokenStyle?: TagStyle
   variables?: string[]
+  completions?: string[]
   setExtractSelection?: (
     extractSelection: () => (tokenType: string) => {
       root: Node
@@ -122,17 +137,16 @@ export default function Editor({
 
   const autocomplete = useMemo(
     () =>
-      variables
+      variables || completions
         ? autocompletion({
             activateOnTyping: true,
             icons: false,
             override: [
-              (context: CompletionContext) => {
-                const word = context.matchBefore(/{{[^}]*}?/)
-                return word && word.from !== word.to
-                  ? { from: word.from, options: variables.map(variable => ({ label: `{{${variable}}}` })) }
-                  : null
-              },
+              ...buildCompletions(
+                /{[^}]*}?/,
+                variables?.map(v => `{{${v}}}`)
+              ),
+              ...buildCompletions(/\w*/, completions),
             ],
           })
         : undefined,

@@ -103,6 +103,7 @@ export const ExtractVariables = (text: string) => [
 
 export const CodeModuleName = 'PlayFetch'
 export const InterruptOnceFunctionName = 'InterruptOnce'
+export const InterruptPrefix = `${CodeModuleName}.${InterruptOnceFunctionName}(`
 
 const interruptPrefix = `${CodeModuleName}\.${InterruptOnceFunctionName}\\(`
 const matchAll = (text: string, expression: string) =>

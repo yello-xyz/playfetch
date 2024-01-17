@@ -6,6 +6,7 @@ import TextInput from '../textInput'
 import Button from '../button'
 import { Fragment } from 'react'
 import { ShiftRight, PruneBranchAndShiftLeft } from '@/src/common/branching'
+import { InterruptPrefix } from '@/src/common/formatting'
 
 const placeholderSuffix = (branchIndex: number) => {
   switch (branchIndex) {
@@ -110,6 +111,7 @@ export default function BranchNodeEditor({
               value={item.code}
               setValue={updateCode}
               variables={variables}
+              completions={[InterruptPrefix]}
               preformatted
             />
           </div>
