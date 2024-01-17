@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { ActivePrompt, PromptVersion } from '@/types'
 import { PromptConfigsAreEqual, PromptVersionsAreEqual, VersionHasNonEmptyPrompts } from '@/src/common/versionsEqual'
 
-type OnSaved = (versionID: number) => Promise<void> | void
+type OnSaved = (versionID: number) => void | Promise<void>
 
 export default function useSavePrompt(
   activePrompt: ActivePrompt | undefined,

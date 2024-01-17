@@ -17,6 +17,7 @@ import CompareView from '../compare/compareView'
 import EndpointsView from '../endpoints/endpointsView'
 import CommentsPane from '../commentsPane'
 import SettingsView from '../settings/settingsView'
+import { OnSavedChain } from '@/src/client/hooks/useSaveChain'
 
 export default function MainProjectPane({
   activeItem,
@@ -47,10 +48,7 @@ export default function MainProjectPane({
   setModifiedVersion: (version: PromptVersion) => void
   addPrompt: () => Promise<void>
   savePrompt: () => Promise<number>
-  saveChain: (
-    items: ChainItemWithInputs[],
-    onSaved?: ((versionID: number) => Promise<void>) | (() => void)
-  ) => Promise<number | undefined>
+  saveChain: (items: ChainItemWithInputs[], onSaved?: OnSavedChain) => Promise<number | undefined>
   focusRunID: number | undefined
   analytics: Analytics | undefined
   refreshAnalytics: (dayRange?: number) => Promise<void>

@@ -21,6 +21,7 @@ import IconButton from '../iconButton'
 import closeIcon from '@/public/close.svg'
 import ChainNodeOutput, { ExtractChainItemVariables } from './chainNodeOutput'
 import useChainPromptCache, { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
+import { OnSavedChain } from '@/src/client/hooks/useSaveChain'
 
 const StripItemsToSave = (items: ChainItem[]): ChainItem[] =>
   items.map(item => {
@@ -60,10 +61,7 @@ export default function ChainView({
   chain: ActiveChain
   activeVersion: ChainVersion
   setActiveVersion: (version: ChainVersion) => void
-  saveChain: (
-    items: ChainItemWithInputs[],
-    onSaved?: ((versionID: number) => Promise<void>) | (() => void)
-  ) => Promise<number | undefined>
+  saveChain: (items: ChainItemWithInputs[], onSaved?: OnSavedChain) => Promise<number | undefined>
   focusRunID?: number
 }) {
   const [nodes, setNodes] = useState([InputNode, ...activeVersion.items, OutputNode] as ChainNode[])
