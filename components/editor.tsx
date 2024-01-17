@@ -9,6 +9,7 @@ import {
   TagStyle,
 } from '@codemirror/language'
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
+import { CompletionContext, autocompletion } from '@codemirror/autocomplete'
 import { Inter, Roboto_Mono } from 'next/font/google'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
@@ -38,11 +39,26 @@ const editorTheme = (preformatted: boolean, bordered: boolean) =>
     },
   })
 
+const autocompleteExtension = (variables: string[]) =>
+  autocompletion({
+    activateOnTyping: true,
+    icons: false,
+    override: [
+      (context: CompletionContext) => {
+        const word = context.matchBefore(/{{/)
+        return word && word.from !== word.to
+          ? { from: word.from, options: variables.map(variable => ({ label: `{{${variable}}}` })) }
+          : null
+      },
+    ],
+  })
+
 export default function Editor({
   value,
   setValue,
   tokenizer,
   tokenStyle,
+  variables,
   setExtractSelection,
   className = '',
   placeholder,
@@ -58,6 +74,7 @@ export default function Editor({
   setValue: (value: string) => void
   tokenizer?: (stream: StringStream) => string
   tokenStyle?: TagStyle
+  variables?: string[]
   setExtractSelection?: (
     extractSelection: () => (tokenType: string) => {
       root: Node
@@ -100,6 +117,7 @@ export default function Editor({
   const extensions = useMemo(
     () => [
       ...(tokenizer ? [StreamLanguage.define({ token: tokenizer })] : []),
+      ...(variables ? [autocompleteExtension(variables)] : []),
       ...(tokenStyle ? [syntaxHighlighting(HighlightStyle.define([tokenStyle]))] : []),
       ...(preformatted ? [lineNumbers()] : []),
       EditorView.lineWrapping,
