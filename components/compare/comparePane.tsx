@@ -72,7 +72,7 @@ export default function ComparePane({
 
   return (
     <div className='flex flex-col w-1/2 h-full grow'>
-      <div className='flex items-center gap-1 p-4 border-b border-gray-200'>
+      <div className='flex items-center gap-1 p-2.5 border-b border-gray-200 bg-white'>
         <ProjectItemSelector
           className='w-full max-w-[240px]'
           project={project}
