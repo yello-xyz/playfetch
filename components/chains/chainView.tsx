@@ -3,53 +3,17 @@ import { useCallback, useState } from 'react'
 import api from '@/src/client/api'
 import ChainNodeEditor from './chainNodeEditor'
 import ChainEditor from './chainEditor'
-import {
-  ChainNode,
-  InputNode,
-  IsBranchChainItem,
-  IsChainItem,
-  IsCodeChainItem,
-  IsPromptChainItem,
-  IsQueryChainItem,
-  OutputNode,
-} from './chainNode'
+import { ChainNode, InputNode, IsChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import { Allotment } from 'allotment'
 import { useActiveProject, useRefreshActiveItem, useRefreshProject } from '@/src/client/context/projectContext'
 import VersionTimeline from '../versions/versionTimeline'
 import { SingleTabHeader } from '../tabsHeader'
 import IconButton from '../iconButton'
 import closeIcon from '@/public/close.svg'
-import ChainNodeOutput, { ExtractChainItemVariables, ExtractUnboundChainVariables } from './chainNodeOutput'
-import useChainPromptCache, { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
+import ChainNodeOutput, { ExtractUnboundChainVariables } from './chainNodeOutput'
+import useChainPromptCache from '../../src/client/hooks/useChainPromptCache'
 import { OnSavedChain } from '@/src/client/hooks/useSaveChain'
-
-const StripItemsToSave = (items: ChainItem[]): ChainItem[] =>
-  items.map(item => {
-    return IsCodeChainItem(item) || IsBranchChainItem(item) || IsQueryChainItem(item)
-      ? item
-      : {
-          ...item,
-          activePrompt: undefined,
-          version: undefined,
-        }
-  })
-
-const AugmentItemsToSave = (items: ChainItem[], promptCache: ChainPromptCache) =>
-  items.map(item => {
-    const inputs = ExtractChainItemVariables(item, promptCache, false)
-    return IsCodeChainItem(item) || IsBranchChainItem(item) || IsQueryChainItem(item)
-      ? { ...item, inputs }
-      : {
-          ...item,
-          inputs,
-          dynamicInputs: ExtractChainItemVariables(item, promptCache, true).filter(input => !inputs.includes(input)),
-        }
-  })
-
-const GetItemsToSave = (items: ChainItem[], promptCache: ChainPromptCache) =>
-  AugmentItemsToSave(StripItemsToSave(items), promptCache)
-
-export const GetChainItemsSaveKey = (items: ChainItem[]) => JSON.stringify(StripItemsToSave(items))
+import { GetChainItemsSaveKey, GetItemsToSave } from './chainItems'
 
 export default function ChainView({
   chain,

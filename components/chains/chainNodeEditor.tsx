@@ -6,12 +6,12 @@ import Button, { PendingButton } from '../button'
 import { useState } from 'react'
 import useSavePrompt from '@/src/client/hooks/useSavePrompt'
 import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
-import { GetChainItemsSaveKey } from './chainView'
 import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import QueryNodeEditor from './queryNodeEditor'
 import BranchNodeEditor from './branchNodeEditor'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
+import { GetChainItemsSaveKey } from './chainItems'
 
 export default function ChainNodeEditor({
   items,
