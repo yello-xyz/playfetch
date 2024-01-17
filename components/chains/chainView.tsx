@@ -19,7 +19,7 @@ import VersionTimeline from '../versions/versionTimeline'
 import { SingleTabHeader } from '../tabsHeader'
 import IconButton from '../iconButton'
 import closeIcon from '@/public/close.svg'
-import ChainNodeOutput, { ExtractChainItemVariables } from './chainNodeOutput'
+import ChainNodeOutput, { ExtractChainItemVariables, ExtractUnboundChainVariables } from './chainNodeOutput'
 import useChainPromptCache, { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
 import { OnSavedChain } from '@/src/client/hooks/useSaveChain'
 
@@ -162,6 +162,8 @@ export default function ChainView({
     }
   }
 
+  const staticVariables = ExtractUnboundChainVariables(items, promptCache, false)
+
   const minWidth = 300
   return (
     <Allotment>
@@ -230,6 +232,7 @@ export default function ChainView({
                 setDirty={setNodeDirty}
                 promptCache={promptCache}
                 dismiss={() => updateActiveNodeIndex(undefined)}
+                variables={staticVariables}
               />
             )}
           </Allotment.Pane>

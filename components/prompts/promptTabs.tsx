@@ -29,6 +29,7 @@ export default function PromptTabs({
   updateConfig,
   initialTabs,
   persistTabs,
+  variables,
 }: {
   prompt: ActivePrompt
   versions: PromptVersion[]
@@ -39,6 +40,7 @@ export default function PromptTabs({
   updateConfig: (config: PromptVersion['config']) => void
   initialTabs: PromptTab[][]
   persistTabs: (tabs: PromptTab[][]) => void
+  variables: string[]
 }) {
   const [tabs, setTabs] = useState(initialTabs.flat())
   const [areTabsMerged, setTabsMerged] = useState(initialTabs.length === 1)
@@ -56,7 +58,12 @@ export default function PromptTabs({
         return (
           <div className='flex flex-col flex-1 h-full'>
             {tabSelector()}
-            <PromptPanel version={currentVersion} updatePrompt={updatePrompt} updateConfig={updateConfig} />
+            <PromptPanel
+              version={currentVersion}
+              updatePrompt={updatePrompt}
+              updateConfig={updateConfig}
+              variables={variables}
+            />
           </div>
         )
       case 'Version History':

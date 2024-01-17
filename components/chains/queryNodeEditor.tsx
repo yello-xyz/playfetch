@@ -13,9 +13,11 @@ import { ProviderWarning } from '../prompts/modelUnavailableWarning'
 export default function QueryNodeEditor({
   item,
   updateItem,
+  variables,
 }: {
   item: QueryChainItem
   updateItem: (item: QueryChainItem) => void
+  variables: string[]
 }) {
   const updateProvider = (provider: QueryProvider) => updateItem({ ...item, provider })
   const updateModel = (model: EmbeddingModel) => updateItem({ ...item, model })
@@ -61,7 +63,13 @@ export default function QueryNodeEditor({
             </div>
           </div>
           <span className='font-medium mt-2.5'>Query</span>
-          <PromptInput placeholder='Query' value={item.query} setValue={updateQuery} preformatted />
+          <PromptInput
+            placeholder='Query'
+            value={item.query}
+            setValue={updateQuery}
+            variables={variables}
+            preformatted
+          />
         </div>
         {!(isVectorStoreAvailable && isEmbeddingProviderAvailable) && (
           <div className='flex flex-col gap-2 px-4 pt-4'>

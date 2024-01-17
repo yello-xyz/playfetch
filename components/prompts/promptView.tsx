@@ -96,6 +96,7 @@ export default function PromptView({
               updateConfig={updateConfig}
               initialTabs={promptTabs}
               persistTabs={setPromptTabs}
+              variables={staticVariables}
             />
           </Allotment.Pane>
           <Allotment.Pane minSize={minWidth}>

@@ -20,6 +20,7 @@ export default function ChainNodeEditor({
   setDirty,
   promptCache,
   dismiss,
+  variables,
 }: {
   items: ChainItem[]
   saveItems: (items: ChainItem[]) => void
@@ -27,6 +28,7 @@ export default function ChainNodeEditor({
   setDirty: (dirty: boolean) => void
   promptCache: ChainPromptCache
   dismiss: () => void
+  variables: string[]
 }) {
   const [updatedItems, setUpdatedItems] = useInitialState(
     items,
@@ -114,16 +116,23 @@ export default function ChainNodeEditor({
             promptCache={promptCache}
             selectVersion={selectVersion}
             setModifiedVersion={updateVersion}
+            variables={variables}
           />
         )}
         {IsCodeChainItem(activeItem) && (
-          <CodeNodeEditor key={activeIndex} item={activeItem} updateItem={updateActiveItem} />
+          <CodeNodeEditor key={activeIndex} item={activeItem} updateItem={updateActiveItem} variables={variables} />
         )}
         {IsBranchChainItem(activeItem) && (
-          <BranchNodeEditor key={activeIndex} index={activeIndex} items={updatedItems} updateItems={updateItems} />
+          <BranchNodeEditor
+            key={activeIndex}
+            index={activeIndex}
+            items={updatedItems}
+            updateItems={updateItems}
+            variables={variables}
+          />
         )}
         {IsQueryChainItem(activeItem) && (
-          <QueryNodeEditor key={activeIndex} item={activeItem} updateItem={updateActiveItem} />
+          <QueryNodeEditor key={activeIndex} item={activeItem} updateItem={updateActiveItem} variables={variables} />
         )}
         <div className='flex items-center justify-end w-full gap-2 px-4'>
           <Button type='outline' onClick={dismiss}>

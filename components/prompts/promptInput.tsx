@@ -61,12 +61,14 @@ export default function PromptInput({
   placeholder,
   disabled,
   preformatted,
+  variables,
 }: {
   value: string
   setValue: (value: string) => void
   placeholder?: string
   disabled?: boolean
   preformatted?: boolean
+  variables?: string[]
 }) {
   const toggleInput = useCallback(
     (selection: Selection) => {
@@ -113,6 +115,7 @@ export default function PromptInput({
       placeholder={placeholder}
       disabled={disabled}
       preformatted={preformatted}
+      variables={variables}
     />
   )
 }

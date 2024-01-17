@@ -22,10 +22,12 @@ export default function BranchNodeEditor({
   index,
   items,
   updateItems,
+  variables,
 }: {
   index: number
   items: ChainItem[]
   updateItems: (items: ChainItem[]) => void
+  variables: string[]
 }) {
   const item = items[index] as BranchChainItem
 
@@ -107,6 +109,7 @@ export default function BranchNodeEditor({
               placeholder={`return Math.random() < 0.5 ? 'left' : 'right'`}
               value={item.code}
               setValue={updateCode}
+              variables={variables}
               preformatted
             />
           </div>

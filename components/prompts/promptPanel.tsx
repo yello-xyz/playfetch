@@ -16,10 +16,12 @@ export default function PromptPanel({
   version,
   updatePrompt,
   updateConfig,
+  variables,
 }: {
   version: PromptVersion
   updatePrompt?: (promptKey: keyof Prompts, prompt: string) => void
   updateConfig?: (config: PromptConfig) => void
+  variables?: string[]
 }) {
   const config = version.config
 
@@ -44,6 +46,7 @@ export default function PromptPanel({
             updatePrompt={updatePrompt}
             isExpanded={areAllSectionsExpanded}
             setExpanded={setExpanded}
+            variables={variables}
           />
         ))}
         <PromptSection title='Parameters' isExpanded={areAllSectionsExpanded ?? true} setExpanded={setExpanded}>
@@ -61,6 +64,7 @@ export default function PromptPanel({
             updatePrompt={updatePrompt}
             isExpanded={areAllSectionsExpanded}
             setExpanded={setExpanded}
+            variables={variables}
           />
         ))}
         {!isModelAvailable && canModifyPrompt && (
@@ -78,12 +82,14 @@ const PromptInputSection = ({
   updatePrompt,
   isExpanded,
   setExpanded,
+  variables,
 }: {
   promptKey: keyof Prompts
   version: PromptVersion
   updatePrompt?: (promptKey: keyof Prompts, prompt: string) => void
   isExpanded?: boolean
   setExpanded: (expanded: boolean, shiftClick: boolean) => void
+  variables?: string[]
 }) => (
   <PromptSection
     key={promptKey}
@@ -98,6 +104,7 @@ const PromptInputSection = ({
         placeholder={updatePrompt ? PlaceholderForPromptKey(promptKey) : undefined}
         preformatted={PromptKeyNeedsPreformatted(promptKey)}
         disabled={!updatePrompt}
+        variables={variables}
       />
     </div>
   </PromptSection>

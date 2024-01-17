@@ -9,11 +9,13 @@ export default function PromptNodeEditor({
   promptCache,
   selectVersion,
   setModifiedVersion,
+  variables,
 }: {
   item: PromptChainItem
   promptCache: ChainPromptCache
   selectVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
+  variables: string[]
 }) {
   const loadedPrompt = promptCache.promptForItem(item)
   const activeVersion = promptCache.versionForItem(item)
@@ -24,6 +26,7 @@ export default function PromptNodeEditor({
       activeVersion={activeVersion}
       selectVersion={selectVersion}
       setModifiedVersion={setModifiedVersion}
+      variables={variables}
     />
   ) : (
     <div className='grow' />
@@ -35,11 +38,13 @@ function PromptEditor({
   activeVersion,
   selectVersion,
   setModifiedVersion,
+  variables,
 }: {
   prompt: ActivePrompt
   activeVersion: PromptVersion
   selectVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
+  variables: string[]
 }) {
   const [promptTabs, setPromptTabs] = usePromptTabs()
   const [currentVersion, versions, updatePrompt, updateConfig] = usePromptVersion(
@@ -59,6 +64,7 @@ function PromptEditor({
       updateConfig={updateConfig}
       initialTabs={promptTabs}
       persistTabs={setPromptTabs}
+      variables={variables}
     />
   )
 }
