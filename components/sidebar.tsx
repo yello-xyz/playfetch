@@ -88,7 +88,7 @@ export function SidebarButton({
         {icon && <Icon icon={icon} />}
         {label !== undefined ? (
           <EditableItem
-            className='leading-6 select-none bg-blue-25 whitespace-nowrap'
+            className='pl-0.5 leading-6 select-none bg-blue-25 whitespace-nowrap'
             value={label}
             onChange={setLabel}
             onSubmit={() => submitRename(label)}

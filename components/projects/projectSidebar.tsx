@@ -13,6 +13,7 @@ import { ActiveItem, CompareItem, EndpointsItem, SettingsItem } from '@/src/comm
 import { useActiveProject } from '@/src/client/context/projectContext'
 
 import dynamic from 'next/dynamic'
+import useProjectItemActions from '@/src/client/hooks/useProjectItemActions'
 const ProjectItemPopupMenu = dynamic(() => import('./projectItemPopupMenu'))
 
 export default function ProjectSidebar({
@@ -45,6 +46,7 @@ export default function ProjectSidebar({
     activeProject.endpoints.find(endpoint => endpoint.enabled && endpoint.parentID === item.id) ??
     activeProject.chains.find(chain => chain.referencedItemIDs.includes(item.id))
 
+  const [renameItem] = useProjectItemActions()
   const actionButtonForProjectItem = (item: Prompt | Chain, activeItem: boolean) => (
     <ProjectItemActionButton
       item={item}
@@ -96,6 +98,7 @@ export default function ProjectSidebar({
             active={isActiveItem(prompt)}
             onClick={() => onSelectPrompt(prompt.id)}
             actionComponent={actionButtonForProjectItem(prompt, isActiveItem(prompt))}
+            onRename={name => renameItem(prompt, name)}
           />
         ))}
       </SidebarSection>
@@ -108,6 +111,7 @@ export default function ProjectSidebar({
             active={isActiveItem(chain)}
             onClick={() => onSelectChain(chain.id)}
             actionComponent={actionButtonForProjectItem(chain, isActiveItem(chain))}
+            onRename={name => renameItem(chain, name)}
           />
         ))}
       </SidebarSection>
