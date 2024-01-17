@@ -3,6 +3,7 @@ import useInitialState from './useInitialState'
 import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import { SupportedPromptKeysForModel, ValidatePromptConfig } from '@/src/common/providerMetadata'
 import { useEffect, useState } from 'react'
+import { useLoggedInUser } from '../context/userContext'
 
 export default function usePromptVersion(
   prompt: ActivePrompt,
@@ -37,10 +38,11 @@ export default function usePromptVersion(
 
   const draftVersion = prompt.versions.find(version => !version.didRun)
 
+  const loggedInUser = useLoggedInUser()
   const versions = isDirty
     ? [
         ...prompt.versions.filter(version => version.didRun),
-        AugmentVersion(draftVersion ?? DummyVersion, currentVersion),
+        AugmentVersion(draftVersion ?? DummyVersion, currentVersion, loggedInUser.id),
       ]
     : prompt.versions
 
@@ -60,14 +62,14 @@ export default function usePromptVersion(
 
 type PartialVersion = Omit<PromptVersion, 'previousID' | 'prompts' | 'config' | 'userID' | 'parentID' | 'timestamp'>
 
-const AugmentVersion = (partialVersion: PartialVersion | PromptVersion, version: PromptVersion) => ({
+const AugmentVersion = (partialVersion: PartialVersion | PromptVersion, version: PromptVersion, userID: number) => ({
   ...partialVersion,
   previousID: version.id,
   prompts: version.prompts,
   config: version.config,
-  userID: version.userID,
   parentID: version.parentID,
   timestamp: version.timestamp,
+  userID,
 })
 
 const DummyVersionID = 1
