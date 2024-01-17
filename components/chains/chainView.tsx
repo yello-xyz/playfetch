@@ -126,6 +126,7 @@ export default function ChainView({
     }
   }
 
+  const variables = ExtractUnboundChainVariables(items, promptCache, true)
   const staticVariables = ExtractUnboundChainVariables(items, promptCache, false)
 
   const minWidth = 300
@@ -181,6 +182,8 @@ export default function ChainView({
                 chain={chain}
                 activeVersion={activeVersion}
                 nodes={nodes}
+                variables={variables}
+                staticVariables={staticVariables}
                 activeIndex={activeNodeIndex}
                 setActiveIndex={updateActiveNodeIndex}
                 promptCache={promptCache}

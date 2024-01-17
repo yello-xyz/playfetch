@@ -13,13 +13,14 @@ import { ProviderForModel } from '@/src/common/providerMetadata'
 import { SelectAnyInputValue } from '@/src/client/inputRows'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import api from '@/src/client/api'
-import { ExtractUnboundChainVariables } from './chainItems'
 
 export default function ChainNodeOutput({
   chain,
   activeVersion,
   focusRunID,
   nodes,
+  variables,
+  staticVariables,
   activeIndex,
   setActiveIndex,
   promptCache,
@@ -30,6 +31,8 @@ export default function ChainNodeOutput({
   activeVersion: ChainVersion
   focusRunID?: number
   nodes: ChainNode[]
+  variables: string[]
+  staticVariables: string[]
   activeIndex: number
   setActiveIndex: (index: number) => void
   promptCache: ChainPromptCache
@@ -112,8 +115,6 @@ export default function ChainNodeOutput({
     refreshIntermediateRuns()
   }
 
-  const variables = ExtractUnboundChainVariables(items, promptCache, true)
-  const staticVariables = ExtractUnboundChainVariables(items, promptCache, false)
   const canShowTestData = variables.length > 0 || Object.keys(inputValues).length > 0
 
   const findParentRun = (run: Run) => activeVersion.runs.find(r => !!run.parentRunID && r.id === run.parentRunID)
