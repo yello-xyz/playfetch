@@ -196,6 +196,7 @@ export type PartialRun = {
   parentRunID?: number | null
   continuations?: (PartialRun | Run)[]
   userID?: number
+  onCancel?: () => void
 }
 
 export type Run = PartialRun & {

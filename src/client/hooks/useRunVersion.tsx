@@ -82,7 +82,9 @@ export default function useRunVersion(activeVersionID: number) {
     let anyRunFailed = false
     await ConsumeStream(inputs, streamReader, runs => {
       anyRunFailed = runs.some(run => run.failed)
-      setPartialRuns(runs)
+      setPartialRuns(
+        runs.map(run => ({ ...run, onCancel: run.failed === undefined ? () => abortController.abort() : undefined }))
+      )
       setHighestRunIndex(highestRunIndex => Math.max(highestRunIndex, ...runs.map(run => run.index)))
     })
     await refreshActiveItem(versionID, true)
