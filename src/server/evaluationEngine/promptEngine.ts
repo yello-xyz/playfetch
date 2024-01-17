@@ -28,6 +28,7 @@ export type Predictor = (
   context: PromptContext,
   usePreviousContext: boolean,
   streamChunks: ((text: string) => void) | undefined,
+  abortSignal: AbortSignal,
   seed: number | undefined,
   jsonMode: boolean | undefined,
   continuationInputs: PromptInputs
@@ -48,6 +49,7 @@ export default async function runPromptWithConfig(
   context: PromptContext,
   usePreviousContext: boolean,
   streamChunks: (chunk: string) => void | undefined,
+  abortSignal: AbortSignal,
   continuationInputs: PromptInputs
 ): Promise<RunResponse> {
   const scopeIDs = [projectID, userID]
@@ -67,7 +69,7 @@ export default async function runPromptWithConfig(
   let result: PredictionResponse = EmptyRunResponse()
   let attempts = 0
   const maxAttempts = 3
-  while (++attempts <= maxAttempts) {
+  while (++attempts <= maxAttempts && !abortSignal.aborted) {
     result = await predictor(
       prompts,
       config.temperature,
@@ -75,6 +77,7 @@ export default async function runPromptWithConfig(
       context,
       usePreviousContext,
       streamChunks,
+      abortSignal,
       config.seed,
       config.jsonMode,
       continuationInputs

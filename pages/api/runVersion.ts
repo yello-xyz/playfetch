@@ -20,6 +20,12 @@ import { TimedRunResponse } from '@/src/server/evaluationEngine/runResponse'
 export const loadConfigsFromVersion = (version: RawPromptVersion | RawChainVersion): (RunConfig | CodeConfig)[] =>
   (version.items as (RunConfig | CodeConfig)[] | undefined) ?? [{ versionID: version.id, branch: 0 }]
 
+export const detectRequestClosed = (req: NextApiRequest) => {
+  const abortController = new AbortController()
+  req.on('close', () => abortController.abort())
+  return abortController
+}
+
 const saveRun = (
   userID: number,
   version: RawPromptVersion | RawChainVersion,
@@ -65,6 +71,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
 
   res.setHeader('X-Accel-Buffering', 'no')
   const sendData = (data: object) => res.write(`data: ${JSON.stringify(data)}\n\n`)
+  const abortController = detectRequestClosed(req)
 
   for (let autoRunIndex = 0; autoRunIndex < 1 + autoRepeatCount && multipleInputs.length > 0; autoRunIndex++) {
     const runIDs = await allocateRunIDs(multipleInputs.length)
@@ -97,6 +104,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
           configs,
           inputs,
           false,
+          abortController.signal,
           (index, message, response, stepInputs, canLoop) => {
             lastIndices[inputIndex] = index
             sendDataForInput(inputIndex, message, response)
@@ -111,6 +119,10 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
         )
       )
     )
+
+    if (abortController.signal.aborted) {
+      break
+    }
 
     for (const [index, response] of responses.entries()) {
       logUserRequest(req, res, user.id, RunEvent(version.parentID, response.failed, response.cost, response.duration))

@@ -4,7 +4,7 @@ import { getActiveEndpointFromPath } from '@/src/server/datastore/endpoints'
 import { checkProject } from '@/src/server/datastore/projects'
 import { updateUsage } from '@/src/server/datastore/usage'
 import { Endpoint, PromptInputs } from '@/types'
-import { loadConfigsFromVersion } from '../runVersion'
+import { detectRequestClosed, loadConfigsFromVersion } from '../runVersion'
 import { saveLogEntry } from '@/src/server/datastore/logs'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 import runChain, { ChainResponseFromValue } from '@/src/server/evaluationEngine/chainEngine'
@@ -119,7 +119,18 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
               }
             : undefined
 
-          response = await runChain(endpoint.userID, projectID, version, configs, inputs, true, stream, continuationID)
+          const abortController = detectRequestClosed(req)
+          response = await runChain(
+            endpoint.userID,
+            projectID,
+            version,
+            configs,
+            inputs,
+            true,
+            abortController.signal,
+            stream,
+            continuationID
+          )
 
           if (endpoint.useCache && !response.failed && !continuationID && !response.continuationID) {
             cacheResponse(versionID, inputs, response.output, endpoint.parentID)

@@ -12,13 +12,22 @@ const client = new PredictionServiceClient({ apiEndpoint: `${location}-aiplatfor
 
 const predict =
   (model: GoogleLanguageModel): Predictor =>
-  (prompts, temperature, maxTokens, context, useContext, streamChunks) => {
+  (prompts, temperature, maxTokens, context, useContext, streamChunks, abortSignal) => {
     switch (model) {
       case 'text-bison':
       case 'chat-bison':
         return complete(model, prompts.main, prompts.system, temperature, maxTokens, context, useContext, streamChunks)
       case 'gemini-pro':
-        return completePreview(model, prompts.main, temperature, maxTokens, context, useContext, streamChunks)
+        return completePreview(
+          model,
+          prompts.main,
+          temperature,
+          maxTokens,
+          context,
+          useContext,
+          abortSignal,
+          streamChunks
+        )
     }
   }
 
@@ -100,6 +109,7 @@ async function completePreview(
   maxTokens: number,
   context: PromptContext,
   usePreviousContext: boolean,
+  abortSignal: AbortSignal,
   streamChunks?: (text: string) => void
 ) {
   try {
@@ -121,6 +131,10 @@ async function completePreview(
 
     let output = ''
     for await (const chunk of responseStream.stream) {
+      if (abortSignal.aborted) {
+        // TODO cancel the request to limit LLM usage once the API supports it?
+        break
+      }
       const text = getText(getContent(chunk)) ?? ''
       output += text
       streamChunks?.(text)
