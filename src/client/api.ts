@@ -49,7 +49,8 @@ export async function postToAPI(
   apiPath: string,
   apiCall: string,
   body: Record<string, any>,
-  responseType: ResponseType
+  responseType: ResponseType,
+  signal?: AbortSignal
 ) {
   Progress.start()
   return fetch(`${apiPath}/${apiCall}`, {
@@ -59,13 +60,14 @@ export async function postToAPI(
       'content-type': 'application/json',
     },
     body: JSON.stringify(body),
+    signal,
   })
     .then(response => parseResponse(response, responseType))
     .finally(() => Progress.done())
 }
 
-const post = (apiCall: Function, json: any = {}, responseType: ResponseType = 'json') => {
-  return postToAPI('/api', apiCall.name, json, responseType)
+const post = (apiCall: Function, json: any = {}, responseType: ResponseType = 'json', signal?: AbortSignal) => {
+  return postToAPI('/api', apiCall.name, json, responseType, signal)
 }
 
 const api = {
@@ -159,12 +161,14 @@ const api = {
     dynamicInputs: PromptInputs[],
     continuationID?: number,
     autoRespond?: boolean,
-    maxResponses?: number
+    maxResponses?: number,
+    signal?: AbortSignal
   ): Promise<StreamReader> {
     return post(
       this.runVersion,
       { versionID, inputs, dynamicInputs, continuationID, autoRespond, maxResponses },
-      'stream'
+      'stream',
+      signal
     )
   },
   getIntermediateRuns: function (parentRunID: number, continuationID?: number): Promise<Run[]> {
