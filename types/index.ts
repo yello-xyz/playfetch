@@ -413,3 +413,9 @@ export type OnboardingResponse = {
   area?: 'product' | 'engineering' | 'marketing' | 'content' | 'design' | 'sales'
   otherArea?: string
 }
+
+export type Table = {
+  id: number
+  name: string
+  projectID: number
+}
