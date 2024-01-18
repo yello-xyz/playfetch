@@ -32,7 +32,6 @@ export default function TableEditor({
   gutterColumn,
   onToggleAll,
   skipExpandButtons = false,
-  skipButtonBorder = false,
 }: {
   inputValues: InputValues
   setInputValues: Dispatch<SetStateAction<InputValues>>
@@ -42,7 +41,6 @@ export default function TableEditor({
   gutterColumn?: (row: number) => ReactNode
   onToggleAll?: () => void
   skipExpandButtons?: boolean
-  skipButtonBorder?: boolean
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -101,9 +99,7 @@ export default function TableEditor({
   })
 
   const gridTemplateColumns = `${gutterColumn ? '58px ' : ''}repeat(${allVariables.length}, minmax(240px, 1fr))`
-  const buttonBaseClass = 'flex items-center justify-center py-1 bg-gray-25 font-regular'
-  const buttonCursorClass = canAddRow ? 'cursor-pointer hover:bg-gray-50' : 'text-gray-400 select-none'
-  const buttonBorderClass = skipButtonBorder ? '' : 'border-b border-gray-200'
+  const buttonCursor = canAddRow ? 'cursor-pointer hover:bg-gray-50' : 'text-gray-400 select-none'
   return (
     <>
       <div
@@ -165,7 +161,7 @@ export default function TableEditor({
         })}
       </div>
       <div
-        className={`${buttonBaseClass} ${buttonCursorClass} ${buttonBorderClass}`}
+        className={`flex items-center justify-center py-1 bg-gray-25 font-regular ${buttonCursor}`}
         onClick={canAddRow ? addInput : undefined}>
         <Icon icon={addIcon} className={canAddRow ? '' : 'opacity-40'} />
         Add Row

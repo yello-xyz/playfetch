@@ -76,8 +76,8 @@ export default function TestDataPane({
         )}
         onToggleAll={toggleAll}
         skipExpandButtons={asModalPopup}
-        skipButtonBorder={skipButtonBorder && !shouldShowOptions}
       />
+      {(!skipButtonBorder || shouldShowOptions) && <div className='border-b border-gray-200' />}
       {shouldShowOptions && (
         <div className='flex flex-wrap items-center px-3 py-2 gap-y-2 gap-x-4'>
           <OptionSection
