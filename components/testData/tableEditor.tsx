@@ -32,6 +32,8 @@ export default function TableEditor({
   gutterColumn,
   onToggleAll,
   skipExpandButtons = false,
+  backgroundColor = 'bg-gray-25',
+  rounded = false,
 }: {
   inputValues: InputValues
   setInputValues: Dispatch<SetStateAction<InputValues>>
@@ -41,6 +43,8 @@ export default function TableEditor({
   gutterColumn?: (row: number) => ReactNode
   onToggleAll?: () => void
   skipExpandButtons?: boolean
+  backgroundColor?: string
+  rounded?: boolean
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -99,15 +103,17 @@ export default function TableEditor({
   })
 
   const gridTemplateColumns = `${gutterColumn ? '58px ' : ''}repeat(${allVariables.length}, minmax(240px, 1fr))`
-  const buttonCursor = canAddRow ? 'cursor-pointer hover:bg-gray-50' : 'text-gray-400 select-none'
+  const buttonBaseClass = 'flex items-center justify-center py-1 font-regular'
+  const buttonCursor = canAddRow ? `cursor-pointer hover:bg-gray-50` : 'text-gray-400 select-none'
+  const buttonRounded = rounded ? 'rounded-b-lg' : ''
   return (
     <>
       <div
         key={allVariables.join(',')}
         ref={containerRef}
-        className='grid w-full overflow-x-auto bg-gray-25 shrink-0'
+        className={`${backgroundColor} ${rounded ? 'rounded-t-lg' : ''} grid w-full overflow-x-auto shrink-0`}
         style={{ gridTemplateColumns }}>
-        {gutterColumn && <div className='border-b border-gray-200 cursor-pointer bg-gray-25' onClick={onToggleAll} />}
+        {gutterColumn && <div className='border-b border-gray-200 cursor-pointer' onClick={onToggleAll} />}
         {allVariables.map((variable, index) => (
           <TestDataHeader
             key={index}
@@ -126,7 +132,7 @@ export default function TableEditor({
           const iconPosition = (col: number) => (col === allVariables.length - 1 ? 'right-3' : 'right-0.5')
           const iconOpacity = (col: number) =>
             isCellActive(row, col) ? 'hover:opacity-100' : 'group-hover:opacity-100'
-          const iconStyle = 'bg-gray-25 rounded cursor-pointer opacity-0'
+          const iconStyle = `${backgroundColor} rounded cursor-pointer opacity-0`
           return (
             <Fragment key={row}>
               {gutterColumn && <div className='px-2 py-1 border-b border-gray-200'>{gutterColumn(row)}</div>}
@@ -161,7 +167,7 @@ export default function TableEditor({
         })}
       </div>
       <div
-        className={`flex items-center justify-center py-1 bg-gray-25 font-regular ${buttonCursor}`}
+        className={`${buttonBaseClass} ${backgroundColor} ${buttonCursor} ${buttonRounded}`}
         onClick={canAddRow ? addInput : undefined}>
         <Icon icon={addIcon} className={canAddRow ? '' : 'opacity-40'} />
         Add Row
