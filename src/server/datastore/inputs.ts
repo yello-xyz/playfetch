@@ -10,7 +10,6 @@ import {
   runTransactionWithExponentialBackoff,
 } from './datastore'
 import { InputValues } from '@/types'
-import { ensurePromptOrChainAccess } from './chains'
 import { getVerifiedProjectScopedData } from './prompts'
 
 export async function migrateInputs(postMerge: boolean) {
@@ -32,9 +31,12 @@ export async function migrateInputs(postMerge: boolean) {
   }
 }
 
-const toInputData = (parentID: number, name: string, values: string[], createdAt: Date, inputID?: number) => ({
+const toInputData = (parentID: number, name: string, values: string[], createdAt: Date, inputID?: number) =>
+  toRawInputData(parentID, name, JSON.stringify(values), createdAt, inputID)
+
+const toRawInputData = (parentID: number, name: string, values: string, createdAt: Date, inputID?: number) => ({
   key: buildKey(Entity.INPUT, inputID),
-  data: { parentID, createdAt, name, values: JSON.stringify(values) },
+  data: { parentID, createdAt, name, values },
   excludeFromIndexes: ['values'],
 })
 
@@ -60,4 +62,18 @@ const toInput = (data: any): InputValues => ({ name: data.name, values: JSON.par
 export async function getTrustedParentInputValues(parentID: number) {
   const entities = await getEntities(Entity.INPUT, 'parentID', parentID)
   return Object.fromEntries(entities.map(toInput).map(input => [input.name, input.values])) as InputValues
+}
+
+export async function reparentInputValues(oldParentID: number, newParentID: number) {
+  await runTransactionWithExponentialBackoff(async transaction => {
+    const inputs = await getEntities(Entity.INPUT, 'parentID', oldParentID, transaction)
+    inputs.forEach(input => {
+      input.parentID = newParentID
+    })
+    transaction.save(
+      inputs.map(inputData =>
+        toRawInputData(newParentID, inputData.name, inputData.values, inputData.createdAt, getID(inputData))
+      )
+    )
+  })
 }

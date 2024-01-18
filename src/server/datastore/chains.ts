@@ -12,11 +12,12 @@ import {
 import { Chain, ChainItemWithInputs, InputValues, RawChainVersion } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { getTrustedProjectScopedData, getVerifiedProjectScopedData } from './prompts'
-import { getTrustedParentInputValues } from './inputs'
+import { getTrustedParentInputValues, reparentInputValues } from './inputs'
 import { addInitialVersion, saveChainVersionForUser, toUserVersions } from './versions'
 import { getOrderedRunsForParentID } from './runs'
 import { deleteEntity } from './cleanup'
 import { GetUniqueName } from '@/src/common/formatting'
+import { addTableForUser } from './tables'
 
 export async function migrateChains(postMerge: boolean) {
   if (postMerge) {
@@ -37,6 +38,7 @@ const toChainData = (
   references: References,
   createdAt: Date,
   lastEditedAt: Date,
+  tableID: number | undefined,
   chainID: number
 ) => ({
   key: buildKey(Entity.CHAIN, chainID),
@@ -46,6 +48,7 @@ const toChainData = (
     references: JSON.stringify(references),
     createdAt,
     lastEditedAt,
+    tableID,
   },
   excludeFromIndexes: ['name', 'references'],
 })
@@ -55,6 +58,7 @@ export const toChain = (data: any): Chain => ({
   name: data.name,
   referencedItemIDs: [...new Set(Object.values(JSON.parse(data.references) as References).flat())],
   projectID: data.projectID,
+  tableID: data.tableID ?? null,
 })
 
 export async function getChainForUser(
@@ -88,7 +92,7 @@ export async function addChainForUser(userID: number, projectID: number, name = 
   const chainID = await allocateID(Entity.CHAIN)
   const versionData = await addInitialVersion(userID, chainID, true)
   const versionID = getID(versionData)
-  const chainData = toChainData(projectID, uniqueName, { [versionID]: [] }, createdAt, createdAt, chainID)
+  const chainData = toChainData(projectID, uniqueName, { [versionID]: [] }, createdAt, createdAt, undefined, chainID)
   await getDatastore().save([chainData, versionData])
   updateProjectLastEditedAt(projectID)
   return { chainID: getID(chainData), versionID }
@@ -111,6 +115,7 @@ export async function updateChain(chainData: any, updateLastEditedTimestamp: boo
       JSON.parse(chainData.references),
       chainData.createdAt,
       updateLastEditedTimestamp ? new Date() : chainData.lastEditedAt,
+      chainData.tableID,
       getID(chainData)
     )
   )
@@ -166,4 +171,11 @@ export async function deleteChainForUser(userID: number, chainID: number) {
     throw new Error('Cannot delete chain with published endpoints')
   }
   await deleteEntity(Entity.CHAIN, chainID)
+}
+
+export async function exportChainInputs(userID: number, chainID: number) {
+  const chainData = await getTrustedChain(chainID)
+  const tableID = await addTableForUser(userID, chainData.projectID)
+  await reparentInputValues(chainID, tableID)
+  await updateChain({ ...chainData, tableID }, false)
 }

@@ -23,11 +23,12 @@ import {
 import { InputValues, Prompt, PromptConfig, Prompts, RawPromptVersion } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { GetUniqueName, StripVariableSentinels } from '@/src/common/formatting'
-import { getTrustedParentInputValues } from './inputs'
+import { getTrustedParentInputValues, reparentInputValues } from './inputs'
 import { getOrderedRunsForParentID } from './runs'
 import { canSuggestImprovedPrompt } from './ratings'
 import { PropertyFilter, and } from '@google-cloud/datastore'
 import { deleteEntity } from './cleanup'
+import { addTableForUser } from './tables'
 
 export async function migratePrompts(postMerge: boolean) {
   if (postMerge) {
@@ -46,10 +47,11 @@ const toPromptData = (
   createdAt: Date,
   lastEditedAt: Date,
   sourcePath: string | undefined,
+  tableID: number | undefined,
   promptID: number
 ) => ({
   key: buildKey(Entity.PROMPT, promptID),
-  data: { projectID, name, createdAt, lastEditedAt, sourcePath },
+  data: { projectID, name, createdAt, lastEditedAt, sourcePath, tableID },
   excludeFromIndexes: ['name'],
 })
 
@@ -58,6 +60,7 @@ export const toPrompt = (data: any): Prompt => ({
   name: data.name,
   projectID: data.projectID,
   sourcePath: data.sourcePath ?? null,
+  tableID: data.tableID ?? null,
 })
 
 export async function getPromptForUser(
@@ -114,7 +117,7 @@ export async function addPromptToProject(
   const createdAt = new Date()
   const promptID = await allocateID(Entity.PROMPT)
   const versionData = await addInitialVersion(userID, promptID, false)
-  const promptData = toPromptData(projectID, name, createdAt, createdAt, sourcePath, promptID)
+  const promptData = toPromptData(projectID, name, createdAt, createdAt, sourcePath, undefined, promptID)
   return [promptData, versionData]
 }
 
@@ -205,6 +208,7 @@ async function updatePrompt(promptData: any, updateLastEditedTimestamp: boolean)
       promptData.createdAt,
       updateLastEditedTimestamp ? new Date() : promptData.lastEditedAt,
       promptData.sourcePath,
+      promptData.tableID,
       getID(promptData)
     )
   )
@@ -273,4 +277,11 @@ export async function deletePromptForUser(userID: number, promptID: number) {
     throw new Error('Cannot delete prompt with published endpoints')
   }
   await deleteEntity(Entity.PROMPT, promptID)
+}
+
+export async function exportPromptInputs(userID: number, promptID: number) {
+  const promptData = await getTrustedPrompt(promptID)
+  const tableID = await addTableForUser(userID, promptData.projectID)
+  await reparentInputValues(promptID, tableID)
+  await updatePrompt({ ...promptData, tableID }, false)
 }

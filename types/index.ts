@@ -66,6 +66,7 @@ export type Prompt = {
   id: number
   name: string
   projectID: number
+  tableID: number | null
   sourcePath: string | null
 }
 
@@ -80,8 +81,9 @@ export type ActivePrompt = Prompt & {
 export type Chain = {
   id: number
   name: string
-  referencedItemIDs: number[]
   projectID: number
+  tableID: number | null
+  referencedItemIDs: number[]
 }
 
 export type ActiveChain = Chain & {
