@@ -1,10 +1,10 @@
 import { Dispatch, SetStateAction, useState } from 'react'
-import { ActiveChain, ActivePrompt, InputValues } from '@/types'
+import { ActiveChain, ActivePrompt, ActiveTable, InputValues } from '@/types'
 import api from '@/src/client/api'
 import useInitialState from './useInitialState'
 
 export default function useInputValues(
-  parent: ActivePrompt | ActiveChain,
+  parent: ActivePrompt | ActiveChain | ActiveTable,
   context: string
 ): [InputValues, Dispatch<SetStateAction<InputValues>>, () => void] {
   const [originalInputValues, setOriginalInputValues] = useInitialState(parent.inputValues)

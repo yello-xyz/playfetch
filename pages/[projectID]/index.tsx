@@ -285,6 +285,7 @@ export default function Home({
                             activeItem={activeItem}
                             activePrompt={activePrompt}
                             activeChain={activeChain}
+                            activeTable={activeTable}
                             activePromptVersion={activePromptVersion}
                             activeChainVersion={activeChainVersion}
                             selectVersion={selectVersion}

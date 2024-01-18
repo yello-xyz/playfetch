@@ -7,6 +7,7 @@ import {
   ActiveChain,
   ChainItemWithInputs,
   AvailableProvider,
+  ActiveTable,
 } from '@/types'
 import { EmptyProjectView } from '@/components/projects/emptyProjectView'
 import { ActiveItem, CompareItem, EndpointsItem, SettingsItem } from '@/src/common/activeItem'
@@ -18,11 +19,13 @@ import EndpointsView from '../endpoints/endpointsView'
 import CommentsPane from '../commentsPane'
 import SettingsView from '../settings/settingsView'
 import { OnSavedChain } from '@/src/client/hooks/useSaveChain'
+import TestDataView from '../testData/testDataView'
 
 export default function MainProjectPane({
   activeItem,
   activePrompt,
   activeChain,
+  activeTable,
   activePromptVersion,
   activeChainVersion,
   selectVersion,
@@ -42,6 +45,7 @@ export default function MainProjectPane({
   activeItem: ActiveItem | undefined
   activePrompt: ActivePrompt | undefined
   activeChain: ActiveChain | undefined
+  activeTable: ActiveTable | undefined
   activePromptVersion: PromptVersion | undefined
   activeChainVersion: ChainVersion | undefined
   selectVersion: (version: PromptVersion | ChainVersion) => void
@@ -81,6 +85,7 @@ export default function MainProjectPane({
             focusRunID={focusRunID}
           />
         )}
+        {activeTable && <TestDataView key={activeTable.id} table={activeTable} />}
         {activeItem === CompareItem && <CompareView logEntries={analytics?.recentLogEntries} />}
         {activeItem === EndpointsItem && <EndpointsView analytics={analytics} refreshAnalytics={refreshAnalytics} />}
         {activeItem === SettingsItem && (
