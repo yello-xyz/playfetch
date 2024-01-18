@@ -21,9 +21,10 @@ import {
   CostUsage,
   Run,
   SourceControlProvider,
+  ActiveTable,
 } from '@/types'
 import ClientRoute from '../common/clientRoute'
-import { BuildActiveChain, BuildActivePrompt } from '../common/activeItem'
+import { BuildActiveChain, BuildActivePrompt, BuildActiveTable } from '../common/activeItem'
 import Progress from 'nprogress'
 import { LayoutConfig } from '../common/userPresets'
 
@@ -196,6 +197,9 @@ const api = {
   },
   deleteChain: function (chainID: number) {
     return post(this.deleteChain, { chainID })
+  },
+  getTable: function (tableID: number): Promise<ActiveTable> {
+    return post(this.getTable, { tableID }).then(BuildActiveTable)
   },
   addTable: function (projectID: number): Promise<number> {
     return post(this.addTable, { projectID })

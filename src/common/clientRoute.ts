@@ -25,6 +25,8 @@ export const PromptRoute = (projectID: number, promptID: number) => `${ProjectRo
 
 export const ChainRoute = (projectID: number, chainID: number) => `${ProjectRoute(projectID)}?c=${chainID}`
 
+export const TableRoute = (projectID: number, tableID: number) => `${ProjectRoute(projectID)}?t=${tableID}`
+
 export const CompareRoute = (projectID: number, itemID?: number, versionID?: number, previousID?: number) =>
   `${ProjectRoute(projectID)}?m=1` +
   `${itemID ? `&i=${itemID}` : ''}${versionID ? `&v=${versionID}` : ''}${previousID ? `&p=${previousID}` : ''}`
@@ -58,15 +60,15 @@ export const ParseEncodedQuery = (query: NodeJS.Dict<string | string[]>): NodeJS
   mapDictionary(ParseQuery(query), value => decodeURIComponent(value))
 
 export const ParseActiveItemQuery = (query: any, project: ActiveProject) => {
-  let { p: promptID, c: chainID, m: compare, e: endpoints, s: settings } = ParseNumberQuery(query)
-  if (!compare && !endpoints && !settings && !promptID && !chainID) {
+  let { p: promptID, c: chainID, t: tableID, m: compare, e: endpoints, s: settings } = ParseNumberQuery(query)
+  if (!compare && !endpoints && !settings && !promptID && !chainID && !tableID) {
     if (project.prompts.length > 0) {
       promptID = project.prompts[0].id
     } else {
       chainID = project.chains[0]?.id
     }
   }
-  return { promptID, chainID, compare, endpoints, settings }
+  return { promptID, chainID, tableID, compare, endpoints, settings }
 }
 
 type ActiveSettingsTab = 'providers' | 'usage' | 'team' | 'connectors' | 'sourceControl'

@@ -420,3 +420,5 @@ export type Table = {
   name: string
   projectID: number
 }
+
+export type ActiveTable = Table & { inputValues: InputValues }

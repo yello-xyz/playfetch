@@ -76,6 +76,7 @@ export default function Home({
     setActiveItem,
     activePrompt,
     activeChain,
+    activeTable,
     activeVersion,
     setActiveVersion,
     activePromptVersion,
@@ -101,12 +102,14 @@ export default function Home({
     savePrompt
   )
 
-  const [addTable] = useTable(activeProject, refreshProject)
-
   const updateVersion = (version?: PromptVersion | ChainVersion) => {
     setActiveVersion(version)
     setModifiedVersion(undefined)
   }
+
+  const [addTable, selectTable] = useTable(activeProject, refreshProject, activeTable, setActiveItem, savePrompt, () =>
+    updateVersion(undefined)
+  )
 
   const selectVersion = (version: PromptVersion | ChainVersion) => {
     if (activePrompt) {
@@ -132,7 +135,7 @@ export default function Home({
     }).then(versionID => versionID!)
 
   const router = useRouter()
-  const { promptID, chainID, compare, endpoints, settings } = ParseActiveItemQuery(router.query, activeProject)
+  const { promptID, chainID, tableID, compare, endpoints, settings } = ParseActiveItemQuery(router.query, activeProject)
 
   const onDeleteItem = async (itemID: number) => {
     refreshProject()
@@ -188,10 +191,10 @@ export default function Home({
   const currentQueryState = compare
     ? CompareItem
     : endpoints
-      ? EndpointsItem
-      : settings
-        ? SettingsItem
-        : promptID ?? chainID
+    ? EndpointsItem
+    : settings
+    ? SettingsItem
+    : promptID ?? chainID ?? tableID
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
     if (compare) {
@@ -204,6 +207,8 @@ export default function Home({
       selectPrompt(promptID)
     } else if (chainID) {
       selectChain(chainID)
+    } else if (tableID) {
+      selectTable(tableID)
     }
     setQuery(currentQueryState)
   }
@@ -266,6 +271,7 @@ export default function Home({
                             onDeleteItem={onDeleteItem}
                             onSelectPrompt={selectPrompt}
                             onSelectChain={selectChain}
+                            onSelectTable={selectTable}
                             onSelectCompare={selectCompare}
                             onSelectEndpoints={selectEndpoints}
                             onSelectSettings={selectSettings}

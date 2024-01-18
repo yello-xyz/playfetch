@@ -1,5 +1,5 @@
 import api from '@/src/client/api'
-import { ActiveChain, ActiveProject, ActivePrompt, IsPromptVersion } from '@/types'
+import { ActiveChain, ActiveProject, ActivePrompt, ActiveTable, IsPromptVersion } from '@/types'
 import {
   ActiveItem,
   BuildActiveChain,
@@ -11,19 +11,24 @@ import {
 import useInitialState from './useInitialState'
 import { useState } from 'react'
 
-const ActiveItemIsPromptOrChain = (item: ActiveItem | undefined): item is ActivePrompt | ActiveChain | undefined =>
+type ProjectItem = ActivePrompt | ActiveChain | ActiveTable
+const ActiveItemHasID = (item: ActiveItem | undefined): item is ProjectItem | undefined =>
   item !== CompareItem && item !== EndpointsItem && item !== SettingsItem
+const ActiveItemIsPromptOrChain = (item: ActiveItem): item is ActivePrompt | ActiveChain =>
+  ActiveItemHasID(item) && 'versions' in item
 const ActiveItemIsChain = (item: ActiveItem): item is ActiveChain =>
   ActiveItemIsPromptOrChain(item) && 'referencedItemIDs' in item
 const ActiveItemIsPrompt = (item: ActiveItem): item is ActivePrompt =>
   ActiveItemIsPromptOrChain(item) && !ActiveItemIsChain(item)
+const ActiveItemIsTable = (item: ActiveItem): item is ActiveTable =>
+  ActiveItemHasID(item) && !ActiveItemIsPromptOrChain(item)
 
 const sameIDs = (a: { id: number } | undefined, b: { id: number } | undefined) => a?.id === b?.id
 const sameItems = (a: ActiveItem | undefined, b: ActiveItem | undefined) =>
   (a === CompareItem && b === CompareItem) ||
   (a === EndpointsItem && b === EndpointsItem) ||
   (a === SettingsItem && b === SettingsItem) ||
-  (ActiveItemIsPromptOrChain(a) && ActiveItemIsPromptOrChain(b) && sameIDs(a, b))
+  (ActiveItemHasID(a) && ActiveItemHasID(b) && sameIDs(a, b))
 
 export default function useActiveItem(initialActiveProject: ActiveProject, initialActiveItem: ActiveItem | null) {
   const [activeProject, setActiveProject] = useInitialState(initialActiveProject, sameIDs)
@@ -58,6 +63,7 @@ export default function useActiveItem(initialActiveProject: ActiveProject, initi
   const [activeItem, setActiveItem] = useInitialState(initialActiveItem ?? undefined, sameItems)
   const activePrompt = activeItem && ActiveItemIsPrompt(activeItem) ? activeItem : undefined
   const activeChain = activeItem && ActiveItemIsChain(activeItem) ? activeItem : undefined
+  const activeTable = activeItem && ActiveItemIsTable(activeItem) ? activeItem : undefined
 
   const defaultVersionForItem = (item: ActiveItem | undefined) =>
     item && ActiveItemIsPromptOrChain(item) ? item.versions.slice(-1)[0] : undefined
@@ -80,6 +86,7 @@ export default function useActiveItem(initialActiveProject: ActiveProject, initi
     updateActiveItem,
     activePrompt,
     activeChain,
+    activeTable,
     activeVersion,
     setActiveVersion,
     activePromptVersion,

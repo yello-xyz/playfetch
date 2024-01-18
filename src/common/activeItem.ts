@@ -2,20 +2,28 @@ import {
   ActiveChain,
   ActiveProject,
   ActivePrompt,
+  ActiveTable,
   Chain,
   Endpoint,
   InputValues,
   Prompt,
   RawChainVersion,
   RawPromptVersion,
+  Table,
 } from '@/types'
 
 export const CompareItem = 'compare'
 export const EndpointsItem = 'endpoints'
 export const SettingsItem = 'settings'
-export type ActiveItem = ActivePrompt | ActiveChain | typeof CompareItem | typeof EndpointsItem | typeof SettingsItem
+export type ActiveItem =
+  | ActivePrompt
+  | ActiveChain
+  | ActiveTable
+  | typeof CompareItem
+  | typeof EndpointsItem
+  | typeof SettingsItem
 
-export const IsEndpoint = (item: ActivePrompt | ActiveChain | Endpoint | undefined): item is Endpoint =>
+export const IsEndpoint = (item: ActivePrompt | ActiveChain | ActiveTable | Endpoint | undefined): item is Endpoint =>
   !!item && 'urlPath' in item
 
 export const BuildActivePrompt =
@@ -84,3 +92,8 @@ export const BuildActiveChain =
       availableLabels: project.availableLabels,
     }
   }
+
+export const BuildActiveTable = ({ table, inputValues }: { table: Table; inputValues: InputValues }): ActiveTable => ({
+  ...table,
+  inputValues,
+})

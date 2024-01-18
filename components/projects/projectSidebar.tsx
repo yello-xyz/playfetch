@@ -1,4 +1,4 @@
-import { Chain, Endpoint, Prompt, Workspace } from '@/types'
+import { Chain, Endpoint, Prompt, Table, Workspace } from '@/types'
 import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'
 import chainIcon from '@/public/chain.svg'
@@ -26,6 +26,7 @@ export default function ProjectSidebar({
   onDeleteItem,
   onSelectPrompt,
   onSelectChain,
+  onSelectTable,
   onSelectCompare,
   onSelectEndpoints,
   onSelectSettings,
@@ -39,6 +40,7 @@ export default function ProjectSidebar({
   onDeleteItem: (itemID: number) => void
   onSelectPrompt: (promptID: number) => void
   onSelectChain: (chainID: number) => void
+  onSelectTable: (tableID: number) => void
   onSelectCompare: () => void
   onSelectEndpoints: () => void
   onSelectSettings: () => void
@@ -63,7 +65,7 @@ export default function ProjectSidebar({
   const addButton = (onAdd: () => void) => (
     <IconButton className='opacity-50 hover:opacity-100' icon={addIcon} onClick={onAdd} />
   )
-  const isActiveItem = (item: Prompt | Chain) =>
+  const isActiveItem = (item: Prompt | Chain | Table) =>
     activeItem !== CompareItem &&
     activeItem !== EndpointsItem &&
     activeItem !== SettingsItem &&
@@ -125,8 +127,8 @@ export default function ProjectSidebar({
             key={tableIndex}
             title={table.name}
             icon={tableIcon}
-            // active={isActiveItem(table)}
-            // onClick={() => onSelectTable(table.id)}
+            active={isActiveItem(table)}
+            onClick={() => onSelectTable(table.id)}
             // actionComponent={actionButtonForProjectItem(table, isActiveItem(table))}
             // onRename={name => renameItem(table, name)}
           />
