@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import { ExtractPromptVariables, GetEditorVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
-import TestDataPane, { GetTestDataRowCount } from '../testData/testDataPane'
+import TestDataPane from '../testData/testDataPane'
 import usePromptVersion from '@/src/client/hooks/usePromptVersion'
 import { SelectAnyInputValue, SelectInputRows } from '@/src/client/inputRows'
 import RunButtons from '../runs/runButtons'
@@ -18,6 +18,7 @@ import IconButton from '../iconButton'
 import expandIcon from '@/public/expand.svg'
 import useTestDataPopup from '@/src/client/hooks/useTestDataPopup'
 import { usePromptTabs } from '@/src/client/context/userPresetsContext'
+import { GetTableRowCount } from '../testData/tableEditor'
 
 export default function PromptView({
   prompt,
@@ -78,7 +79,7 @@ export default function PromptView({
   useEffect(() => setPreferredPromptTabsWidth(promptTabs.length > 1 ? '66%' : '50%'), [promptTabs])
   const minWidth = 400
   const minTopPaneHeight = 120
-  const rowCount = GetTestDataRowCount(variables, inputValues)
+  const rowCount = GetTableRowCount(variables, inputValues)
   const minBottomPaneHeight = canShowTestData ? (testDataExpanded ? Math.min(240, 150 + rowCount * 33) : 84) : 52
   const maxBottomPaneHeight = canShowTestData && testDataExpanded ? Infinity : minBottomPaneHeight
   return (
