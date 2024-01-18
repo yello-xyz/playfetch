@@ -39,6 +39,7 @@ import { ProviderContext } from '@/src/client/context/providerContext'
 import dynamic from 'next/dynamic'
 import ProjectPaneWrapper from '@/components/projects/projectPaneWrapper'
 import { UserPresets } from '@/src/common/userPresets'
+import useTable from '@/src/client/hooks/useTable'
 
 const MainProjectPane = dynamic(() => import('@/components/projects/mainProjectPane'))
 const ProjectSidebar = dynamic(() => import('@/components/projects/projectSidebar'))
@@ -99,6 +100,8 @@ export default function Home({
     setActiveVersion,
     savePrompt
   )
+
+  const [addTable] = useTable(activeProject, refreshProject)
 
   const updateVersion = (version?: PromptVersion | ChainVersion) => {
     setActiveVersion(version)
@@ -259,6 +262,7 @@ export default function Home({
                             workspaces={workspaces}
                             onAddPrompt={addPrompt}
                             onAddChain={addChain}
+                            onAddTable={addTable}
                             onDeleteItem={onDeleteItem}
                             onSelectPrompt={selectPrompt}
                             onSelectChain={selectChain}

@@ -197,6 +197,9 @@ const api = {
   deleteChain: function (chainID: number) {
     return post(this.deleteChain, { chainID })
   },
+  addTable: function (projectID: number): Promise<number> {
+    return post(this.addTable, { projectID })
+  },
   publishEndpoint: function (
     isEnabled: boolean,
     projectID: number,

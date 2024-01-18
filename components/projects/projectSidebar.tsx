@@ -12,9 +12,9 @@ import { Suspense, useState } from 'react'
 import IconButton from '../iconButton'
 import { ActiveItem, CompareItem, EndpointsItem, SettingsItem } from '@/src/common/activeItem'
 import { useActiveProject } from '@/src/client/context/projectContext'
+import useProjectItemActions from '@/src/client/hooks/useProjectItemActions'
 
 import dynamic from 'next/dynamic'
-import useProjectItemActions from '@/src/client/hooks/useProjectItemActions'
 const ProjectItemPopupMenu = dynamic(() => import('./projectItemPopupMenu'))
 
 export default function ProjectSidebar({
@@ -22,6 +22,7 @@ export default function ProjectSidebar({
   workspaces,
   onAddPrompt,
   onAddChain,
+  onAddTable,
   onDeleteItem,
   onSelectPrompt,
   onSelectChain,
@@ -34,6 +35,7 @@ export default function ProjectSidebar({
   workspaces: Workspace[]
   onAddPrompt: () => void
   onAddChain: () => void
+  onAddTable: () => void
   onDeleteItem: (itemID: number) => void
   onSelectPrompt: (promptID: number) => void
   onSelectChain: (chainID: number) => void
@@ -58,8 +60,9 @@ export default function ProjectSidebar({
     />
   )
 
-  const addPromptButton = <IconButton className='opacity-50 hover:opacity-100' icon={addIcon} onClick={onAddPrompt} />
-  const addChainButton = <IconButton className='opacity-50 hover:opacity-100' icon={addIcon} onClick={onAddChain} />
+  const addButton = (onAdd: () => void) => (
+    <IconButton className='opacity-50 hover:opacity-100' icon={addIcon} onClick={onAdd} />
+  )
   const isActiveItem = (item: Prompt | Chain) =>
     activeItem !== CompareItem &&
     activeItem !== EndpointsItem &&
@@ -90,7 +93,7 @@ export default function ProjectSidebar({
           />
         )}
       </SidebarSection>
-      <SidebarSection title='Prompts' actionComponent={addPromptButton}>
+      <SidebarSection title='Prompts' actionComponent={addButton(onAddPrompt)}>
         {activeProject.prompts.map((prompt, promptIndex) => (
           <SidebarButton
             key={promptIndex}
@@ -103,7 +106,7 @@ export default function ProjectSidebar({
           />
         ))}
       </SidebarSection>
-      <SidebarSection title='Chains' actionComponent={addChainButton}>
+      <SidebarSection title='Chains' actionComponent={addButton(onAddChain)}>
         {activeProject.chains.map((chain, chainIndex) => (
           <SidebarButton
             key={chainIndex}
@@ -116,8 +119,7 @@ export default function ProjectSidebar({
           />
         ))}
       </SidebarSection>
-      <SidebarSection title='Test Data' className='flex-1'> 
-      {/* actionComponent={addTableButton}> */}
+      <SidebarSection title='Test Data' className='flex-1' actionComponent={addButton(onAddTable)}>
         {activeProject.tables.map((table, tableIndex) => (
           <SidebarButton
             key={tableIndex}
