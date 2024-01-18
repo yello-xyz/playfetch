@@ -1,5 +1,5 @@
 import api from '@/src/client/api'
-import { ActiveChain, ActiveProject, ActivePrompt, ActiveTable, IsPromptVersion } from '@/types'
+import { ActiveChain, ActiveProject, ActivePrompt, ActiveTable, IsProjectItem, IsPromptVersion, ProjectItemIsChain } from '@/types'
 import {
   ActiveItem,
   BuildActiveChain,
@@ -14,14 +14,14 @@ import { useState } from 'react'
 type ProjectItem = ActivePrompt | ActiveChain | ActiveTable
 const ActiveItemHasID = (item: ActiveItem | undefined): item is ProjectItem | undefined =>
   item !== CompareItem && item !== EndpointsItem && item !== SettingsItem
-const ActiveItemIsPromptOrChain = (item: ActiveItem): item is ActivePrompt | ActiveChain =>
-  ActiveItemHasID(item) && 'versions' in item
+const ActiveItemIsProjectItem = (item: ActiveItem): item is ActivePrompt | ActiveChain =>
+  ActiveItemHasID(item) && IsProjectItem(item)
 const ActiveItemIsChain = (item: ActiveItem): item is ActiveChain =>
-  ActiveItemIsPromptOrChain(item) && 'referencedItemIDs' in item
+  ActiveItemIsProjectItem(item) && ProjectItemIsChain(item)
 const ActiveItemIsPrompt = (item: ActiveItem): item is ActivePrompt =>
-  ActiveItemIsPromptOrChain(item) && !ActiveItemIsChain(item)
+  ActiveItemIsProjectItem(item) && !ActiveItemIsChain(item)
 const ActiveItemIsTable = (item: ActiveItem): item is ActiveTable =>
-  ActiveItemHasID(item) && !ActiveItemIsPromptOrChain(item)
+  ActiveItemHasID(item) && !ActiveItemIsProjectItem(item)
 
 const sameIDs = (a: { id: number } | undefined, b: { id: number } | undefined) => a?.id === b?.id
 const sameItems = (a: ActiveItem | undefined, b: ActiveItem | undefined) =>
@@ -66,7 +66,7 @@ export default function useActiveItem(initialActiveProject: ActiveProject, initi
   const activeTable = activeItem && ActiveItemIsTable(activeItem) ? activeItem : undefined
 
   const defaultVersionForItem = (item: ActiveItem | undefined) =>
-    item && ActiveItemIsPromptOrChain(item) ? item.versions.slice(-1)[0] : undefined
+    item && ActiveItemIsProjectItem(item) ? item.versions.slice(-1)[0] : undefined
 
   const [activeVersion, setActiveVersion] = useState(defaultVersionForItem(activeItem))
   const activePromptVersion = activeVersion && IsPromptVersion(activeVersion) ? activeVersion : undefined
