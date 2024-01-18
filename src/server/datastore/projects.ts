@@ -35,6 +35,7 @@ import { StripVariableSentinels } from '@/src/common/formatting'
 import { getAnalyticsForProject } from './analytics'
 import { toComment } from './comments'
 import { deleteEntity } from './cleanup'
+import { toTable } from './tables'
 
 export async function migrateProjects(postMerge: boolean) {
   if (postMerge) {
@@ -108,6 +109,8 @@ export async function getActiveProject(userID: number, projectID: number): Promi
   const prompts = promptData.map(toPrompt)
   const chainData = await getOrderedEntities(Entity.CHAIN, 'projectID', projectID)
   const chains = chainData.map(toChain)
+  const tableData = await getOrderedEntities(Entity.TABLE, 'projectID', projectID)
+  const tables = tableData.map(toTable)
   const commentsData = await getOrderedEntities(Entity.COMMENT, 'projectID', projectID)
   const comments = commentsData.map(toComment).reverse()
   const [users, pendingUsers, projectOwners, projectMembers, pendingProjectMembers] = await getProjectAndWorkspaceUsers(
@@ -123,6 +126,7 @@ export async function getActiveProject(userID: number, projectID: number): Promi
     endpoints: await loadEndpoints(projectID, projectData.encryptedAPIKey ? decrypt(projectData.encryptedAPIKey) : ''),
     prompts,
     chains,
+    tables,
     users,
     pendingUsers,
     projectOwners: projectOwner ? [projectOwner, ...filterObjects(projectOwners, [projectOwner])] : [],

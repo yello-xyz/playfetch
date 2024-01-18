@@ -52,6 +52,7 @@ export type ActiveProject = Project & {
   availableFlavors: string[]
   prompts: Prompt[]
   chains: Chain[]
+  tables: Table[]
   users: User[]
   pendingUsers: PendingUser[]
   projectOwners: User[]

@@ -2,6 +2,7 @@ import { Chain, Endpoint, Prompt, Workspace } from '@/types'
 import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'
 import chainIcon from '@/public/chain.svg'
+import tableIcon from '@/public/table.svg'
 import compareIcon from '@/public/compare.svg'
 import endpointIcon from '@/public/endpoint.svg'
 import settingsIcon from '@/public/settings.svg'
@@ -102,7 +103,7 @@ export default function ProjectSidebar({
           />
         ))}
       </SidebarSection>
-      <SidebarSection title='Chains' className='flex-1' actionComponent={addChainButton}>
+      <SidebarSection title='Chains' actionComponent={addChainButton}>
         {activeProject.chains.map((chain, chainIndex) => (
           <SidebarButton
             key={chainIndex}
@@ -112,6 +113,20 @@ export default function ProjectSidebar({
             onClick={() => onSelectChain(chain.id)}
             actionComponent={actionButtonForProjectItem(chain, isActiveItem(chain))}
             onRename={name => renameItem(chain, name)}
+          />
+        ))}
+      </SidebarSection>
+      <SidebarSection title='Test Data' className='flex-1'> 
+      {/* actionComponent={addTableButton}> */}
+        {activeProject.tables.map((table, tableIndex) => (
+          <SidebarButton
+            key={tableIndex}
+            title={table.name}
+            icon={tableIcon}
+            // active={isActiveItem(table)}
+            // onClick={() => onSelectTable(table.id)}
+            // actionComponent={actionButtonForProjectItem(table, isActiveItem(table))}
+            // onRename={name => renameItem(table, name)}
           />
         ))}
       </SidebarSection>
