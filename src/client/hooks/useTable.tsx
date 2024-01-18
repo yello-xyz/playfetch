@@ -1,6 +1,6 @@
 import api from '@/src/client/api'
 import { TableRoute } from '@/src/common/clientRoute'
-import { ActiveProject, ActiveTable, Table } from '@/types'
+import { ActiveProject, ActiveTable } from '@/types'
 import { useRouter } from 'next/router'
 
 export default function useTable(
@@ -32,5 +32,5 @@ export default function useTable(
     refreshProject().then(() => selectTable(tableID))
   }
 
-  return [addTable, selectTable] as const
+  return [refreshTable, selectTable, addTable] as const
 }

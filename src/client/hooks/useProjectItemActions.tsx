@@ -5,12 +5,10 @@ import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/pr
 export default function useProjectItemActions(onDelete?: () => void) {
   const refreshActiveItem = useRefreshActiveItem()
   const refreshProject = useRefreshProject()
-  const refreshOnRename = (item: Prompt | Chain | Table) => {
-    if (!IsProjectItem(item) || ProjectItemIsChain(item)) {
-      refreshActiveItem()
-    }
-    return refreshProject()
-  }
+  const refreshOnRename = async (item: Prompt | Chain | Table) =>
+    !IsProjectItem(item) || ProjectItemIsChain(item)
+      ? Promise.all([refreshActiveItem(), refreshProject()]).then(() => {})
+      : refreshProject()
 
   const renameItem = (item: Prompt | Chain | Table, name: string) =>
     IsProjectItem(item)

@@ -107,7 +107,7 @@ export default function Home({
     setModifiedVersion(undefined)
   }
 
-  const [addTable, selectTable] = useTable(activeProject, refreshProject, activeTable, setActiveItem, savePrompt, () =>
+  const [refreshTable, selectTable, addTable] = useTable(activeProject, refreshProject, activeTable, setActiveItem, savePrompt, () =>
     updateVersion(undefined)
   )
 
@@ -123,6 +123,8 @@ export default function Home({
       return refreshPrompt(activePrompt.id, versionID, allowResave)
     } else if (activeChain) {
       return refreshChain(activeChain.id, versionID)
+    } else if (activeTable) {
+      return refreshTable(activeTable.id)
     } else {
       return refreshProject()
     }
