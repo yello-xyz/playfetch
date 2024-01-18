@@ -1,20 +1,24 @@
-import { Chain, ProjectItemIsChain, Prompt } from '@/types'
+import { Chain, IsProjectItem, ProjectItemIsChain, Prompt, Table } from '@/types'
 import api from '@/src/client/api'
 import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/projectContext'
 
 export default function useProjectItemActions(onDelete?: () => void) {
   const refreshActiveItem = useRefreshActiveItem()
   const refreshProject = useRefreshProject()
-  const refreshOnRename = (item: Prompt | Chain) => {
-    if (ProjectItemIsChain(item)) {
+  const refreshOnRename = (item: Prompt | Chain | Table) => {
+    if (!IsProjectItem(item) || ProjectItemIsChain(item)) {
       refreshActiveItem()
     }
     return refreshProject()
   }
 
-  const renameItem = (item: Prompt | Chain, name: string) =>
-    ProjectItemIsChain(item) ? api.renameChain(item.id, name) : api.renamePrompt(item.id, name)
-  const renameAndRefresh = (item: Prompt | Chain, name: string) =>
+  const renameItem = (item: Prompt | Chain | Table, name: string) =>
+    IsProjectItem(item)
+      ? ProjectItemIsChain(item)
+        ? api.renameChain(item.id, name)
+        : api.renamePrompt(item.id, name)
+      : api.renameTable(item.id, name)
+  const renameAndRefresh = (item: Prompt | Chain | Table, name: string) =>
     name !== item.name ? renameItem(item, name).then(() => refreshOnRename(item)) : Promise.resolve()
 
   const deleteItem = (item: Prompt | Chain) =>

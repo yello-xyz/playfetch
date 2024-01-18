@@ -296,6 +296,8 @@ export type ResolvedEndpoint = Endpoint & {
 export const ItemsInProject = (project: ActiveProject) => [...project.prompts, ...project.chains]
 export const FindItemInProject = (itemID: number | undefined, project: ActiveProject) =>
   ItemsInProject(project).find(item => item.id === itemID)!
+export const IsProjectItem = (item: Prompt | Chain | Table): item is Prompt | Chain =>
+  'referencedItemIDs' in item || 'sourcePath' in item
 export const ProjectItemIsChain = (item: Chain | Prompt | undefined): item is Chain =>
   !!item && 'referencedItemIDs' in item
 

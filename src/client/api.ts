@@ -204,6 +204,9 @@ const api = {
   addTable: function (projectID: number): Promise<number> {
     return post(this.addTable, { projectID })
   },
+  renameTable: function (tableID: number, name: string) {
+    return post(this.renameTable, { tableID, name })
+  },
   publishEndpoint: function (
     isEnabled: boolean,
     projectID: number,

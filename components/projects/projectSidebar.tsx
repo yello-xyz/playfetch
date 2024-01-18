@@ -130,7 +130,7 @@ export default function ProjectSidebar({
             active={isActiveItem(table)}
             onClick={() => onSelectTable(table.id)}
             // actionComponent={actionButtonForProjectItem(table, isActiveItem(table))}
-            // onRename={name => renameItem(table, name)}
+            onRename={name => renameItem(table, name)}
           />
         ))}
       </SidebarSection>
