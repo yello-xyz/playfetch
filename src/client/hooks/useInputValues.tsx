@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useState } from 'react'
-import { ActiveChain, ActivePrompt, ActiveTable, InputValues } from '@/types'
+import { ActiveChain, ActivePrompt, ActiveTable, InputValues, IsProjectItem } from '@/types'
 import api from '@/src/client/api'
 import useInitialState from './useInitialState'
 
@@ -13,13 +13,14 @@ export default function useInputValues(
   const persistInputValuesIfNeeded = () => {
     setInputValues(inputValues => {
       setOriginalInputValues(originalInputValues => {
+        const parentID = IsProjectItem(parent) ? parent.tableID ?? parent.id : parent.id
         for (const [variable, inputs] of Object.entries(inputValues)) {
           if (inputs.join(',') !== (originalInputValues[variable] ?? []).join(',')) {
-            api.updateInputValues(parent.id, variable, inputs)
+            api.updateInputValues(parentID, variable, inputs)
           }
         }
         for (const variable of Object.keys(originalInputValues).filter(variable => !(variable in inputValues))) {
-          api.deleteInputValues(parent.id, variable)
+          api.deleteInputValues(parentID, variable)
         }
         return inputValues
       })
