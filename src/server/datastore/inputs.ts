@@ -11,6 +11,7 @@ import {
 } from './datastore'
 import { InputValues } from '@/types'
 import { ensurePromptOrChainAccess } from './chains'
+import { getVerifiedProjectScopedData } from './prompts'
 
 export async function migrateInputs(postMerge: boolean) {
   if (postMerge) {
@@ -38,7 +39,7 @@ const toInputData = (parentID: number, name: string, values: string[], createdAt
 })
 
 export async function saveInputValues(userID: number, parentID: number, name: string, values: string[] | undefined) {
-  ensurePromptOrChainAccess(userID, parentID)
+  await getVerifiedProjectScopedData(userID, [Entity.PROMPT, Entity.CHAIN, Entity.TABLE], parentID)
   await runTransactionWithExponentialBackoff(async transaction => {
     const key = await getFilteredEntityKey(
       Entity.INPUT,
