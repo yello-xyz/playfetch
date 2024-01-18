@@ -9,9 +9,10 @@ import Editor from '../editor'
 
 const getAllVariablesAndRowCount = (variables: string[], inputValues: InputValues) => {
   const allVariables = [...variables, ...Object.keys(inputValues).filter(input => !variables.includes(input))]
-  const rowCount = Math.max(1, ...allVariables.map(variable => inputValues[variable]?.length ?? 0))
+  const paddedVariables = allVariables.length > 0 ? allVariables : ['New Variable']
+  const rowCount = Math.max(1, ...paddedVariables.map(variable => inputValues[variable]?.length ?? 0))
 
-  return [allVariables, rowCount] as const
+  return [paddedVariables, rowCount] as const
 }
 
 export const GetTableRowCount = (variables: string[], inputValues: InputValues) => {
