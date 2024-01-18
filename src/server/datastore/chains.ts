@@ -70,7 +70,7 @@ export async function getChainForUser(
   const versions = await getOrderedEntities(Entity.VERSION, 'parentID', chainID)
   const runs = await getOrderedRunsForParentID(chainID)
 
-  const inputValues = await getTrustedParentInputValues(chainID)
+  const inputValues = await getTrustedParentInputValues(chainData.tableID ?? chainID)
 
   return {
     chain: toChain(chainData),

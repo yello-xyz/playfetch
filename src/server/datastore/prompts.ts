@@ -77,7 +77,7 @@ export async function getPromptForUser(
   const versions = await getOrderedEntities(Entity.VERSION, 'parentID', promptID)
   const runs = await getOrderedRunsForParentID(promptID)
 
-  const inputValues = await getTrustedParentInputValues(promptID)
+  const inputValues = await getTrustedParentInputValues(promptData.tableID ?? promptID)
   const canSuggestImprovements = await canSuggestImprovedPrompt(promptID)
 
   return {
