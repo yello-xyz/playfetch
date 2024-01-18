@@ -8,14 +8,12 @@ import endpointIcon from '@/public/endpoint.svg'
 import settingsIcon from '@/public/settings.svg'
 import dotsIcon from '@/public/dots.svg'
 import Sidebar, { SidebarButton, SidebarSection } from '../sidebar'
-import { Suspense, useState } from 'react'
+import { useState } from 'react'
 import IconButton from '../iconButton'
 import { ActiveItem, CompareItem, EndpointsItem, SettingsItem } from '@/src/common/activeItem'
 import { useActiveProject } from '@/src/client/context/projectContext'
 import useProjectItemActions from '@/src/client/hooks/useProjectItemActions'
-
-import dynamic from 'next/dynamic'
-const ProjectItemPopupMenu = dynamic(() => import('./projectItemPopupMenu'))
+import ProjectItemPopupMenu from './projectItemPopupMenu'
 
 export default function ProjectSidebar({
   activeItem,
@@ -163,9 +161,7 @@ function ProjectItemActionButton({
         hoverType={{ background: active ? '' : '' }}
       />
       <div className='absolute shadow-sm -right-1 top-8'>
-        <Suspense>
-          <ProjectItemPopupMenu {...{ item, workspaces, reference, isMenuExpanded, setMenuExpanded, onDelete }} />
-        </Suspense>
+        <ProjectItemPopupMenu {...{ item, workspaces, reference, isMenuExpanded, setMenuExpanded, onDelete }} />
       </div>
     </div>
   )
