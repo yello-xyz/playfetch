@@ -14,11 +14,9 @@ import { VersionHasNonEmptyPrompts } from '@/src/common/versionsEqual'
 import { useCheckModelAvailable } from '@/src/client/context/providerContext'
 import Collapsible from '../collapsible'
 import PromptTabs from './promptTabs'
-import IconButton from '../iconButton'
-import expandIcon from '@/public/expand.svg'
-import useTestDataPopup from '@/src/client/hooks/useTestDataPopup'
 import { usePromptTabs } from '@/src/client/context/userPresetsContext'
 import { GetTableRowCount } from '../testData/tableEditor'
+import useTestDataActionButtons from '@/src/client/hooks/useTestDataActionButtons'
 
 export default function PromptView({
   prompt,
@@ -65,7 +63,7 @@ export default function PromptView({
   const staticVariables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, false)
   const canShowTestData = variables.length > 0 || Object.keys(prompt.inputValues).length > 0
 
-  const expandTestData = useTestDataPopup(
+  const testDataActionButtons = useTestDataActionButtons(
     variables,
     staticVariables,
     inputValues,
@@ -128,7 +126,7 @@ export default function PromptView({
               className='flex flex-col h-full'
               contentClassName='mt-1.5 border-t border-gray-200 overflow-y-auto border-b'
               titleClassName='pt-1.5 pl-0.5'
-              rightHandItems={<IconButton className='mr-3 rounded' icon={expandIcon} onClick={expandTestData} />}
+              rightHandItems={testDataActionButtons('mr-3')}
               onSetExpanded={setTestDataExpanded}>
               <TestDataPane
                 variables={variables}

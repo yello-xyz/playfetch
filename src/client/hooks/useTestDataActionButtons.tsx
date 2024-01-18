@@ -6,8 +6,9 @@ import { InputValues, TestConfig } from '@/types'
 import Label from '@/components/label'
 import IconButton from '@/components/iconButton'
 import closeIcon from '@/public/close.svg'
+import expandIcon from '@/public/expand.svg'
 
-export default function useTestDataPopup(
+export default function useTestDataActionButtons(
   variables: string[],
   staticVariables: string[],
   inputValues: InputValues,
@@ -18,7 +19,7 @@ export default function useTestDataPopup(
 ) {
   const setPopup = useGlobalPopup<TestDataPopupProps>()
 
-  const expandCell = () => {
+  const expandTestData = () => {
     setPopup(
       TestDataPopup,
       {
@@ -34,7 +35,7 @@ export default function useTestDataPopup(
     )
   }
 
-  return expandCell
+  return (className?: string) => <IconButton className={className} icon={expandIcon} onClick={expandTestData} />
 }
 
 type TestDataPopupProps = {

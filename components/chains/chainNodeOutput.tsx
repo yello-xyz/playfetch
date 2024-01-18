@@ -13,9 +13,7 @@ import { ProviderForModel } from '@/src/common/providerMetadata'
 import { SelectAnyInputValue } from '@/src/client/inputRows'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import api from '@/src/client/api'
-import useTestDataPopup from '@/src/client/hooks/useTestDataPopup'
-import IconButton from '../iconButton'
-import expandIcon from '@/public/expand.svg'
+import useTestDataActionButtons from '@/src/client/hooks/useTestDataActionButtons'
 
 export default function ChainNodeOutput({
   chain,
@@ -138,7 +136,7 @@ export default function ChainNodeOutput({
     ...partialRuns,
   ]
 
-  const expandTestData = useTestDataPopup(
+  const testDataActionButtons = useTestDataActionButtons(
     variables,
     staticVariables,
     inputValues,
@@ -154,7 +152,7 @@ export default function ChainNodeOutput({
         {activeNode === InputNode && canShowTestData ? (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
             <SingleTabHeader label='Test Data'>
-              <IconButton icon={expandIcon} onClick={expandTestData} />
+              {testDataActionButtons()}
             </SingleTabHeader>
             <TestDataPane
               variables={variables}
