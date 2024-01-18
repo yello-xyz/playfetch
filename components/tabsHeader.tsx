@@ -16,7 +16,7 @@ export function SingleTabHeader({
   label: string
   icon?: StaticImageData
   secondaryLabel?: string
-  onUpdateLabel?: (label: string) => void
+  onUpdateLabel?: (label: string) => void | Promise<void>
   draggableTab?: boolean
   dropTarget?: string
   children?: ReactNode
@@ -50,14 +50,14 @@ export default function TabsHeader<T extends string>({
   setActiveTab?: (tab: T) => void
   icon?: StaticImageData
   secondaryLabel?: string
-  onUpdateLabel?: (label: string) => void
+  onUpdateLabel?: (label: string) => void | Promise<void>
   draggableTabs?: boolean
   dropTarget?: string
   children?: ReactNode
 }) {
   const [label, setLabel] = useState<string>()
-  const submitRename = (name: string) => {
-    onUpdateLabel?.(name)
+  const submitRename =  async (name: string) => {
+    await onUpdateLabel?.(name)
     setLabel(undefined)
   }
 
