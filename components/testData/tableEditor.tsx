@@ -100,7 +100,7 @@ export default function TableEditor({
     persistInputValuesIfNeeded()
   })
 
-  const gridTemplateColumns = `58px repeat(${allVariables.length}, minmax(240px, 1fr))`
+  const gridTemplateColumns = `${gutterColumn ? '58px ' : ''}repeat(${allVariables.length}, minmax(240px, 1fr))`
   const buttonBaseClass = 'flex items-center justify-center py-1 bg-gray-25 font-regular'
   const buttonCursorClass = canAddRow ? 'cursor-pointer hover:bg-gray-50' : 'text-gray-400 select-none'
   const buttonBorderClass = skipButtonBorder ? '' : 'border-b border-gray-200'
@@ -113,11 +113,19 @@ export default function TableEditor({
         style={{ gridTemplateColumns }}>
         {gutterColumn && <div className='border-b border-gray-200 cursor-pointer bg-gray-25' onClick={onToggleAll} />}
         {allVariables.map((variable, index) => (
-          <TestDataHeader key={index} variable={variable} variables={variables} staticVariables={staticVariables} />
+          <TestDataHeader
+            key={index}
+            variable={variable}
+            variables={variables}
+            staticVariables={staticVariables}
+            leftBorder={!!gutterColumn || index > 0}
+          />
         ))}
         {Array.from({ length: rowCount }, (_, row) => {
           const border = (col: number) =>
-            isCellActive(row, col) ? 'border border-blue-400' : 'border-b border-l border-gray-200'
+            isCellActive(row, col)
+              ? 'border border-blue-400'
+              : `${gutterColumn || col > 0 ? 'border-l' : ''} border-b border-gray-200`
           const truncate = isRowActive(row) ? '' : `max-h-[46px] ${isRowEmpty(row) ? '' : 'line-clamp-2'}`
           const iconPosition = (col: number) => (col === allVariables.length - 1 ? 'right-3' : 'right-0.5')
           const iconOpacity = (col: number) =>
