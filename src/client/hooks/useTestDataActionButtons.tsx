@@ -42,7 +42,7 @@ export default function useTestDataActionButtons(
     )
   }
 
-  return (className = '') => (
+  const actionButtons = (className = '') => (
     <div className={`${className} relative flex items-center gap-1`}>
       <IconButton icon={expandIcon} onClick={expandTestData} />
       <IconButton icon={dotsIcon} className='rotate-90' onClick={() => setMenuExpanded(!isMenuExpanded)} />
@@ -53,6 +53,8 @@ export default function useTestDataActionButtons(
       )}
     </div>
   )
+
+  return actionButtons
 }
 
 type TestDataPopupProps = {
