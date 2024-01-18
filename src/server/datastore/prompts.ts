@@ -98,7 +98,7 @@ export async function addPromptForUser(
 ) {
   await ensureProjectAccess(userID, projectID)
   const promptNames = await getEntities(Entity.PROMPT, 'projectID', projectID)
-  const uniqueName = await GetUniqueName(name, promptNames.map(prompt => prompt.name))
+  const uniqueName = GetUniqueName(name, promptNames.map(prompt => prompt.name))
   const [promptData, versionData] = await addPromptToProject(userID, projectID, uniqueName, sourcePath)
   await getDatastore().save([promptData, versionData])
   updateProjectLastEditedAt(projectID)

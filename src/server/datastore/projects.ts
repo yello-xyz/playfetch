@@ -147,7 +147,7 @@ export async function addProjectForUser(
 ): Promise<number> {
   await ensureWorkspaceAccess(userID, workspaceID)
   const projectNames = await getEntities(Entity.PROJECT, 'workspaceID', workspaceID)
-  const uniqueName = await GetUniqueName(
+  const uniqueName = GetUniqueName(
     name,
     projectNames.map(project => project.name)
   )

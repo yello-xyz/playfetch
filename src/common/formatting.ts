@@ -171,22 +171,11 @@ export const CheckValidURLPath = (urlPath: string) => {
   return urlPath.length > 2 && validRegexp.test(urlPath) && !digitsOnlyRegexp.test(urlPath)
 }
 
-export const GetUniqueNameWithFormat = async (
-  name: string,
-  nameExists: (name: string) => Promise<boolean> | boolean,
-  format: (name: string, suffix: number) => string
-) => {
+export const GetUniqueName = (name: string, existingNames: string[]) => {
   let uniqueName = name
   let counter = 2
-  while (await nameExists(uniqueName)) {
-    uniqueName = format(name, counter++)
+  while (existingNames.includes(name)) {
+    uniqueName = `${name} ${counter++}`
   }
   return uniqueName
 }
-
-export const GetUniqueName = (name: string, existingNames: string[]) =>
-  GetUniqueNameWithFormat(
-    name,
-    name => existingNames.includes(name),
-    (name, counter) => `${name} ${counter}`
-  )

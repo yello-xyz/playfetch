@@ -46,7 +46,7 @@ const DefaultTableName = 'New Test Data'
 export async function addTableForUser(userID: number, projectID: number, name = DefaultTableName) {
   await ensureProjectAccess(userID, projectID)
   const tableNames = await getEntities(Entity.TABLE, 'projectID', projectID)
-  const uniqueName = await GetUniqueName(
+  const uniqueName = GetUniqueName(
     name,
     tableNames.map(table => table.name)
   )

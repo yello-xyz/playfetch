@@ -80,7 +80,7 @@ const DefaultChainName = 'New Chain'
 export async function addChainForUser(userID: number, projectID: number, name = DefaultChainName) {
   await ensureProjectAccess(userID, projectID)
   const chainNames = await getEntities(Entity.CHAIN, 'projectID', projectID)
-  const uniqueName = await GetUniqueName(
+  const uniqueName = GetUniqueName(
     name,
     chainNames.map(chain => chain.name)
   )
