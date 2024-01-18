@@ -137,6 +137,7 @@ export default function ChainNodeOutput({
   ]
 
   const testDataActionButtons = useTestDataActionButtons(
+    chain,
     variables,
     staticVariables,
     inputValues,

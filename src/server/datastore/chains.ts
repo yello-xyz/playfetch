@@ -174,7 +174,7 @@ export async function deleteChainForUser(userID: number, chainID: number) {
 }
 
 export async function exportChainInputs(userID: number, chainID: number) {
-  const chainData = await getTrustedChain(chainID)
+  const chainData = await getChainData(chainID)
   const tableID = await addTableForUser(userID, chainData.projectID)
   await reparentInputValues(chainID, tableID)
   await updateChain({ ...chainData, tableID }, false)

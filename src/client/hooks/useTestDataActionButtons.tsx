@@ -1,14 +1,20 @@
 import { Dispatch, SetStateAction, useState } from 'react'
 import useGlobalPopup, { WithDismiss } from '@/src/client/context/globalPopupContext'
-import { PopupContent } from '../../../components/popupMenu'
+import PopupMenu, { PopupContent, PopupMenuItem } from '../../../components/popupMenu'
 import TestDataPane from '@/components/testData/testDataPane'
-import { InputValues, TestConfig } from '@/types'
+import { Chain, InputValues, ProjectItemIsChain, Prompt, TestConfig } from '@/types'
 import Label from '@/components/label'
 import IconButton from '@/components/iconButton'
 import closeIcon from '@/public/close.svg'
 import expandIcon from '@/public/expand.svg'
+import dotsIcon from '@/public/dots.svg'
+import api from '../api'
+import { useRefreshProject } from '../context/projectContext'
+import { useRouter } from 'next/router'
+import { TableRoute } from '@/src/common/clientRoute'
 
 export default function useTestDataActionButtons(
+  parentItem: Prompt | Chain,
   variables: string[],
   staticVariables: string[],
   inputValues: InputValues,
@@ -17,6 +23,7 @@ export default function useTestDataActionButtons(
   testConfig: TestConfig,
   setTestConfig: (testConfig: TestConfig) => void
 ) {
+  const [isMenuExpanded, setMenuExpanded] = useState(false)
   const setPopup = useGlobalPopup<TestDataPopupProps>()
 
   const expandTestData = () => {
@@ -35,7 +42,17 @@ export default function useTestDataActionButtons(
     )
   }
 
-  return (className?: string) => <IconButton className={className} icon={expandIcon} onClick={expandTestData} />
+  return (className = '') => (
+    <div className={`${className} relative flex items-center gap-1`}>
+      <IconButton icon={expandIcon} onClick={expandTestData} />
+      <IconButton icon={dotsIcon} className='rotate-90' onClick={() => setMenuExpanded(!isMenuExpanded)} />
+      {isMenuExpanded && (
+        <div className='absolute shadow-sm -right-1 top-8'>
+          <TestDataPopupMenu {...{ parentItem, isMenuExpanded, setMenuExpanded }} />
+        </div>
+      )}
+    </div>
+  )
 }
 
 type TestDataPopupProps = {
@@ -88,5 +105,35 @@ const TestDataPopup = ({
         skipButtonBorder
       />
     </PopupContent>
+  )
+}
+
+function TestDataPopupMenu({
+  parentItem,
+  isMenuExpanded,
+  setMenuExpanded,
+}: {
+  parentItem: Prompt | Chain
+  isMenuExpanded: boolean
+  setMenuExpanded: (isExpanded: boolean) => void
+}) {
+  const router = useRouter()
+  const refreshProject = useRefreshProject()
+
+  const withDismiss = (callback: () => void) => () => {
+    setMenuExpanded(false)
+    callback()
+  }
+
+  const exportTable = async () => {
+    const tableID = ProjectItemIsChain(parentItem) ? await api.exportChainInputs(parentItem.id) : await api.exportPromptInputs(parentItem.id)
+    await refreshProject()
+    router.push(TableRoute(parentItem.projectID, tableID))
+  }
+
+  return (
+    <PopupMenu className='w-40' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
+      <PopupMenuItem title='Save Test Data' callback={withDismiss(() => exportTable())} first last />
+    </PopupMenu>
   )
 }

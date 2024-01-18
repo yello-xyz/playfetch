@@ -64,6 +64,7 @@ export default function PromptView({
   const canShowTestData = variables.length > 0 || Object.keys(prompt.inputValues).length > 0
 
   const testDataActionButtons = useTestDataActionButtons(
+    prompt,
     variables,
     staticVariables,
     inputValues,

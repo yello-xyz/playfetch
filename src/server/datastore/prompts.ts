@@ -276,7 +276,7 @@ export async function deletePromptForUser(userID: number, promptID: number) {
 }
 
 export async function exportPromptInputs(userID: number, promptID: number) {
-  const promptData = await getTrustedPrompt(promptID)
+  const promptData = await getPromptData(promptID)
   const tableID = await addTableForUser(userID, promptData.projectID)
   await reparentInputValues(promptID, tableID)
   await updatePrompt({ ...promptData, tableID }, false)
