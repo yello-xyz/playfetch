@@ -18,6 +18,7 @@ export default function useInputValues(
             api.updateInputValues(parent.id, variable, inputs)
           }
         }
+        // TODO delete removed variables
         return inputValues
       })
       return inputValues

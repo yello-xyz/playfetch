@@ -6,6 +6,7 @@ import { InputValues } from '@/types'
 import TestDataHeader from './testDataHeader'
 import useTestDataValuePopup from '@/src/client/hooks/useTestDataValuePopup'
 import Editor from '../editor'
+import { GetUniqueName } from '@/src/common/formatting'
 
 const getAllVariablesAndRowCount = (variables: string[], inputValues: InputValues) => {
   const allVariables = [...variables, ...Object.keys(inputValues).filter(input => !variables.includes(input))]
@@ -62,6 +63,17 @@ export default function TableEditor({
         [variable]: [...paddedColumn.slice(0, row), value, ...paddedColumn.slice(row + 1)],
       }
     })
+
+  const renameColumn = (name: string, newName: string) => {
+    setInputValues(inputValues => {
+      const uniqueName = GetUniqueName(newName, allVariables)
+      const entries = Object.entries(inputValues)
+      const index = entries.findIndex(([variable]) => variable === name)
+      const [_, values] = entries[index]
+      return Object.fromEntries([...entries.slice(0, index), [uniqueName, values], ...entries.slice(index + 1)])
+    })
+    setTimeout(() => persistInputValuesIfNeeded())
+  }
 
   const isRowEmpty = (row: number) => allVariables.every(variable => getInputValue(row, variable).length === 0)
 
@@ -120,6 +132,7 @@ export default function TableEditor({
             variable={variable}
             variables={variables}
             staticVariables={staticVariables}
+            onRename={name => renameColumn(variable, name)}
             leftBorder={!!gutterColumn || index > 0}
           />
         ))}
