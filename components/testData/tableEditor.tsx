@@ -8,9 +8,11 @@ import useTestDataValuePopup from '@/src/client/hooks/useTestDataValuePopup'
 import Editor from '../editor'
 import { GetUniqueName } from '@/src/common/formatting'
 
+const DefaultVariableName = 'New Variable'
+
 const getAllVariablesAndRowCount = (variables: string[], inputValues: InputValues) => {
   const allVariables = [...variables, ...Object.keys(inputValues).filter(input => !variables.includes(input))]
-  const paddedVariables = allVariables.length > 0 ? allVariables : ['New Variable']
+  const paddedVariables = allVariables.length > 0 ? allVariables : [DefaultVariableName]
   const rowCount = Math.max(1, ...paddedVariables.map(variable => inputValues[variable]?.length ?? 0))
 
   return [paddedVariables, rowCount] as const
@@ -81,13 +83,24 @@ export default function TableEditor({
 
   const canAddRow = !isRowEmpty(rowCount - 1)
 
-  const addInput = () => {
+  const addRow = () => {
     persistInputValuesIfNeeded()
     setTimeout(() => {
       setInputValues(inputValues =>
         Object.fromEntries(Object.entries(inputValues).map(([variable, values]) => [variable, [...values, '']]))
       )
       // TODO focus on last cell in newly added row?
+    })
+  }
+
+  const addColumn = () => {
+    persistInputValuesIfNeeded()
+    setTimeout(() => {
+      setInputValues(inputValues => {
+        const name = GetUniqueName(DefaultVariableName, allVariables)
+        return { ...inputValues, [name]: Array.from({ length: rowCount }, _ => '') }
+      })
+      setTimeout(() => persistInputValuesIfNeeded())
     })
   }
 
@@ -117,15 +130,18 @@ export default function TableEditor({
   })
 
   const gridTemplateColumns = `${gutterColumn ? '58px ' : ''}repeat(${allVariables.length}, minmax(240px, 1fr))`
-  const buttonBaseClass = 'flex items-center justify-center py-1 font-regular'
-  const buttonCursor = canAddRow ? `cursor-pointer hover:bg-gray-50` : 'text-gray-400 select-none'
-  const buttonRounded = rounded ? 'rounded-b-lg' : ''
+  const addRowButtonBaseClass = 'flex items-center justify-center py-1 font-regular'
+  const cursor = 'cursor-pointer hover:bg-gray-50'
+  const addRowButtonCursor = canAddRow ? cursor : 'text-gray-400 select-none'
+  const addRowButtonRounded = rounded ? 'rounded-b-lg' : ''
+  const addColumnButtonBaseClass =
+    'absolute top-0 right-0 h-8 border-l border-b border-gray-200 w-7 flex items-center justify-center hover:bg-gray-50'
   return (
     <>
       <div
         key={allVariables.join(',')}
         ref={containerRef}
-        className={`${backgroundColor} ${rounded ? 'rounded-t-lg' : ''} grid w-full overflow-x-auto shrink-0`}
+        className={`${backgroundColor} ${rounded ? 'rounded-t-lg' : ''} relative grid w-full overflow-x-auto shrink-0`}
         style={{ gridTemplateColumns }}>
         {gutterColumn && <div className='border-b border-gray-200 cursor-pointer' onClick={onToggleAll} />}
         {allVariables.map((variable, index) => (
@@ -138,6 +154,11 @@ export default function TableEditor({
             leftBorder={!!gutterColumn || index > 0}
           />
         ))}
+        <div
+          className={`${addColumnButtonBaseClass} ${rounded ? 'rounded-tr-lg' : ''} ${backgroundColor} ${cursor}`}
+          onClick={addColumn}>
+          <Icon icon={addIcon} />
+        </div>
         {Array.from({ length: rowCount }, (_, row) => {
           const border = (col: number) =>
             isCellActive(row, col)
@@ -182,8 +203,8 @@ export default function TableEditor({
         })}
       </div>
       <div
-        className={`${buttonBaseClass} ${backgroundColor} ${buttonCursor} ${buttonRounded}`}
-        onClick={canAddRow ? addInput : undefined}>
+        className={`${addRowButtonBaseClass} ${backgroundColor} ${addRowButtonCursor} ${addRowButtonRounded}`}
+        onClick={canAddRow ? addRow : undefined}>
         <Icon icon={addIcon} className={canAddRow ? '' : 'opacity-40'} />
         Add Row
       </div>

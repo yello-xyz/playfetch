@@ -27,7 +27,7 @@ export default function TestDataHeader({
   const bgColor = isStatic ? 'bg-pink-25' : isInUse ? 'bg-purple-25' : ''
   const textColor = isStatic ? 'text-pink-400' : isInUse ? 'text-purple-400' : ''
 
-  const baseClass = 'flex items-center px-3 py-1 border-b border-gray-200'
+  const baseClass = 'flex items-center px-3 py-1 border-b border-gray-200 h-8'
 
   return (
     <div
