@@ -241,17 +241,13 @@ export async function updatePromptOnDeletedVersion(promptID: number) {
 }
 
 export const getTrustedProjectScopedData = async (entities: Entity[], id: number) => {
-  let data
   for (const entity of entities) {
-    data = await getKeyedEntity(entity, id)
+    const data = await getKeyedEntity(entity, id)
     if (data) {
-      break
+      return data
     }
   }
-  if (!data) {
-    throw new Error(`Entity with ID ${id} does not exist or user has no access`)
-  }
-  return data
+  throw new Error(`Entity with ID ${id} does not exist or user has no access`)
 }
 
 export const getVerifiedProjectScopedData = async (userID: number, entities: Entity[], id: number) => {
@@ -284,4 +280,5 @@ export async function exportPromptInputs(userID: number, promptID: number) {
   const tableID = await addTableForUser(userID, promptData.projectID)
   await reparentInputValues(promptID, tableID)
   await updatePrompt({ ...promptData, tableID }, false)
+  return tableID
 }

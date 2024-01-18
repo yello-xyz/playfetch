@@ -150,6 +150,9 @@ const api = {
   renamePrompt: function (promptID: number, name: string) {
     return post(this.renamePrompt, { promptID, name })
   },
+  exportPromptInputs: function (promptID: number): Promise<number> {
+    return this.exportTable({ promptID })
+  },
   deletePrompt: function (promptID: number) {
     return post(this.deletePrompt, { promptID })
   },
@@ -195,6 +198,9 @@ const api = {
   renameChain: function (chainID: number, name: string) {
     return post(this.renameChain, { chainID, name })
   },
+  exportChainInputs: function (chainID: number): Promise<number> {
+    return this.exportTable({ chainID })
+  },
   deleteChain: function (chainID: number) {
     return post(this.deleteChain, { chainID })
   },
@@ -206,6 +212,9 @@ const api = {
   },
   renameTable: function (tableID: number, name: string) {
     return post(this.renameTable, { tableID, name })
+  },
+  exportTable: function ({promptID, chainID }:{ promptID?: number; chainID?: number}): Promise<number> {
+    return post(this.exportTable, { promptID, chainID })
   },
   publishEndpoint: function (
     isEnabled: boolean,

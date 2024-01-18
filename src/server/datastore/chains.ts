@@ -178,4 +178,5 @@ export async function exportChainInputs(userID: number, chainID: number) {
   const tableID = await addTableForUser(userID, chainData.projectID)
   await reparentInputValues(chainID, tableID)
   await updateChain({ ...chainData, tableID }, false)
+  return tableID
 }
