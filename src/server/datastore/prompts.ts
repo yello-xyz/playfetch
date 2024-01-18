@@ -22,7 +22,7 @@ import {
 } from './versions'
 import { InputValues, Prompt, PromptConfig, Prompts, RawPromptVersion } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
-import { StripVariableSentinels } from '@/src/common/formatting'
+import { GetUniqueName, StripVariableSentinels } from '@/src/common/formatting'
 import { getTrustedParentInputValues } from './inputs'
 import { getOrderedRunsForParentID } from './runs'
 import { canSuggestImprovedPrompt } from './ratings'
@@ -85,26 +85,6 @@ export async function getPromptForUser(
   }
 }
 
-export const getUniqueNameWithFormat = async (
-  name: string,
-  nameExists: (name: string) => Promise<boolean> | boolean,
-  format: (name: string, suffix: number) => string
-) => {
-  let uniqueName = name
-  let counter = 2
-  while (await nameExists(uniqueName)) {
-    uniqueName = format(name, counter++)
-  }
-  return uniqueName
-}
-
-export const getUniqueName = (name: string, existingNames: string[]) =>
-  getUniqueNameWithFormat(
-    name,
-    name => existingNames.includes(name),
-    (name, counter) => `${name} ${counter}`
-  )
-
 export const matchesDefaultName = (name: string, defaultName: string) =>
   name.match(new RegExp(`^${defaultName}( \\d+)?$`))
 
@@ -118,7 +98,7 @@ export async function addPromptForUser(
 ) {
   await ensureProjectAccess(userID, projectID)
   const promptNames = await getEntities(Entity.PROMPT, 'projectID', projectID)
-  const uniqueName = await getUniqueName(name, promptNames.map(prompt => prompt.name))
+  const uniqueName = await GetUniqueName(name, promptNames.map(prompt => prompt.name))
   const [promptData, versionData] = await addPromptToProject(userID, projectID, uniqueName, sourcePath)
   await getDatastore().save([promptData, versionData])
   updateProjectLastEditedAt(projectID)

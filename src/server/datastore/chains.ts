@@ -11,11 +11,12 @@ import {
 } from './datastore'
 import { Chain, ChainItemWithInputs, InputValues, RawChainVersion } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
-import { getTrustedProjectScopedData, getUniqueName, getVerifiedProjectScopedData } from './prompts'
+import { getTrustedProjectScopedData, getVerifiedProjectScopedData } from './prompts'
 import { getTrustedParentInputValues } from './inputs'
 import { addInitialVersion, saveChainVersionForUser, toUserVersions } from './versions'
 import { getOrderedRunsForParentID } from './runs'
 import { deleteEntity } from './cleanup'
+import { GetUniqueName } from '@/src/common/formatting'
 
 export async function migrateChains(postMerge: boolean) {
   if (postMerge) {
@@ -79,7 +80,7 @@ const DefaultChainName = 'New Chain'
 export async function addChainForUser(userID: number, projectID: number, name = DefaultChainName) {
   await ensureProjectAccess(userID, projectID)
   const chainNames = await getEntities(Entity.CHAIN, 'projectID', projectID)
-  const uniqueName = await getUniqueName(
+  const uniqueName = await GetUniqueName(
     name,
     chainNames.map(chain => chain.name)
   )

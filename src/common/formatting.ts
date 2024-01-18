@@ -38,8 +38,8 @@ export const FormatDate = (timestamp: number, alwaysIncludeTime = true, alwaysIn
   return !alwaysIncludeDate && dateString === todayString
     ? timeString
     : alwaysIncludeTime
-      ? `${dateString} ${timeString}`
-      : dateString
+    ? `${dateString} ${timeString}`
+    : dateString
 }
 
 export const FormatRelativeDate = (timestamp: number, thresholdDays = 0) => {
@@ -170,3 +170,23 @@ export const CheckValidURLPath = (urlPath: string) => {
 
   return urlPath.length > 2 && validRegexp.test(urlPath) && !digitsOnlyRegexp.test(urlPath)
 }
+
+export const GetUniqueNameWithFormat = async (
+  name: string,
+  nameExists: (name: string) => Promise<boolean> | boolean,
+  format: (name: string, suffix: number) => string
+) => {
+  let uniqueName = name
+  let counter = 2
+  while (await nameExists(uniqueName)) {
+    uniqueName = format(name, counter++)
+  }
+  return uniqueName
+}
+
+export const GetUniqueName = (name: string, existingNames: string[]) =>
+  GetUniqueNameWithFormat(
+    name,
+    name => existingNames.includes(name),
+    (name, counter) => `${name} ${counter}`
+  )

@@ -3,7 +3,8 @@ import { InputValues, Table } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { getTrustedParentInputValues } from './inputs'
 import { deleteEntity } from './cleanup'
-import { getUniqueName, getVerifiedProjectScopedData } from './prompts'
+import { getVerifiedProjectScopedData } from './prompts'
+import { GetUniqueName } from '@/src/common/formatting'
 
 export async function migrateTables(postMerge: boolean) {
   if (postMerge) {
@@ -45,7 +46,7 @@ const DefaultTableName = 'New Test Data'
 export async function addTableForUser(userID: number, projectID: number, name = DefaultTableName) {
   await ensureProjectAccess(userID, projectID)
   const tableNames = await getEntities(Entity.TABLE, 'projectID', projectID)
-  const uniqueName = await getUniqueName(
+  const uniqueName = await GetUniqueName(
     name,
     tableNames.map(table => table.name)
   )

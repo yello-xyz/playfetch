@@ -11,9 +11,9 @@ import {
   getRecentEntities,
   getTimestamp,
 } from './datastore'
-import { getUniqueNameWithFormat, getVerifiedProjectScopedData } from './prompts'
+import { getVerifiedProjectScopedData } from './prompts'
 import { saveUsage } from './usage'
-import { CheckValidURLPath } from '@/src/common/formatting'
+import { CheckValidURLPath, GetUniqueNameWithFormat } from '@/src/common/formatting'
 import { getTrustedUserPromptOrChainData } from './chains'
 import { ensureProjectAccess } from './projects'
 import { getTrustedVersion } from './versions'
@@ -74,7 +74,7 @@ const getValidURLPath = async (
   if (!CheckValidURLPath(name)) {
     throw new Error(`Invalid name ${name} for endpoint`)
   }
-  return getUniqueNameWithFormat(
+  return GetUniqueNameWithFormat(
     name,
     async urlPath => {
       const endpoints = await getFilteredEntities(Entity.ENDPOINT, buildPathFilter(projectID, urlPath))

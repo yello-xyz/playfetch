@@ -25,13 +25,13 @@ import {
   revokeUserAccess,
   getAccessibleObjectIDs,
 } from './access'
-import { addPromptToProject, getUniqueName, matchesDefaultName, toPrompt } from './prompts'
+import { addPromptToProject, matchesDefaultName, toPrompt } from './prompts'
 import { getActiveUsers, toUser } from './users'
 import { DefaultEndpointFlavor, toEndpoint } from './endpoints'
 import { toChain } from './chains'
 import { ensureWorkspaceAccess, getPendingAccessObjects, getWorkspaceUsers } from './workspaces'
 import { toUsage } from './usage'
-import { StripVariableSentinels } from '@/src/common/formatting'
+import { GetUniqueName, StripVariableSentinels } from '@/src/common/formatting'
 import { getAnalyticsForProject } from './analytics'
 import { toComment } from './comments'
 import { deleteEntity } from './cleanup'
@@ -147,7 +147,7 @@ export async function addProjectForUser(
 ): Promise<number> {
   await ensureWorkspaceAccess(userID, workspaceID)
   const projectNames = await getEntities(Entity.PROJECT, 'workspaceID', workspaceID)
-  const uniqueName = await getUniqueName(
+  const uniqueName = await GetUniqueName(
     name,
     projectNames.map(project => project.name)
   )
