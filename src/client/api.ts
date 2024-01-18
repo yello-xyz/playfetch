@@ -213,7 +213,7 @@ const api = {
   renameTable: function (tableID: number, name: string) {
     return post(this.renameTable, { tableID, name })
   },
-  exportTable: function ({promptID, chainID }:{ promptID?: number; chainID?: number}): Promise<number> {
+  exportTable: function ({ promptID, chainID }: { promptID?: number; chainID?: number }): Promise<number> {
     return post(this.exportTable, { promptID, chainID })
   },
   publishEndpoint: function (

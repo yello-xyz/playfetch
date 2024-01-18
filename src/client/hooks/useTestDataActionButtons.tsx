@@ -45,7 +45,9 @@ export default function useTestDataActionButtons(
   const actionButtons = (className = '') => (
     <div className={`${className} relative flex items-center gap-1`}>
       <IconButton icon={expandIcon} onClick={expandTestData} />
-      <IconButton icon={dotsIcon} className='rotate-90' onClick={() => setMenuExpanded(!isMenuExpanded)} />
+      {!parentItem.tableID && ( // TODO move this check to TestDataPopupMenu when there are more items
+        <IconButton icon={dotsIcon} className='rotate-90' onClick={() => setMenuExpanded(!isMenuExpanded)} />
+      )}
       {isMenuExpanded && (
         <div className='absolute shadow-sm -right-1 top-8'>
           <TestDataPopupMenu {...{ parentItem, isMenuExpanded, setMenuExpanded }} />
@@ -128,8 +130,10 @@ function TestDataPopupMenu({
   }
 
   const exportTable = async () => {
-    const tableID = ProjectItemIsChain(parentItem) ? await api.exportChainInputs(parentItem.id) : await api.exportPromptInputs(parentItem.id)
-    await refreshProject()
+    const tableID = ProjectItemIsChain(parentItem)
+      ? await api.exportChainInputs(parentItem.id)
+      : await api.exportPromptInputs(parentItem.id)
+    refreshProject()
     router.push(TableRoute(parentItem.projectID, tableID))
   }
 

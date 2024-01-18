@@ -56,7 +56,7 @@ export default function TabsHeader<T extends string>({
   children?: ReactNode
 }) {
   const [label, setLabel] = useState<string>()
-  const submitRename =  async (name: string) => {
+  const submitRename = async (name: string) => {
     await onUpdateLabel?.(name)
     setLabel(undefined)
   }

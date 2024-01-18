@@ -107,8 +107,13 @@ export default function Home({
     setModifiedVersion(undefined)
   }
 
-  const [refreshTable, selectTable, addTable] = useTable(activeProject, refreshProject, activeTable, setActiveItem, savePrompt, () =>
-    updateVersion(undefined)
+  const [refreshTable, selectTable, addTable] = useTable(
+    activeProject,
+    refreshProject,
+    activeTable,
+    setActiveItem,
+    savePrompt,
+    () => updateVersion(undefined)
   )
 
   const selectVersion = (version: PromptVersion | ChainVersion) => {
@@ -193,10 +198,10 @@ export default function Home({
   const currentQueryState = compare
     ? CompareItem
     : endpoints
-    ? EndpointsItem
-    : settings
-    ? SettingsItem
-    : promptID ?? chainID ?? tableID
+      ? EndpointsItem
+      : settings
+        ? SettingsItem
+        : promptID ?? chainID ?? tableID
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
     if (compare) {
