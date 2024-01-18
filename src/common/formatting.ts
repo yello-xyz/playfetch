@@ -174,7 +174,7 @@ export const CheckValidURLPath = (urlPath: string) => {
 export const GetUniqueName = (name: string, existingNames: string[]) => {
   let uniqueName = name
   let counter = 2
-  while (existingNames.includes(name)) {
+  while (existingNames.includes(uniqueName)) {
     uniqueName = `${name} ${counter++}`
   }
   return uniqueName

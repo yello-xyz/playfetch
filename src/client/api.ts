@@ -290,6 +290,9 @@ const api = {
   updateInputValues: function (parentID: number, name: string, values: string[]) {
     return post(this.updateInputValues, { parentID, name, values })
   },
+  deleteInputValues: function (parentID: number, name: string) {
+    return post(this.updateInputValues, { parentID, name })
+  },
   deleteVersion: function (versionID: number) {
     return post(this.deleteVersion, { versionID })
   },

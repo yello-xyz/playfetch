@@ -37,7 +37,7 @@ const toInputData = (parentID: number, name: string, values: string[], createdAt
   excludeFromIndexes: ['values'],
 })
 
-export async function saveInputValues(userID: number, parentID: number, name: string, values: string[]) {
+export async function saveInputValues(userID: number, parentID: number, name: string, values: string[] | undefined) {
   ensurePromptOrChainAccess(userID, parentID)
   await runTransactionWithExponentialBackoff(async transaction => {
     const key = await getFilteredEntityKey(
@@ -45,8 +45,12 @@ export async function saveInputValues(userID: number, parentID: number, name: st
       and([buildFilter('parentID', parentID), buildFilter('name', name)]),
       transaction
     )
-    const inputID = key ? getID({ key }) : undefined
-    transaction.save(toInputData(parentID, name, values, new Date(), inputID))
+    if (values !== undefined) {
+      const inputID = key ? getID({ key }) : undefined
+      transaction.save(toInputData(parentID, name, values, new Date(), inputID))
+    } else if (key) {
+      transaction.delete(key)
+    }
   })
 }
 

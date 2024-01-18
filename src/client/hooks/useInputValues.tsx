@@ -18,7 +18,9 @@ export default function useInputValues(
             api.updateInputValues(parent.id, variable, inputs)
           }
         }
-        // TODO delete removed variables
+        for (const variable of Object.keys(originalInputValues).filter(variable => !(variable in inputValues))) {
+          api.deleteInputValues(parent.id, variable)
+        }
         return inputValues
       })
       return inputValues

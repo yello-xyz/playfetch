@@ -65,14 +65,16 @@ export default function TableEditor({
     })
 
   const renameColumn = (name: string, newName: string) => {
-    setInputValues(inputValues => {
-      const uniqueName = GetUniqueName(newName, allVariables)
-      const entries = Object.entries(inputValues)
-      const index = entries.findIndex(([variable]) => variable === name)
-      const [_, values] = entries[index]
-      return Object.fromEntries([...entries.slice(0, index), [uniqueName, values], ...entries.slice(index + 1)])
-    })
-    setTimeout(() => persistInputValuesIfNeeded())
+    if (name !== newName) {
+      setInputValues(inputValues => {
+        const uniqueName = GetUniqueName(newName, allVariables)
+        const entries = Object.entries(inputValues)
+        const index = entries.findIndex(([variable]) => variable === name)
+        const [_, values] = entries[index]
+        return Object.fromEntries([...entries.slice(0, index), [uniqueName, values], ...entries.slice(index + 1)])
+      })
+      setTimeout(() => persistInputValuesIfNeeded())
+    }
   }
 
   const isRowEmpty = (row: number) => allVariables.every(variable => getInputValue(row, variable).length === 0)
