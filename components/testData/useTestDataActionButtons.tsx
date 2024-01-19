@@ -8,9 +8,10 @@ import dotsIcon from '@/public/dots.svg'
 import { useActiveProject } from '../../src/client/context/projectContext'
 import Icon from '@/components/icon'
 import TestDataPopup, { TestDataPopupProps } from './testDataPopup'
-import TestDataPopupMenu, { useReplaceInputs } from './testDataPopupMenu'
+import TestDataPopupMenu, { TestDataPopupMenuProps, useReplaceInputs } from './testDataPopupMenu'
 import PickTableDialog from './pickTableDialog'
 import api from '@/src/client/api'
+import GlobalPopupMenu from '../globalPopupMenu'
 
 export default function useTestDataActionButtons(
   parentItem: Prompt | Chain,
@@ -23,7 +24,6 @@ export default function useTestDataActionButtons(
   setTestConfig: (testConfig: TestConfig) => void
 ) {
   const [showPickTableDialog, setShowPickTableDialog] = useState(false)
-  const [isMenuExpanded, setMenuExpanded] = useState(false)
   const setPopup = useGlobalPopup<TestDataPopupProps>()
   const activeProject = useActiveProject()
   const replaceInputs = useReplaceInputs(parentItem)
@@ -44,6 +44,11 @@ export default function useTestDataActionButtons(
     )
   }
 
+  const showPopupMenu = (): [typeof TestDataPopupMenu, TestDataPopupMenuProps] => [
+    TestDataPopupMenu,
+    { parentItem, isDataEmpty, onReplaceData },
+  ]
+
   const tables = activeProject.tables
   const table = tables.find(table => table.id === parentItem.tableID)
   const isDataEmpty = Object.values(inputValues).every(value => value.length === 0 || value[0] === '')
@@ -57,12 +62,7 @@ export default function useTestDataActionButtons(
         <LinkedTableItem table={table} onReplaceData={onReplaceData} />
       </div>
       <IconButton icon={expandIcon} onClick={expandTestData} />
-      <IconButton icon={dotsIcon} className='rotate-90' onClick={() => setMenuExpanded(!isMenuExpanded)} />
-      {isMenuExpanded && (
-        <div className='absolute shadow-sm -right-1 top-8'>
-          <TestDataPopupMenu {...{ parentItem, isDataEmpty, onReplaceData, isMenuExpanded, setMenuExpanded }} />
-        </div>
-      )}
+      <GlobalPopupMenu icon={dotsIcon} iconClassName='rotate-90' loadPopup={showPopupMenu} />
       {showPickTableDialog && (
         <PickTableDialog
           tables={tables}

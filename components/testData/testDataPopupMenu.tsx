@@ -1,35 +1,28 @@
-import PopupMenu, { PopupMenuItem } from '../popupMenu'
+import { PopupContent, PopupMenuItem } from '../popupMenu'
 import { Chain, ProjectItemIsChain, Prompt } from '@/types'
 import api from '../../src/client/api'
 import { useRefreshActiveItem, useRefreshProject } from '../../src/client/context/projectContext'
 import { useRouter } from 'next/router'
 import { TableRoute } from '@/src/common/clientRoute'
 import useModalDialogPrompt from '../../src/client/context/modalDialogContext'
+import { WithDismiss } from '@/src/client/context/globalPopupContext'
 
+export type TestDataPopupMenuProps = {
+  parentItem: Prompt | Chain
+  isDataEmpty: boolean
+  onReplaceData?: () => void
+}
 export default function TestDataPopupMenu({
   parentItem,
   isDataEmpty,
   onReplaceData,
-  isMenuExpanded,
-  setMenuExpanded,
-}: {
-  parentItem: Prompt | Chain
-  isDataEmpty: boolean
-  onReplaceData?: () => void
-  isMenuExpanded: boolean
-  setMenuExpanded: (isExpanded: boolean) => void
-}) {
+  withDismiss,
+}: TestDataPopupMenuProps & WithDismiss) {
   const router = useRouter()
   const refreshProject = useRefreshProject()
   const setDialogPrompt = useModalDialogPrompt()
 
-  const withDismiss = (callback?: () => void) =>
-    callback
-      ? () => {
-          setMenuExpanded(false)
-          callback()
-        }
-      : callback
+  const dismiss = (callback?: () => void) => (callback ? withDismiss(callback) : undefined)
 
   const exportInputs = async () => {
     const tableID = ProjectItemIsChain(parentItem)
@@ -83,17 +76,17 @@ export default function TestDataPopupMenu({
     : undefined
 
   return (
-    <PopupMenu className='w-40' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
-      <PopupMenuItem title='Replace Test Data' callback={withDismiss(replaceData)} first />
-      <PopupMenuItem title='Save Test Data' callback={withDismiss(exportData)} />
+    <PopupContent className='w-44'>
+      <PopupMenuItem title='Replace Test Data' callback={dismiss(replaceData)} first />
+      <PopupMenuItem title='Save Test Data' callback={dismiss(exportData)} />
       <PopupMenuItem
         title='Reset Test Data'
-        callback={withDismiss(resetData)}
+        callback={dismiss(resetData)}
         separated
         destructive={!parentItem.tableID}
         last
       />
-    </PopupMenu>
+    </PopupContent>
   )
 }
 
