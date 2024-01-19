@@ -36,7 +36,7 @@ export default function TestDataHeader({
   return (
     <div
       className={`${baseClass} ${isFirst ? '' : 'border-l'} ${grow ? 'grow' : ''}  ${bgColor}`}
-      onClick={isInUse ? undefined : () => setLabel(variable)}>
+      onClick={isInUse || !onRename ? undefined : () => setLabel(variable)}>
       <span className={`flex-1 mr-6 font-medium whitespace-nowrap text-ellipsis ${textColor}`}>
         {label !== undefined ? (
           <EditableItem
