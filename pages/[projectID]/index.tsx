@@ -146,7 +146,7 @@ export default function Home({
 
   const onDeleteItem = async (itemID: number) => {
     refreshProject()
-    if (itemID === activePrompt?.id || itemID === activeChain?.id) {
+    if (itemID === activePrompt?.id || itemID === activeChain?.id || itemID === activeTable?.id) {
       setModifiedVersion(undefined)
       router.push(ProjectRoute(activeProject.id))
     }
