@@ -1,4 +1,4 @@
-import { Dispatch, ReactNode, SetStateAction, useState } from 'react'
+import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { InputValues, TestConfig } from '@/types'
 import { SelectInputRows } from '@/src/client/inputRows'
 import DropdownMenu from '../dropdownMenu'
@@ -59,7 +59,11 @@ export default function TestDataPane({
   const dynamicVariables = variables.filter(variable => !staticVariables.includes(variable))
   const [_, dynamicInputRows] = SelectInputRows(inputValues, dynamicVariables, testConfig)
   const shouldShowOptions = !asModalPopup && dynamicInputRows.length > 0
+
+  const hasTestData = HasTableData(variables, inputValues)
   const [startFromScratch, setStartFromScratch] = useState(false)
+
+  useEffect(() => setStartFromScratch(startFromScratch && !hasTestData), [startFromScratch, hasTestData])
 
   return HasTableData(variables, inputValues) || startFromScratch ? (
     <div className='flex flex-col items-stretch flex-1 h-full overflow-y-auto'>
