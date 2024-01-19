@@ -45,12 +45,14 @@ export default function ProjectSidebar({
   rightBorder: boolean
 }) {
   const activeProject = useActiveProject()
-  const reference = (item: Prompt | Chain) =>
+  const reference = (item: Prompt | Chain | Table) =>
     activeProject.endpoints.find(endpoint => endpoint.enabled && endpoint.parentID === item.id) ??
-    activeProject.chains.find(chain => chain.referencedItemIDs.includes(item.id))
+    activeProject.chains.find(chain => chain.referencedItemIDs.includes(item.id)) ??
+    activeProject.chains.find(chain => chain.tableID === item.id) ??
+    activeProject.prompts.find(prompt => prompt.tableID === item.id)
 
   const [renameItem] = useProjectItemActions()
-  const actionButtonForProjectItem = (item: Prompt | Chain, activeItem: boolean) => (
+  const actionButtonForProjectItem = (item: Prompt | Chain | Table, activeItem: boolean) => (
     <ProjectItemActionButton
       item={item}
       workspaces={workspaces}
@@ -127,7 +129,7 @@ export default function ProjectSidebar({
             icon={tableIcon}
             active={isActiveItem(table)}
             onClick={() => onSelectTable(table.id)}
-            // actionComponent={actionButtonForProjectItem(table, isActiveItem(table))}
+            actionComponent={actionButtonForProjectItem(table, isActiveItem(table))}
             onRename={name => renameItem(table, name)}
           />
         ))}
@@ -143,9 +145,9 @@ function ProjectItemActionButton({
   onDelete,
   active,
 }: {
-  item: Prompt | Chain
+  item: Prompt | Chain | Table
   workspaces: Workspace[]
-  reference: Chain | Endpoint | undefined
+  reference: Prompt | Chain | Endpoint | undefined
   onDelete: () => void
   active?: boolean
 }) {

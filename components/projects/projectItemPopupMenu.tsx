@@ -1,4 +1,4 @@
-import { Chain, Endpoint, Project, ProjectItemIsChain, Prompt, Workspace } from '@/types'
+import { Chain, Endpoint, IsProjectItem, Project, ProjectItemIsChain, Prompt, Table, Workspace } from '@/types'
 import api from '@/src/client/api'
 import PopupMenu, { PopupMenuItem } from '../popupMenu'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
@@ -18,9 +18,9 @@ export default function ProjectItemPopupMenu({
   setMenuExpanded,
   onDelete,
 }: {
-  item: Prompt | Chain
+  item: Prompt | Chain | Table
   workspaces: Workspace[]
-  reference: Chain | Endpoint | undefined
+  reference: Prompt | Chain | Endpoint | undefined
   isMenuExpanded: boolean
   setMenuExpanded: (isExpanded: boolean) => void
   onDelete: () => void
@@ -31,7 +31,9 @@ export default function ProjectItemPopupMenu({
   const [showMovePromptDialog, setShowMovePromptDialog] = useState(false)
   const [sharedProjects, setSharedProjects] = useState<Project[]>([])
 
-  const isChain = ProjectItemIsChain(item)
+  const isTable = !IsProjectItem(item)
+  const isChain = !isTable && ProjectItemIsChain(item)
+  const isPrompt = !isTable && !isChain
   const refreshProject = useRefreshProject()
   const [renameItem, duplicateItem, deleteItem] = useProjectItemActions(onDelete)
 
@@ -41,9 +43,10 @@ export default function ProjectItemPopupMenu({
   }
 
   const promptDeleteItem = () => {
-    const label = isChain ? 'chain' : 'prompt'
+    const label = isTable ? 'table' : isChain ? 'chain' : 'prompt'
     if (reference) {
-      const reason = 'name' in reference ? `it is referenced by chain “${reference.name}”` : `has published endpoints`
+      const referenced = isTable ? 'used' : 'referenced'
+      const reason = 'name' in reference ? `it is ${referenced} by chain “${reference.name}”` : `has published endpoints`
       setDialogPrompt({
         title: `Cannot delete ${label} because ${reason}.`,
         confirmTitle: 'OK',
@@ -75,8 +78,8 @@ export default function ProjectItemPopupMenu({
     <>
       <PopupMenu className='w-40' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
         <PopupMenuItem title='Rename…' callback={withDismiss(() => setShowPickNamePrompt(true))} first />
-        <PopupMenuItem title='Duplicate' callback={withDismiss(() => duplicateItem(item))} />
-        {!isChain && <PopupMenuItem title='Copy to Project…' callback={withDismiss(copyPromptToProject)} />}
+        {!isTable && <PopupMenuItem title='Duplicate' callback={withDismiss(() => duplicateItem(item))} />}
+        {isPrompt && <PopupMenuItem title='Copy to Project…' callback={withDismiss(copyPromptToProject)} />}
         <PopupMenuItem separated destructive title='Delete' callback={withDismiss(promptDeleteItem)} last />
       </PopupMenu>
       {showPickNamePrompt && (
@@ -89,7 +92,7 @@ export default function ProjectItemPopupMenu({
           onDismiss={() => setShowPickNamePrompt(false)}
         />
       )}
-      {!isChain && showMovePromptDialog && (
+      {isPrompt && showMovePromptDialog && (
         <MovePromptDialog
           item={item}
           workspaces={allWorkspaces}
