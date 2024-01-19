@@ -43,19 +43,19 @@ export default function TestDataPopupMenu({
   const resetData = isDataEmpty
     ? undefined
     : parentItem.tableID
-    ? resetInputs
-    : () => {
-        setDialogPrompt({
-          title: 'Confirm Reset Test Data',
-          content:
-            'To retain the current test data, select Save below to save it in a reusable object before proceeding. ' +
-            'Resetting the data cannot be undone once confirmed.',
-          confirmTitle: 'Save and Reset',
-          alternativeTitle: 'Reset',
-          callback: () => exportInputs().then(resetInputs),
-          alternativeCallback: resetInputs,
-        })
-      }
+      ? resetInputs
+      : () => {
+          setDialogPrompt({
+            title: 'Confirm Reset Test Data',
+            content:
+              'To retain the current test data, select Save below to save it in a reusable object before proceeding. ' +
+              'Resetting the data cannot be undone once confirmed.',
+            confirmTitle: 'Save and Reset',
+            alternativeTitle: 'Reset',
+            callback: () => exportInputs().then(resetInputs),
+            alternativeCallback: resetInputs,
+          })
+        }
 
   const replaceData = onReplaceData
     ? parentItem.tableID || isDataEmpty

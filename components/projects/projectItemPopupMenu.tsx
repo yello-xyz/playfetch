@@ -46,7 +46,8 @@ export default function ProjectItemPopupMenu({
     const label = isTable ? 'table' : isChain ? 'chain' : 'prompt'
     if (reference) {
       const referenced = isTable ? 'used' : 'referenced'
-      const reason = 'name' in reference ? `it is ${referenced} by chain “${reference.name}”` : `has published endpoints`
+      const reason =
+        'name' in reference ? `it is ${referenced} by chain “${reference.name}”` : `has published endpoints`
       setDialogPrompt({
         title: `Cannot delete ${label} because ${reason}.`,
         confirmTitle: 'OK',

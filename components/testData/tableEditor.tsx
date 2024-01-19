@@ -57,7 +57,7 @@ export default function TableEditor({
       setInputValues({ [DefaultVariableName]: [''] })
       setTimeout(() => persistInputValuesIfNeeded())
     }
-  }, [allVariables, setInputValues])
+  }, [allVariables, setInputValues, persistInputValuesIfNeeded])
 
   const getInputValue = (row: number, variable: string) => GetTableValueForRow(row, variable, inputValues)
   const setInputValue = (row: number, variable: string, value: string) =>
@@ -72,16 +72,23 @@ export default function TableEditor({
       }
     })
 
+  const updateInputValues = (update: (inputValues: InputValues) => InputValues) => {
+    persistInputValuesIfNeeded()
+    setTimeout(() => {
+      setInputValues(inputValues => update(inputValues))
+      setTimeout(() => persistInputValuesIfNeeded())
+    })
+  }
+
   const renameColumn = (name: string, newName: string) => {
     if (name !== newName) {
-      setInputValues(inputValues => {
+      updateInputValues(inputValues => {
         const uniqueName = GetUniqueName(newName, allVariables)
         const entries = Object.entries(inputValues)
         const index = entries.findIndex(([variable]) => variable === name)
         const [_, values] = entries[index]
         return Object.fromEntries([...entries.slice(0, index), [uniqueName, values], ...entries.slice(index + 1)])
       })
-      setTimeout(() => persistInputValuesIfNeeded())
     }
   }
 
@@ -89,50 +96,34 @@ export default function TableEditor({
   const canAddRow = !isRowEmpty(rowCount - 1)
   const canDeleteRow = (row: number) => rowCount > 1 && isRowEmpty(row)
 
-  const addRow = () => {
-    persistInputValuesIfNeeded()
-    setTimeout(() => {
-      setInputValues(inputValues =>
-        Object.fromEntries(Object.entries(inputValues).map(([variable, values]) => [variable, [...values, '']]))
-      )
-    })
-  }
+  const addRow = () =>
+    updateInputValues(inputValues =>
+      Object.fromEntries(Object.entries(inputValues).map(([variable, values]) => [variable, [...values, '']]))
+    )
 
-  const addColumn = () => {
-    persistInputValuesIfNeeded()
-    setTimeout(() => {
-      setInputValues(inputValues => {
-        const name = GetUniqueName(DefaultVariableName, allVariables)
-        return { ...inputValues, [name]: Array.from({ length: rowCount }, _ => '') }
-      })
-      setTimeout(() => persistInputValuesIfNeeded())
+  const addColumn = () =>
+    updateInputValues(inputValues => {
+      const name = GetUniqueName(DefaultVariableName, allVariables)
+      return { ...inputValues, [name]: Array.from({ length: rowCount }, _ => '') }
     })
-  }
 
-  const deleteColumn = (name: string) => {
-    persistInputValuesIfNeeded()
-    setTimeout(() => {
-      setInputValues(inputValues => {
-        const entries = Object.entries(inputValues)
-        const index = entries.findIndex(([variable]) => variable === name)
-        return Object.fromEntries([...entries.slice(0, index), ...entries.slice(index + 1)])
-      })
+  const deleteColumn = (name: string) =>
+    updateInputValues(inputValues => {
+      const entries = Object.entries(inputValues)
+      const index = entries.findIndex(([variable]) => variable === name)
+      return Object.fromEntries([...entries.slice(0, index), ...entries.slice(index + 1)])
     })
-  }
 
   const checkDeleteRow = (event: KeyboardEvent, row: number) => {
     if (canDeleteRow(row) && (event.key === 'Backspace' || event.key === 'Delete')) {
-      persistInputValuesIfNeeded()
-      setTimeout(() => {
-        setInputValues(inputValues =>
-          Object.fromEntries(
-            Object.entries(inputValues).map(([variable, values]) => [
-              variable,
-              [...values.slice(0, row), ...values.slice(row + 1)],
-            ])
-          )
+      updateInputValues(inputValues =>
+        Object.fromEntries(
+          Object.entries(inputValues).map(([variable, values]) => [
+            variable,
+            [...values.slice(0, row), ...values.slice(row + 1)],
+          ])
         )
-      })
+      )
     }
   }
 
