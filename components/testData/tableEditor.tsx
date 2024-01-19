@@ -143,75 +143,77 @@ export default function TableEditor({
     'absolute top-0 right-0 h-8 border-l border-b border-gray-200 w-7 flex items-center justify-center hover:bg-gray-50'
   return allVariables.length > 0 ? (
     <>
-      <div
-        key={allVariables.join(',')}
-        ref={containerRef}
-        className={`${backgroundColor} ${rounded ? 'rounded-t-lg' : ''} relative grid w-full overflow-x-auto shrink-0`}
-        style={{ gridTemplateColumns }}>
-        {gutterColumn && <div className='border-b border-gray-200 cursor-pointer' onClick={onToggleAll} />}
-        {allVariables.map((variable, index) => (
-          <TestDataHeader
-            key={index}
-            variable={variable}
-            variables={variables}
-            staticVariables={staticVariables}
-            onRename={name => renameColumn(variable, name)}
-            leftBorder={!!gutterColumn || index > 0}
-          />
-        ))}
+      <div className='relative w-full h-full'>
         <div
-          className={`${addColumnButtonBaseClass} ${rounded ? 'rounded-tr-lg' : ''} ${backgroundColor} ${cursor}`}
-          onClick={addColumn}>
-          <Icon icon={addIcon} />
-        </div>
-        {Array.from({ length: rowCount }, (_, row) => {
-          const border = (col: number) =>
-            isCellActive(row, col)
-              ? 'border border-blue-400'
-              : `${gutterColumn || col > 0 ? 'border-l' : ''} border-b border-gray-200`
-          const truncate = isRowActive(row) ? '' : `max-h-[46px] ${isRowEmpty(row) ? '' : 'line-clamp-2'}`
-          const iconPosition = (col: number) => (col === allVariables.length - 1 ? 'right-3' : 'right-0.5')
-          const iconOpacity = (col: number) =>
-            isCellActive(row, col) ? 'hover:opacity-100' : 'group-hover:opacity-100'
-          const iconStyle = `${backgroundColor} rounded cursor-pointer opacity-0`
-          return (
-            <Fragment key={row}>
-              {gutterColumn && <div className='px-2 py-1 border-b border-gray-200'>{gutterColumn(row)}</div>}
-              {allVariables.map((variable, col) => (
-                <div className='relative group' key={`${rowCount}-${col}`}>
-                  <Editor
-                    className={`h-full ${border(col)} ${truncate}`}
-                    value={getInputValue(row, variable)}
-                    setValue={value => setInputValue(row, variable, value)}
-                    onBlur={() => {
-                      persistInputValuesIfNeeded()
-                      setActiveCell(activeCell =>
-                        activeCell?.[0] === row && activeCell?.[1] === col ? undefined : activeCell
-                      )
-                    }}
-                    onFocus={() => setActiveCell([row, col])}
-                    onKeyDown={event => checkDeleteRow(event, row)}
-                    bordered={false}
-                    focusOnLoad={false}
-                  />
-                  {!skipExpandButtons && (
-                    <Icon
-                      className={`absolute top-0.5 ${iconPosition(col)} ${iconOpacity(col)} ${iconStyle}`}
-                      icon={expandIcon}
-                      onClick={() => expandCell(row, variable)}
+          key={allVariables.join(',')}
+          ref={containerRef}
+          className={`${backgroundColor} ${rounded ? 'rounded-t-lg' : ''} grid w-full overflow-x-auto shrink-0`}
+          style={{ gridTemplateColumns }}>
+          {gutterColumn && <div className='border-b border-gray-200 cursor-pointer' onClick={onToggleAll} />}
+          {allVariables.map((variable, index) => (
+            <TestDataHeader
+              key={index}
+              variable={variable}
+              variables={variables}
+              staticVariables={staticVariables}
+              onRename={name => renameColumn(variable, name)}
+              leftBorder={!!gutterColumn || index > 0}
+            />
+          ))}
+          <div
+            className={`${addColumnButtonBaseClass} ${rounded ? 'rounded-tr-lg' : ''} ${backgroundColor} ${cursor}`}
+            onClick={addColumn}>
+            <Icon icon={addIcon} />
+          </div>
+          {Array.from({ length: rowCount }, (_, row) => {
+            const border = (col: number) =>
+              isCellActive(row, col)
+                ? 'border border-blue-400'
+                : `${gutterColumn || col > 0 ? 'border-l' : ''} border-b border-gray-200`
+            const truncate = isRowActive(row) ? '' : `max-h-[46px] ${isRowEmpty(row) ? '' : 'line-clamp-2'}`
+            const iconPosition = (col: number) => (col === allVariables.length - 1 ? 'right-3' : 'right-0.5')
+            const iconOpacity = (col: number) =>
+              isCellActive(row, col) ? 'hover:opacity-100' : 'group-hover:opacity-100'
+            const iconStyle = `${backgroundColor} rounded cursor-pointer opacity-0`
+            return (
+              <Fragment key={row}>
+                {gutterColumn && <div className='px-2 py-1 border-b border-gray-200'>{gutterColumn(row)}</div>}
+                {allVariables.map((variable, col) => (
+                  <div className='relative group' key={`${rowCount}-${col}`}>
+                    <Editor
+                      className={`h-full ${border(col)} ${truncate}`}
+                      value={getInputValue(row, variable)}
+                      setValue={value => setInputValue(row, variable, value)}
+                      onBlur={() => {
+                        persistInputValuesIfNeeded()
+                        setActiveCell(activeCell =>
+                          activeCell?.[0] === row && activeCell?.[1] === col ? undefined : activeCell
+                        )
+                      }}
+                      onFocus={() => setActiveCell([row, col])}
+                      onKeyDown={event => checkDeleteRow(event, row)}
+                      bordered={false}
+                      focusOnLoad={false}
                     />
-                  )}
-                </div>
-              ))}
-            </Fragment>
-          )
-        })}
-      </div>
-      <div
-        className={`${addRowButtonBaseClass} ${backgroundColor} ${addRowButtonCursor} ${addRowButtonRounded}`}
-        onClick={canAddRow ? addRow : undefined}>
-        <Icon icon={addIcon} className={canAddRow ? '' : 'opacity-40'} />
-        Add Row
+                    {!skipExpandButtons && (
+                      <Icon
+                        className={`absolute top-0.5 ${iconPosition(col)} ${iconOpacity(col)} ${iconStyle}`}
+                        icon={expandIcon}
+                        onClick={() => expandCell(row, variable)}
+                      />
+                    )}
+                  </div>
+                ))}
+              </Fragment>
+            )
+          })}
+        </div>
+        <div
+          className={`${addRowButtonBaseClass} ${backgroundColor} ${addRowButtonCursor} ${addRowButtonRounded}`}
+          onClick={canAddRow ? addRow : undefined}>
+          <Icon icon={addIcon} className={canAddRow ? '' : 'opacity-40'} />
+          Add Row
+        </div>
       </div>
     </>
   ) : null
