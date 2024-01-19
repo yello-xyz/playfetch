@@ -54,7 +54,8 @@ export default function TableEditor({
 
   useEffect(() => {
     if (allVariables.length === 0) {
-      setInputValues({ [DefaultVariableName]: [] })
+      setInputValues({ [DefaultVariableName]: [''] })
+      setTimeout(() => persistInputValuesIfNeeded())
     }
   }, [allVariables, setInputValues])
 
