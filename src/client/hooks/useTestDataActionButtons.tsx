@@ -145,26 +145,33 @@ function TestDataPopupMenu({
         }
       : callback
 
+  const exportInputs = async () => {
+    const tableID = ProjectItemIsChain(parentItem)
+      ? await api.exportChainInputs(parentItem.id)
+      : await api.exportPromptInputs(parentItem.id)
+    refreshProject()
+    return tableID
+  }
+
   const exportData = parentItem.tableID
     ? undefined
-    : async () => {
-        const tableID = ProjectItemIsChain(parentItem)
-          ? await api.exportChainInputs(parentItem.id)
-          : await api.exportPromptInputs(parentItem.id)
-        refreshProject()
-        router.push(TableRoute(parentItem.projectID, tableID))
-      }
+    : () => exportInputs().then(tableID => router.push(TableRoute(parentItem.projectID, tableID)))
+
+  const resetInputs = () =>
+    (ProjectItemIsChain(parentItem) ? api.resetChainInputs(parentItem.id) : api.resetPromptInputs(parentItem.id)).then(
+      refreshActiveItem
+    )
 
   const resetData = () => {
     setDialogPrompt({
-      // TODO allow to save and reset
-      title: 'Are you sure you want to delete the existing test data? This action cannot be undone.',
-      callback: () =>
-        (ProjectItemIsChain(parentItem)
-          ? api.resetChainInputs(parentItem.id)
-          : api.resetPromptInputs(parentItem.id)
-        ).then(refreshActiveItem),
-      destructive: true,
+      title: 'Confirm Reset Test Data',
+      content:
+        'To retain the current test data, select Save below to save it in a reusable object before proceeding. ' +
+        'Resetting the data cannot be undone once confirmed.',
+      confirmTitle: 'Save and Reset',
+      alternativeTitle: 'Reset',
+      callback: () => exportInputs().then(resetInputs),
+      alternativeCallback: resetInputs,
     })
   }
 
