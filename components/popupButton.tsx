@@ -56,12 +56,12 @@ export function CustomPopupButton({
   const togglePopup = disabled
     ? undefined
     : () => {
-        const iconRect = buttonRef.current?.getBoundingClientRect()!
+        const buttonRect = buttonRef.current?.getBoundingClientRect()!
         onSetPopup({
-          top: !popUpAbove ? iconRect.y + 48 : undefined,
-          left: (!alignRight && !popUpAbove) || fixedWidth ? iconRect.x : undefined,
-          bottom: popUpAbove ? iconRect.y - 6 : undefined,
-          right: alignRight || popUpAbove || fixedWidth ? iconRect.x + iconRect.width : undefined,
+          top: !popUpAbove ? buttonRect.y + 48 : undefined,
+          left: (!alignRight && !popUpAbove) || fixedWidth ? buttonRect.x : undefined,
+          bottom: popUpAbove ? buttonRect.y - 6 : undefined,
+          right: alignRight || popUpAbove || fixedWidth ? buttonRect.x + buttonRect.width : undefined,
         })
       }
 

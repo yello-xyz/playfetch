@@ -5,11 +5,13 @@ import IconButton from './iconButton'
 
 export default function GlobalPopupMenu<T>({
   icon,
+  iconClassName = '',
   loadPopup,
   selectedCell = false,
   popUpAbove = false,
 }: {
   icon: StaticImageData
+  iconClassName?: string
   loadPopup: () => [GlobalPopupRender<T>, T]
   selectedCell?: boolean
   popUpAbove?: boolean
@@ -31,7 +33,7 @@ export default function GlobalPopupMenu<T>({
   return (
     <div ref={iconRef}>
       <IconButton
-        className='min-w-[24px]'
+        className={`${iconClassName} min-w-[24px]`}
         icon={icon}
         onClick={togglePopup}
         hoverType={{ background: selectedCell ? 'hover:bg-blue-50' : 'hover:bg-gray-100' }}
