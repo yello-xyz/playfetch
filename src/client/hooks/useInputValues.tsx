@@ -3,6 +3,9 @@ import { ActiveChain, ActivePrompt, ActiveTable, InputValues, IsProjectItem } fr
 import api from '@/src/client/api'
 import useInitialState from './useInitialState'
 
+const sameValues = (a: string[] | undefined, b: string[] | undefined) =>
+  (a ?? []).length === (b ?? []).length && (a ?? []).join(',') === (b ?? []).join(',')
+
 export default function useInputValues(
   parent: ActivePrompt | ActiveChain | ActiveTable,
   context: string
@@ -15,12 +18,12 @@ export default function useInputValues(
       setOriginalInputValues(originalInputValues => {
         const parentID = IsProjectItem(parent) ? parent.tableID ?? parent.id : parent.id
         for (const [variable, inputs] of Object.entries(inputValues)) {
-          if (inputs.join(',') !== (originalInputValues[variable] ?? []).join(',')) {
+          if (!sameValues(inputs, originalInputValues[variable])) {
             api.updateInputValues(parentID, variable, inputs)
           }
         }
         for (const [variable, inputs] of Object.entries(originalInputValues)) {
-          if (!(variable in inputValues) && inputs.join(',') !== '') {
+          if (!(variable in inputValues) && !sameValues(inputs, [])) {
             api.deleteInputValues(parentID, variable)
           }
         }
