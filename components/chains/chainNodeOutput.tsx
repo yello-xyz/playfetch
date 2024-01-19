@@ -134,7 +134,7 @@ export default function ChainNodeOutput({
     ...partialRuns,
   ]
 
-  const testDataActionButtons = useTestDataActionButtons(
+  const [testDataActionButtons, importTestDataButton] = useTestDataActionButtons(
     chain,
     variables,
     staticVariables,
@@ -159,6 +159,7 @@ export default function ChainNodeOutput({
               persistInputValuesIfNeeded={persistInputValuesIfNeeded}
               testConfig={testConfig}
               setTestConfig={setTestConfig}
+              importButton={importTestDataButton}
             />
           </div>
         ) : (

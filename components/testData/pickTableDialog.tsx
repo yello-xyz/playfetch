@@ -6,11 +6,15 @@ import tableIcon from '@/public/table.svg'
 import checkIcon from '@/public/check.svg'
 
 export default function PickTableDialog({
+  title,
+  confirmTitle,
   tables,
   initialTable,
   onConfirm,
   onDismiss,
 }: {
+  title: string
+  confirmTitle: string
   tables: Table[]
   initialTable?: Table
   onConfirm: (tableID: number) => void
@@ -19,8 +23,8 @@ export default function PickTableDialog({
   const [selectedTable, setSelectedTable] = useState(initialTable)
 
   const dialogPrompt: DialogPrompt = {
-    title: 'Replace Test Data',
-    confirmTitle: 'Replace',
+    title,
+    confirmTitle,
     disabled: selectedTable?.id === initialTable?.id,
     callback: () => selectedTable && onConfirm(selectedTable.id),
   }

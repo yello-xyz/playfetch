@@ -11,6 +11,7 @@ import TestDataPopup, { TestDataPopupProps } from './testDataPopup'
 import TestDataPopupMenu, { TestDataPopupMenuProps, useReplaceInputs } from './testDataPopupMenu'
 import PickTableDialog from './pickTableDialog'
 import GlobalPopupMenu from '../globalPopupMenu'
+import Button from '../button'
 
 export default function useTestDataActionButtons(
   parentItem: Prompt | Chain,
@@ -22,7 +23,6 @@ export default function useTestDataActionButtons(
   testConfig: TestConfig,
   setTestConfig: (testConfig: TestConfig) => void
 ) {
-  const [showPickTableDialog, setShowPickTableDialog] = useState(false)
   const setPopup = useGlobalPopup<TestDataPopupProps>()
   const activeProject = useActiveProject()
   const replaceInputs = useReplaceInputs(parentItem)
@@ -51,10 +51,11 @@ export default function useTestDataActionButtons(
   const tables = activeProject.tables
   const table = tables.find(table => table.id === parentItem.tableID)
   const isDataEmpty = Object.values(inputValues).every(value => value.length === 0 || value[0] === '')
-  const canReplaceData = tables.length > 0 && (!parentItem.tableID || tables.length > 1)
-  const onReplaceData = canReplaceData ? () => setShowPickTableDialog(true) : undefined
+  const canReplaceData = tables.length > 0 && (!table || tables.length > 1)
+  const onReplaceData = canReplaceData ? () => setShowReplaceDialog(true) : undefined
   const replaceData = (tableID: number) => replaceInputs(tableID)
 
+  const [showReplaceDialog, setShowReplaceDialog] = useState(false)
   const actionButtons = (className = '') => (
     <div className={`${className} relative grow flex items-center gap-1`}>
       <div className='flex flex-1'>
@@ -62,18 +63,37 @@ export default function useTestDataActionButtons(
       </div>
       <IconButton icon={expandIcon} onClick={expandTestData} />
       <GlobalPopupMenu icon={dotsIcon} iconClassName='rotate-90' loadPopup={showPopupMenu} />
-      {showPickTableDialog && (
+      {showReplaceDialog && (
         <PickTableDialog
+          title='Replace Test Data'
+          confirmTitle='Replace'
           tables={tables}
           initialTable={table}
-          onDismiss={() => setShowPickTableDialog(false)}
+          onDismiss={() => setShowReplaceDialog(false)}
           onConfirm={replaceData}
         />
       )}
     </div>
   )
 
-  return actionButtons
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const importButton = () => (
+    <Button disabled={!canReplaceData} type='secondary' onClick={() => setShowImportDialog(true)}>
+      Import Test Data
+      {showImportDialog && (
+        <PickTableDialog
+          title='Import Test Data'
+          confirmTitle='Import'
+          tables={tables}
+          initialTable={table}
+          onDismiss={() => setShowImportDialog(false)}
+          onConfirm={replaceData}
+        />
+      )}
+    </Button>
+  )
+
+  return [actionButtons, importButton] as const
 }
 
 function LinkedTableItem({ table, onReplaceData }: { table?: Table; onReplaceData?: () => void }) {

@@ -7,6 +7,7 @@ import RangeInput from '../rangeInput'
 import Checkbox from '../checkbox'
 import TableEditor, { GetTableRowCount, GetTableValueForRow, HasTableData } from './tableEditor'
 import Button from '../button'
+import PickTableDialog from './pickTableDialog'
 
 export default function TestDataPane({
   variables,
@@ -16,6 +17,7 @@ export default function TestDataPane({
   persistInputValuesIfNeeded,
   testConfig,
   setTestConfig,
+  importButton,
   asModalPopup = false,
   skipButtonBorder = false,
 }: {
@@ -26,6 +28,7 @@ export default function TestDataPane({
   persistInputValuesIfNeeded: () => void
   testConfig: TestConfig
   setTestConfig: (testConfig: TestConfig) => void
+  importButton?: () => ReactNode
   asModalPopup?: boolean
   skipButtonBorder?: boolean
 }) {
@@ -123,7 +126,11 @@ export default function TestDataPane({
       )}
     </div>
   ) : (
-    <EmptyTestData bottomPadding={asModalPopup ? 'pb-4' : ''} onStartFromScratch={() => setStartFromScratch(true)} />
+    <EmptyTestData
+      bottomPadding={asModalPopup ? 'pb-4' : ''}
+      onStartFromScratch={() => setStartFromScratch(true)}
+      importButton={importButton}
+    />
   )
 }
 
@@ -156,21 +163,26 @@ const testConfigWithAutoRespondMode = (testConfig: TestConfig, mode: DynamicMode
 const EmptyTestData = ({
   bottomPadding,
   onStartFromScratch,
+  importButton,
 }: {
   bottomPadding: string
   onStartFromScratch: () => void
-}) => (
-  <div className={`${bottomPadding} w-full px-4 pt-4 text-gray-700`}>
-    <div className='flex flex-col items-center justify-center gap-1 p-6 border border-gray-200 rounded-lg bg-gray-25'>
-      <span className='font-medium'>Create Test Data</span>
-      <span className='text-sm text-center text-gray-400'>
-        Test data allows you to test different inputs to your prompt.
-      </span>
-      <span className='mt-2'>
-        <Button type='secondary' onClick={onStartFromScratch}>
-          Start from scratch
-        </Button>
-      </span>
+  importButton?: () => ReactNode
+}) => {
+  return (
+    <div className={`${bottomPadding} w-full px-4 pt-4 text-gray-700`}>
+      <div className='flex flex-col items-center justify-center gap-1 p-6 border border-gray-200 rounded-lg bg-gray-25'>
+        <span className='font-medium'>Create Test Data</span>
+        <span className='text-sm text-center text-gray-400'>
+          Test data allows you to test different inputs to your prompt.
+        </span>
+        <span className='flex items-center gap-2 mt-2'>
+          {importButton && importButton()}
+          <Button type='secondary' onClick={onStartFromScratch}>
+            Start from scratch
+          </Button>
+        </span>
+      </div>
     </div>
-  </div>
-)
+  )
+}

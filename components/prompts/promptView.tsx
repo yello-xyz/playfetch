@@ -62,7 +62,7 @@ export default function PromptView({
   const variables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, true)
   const staticVariables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, false)
 
-  const testDataActionButtons = useTestDataActionButtons(
+  const [testDataActionButtons, importTestDataButton] = useTestDataActionButtons(
     prompt,
     variables,
     staticVariables,
@@ -136,6 +136,7 @@ export default function PromptView({
               persistInputValuesIfNeeded={persistInputValuesIfNeeded}
               testConfig={testConfig}
               setTestConfig={setTestConfig}
+              importButton={importTestDataButton}
               skipButtonBorder
             />
           </Collapsible>
