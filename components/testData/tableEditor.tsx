@@ -150,7 +150,7 @@ export default function TableEditor({
     'absolute top-0 right-0 h-8 border-l border-b border-gray-200 w-7 flex items-center justify-center hover:bg-gray-50'
   return allVariables.length > 0 ? (
     <>
-      <div className='relative w-full h-full'>
+      <div className='relative w-full'>
         <div
           key={allVariables.join(',')}
           ref={containerRef}
