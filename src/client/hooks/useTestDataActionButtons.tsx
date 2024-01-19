@@ -29,8 +29,6 @@ export default function useTestDataActionButtons(
   const [isMenuExpanded, setMenuExpanded] = useState(false)
   const setPopup = useGlobalPopup<TestDataPopupProps>()
   const activeProject = useActiveProject()
-  const table = activeProject.tables.find(table => table.id === parentItem.tableID)
-  const isDataEmpty = Object.values(inputValues).every(value => value.length === 0 || value[0] === '')
 
   const expandTestData = () => {
     setPopup(
@@ -48,11 +46,24 @@ export default function useTestDataActionButtons(
     )
   }
 
+  const tables = activeProject.tables
+  const table = tables.find(table => table.id === parentItem.tableID)
+  const isDataEmpty = Object.values(inputValues).every(value => value.length === 0 || value[0] === '')
+  const canReplaceData = tables.length > 0 && (!parentItem.tableID || tables.length > 1)
+  const onReplaceData = canReplaceData ? () => {} : undefined
+
   const actionButtons = (className = '') => (
     <div className={`${className} relative grow flex items-center gap-1`}>
       <div className='flex flex-1'>
         {table && (
-          <div className='flex items-center gap-1 pl-1 pr-2 bg-gray-100 rounded'>
+          <div
+            className={`flex items-center gap-1 pl-1 pr-2 bg-gray-100 rounded ${
+              onReplaceData ? 'cursor-pointer hover:bg-gray-200' : ''
+            }`}
+            onClick={event => {
+              event.stopPropagation()
+              onReplaceData
+            }}>
             <Icon icon={tableIcon} />
             {table.name}
           </div>
@@ -62,7 +73,7 @@ export default function useTestDataActionButtons(
       <IconButton icon={dotsIcon} className='rotate-90' onClick={() => setMenuExpanded(!isMenuExpanded)} />
       {isMenuExpanded && (
         <div className='absolute shadow-sm -right-1 top-8'>
-          <TestDataPopupMenu {...{ parentItem, isDataEmpty, isMenuExpanded, setMenuExpanded }} />
+          <TestDataPopupMenu {...{ parentItem, isDataEmpty, onReplaceData, isMenuExpanded, setMenuExpanded }} />
         </div>
       )}
     </div>
@@ -127,11 +138,13 @@ const TestDataPopup = ({
 function TestDataPopupMenu({
   parentItem,
   isDataEmpty,
+  onReplaceData,
   isMenuExpanded,
   setMenuExpanded,
 }: {
   parentItem: Prompt | Chain
   isDataEmpty: boolean
+  onReplaceData?: () => void
   isMenuExpanded: boolean
   setMenuExpanded: (isExpanded: boolean) => void
 }) {
@@ -183,9 +196,28 @@ function TestDataPopupMenu({
         })
       }
 
+  const replaceData = onReplaceData
+    ? parentItem.tableID || isDataEmpty
+      ? onReplaceData
+      : () => {
+          setDialogPrompt({
+            title: 'Confirm Replace Test Data',
+            content:
+              'Replacing the test data will overwrite the existing data. ' +
+              'To retain the current test data, select Save below to save it in a reusable object before proceeding. ' +
+              'Replacing the data cannot be undone once confirmed.',
+            confirmTitle: 'Save and Replace',
+            alternativeTitle: 'Replace',
+            callback: () => exportInputs().then(onReplaceData),
+            alternativeCallback: onReplaceData,
+          })
+        }
+    : undefined
+
   return (
     <PopupMenu className='w-40' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
-      <PopupMenuItem title='Save Test Data' callback={withDismiss(exportData)} first />
+      <PopupMenuItem title='Replace Test Data' callback={withDismiss(replaceData)} first />
+      <PopupMenuItem title='Save Test Data' callback={withDismiss(exportData)} />
       <PopupMenuItem
         title='Reset Test Data'
         callback={withDismiss(resetData)}
