@@ -157,7 +157,8 @@ export default function TableEditor({
               variables={variables}
               staticVariables={staticVariables}
               onRename={name => renameColumn(variable, name)}
-              leftBorder={!!gutterColumn || index > 0}
+              isFirst={!gutterColumn && index === 0}
+              isLast={index === allVariables.length - 1}
             />
           ))}
           <div

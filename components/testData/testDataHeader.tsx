@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { EditableItem } from '../headerItem'
+import chevronIcon from '@/public/chevron.svg'
+import GlobalPopupMenu from '../globalPopupMenu'
 
 export default function TestDataHeader({
   variable,
@@ -7,14 +9,16 @@ export default function TestDataHeader({
   staticVariables,
   onRename,
   grow,
-  leftBorder,
+  isFirst,
+  isLast,
 }: {
   variable: string
   variables: string[]
   staticVariables: string[]
   onRename?: (name: string) => void
   grow?: boolean
-  leftBorder?: boolean
+  isFirst?: boolean
+  isLast?: boolean
 }) {
   const [label, setLabel] = useState<string>()
   const submitRename = (name: string) => {
@@ -31,7 +35,7 @@ export default function TestDataHeader({
 
   return (
     <div
-      className={`${baseClass} ${leftBorder ? 'border-l' : ''} ${grow ? 'grow' : ''}  ${bgColor}`}
+      className={`${baseClass} ${isFirst ? '' : 'border-l'} ${grow ? 'grow' : ''}  ${bgColor}`}
       onClick={isInUse ? undefined : () => setLabel(variable)}>
       <span className={`flex-1 mr-6 font-medium whitespace-nowrap text-ellipsis ${textColor}`}>
         {label !== undefined ? (
