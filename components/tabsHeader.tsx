@@ -11,7 +11,6 @@ export function SingleTabHeader({
   onUpdateLabel,
   draggableTab,
   dropTarget,
-  dropShadow,
   children,
 }: {
   label: string
@@ -20,7 +19,6 @@ export function SingleTabHeader({
   onUpdateLabel?: (label: string) => void | Promise<void>
   draggableTab?: boolean
   dropTarget?: string
-  dropShadow?: string
   children?: ReactNode
 }) {
   return (
@@ -30,8 +28,7 @@ export function SingleTabHeader({
       secondaryLabel={secondaryLabel}
       onUpdateLabel={onUpdateLabel}
       draggableTabs={draggableTab}
-      dropTarget={dropTarget}
-      dropShadow={dropShadow}>
+      dropTarget={dropTarget}>
       {children}
     </TabsHeader>
   )
@@ -46,7 +43,6 @@ export default function TabsHeader<T extends string>({
   onUpdateLabel,
   draggableTabs,
   dropTarget,
-  dropShadow,
   children,
 }: {
   tabs: T[]
@@ -57,7 +53,6 @@ export default function TabsHeader<T extends string>({
   onUpdateLabel?: (label: string) => void | Promise<void>
   draggableTabs?: boolean
   dropTarget?: string
-  dropShadow?: string
   children?: ReactNode
 }) {
   const [label, setLabel] = useState<string>()
@@ -67,7 +62,7 @@ export default function TabsHeader<T extends string>({
   }
 
   return (
-    <CustomHeader dropTarget={dropTarget} dropShadow={dropShadow}>
+    <CustomHeader dropTarget={dropTarget}>
       <div className='flex items-center gap-0.5'>
         {icon && label === undefined && <Icon className='-mr-1.5' icon={icon} />}
         {label !== undefined ? (
@@ -96,22 +91,15 @@ export default function TabsHeader<T extends string>({
   )
 }
 
-export function CustomHeader({
-  children,
-  dropTarget,
-  dropShadow = 'drop-shadow-[0_4px_14px_rgba(0,0,0,0.03)]',
-}: {
-  children?: ReactNode
-  dropTarget?: string
-  dropShadow?: string
-}) {
+export function CustomHeader({ children, dropTarget }: { children?: ReactNode; dropTarget?: string }) {
   const { isOver, setNodeRef } = useDroppable({ id: dropTarget ?? '', disabled: !dropTarget })
   const color = isOver ? 'bg-gray-50' : 'bg-white'
+  const shadow = 'drop-shadow-[0_4px_14px_rgba(0,0,0,0.03)]'
 
   return (
     <div
       ref={setNodeRef}
-      className={`${color} ${dropShadow} flex items-center justify-between gap-2 pl-2 pr-1 border-b border-gray-200`}>
+      className={`${color} ${shadow} flex items-center justify-between gap-2 pl-2 pr-1 border-b border-gray-200 `}>
       {children}
     </div>
   )
