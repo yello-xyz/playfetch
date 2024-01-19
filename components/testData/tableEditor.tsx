@@ -109,6 +109,17 @@ export default function TableEditor({
     })
   }
 
+  const deleteColumn = (name: string) => {
+    persistInputValuesIfNeeded()
+    setTimeout(() => {
+      setInputValues(inputValues => {
+        const entries = Object.entries(inputValues)
+        const index = entries.findIndex(([variable]) => variable === name)
+        return Object.fromEntries([...entries.slice(0, index), ...entries.slice(index + 1)])
+      })
+    })
+  }
+
   const checkDeleteRow = (event: KeyboardEvent, row: number) => {
     if (canDeleteRow(row) && (event.key === 'Backspace' || event.key === 'Delete')) {
       persistInputValuesIfNeeded()
@@ -157,6 +168,7 @@ export default function TableEditor({
               variables={variables}
               staticVariables={staticVariables}
               onRename={name => renameColumn(variable, name)}
+              onDelete={() => deleteColumn(variable)}
               isFirst={!gutterColumn && index === 0}
               isLast={index === allVariables.length - 1}
             />
