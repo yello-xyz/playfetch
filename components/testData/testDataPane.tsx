@@ -1,4 +1,4 @@
-import { Dispatch, ReactNode, SetStateAction } from 'react'
+import { Dispatch, ReactNode, SetStateAction, useState } from 'react'
 import { InputValues, TestConfig } from '@/types'
 import { SelectInputRows } from '@/src/client/inputRows'
 import DropdownMenu from '../dropdownMenu'
@@ -60,8 +60,9 @@ export default function TestDataPane({
   const dynamicVariables = variables.filter(variable => !staticVariables.includes(variable))
   const [_, dynamicInputRows] = SelectInputRows(inputValues, dynamicVariables, testConfig)
   const shouldShowOptions = !asModalPopup && dynamicInputRows.length > 0
+  const [startFromScratch, setStartFromScratch] = useState(false)
 
-  return HasTableData(variables, inputValues) ? (
+  return HasTableData(variables, inputValues) || startFromScratch ? (
     <div className='flex flex-col items-stretch flex-1 h-full overflow-y-auto'>
       <TableEditor
         inputValues={inputValues}
@@ -118,7 +119,7 @@ export default function TestDataPane({
       )}
     </div>
   ) : (
-    <EmptyTestData bottomPadding={asModalPopup ? 'pb-4' : ''} />
+    <EmptyTestData bottomPadding={asModalPopup ? 'pb-4' : ''} onStartFromScratch={() => setStartFromScratch(true)} />
   )
 }
 
@@ -148,7 +149,13 @@ const testConfigWithAutoRespondMode = (testConfig: TestConfig, mode: DynamicMode
   maxResponses: mode === 'manual' ? undefined : testConfig.maxResponses ?? DefaultMaxResponses,
 })
 
-const EmptyTestData = ({ bottomPadding}: {bottomPadding: string}) => (
+const EmptyTestData = ({
+  bottomPadding,
+  onStartFromScratch,
+}: {
+  bottomPadding: string
+  onStartFromScratch: () => void
+}) => (
   <div className={`${bottomPadding} w-full px-4 pt-4 text-gray-700`}>
     <div className='flex flex-col items-center justify-center gap-1 p-6 border border-gray-200 rounded-lg bg-gray-25'>
       <span className='font-medium'>Create Test Data</span>
@@ -156,7 +163,7 @@ const EmptyTestData = ({ bottomPadding}: {bottomPadding: string}) => (
         Test data allows you to test different inputs to your prompt.
       </span>
       <span className='mt-2'>
-        <Button type='secondary' onClick={() => {}}>
+        <Button type='secondary' onClick={onStartFromScratch}>
           Start from scratch
         </Button>
       </span>
