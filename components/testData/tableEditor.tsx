@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, KeyboardEvent, ReactNode, SetStateAction, useRef, useState } from 'react'
+import { Dispatch, Fragment, KeyboardEvent, ReactNode, SetStateAction, useEffect, useRef, useState } from 'react'
 import addIcon from '@/public/add.svg'
 import expandIcon from '@/public/expand.svg'
 import Icon from '../icon'
@@ -12,10 +12,9 @@ const DefaultVariableName = 'New Variable'
 
 const getAllVariablesAndRowCount = (variables: string[], inputValues: InputValues) => {
   const allVariables = [...variables, ...Object.keys(inputValues).filter(input => !variables.includes(input))]
-  const paddedVariables = allVariables.length > 0 ? allVariables : [DefaultVariableName]
-  const rowCount = Math.max(1, ...paddedVariables.map(variable => inputValues[variable]?.length ?? 0))
+  const rowCount = Math.max(1, ...allVariables.map(variable => inputValues[variable]?.length ?? 0))
 
-  return [paddedVariables, rowCount] as const
+  return [allVariables, rowCount] as const
 }
 
 export const GetTableRowCount = (variables: string[], inputValues: InputValues) => {
@@ -52,6 +51,12 @@ export default function TableEditor({
   const containerRef = useRef<HTMLDivElement>(null)
 
   const [allVariables, rowCount] = getAllVariablesAndRowCount(variables, inputValues)
+
+  useEffect(() => {
+    if (allVariables.length === 0) {
+      setInputValues({ [DefaultVariableName]: [] })
+    }
+  }, [allVariables, setInputValues])
 
   const getInputValue = (row: number, variable: string) => GetTableValueForRow(row, variable, inputValues)
   const setInputValue = (row: number, variable: string, value: string) =>
@@ -136,7 +141,7 @@ export default function TableEditor({
   const addRowButtonRounded = rounded ? 'rounded-b-lg' : ''
   const addColumnButtonBaseClass =
     'absolute top-0 right-0 h-8 border-l border-b border-gray-200 w-7 flex items-center justify-center hover:bg-gray-50'
-  return (
+  return allVariables.length > 0 ? (
     <>
       <div
         key={allVariables.join(',')}
@@ -209,5 +214,5 @@ export default function TableEditor({
         Add Row
       </div>
     </>
-  )
+  ) : null
 }
