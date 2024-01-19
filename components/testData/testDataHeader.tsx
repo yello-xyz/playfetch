@@ -5,8 +5,8 @@ import GlobalPopupMenu from '../globalPopupMenu'
 import PopupMenu, { PopupContent, PopupMenuItem } from '../popupMenu'
 import { WithDismiss } from '@/src/client/context/globalPopupContext'
 import PickNameDialog from '../pickNameDialog'
-import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 import IconButton from '../iconButton'
+import ModalDialog, { DialogPrompt } from '../modalDialog'
 
 export default function TestDataHeader({
   variable,
@@ -29,8 +29,8 @@ export default function TestDataHeader({
   isLast?: boolean
   inModal?: boolean
 }) {
-  const setDialogPrompt = useModalDialogPrompt()
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
+  const [showDeleteDialogPrompt, setShowDeleteDialogPrompt] = useState(false)
   const [label, setLabel] = useState<string>()
   const submitRename = (name: string) => {
     onRename?.(name)
@@ -38,13 +38,13 @@ export default function TestDataHeader({
   }
 
   const renameColumn = () => setShowPickNamePrompt(true)
+  const deleteColumn = () => setShowDeleteDialogPrompt(true)
 
-  const deleteColumn = () =>
-    setDialogPrompt({
-      title: 'Delete table column? This action cannot be undone.',
-      destructive: true,
-      callback: () => onDelete?.(),
-    })
+  const deleteDialogPrompt: DialogPrompt = {
+    title: 'Delete table column? This action cannot be undone.',
+    destructive: true,
+    callback: () => onDelete?.()
+  }
 
   const showPopupMenu = (): [typeof ModalTestDataHeaderPopupMenu, TestDataHeaderPopupMenuProps] => [
     ModalTestDataHeaderPopupMenu,
@@ -93,6 +93,9 @@ export default function TestDataHeader({
           onConfirm={name => onRename?.(name)}
           onDismiss={() => setShowPickNamePrompt(false)}
         />
+      )}
+      {showDeleteDialogPrompt && (
+        <ModalDialog prompt={deleteDialogPrompt} onDismiss={() => setShowDeleteDialogPrompt(false)}></ModalDialog>
       )}
     </div>
   )
