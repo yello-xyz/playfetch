@@ -9,7 +9,7 @@ import closeIcon from '@/public/close.svg'
 import expandIcon from '@/public/expand.svg'
 import dotsIcon from '@/public/dots.svg'
 import api from '../api'
-import { useRefreshProject } from '../context/projectContext'
+import { useRefreshActiveItem, useRefreshProject } from '../context/projectContext'
 import { useRouter } from 'next/router'
 import { TableRoute } from '@/src/common/clientRoute'
 
@@ -121,28 +121,35 @@ function TestDataPopupMenu({
 }) {
   const router = useRouter()
   const refreshProject = useRefreshProject()
+  const refreshActiveItem = useRefreshActiveItem()
 
-  const withDismiss = (callback?: () => void) => callback ? () => {
-    setMenuExpanded(false)
-    callback()
-  } : callback
+  const withDismiss = (callback?: () => void) =>
+    callback
+      ? () => {
+          setMenuExpanded(false)
+          callback()
+        }
+      : callback
 
-  const exportTable = parentItem.tableID ? undefined : async () => {
-    const tableID = ProjectItemIsChain(parentItem)
-      ? await api.exportChainInputs(parentItem.id)
-      : await api.exportPromptInputs(parentItem.id)
-    refreshProject()
-    router.push(TableRoute(parentItem.projectID, tableID))
-  }
+  const exportData = parentItem.tableID
+    ? undefined
+    : async () => {
+        const tableID = ProjectItemIsChain(parentItem)
+          ? await api.exportChainInputs(parentItem.id)
+          : await api.exportPromptInputs(parentItem.id)
+        refreshProject()
+        router.push(TableRoute(parentItem.projectID, tableID))
+      }
+
+  const resetData = () =>
+    (ProjectItemIsChain(parentItem) ? api.resetChainInputs(parentItem.id) : api.resetPromptInputs(parentItem.id)).then(
+      refreshActiveItem
+    )
 
   return (
     <PopupMenu className='w-40' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
-      <PopupMenuItem
-        title='Save Test Data'
-        callback={withDismiss(exportTable)}
-        first
-        last
-      />
+      <PopupMenuItem title='Save Test Data' callback={withDismiss(exportData)} first />
+      <PopupMenuItem title='Reset Test Data' callback={withDismiss(resetData)} separated last />
     </PopupMenu>
   )
 }
