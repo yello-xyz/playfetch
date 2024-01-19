@@ -12,6 +12,7 @@ import api from '../api'
 import { useRefreshActiveItem, useRefreshProject } from '../context/projectContext'
 import { useRouter } from 'next/router'
 import { TableRoute } from '@/src/common/clientRoute'
+import useModalDialogPrompt from '../context/modalDialogContext'
 
 export default function useTestDataActionButtons(
   parentItem: Prompt | Chain,
@@ -122,6 +123,7 @@ function TestDataPopupMenu({
   const router = useRouter()
   const refreshProject = useRefreshProject()
   const refreshActiveItem = useRefreshActiveItem()
+  const setDialogPrompt = useModalDialogPrompt()
 
   const withDismiss = (callback?: () => void) =>
     callback
@@ -141,15 +143,23 @@ function TestDataPopupMenu({
         router.push(TableRoute(parentItem.projectID, tableID))
       }
 
-  const resetData = () =>
-    (ProjectItemIsChain(parentItem) ? api.resetChainInputs(parentItem.id) : api.resetPromptInputs(parentItem.id)).then(
-      refreshActiveItem
-    )
+  const resetData = () => {
+    setDialogPrompt({
+      // TODO allow to save and reset
+      title: 'Are you sure you want to delete the existing test data? This action cannot be undone.',
+      callback: () =>
+        (ProjectItemIsChain(parentItem)
+          ? api.resetChainInputs(parentItem.id)
+          : api.resetPromptInputs(parentItem.id)
+        ).then(refreshActiveItem),
+      destructive: true,
+    })
+  }
 
   return (
     <PopupMenu className='w-40' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
       <PopupMenuItem title='Save Test Data' callback={withDismiss(exportData)} first />
-      <PopupMenuItem title='Reset Test Data' callback={withDismiss(resetData)} separated last />
+      <PopupMenuItem title='Reset Test Data' callback={withDismiss(resetData)} separated destructive last />
     </PopupMenu>
   )
 }
