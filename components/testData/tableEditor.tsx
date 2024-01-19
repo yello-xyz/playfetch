@@ -25,6 +25,9 @@ export const GetTableRowCount = (variables: string[], inputValues: InputValues) 
 export const GetTableValueForRow = (row: number, variable: string, inputValues: InputValues) =>
   inputValues[variable]?.[row] ?? ''
 
+export const HasTableData = (variables: string[], inputValues: InputValues) =>
+  variables.length > 0 || Object.keys(inputValues).length > 0
+
 export default function TableEditor({
   inputValues,
   setInputValues,

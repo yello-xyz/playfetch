@@ -15,7 +15,7 @@ import { useCheckModelAvailable } from '@/src/client/context/providerContext'
 import Collapsible from '../collapsible'
 import PromptTabs from './promptTabs'
 import { usePromptTabs } from '@/src/client/context/userPresetsContext'
-import { GetTableRowCount } from '../testData/tableEditor'
+import { GetTableRowCount, HasTableData } from '../testData/tableEditor'
 import useTestDataActionButtons from '@/components/testData/useTestDataActionButtons'
 
 export default function PromptView({
@@ -77,9 +77,10 @@ export default function PromptView({
   useEffect(() => setPreferredPromptTabsWidth(promptTabs.length > 1 ? '66%' : '50%'), [promptTabs])
   const minWidth = 400
   const minTopPaneHeight = 120
+  const hasTestData = HasTableData(variables, inputValues)
   const rowCount = GetTableRowCount(variables, inputValues)
-  const minBottomPaneHeight = testDataExpanded ? Math.min(240, 150 + rowCount * 33) : 84
-  const maxBottomPaneHeight = testDataExpanded ? Infinity : minBottomPaneHeight
+  const minBottomPaneHeight = testDataExpanded ? hasTestData ? Math.min(240, 150 + rowCount * 33) : 224 : 84
+  const maxBottomPaneHeight = testDataExpanded ? hasTestData ? Infinity : 224 : minBottomPaneHeight
   return (
     <Allotment vertical>
       <Allotment.Pane minSize={minTopPaneHeight}>
@@ -123,7 +124,7 @@ export default function PromptView({
             title='Test Data'
             initiallyExpanded={testDataExpanded}
             className='flex flex-col h-full'
-            contentClassName='mt-1.5 border-t border-gray-200 overflow-y-auto border-b'
+            contentClassName={`${hasTestData ? 'mt-1.5 border-t border-b' : '-mt-2.5'}  border-gray-200 overflow-y-auto`}
             titleClassName='pt-1.5 pl-0.5'
             rightHandItems={testDataActionButtons('mr-3')}
             onSetExpanded={setTestDataExpanded}>

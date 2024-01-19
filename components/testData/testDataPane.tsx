@@ -5,8 +5,9 @@ import DropdownMenu from '../dropdownMenu'
 import Label from '../label'
 import RangeInput from '../rangeInput'
 import Checkbox from '../checkbox'
-import TableEditor, { GetTableRowCount, GetTableValueForRow } from './tableEditor'
+import TableEditor, { GetTableRowCount, GetTableValueForRow, HasTableData } from './tableEditor'
 import Button from '../button'
+import useTestDataActionButtons from './useTestDataActionButtons'
 
 export default function TestDataPane({
   variables,
@@ -60,7 +61,7 @@ export default function TestDataPane({
   const [_, dynamicInputRows] = SelectInputRows(inputValues, dynamicVariables, testConfig)
   const shouldShowOptions = !asModalPopup && dynamicInputRows.length > 0
 
-  return variables.length > 0 || Object.keys(inputValues).length > 0 ? (
+  return HasTableData(variables, inputValues) ? (
     <div className='flex flex-col items-stretch flex-1 h-full overflow-y-auto'>
       <TableEditor
         inputValues={inputValues}
@@ -117,7 +118,7 @@ export default function TestDataPane({
       )}
     </div>
   ) : (
-    <EmptyTestData />
+    <EmptyTestData bottomPadding={asModalPopup ? 'pb-4' : ''} />
   )
 }
 
@@ -147,8 +148,8 @@ const testConfigWithAutoRespondMode = (testConfig: TestConfig, mode: DynamicMode
   maxResponses: mode === 'manual' ? undefined : testConfig.maxResponses ?? DefaultMaxResponses,
 })
 
-const EmptyTestData = () => (
-  <div className='w-full p-4 text-gray-700'>
+const EmptyTestData = ({ bottomPadding}: {bottomPadding: string}) => (
+  <div className={`${bottomPadding} w-full px-4 pt-4 text-gray-700`}>
     <div className='flex flex-col items-center justify-center gap-1 p-6 border border-gray-200 rounded-lg bg-gray-25'>
       <span className='font-medium'>Create Test Data</span>
       <span className='text-sm text-center text-gray-400'>
