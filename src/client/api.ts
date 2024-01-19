@@ -230,6 +230,9 @@ const api = {
   }) {
     return post(this.updateTable, { promptID, chainID, tableID })
   },
+  deleteTable: function (tableID: number) {
+    return post(this.deleteTable, { tableID })
+  },
   publishEndpoint: function (
     isEnabled: boolean,
     projectID: number,

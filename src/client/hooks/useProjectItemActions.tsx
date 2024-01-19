@@ -19,9 +19,13 @@ export default function useProjectItemActions(onDelete?: () => void) {
   const renameAndRefresh = (item: Prompt | Chain | Table, name: string) =>
     name !== item.name ? renameItem(item, name).then(() => refreshOnRename(item)) : Promise.resolve()
 
-  const deleteItem = (item: Prompt | Chain) =>
-    ProjectItemIsChain(item) ? api.deleteChain(item.id) : api.deletePrompt(item.id)
-  const deleteAndRefresh = (item: Prompt | Chain) => deleteItem(item).then(onDelete ?? refreshProject)
+  const deleteItem = (item: Prompt | Chain | Table) =>
+    IsProjectItem(item)
+      ? ProjectItemIsChain(item)
+        ? api.deleteChain(item.id)
+        : api.deletePrompt(item.id)
+      : api.deleteTable(item.id)
+  const deleteAndRefresh = (item: Prompt | Chain | Table) => deleteItem(item).then(onDelete ?? refreshProject)
 
   const duplicateItem = (item: Prompt | Chain) =>
     ProjectItemIsChain(item) ? api.duplicateChain(item.id) : api.duplicatePrompt(item.id)
