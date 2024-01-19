@@ -45,9 +45,7 @@ export default function useTestDataActionButtons(
   const actionButtons = (className = '') => (
     <div className={`${className} relative flex items-center gap-1`}>
       <IconButton icon={expandIcon} onClick={expandTestData} />
-      {!parentItem.tableID && ( // TODO move this check to TestDataPopupMenu when there are more items
-        <IconButton icon={dotsIcon} className='rotate-90' onClick={() => setMenuExpanded(!isMenuExpanded)} />
-      )}
+      <IconButton icon={dotsIcon} className='rotate-90' onClick={() => setMenuExpanded(!isMenuExpanded)} />
       {isMenuExpanded && (
         <div className='absolute shadow-sm -right-1 top-8'>
           <TestDataPopupMenu {...{ parentItem, isMenuExpanded, setMenuExpanded }} />
@@ -124,12 +122,12 @@ function TestDataPopupMenu({
   const router = useRouter()
   const refreshProject = useRefreshProject()
 
-  const withDismiss = (callback: () => void) => () => {
+  const withDismiss = (callback?: () => void) => callback ? () => {
     setMenuExpanded(false)
     callback()
-  }
+  } : callback
 
-  const exportTable = async () => {
+  const exportTable = parentItem.tableID ? undefined : async () => {
     const tableID = ProjectItemIsChain(parentItem)
       ? await api.exportChainInputs(parentItem.id)
       : await api.exportPromptInputs(parentItem.id)
@@ -139,7 +137,12 @@ function TestDataPopupMenu({
 
   return (
     <PopupMenu className='w-40' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
-      <PopupMenuItem title='Save Test Data' callback={withDismiss(() => exportTable())} first last />
+      <PopupMenuItem
+        title='Save Test Data'
+        callback={withDismiss(exportTable)}
+        first
+        last
+      />
     </PopupMenu>
   )
 }
