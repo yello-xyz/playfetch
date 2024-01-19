@@ -9,6 +9,7 @@ import { useActiveProject } from '../../src/client/context/projectContext'
 import Icon from '@/components/icon'
 import TestDataPopup, { TestDataPopupProps } from './testDataPopup'
 import TestDataPopupMenu from './testDataPopupMenu'
+import PickTableDialog from './pickTableDialog'
 
 export default function useTestDataActionButtons(
   parentItem: Prompt | Chain,
@@ -20,6 +21,7 @@ export default function useTestDataActionButtons(
   testConfig: TestConfig,
   setTestConfig: (testConfig: TestConfig) => void
 ) {
+  const [showPickTableDialog, setShowPickTableDialog] = useState(false)
   const [isMenuExpanded, setMenuExpanded] = useState(false)
   const setPopup = useGlobalPopup<TestDataPopupProps>()
   const activeProject = useActiveProject()
@@ -41,14 +43,16 @@ export default function useTestDataActionButtons(
   }
 
   const tables = activeProject.tables
+  const table = tables.find(table => table.id === parentItem.tableID)
   const isDataEmpty = Object.values(inputValues).every(value => value.length === 0 || value[0] === '')
   const canReplaceData = tables.length > 0 && (!parentItem.tableID || tables.length > 1)
-  const onReplaceData = canReplaceData ? () => {} : undefined
+  const onReplaceData = canReplaceData ? () => setShowPickTableDialog(true) : undefined
+  const replaceData = (tableID: number) => console.log('replaceData', tableID)
 
   const actionButtons = (className = '') => (
     <div className={`${className} relative grow flex items-center gap-1`}>
       <div className='flex flex-1'>
-        <LinkedTableItem table={tables.find(table => table.id === parentItem.tableID)} onReplaceData={onReplaceData} />
+        <LinkedTableItem table={table} onReplaceData={onReplaceData} />
       </div>
       <IconButton icon={expandIcon} onClick={expandTestData} />
       <IconButton icon={dotsIcon} className='rotate-90' onClick={() => setMenuExpanded(!isMenuExpanded)} />
@@ -56,6 +60,14 @@ export default function useTestDataActionButtons(
         <div className='absolute shadow-sm -right-1 top-8'>
           <TestDataPopupMenu {...{ parentItem, isDataEmpty, onReplaceData, isMenuExpanded, setMenuExpanded }} />
         </div>
+      )}
+      {showPickTableDialog && (
+        <PickTableDialog
+          tables={tables}
+          initialTable={table}
+          onDismiss={() => setShowPickTableDialog(false)}
+          onConfirm={replaceData}
+        />
       )}
     </div>
   )
@@ -67,7 +79,7 @@ function LinkedTableItem({ table, onReplaceData }: { table?: Table; onReplaceDat
   const cursorClass = onReplaceData ? 'cursor-pointer hover:bg-gray-200' : ''
   const onClick = (event: MouseEvent) => {
     event.stopPropagation()
-    onReplaceData
+    onReplaceData?.()
   }
 
   return table ? (
