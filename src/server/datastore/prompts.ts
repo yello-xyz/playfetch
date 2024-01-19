@@ -23,12 +23,11 @@ import {
 import { InputValues, Prompt, PromptConfig, Prompts, RawPromptVersion } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { GetUniqueName, StripVariableSentinels } from '@/src/common/formatting'
-import { getTrustedParentInputValues, reparentInputValues } from './inputs'
+import { getTrustedParentInputValues, relinkInputValues } from './inputs'
 import { getOrderedRunsForParentID } from './runs'
 import { canSuggestImprovedPrompt } from './ratings'
 import { PropertyFilter, and } from '@google-cloud/datastore'
 import { deleteEntity } from './cleanup'
-import { addTableForUser } from './tables'
 
 export async function migratePrompts(postMerge: boolean) {
   if (postMerge) {
@@ -278,10 +277,5 @@ export async function deletePromptForUser(userID: number, promptID: number) {
   await deleteEntity(Entity.PROMPT, promptID)
 }
 
-export async function exportPromptInputs(userID: number, promptID: number) {
-  const promptData = await getPromptData(promptID)
-  const tableID = await addTableForUser(userID, promptData.projectID)
-  await reparentInputValues(promptID, tableID)
-  await updatePrompt({ ...promptData, tableID }, false)
-  return tableID
-}
+export const updateTableForPrompt = (userID: number, promptID: number, tableID: number | null | undefined) =>
+  relinkInputValues(userID, promptID, tableID, getVerifiedUserPromptData, data => updatePrompt(data, false))

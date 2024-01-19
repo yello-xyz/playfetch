@@ -12,12 +12,11 @@ import {
 import { Chain, ChainItemWithInputs, InputValues, RawChainVersion } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { getTrustedProjectScopedData, getVerifiedProjectScopedData } from './prompts'
-import { getTrustedParentInputValues, reparentInputValues } from './inputs'
+import { getTrustedParentInputValues, relinkInputValues } from './inputs'
 import { addInitialVersion, saveChainVersionForUser, toUserVersions } from './versions'
 import { getOrderedRunsForParentID } from './runs'
 import { deleteEntity } from './cleanup'
 import { GetUniqueName } from '@/src/common/formatting'
-import { addTableForUser } from './tables'
 
 export async function migrateChains(postMerge: boolean) {
   if (postMerge) {
@@ -173,10 +172,5 @@ export async function deleteChainForUser(userID: number, chainID: number) {
   await deleteEntity(Entity.CHAIN, chainID)
 }
 
-export async function exportChainInputs(userID: number, chainID: number) {
-  const chainData = await getChainData(chainID)
-  const tableID = await addTableForUser(userID, chainData.projectID)
-  await reparentInputValues(chainID, tableID)
-  await updateChain({ ...chainData, tableID }, false)
-  return tableID
-}
+export const updateTableForChain = (userID: number, chainID: number, tableID: number | null | undefined) =>
+  relinkInputValues(userID, chainID, tableID, getVerifiedUserChainData, data => updateChain(data, false))
