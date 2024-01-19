@@ -43,7 +43,7 @@ export default function TestDataHeader({
   const deleteDialogPrompt: DialogPrompt = {
     title: 'Delete table column? This action cannot be undone.',
     destructive: true,
-    callback: () => onDelete?.()
+    callback: () => onDelete?.(),
   }
 
   const showPopupMenu = (): [typeof ModalTestDataHeaderPopupMenu, TestDataHeaderPopupMenuProps] => [

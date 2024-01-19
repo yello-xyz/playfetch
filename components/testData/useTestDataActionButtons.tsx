@@ -43,17 +43,17 @@ export default function useTestDataActionButtons(
     )
   }
 
-  const showPopupMenu = (): [typeof TestDataPopupMenu, TestDataPopupMenuProps] => [
-    TestDataPopupMenu,
-    { parentItem, isDataEmpty, onReplaceData },
-  ]
-
   const tables = activeProject.tables
   const table = tables.find(table => table.id === parentItem.tableID)
   const isDataEmpty = Object.values(inputValues).every(value => value.length === 0 || value[0] === '')
   const canReplaceData = tables.length > 0 && (!table || tables.length > 1)
   const onReplaceData = canReplaceData ? () => setShowReplaceDialog(true) : undefined
   const replaceData = (tableID: number) => replaceInputs(tableID)
+
+  const showPopupMenu = (): [typeof TestDataPopupMenu, TestDataPopupMenuProps] => [
+    TestDataPopupMenu,
+    { parentItem, isDataEmpty, onReplaceData },
+  ]
 
   const [showReplaceDialog, setShowReplaceDialog] = useState(false)
   const actionButtons = (className = '') => (
