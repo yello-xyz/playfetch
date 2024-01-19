@@ -7,7 +7,6 @@ import RangeInput from '../rangeInput'
 import Checkbox from '../checkbox'
 import TableEditor, { GetTableRowCount, GetTableValueForRow, HasTableData } from './tableEditor'
 import Button from '../button'
-import useTestDataActionButtons from './useTestDataActionButtons'
 
 export default function TestDataPane({
   variables,
@@ -79,6 +78,7 @@ export default function TestDataPane({
         )}
         onToggleAll={toggleAll}
         skipExpandButtons={asModalPopup}
+        inModal={asModalPopup}
       />
       {(!skipButtonBorder || shouldShowOptions) && <div className='border-b border-gray-200' />}
       {shouldShowOptions && (

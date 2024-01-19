@@ -79,8 +79,8 @@ export default function PromptView({
   const minTopPaneHeight = 120
   const hasTestData = HasTableData(variables, inputValues)
   const rowCount = GetTableRowCount(variables, inputValues)
-  const minBottomPaneHeight = testDataExpanded ? hasTestData ? Math.min(240, 150 + rowCount * 33) : 224 : 84
-  const maxBottomPaneHeight = testDataExpanded ? hasTestData ? Infinity : 224 : minBottomPaneHeight
+  const minBottomPaneHeight = testDataExpanded ? (hasTestData ? Math.min(240, 150 + rowCount * 33) : 224) : 84
+  const maxBottomPaneHeight = testDataExpanded ? (hasTestData ? Infinity : 224) : minBottomPaneHeight
   return (
     <Allotment vertical>
       <Allotment.Pane minSize={minTopPaneHeight}>

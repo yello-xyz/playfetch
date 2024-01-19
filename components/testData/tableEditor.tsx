@@ -39,6 +39,7 @@ export default function TableEditor({
   skipExpandButtons = false,
   backgroundColor = 'bg-gray-25',
   rounded = false,
+  inModal = false,
 }: {
   inputValues: InputValues
   setInputValues: Dispatch<SetStateAction<InputValues>>
@@ -50,6 +51,7 @@ export default function TableEditor({
   skipExpandButtons?: boolean
   backgroundColor?: string
   rounded?: boolean
+  inModal?: boolean
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -165,6 +167,7 @@ export default function TableEditor({
               onDelete={() => deleteColumn(variable)}
               isFirst={!gutterColumn && index === 0}
               isLast={index === allVariables.length - 1}
+              inModal={inModal}
             />
           ))}
           <div

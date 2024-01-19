@@ -2,10 +2,11 @@ import { useState } from 'react'
 import { EditableItem } from '../headerItem'
 import chevronIcon from '@/public/chevron.svg'
 import GlobalPopupMenu from '../globalPopupMenu'
-import { PopupContent, PopupMenuItem } from '../popupMenu'
+import PopupMenu, { PopupContent, PopupMenuItem } from '../popupMenu'
 import { WithDismiss } from '@/src/client/context/globalPopupContext'
 import PickNameDialog from '../pickNameDialog'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
+import IconButton from '../iconButton'
 
 export default function TestDataHeader({
   variable,
@@ -16,6 +17,7 @@ export default function TestDataHeader({
   grow,
   isFirst,
   isLast,
+  inModal,
 }: {
   variable: string
   variables: string[]
@@ -25,6 +27,7 @@ export default function TestDataHeader({
   grow?: boolean
   isFirst?: boolean
   isLast?: boolean
+  inModal?: boolean
 }) {
   const setDialogPrompt = useModalDialogPrompt()
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
@@ -34,17 +37,18 @@ export default function TestDataHeader({
     setLabel(undefined)
   }
 
-  const showPopupMenu = (): [typeof TestDataHeaderPopupMenu, TestDataHeaderPopupMenuProps] => [
-    TestDataHeaderPopupMenu,
-    {
-      renameColumn: () => setShowPickNamePrompt(true),
-      deleteColumn: () =>
-        setDialogPrompt({
-          title: 'Delete table column? This action cannot be undone.',
-          destructive: true,
-          callback: () => onDelete?.(),
-        }),
-    },
+  const renameColumn = () => setShowPickNamePrompt(true)
+
+  const deleteColumn = () =>
+    setDialogPrompt({
+      title: 'Delete table column? This action cannot be undone.',
+      destructive: true,
+      callback: () => onDelete?.(),
+    })
+
+  const showPopupMenu = (): [typeof ModalTestDataHeaderPopupMenu, TestDataHeaderPopupMenuProps] => [
+    ModalTestDataHeaderPopupMenu,
+    { renameColumn, deleteColumn },
   ]
 
   const isInUse = variables.includes(variable)
@@ -53,6 +57,7 @@ export default function TestDataHeader({
   const textColor = isStatic ? 'text-pink-400' : isInUse ? 'text-purple-400' : ''
 
   const baseClass = 'flex items-center px-3 py-1 border-b border-gray-200 h-8'
+  const iconClassName = isLast ? 'mr-5' : '-mr-2'
 
   return (
     <div
@@ -71,9 +76,14 @@ export default function TestDataHeader({
           `${isStatic ? `{{${variable}}}` : variable}`
         )}
       </span>
-      {!isInUse && onRename && onDelete && (
-        <GlobalPopupMenu icon={chevronIcon} iconClassName={isLast ? 'mr-5' : '-mr-2'} loadPopup={showPopupMenu} />
-      )}
+      {!isInUse &&
+        onRename &&
+        onDelete &&
+        (inModal ? (
+          <InlineTestDataHeaderPopupMenu {...{ iconClassName, renameColumn, deleteColumn }} />
+        ) : (
+          <GlobalPopupMenu icon={chevronIcon} iconClassName={iconClassName} loadPopup={showPopupMenu} />
+        ))}
       {showPickNamePrompt && (
         <PickNameDialog
           title='Rename Column'
@@ -93,15 +103,47 @@ export type TestDataHeaderPopupMenuProps = {
   deleteColumn: () => void
 }
 
-function TestDataHeaderPopupMenu({
+const InlineTestDataHeaderPopupMenu = ({
+  renameColumn,
+  deleteColumn,
+  iconClassName,
+}: TestDataHeaderPopupMenuProps & { iconClassName?: string }) => {
+  const [isMenuExpanded, setMenuExpanded] = useState(false)
+
+  const withDismiss = (callback: () => void) => () => {
+    setMenuExpanded(false)
+    callback()
+  }
+
+  return (
+    <div className='relative pr-0.5'>
+      <IconButton icon={chevronIcon} className={iconClassName} onClick={() => setMenuExpanded(!isMenuExpanded)} />
+      <div className='absolute shadow-sm -right-1 top-8'>
+        <PopupMenu className='w-44 z-100' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
+          <TestDataHeaderPopupMenuItems {...{ renameColumn, deleteColumn, withDismiss }} />
+        </PopupMenu>
+      </div>
+    </div>
+  )
+}
+
+const ModalTestDataHeaderPopupMenu = ({
   renameColumn,
   deleteColumn,
   withDismiss,
-}: TestDataHeaderPopupMenuProps & WithDismiss) {
-  return (
-    <PopupContent className='w-44'>
-      <PopupMenuItem title='Rename Column' callback={withDismiss(renameColumn)} first />
-      <PopupMenuItem title='Delete Column' callback={withDismiss(deleteColumn)} separated destructive last />
-    </PopupContent>
-  )
-}
+}: TestDataHeaderPopupMenuProps & WithDismiss) => (
+  <PopupContent className='w-44'>
+    <TestDataHeaderPopupMenuItems {...{ renameColumn, deleteColumn, withDismiss }} />
+  </PopupContent>
+)
+
+const TestDataHeaderPopupMenuItems = ({
+  renameColumn,
+  deleteColumn,
+  withDismiss,
+}: TestDataHeaderPopupMenuProps & WithDismiss) => (
+  <>
+    <PopupMenuItem title='Rename Column' callback={withDismiss(renameColumn)} first />
+    <PopupMenuItem title='Delete Column' callback={withDismiss(deleteColumn)} separated destructive last />
+  </>
+)
