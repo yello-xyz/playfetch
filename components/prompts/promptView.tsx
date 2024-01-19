@@ -61,7 +61,6 @@ export default function PromptView({
   const isModelAvailable = checkModelAvailable(currentVersion.config.model)
   const variables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, true)
   const staticVariables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, false)
-  const canShowTestData = variables.length > 0 || Object.keys(prompt.inputValues).length > 0
 
   const testDataActionButtons = useTestDataActionButtons(
     prompt,
@@ -79,8 +78,8 @@ export default function PromptView({
   const minWidth = 400
   const minTopPaneHeight = 120
   const rowCount = GetTableRowCount(variables, inputValues)
-  const minBottomPaneHeight = canShowTestData ? (testDataExpanded ? Math.min(240, 150 + rowCount * 33) : 84) : 52
-  const maxBottomPaneHeight = canShowTestData && testDataExpanded ? Infinity : minBottomPaneHeight
+  const minBottomPaneHeight = testDataExpanded ? Math.min(240, 150 + rowCount * 33) : 84
+  const maxBottomPaneHeight = testDataExpanded ? Infinity : minBottomPaneHeight
   return (
     <Allotment vertical>
       <Allotment.Pane minSize={minTopPaneHeight}>
@@ -118,30 +117,28 @@ export default function PromptView({
         </Allotment>
       </Allotment.Pane>
       <Allotment.Pane minSize={minBottomPaneHeight} maxSize={maxBottomPaneHeight} className='flex flex-col'>
-        {canShowTestData && (
-          <div className='flex-1 min-h-0'>
-            <Collapsible
-              key={testDataExpanded.toString()}
-              title='Test Data'
-              initiallyExpanded={testDataExpanded}
-              className='flex flex-col h-full'
-              contentClassName='mt-1.5 border-t border-gray-200 overflow-y-auto border-b'
-              titleClassName='pt-1.5 pl-0.5'
-              rightHandItems={testDataActionButtons('mr-3')}
-              onSetExpanded={setTestDataExpanded}>
-              <TestDataPane
-                variables={variables}
-                staticVariables={staticVariables}
-                inputValues={inputValues}
-                setInputValues={setInputValues}
-                persistInputValuesIfNeeded={persistInputValuesIfNeeded}
-                testConfig={testConfig}
-                setTestConfig={setTestConfig}
-                skipButtonBorder
-              />
-            </Collapsible>
-          </div>
-        )}
+        <div className='flex-1 min-h-0'>
+          <Collapsible
+            key={testDataExpanded.toString()}
+            title='Test Data'
+            initiallyExpanded={testDataExpanded}
+            className='flex flex-col h-full'
+            contentClassName='mt-1.5 border-t border-gray-200 overflow-y-auto border-b'
+            titleClassName='pt-1.5 pl-0.5'
+            rightHandItems={testDataActionButtons('mr-3')}
+            onSetExpanded={setTestDataExpanded}>
+            <TestDataPane
+              variables={variables}
+              staticVariables={staticVariables}
+              inputValues={inputValues}
+              setInputValues={setInputValues}
+              persistInputValuesIfNeeded={persistInputValuesIfNeeded}
+              testConfig={testConfig}
+              setTestConfig={setTestConfig}
+              skipButtonBorder
+            />
+          </Collapsible>
+        </div>
         <div className='px-2 py-2.5'>
           <RunButtons
             runTitle={activeVersion.runs.length > 0 && !isDirty ? 'Run again' : 'Run'}

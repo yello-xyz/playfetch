@@ -6,6 +6,7 @@ import Label from '../label'
 import RangeInput from '../rangeInput'
 import Checkbox from '../checkbox'
 import TableEditor, { GetTableRowCount, GetTableValueForRow } from './tableEditor'
+import Button from '../button'
 
 export default function TestDataPane({
   variables,
@@ -59,7 +60,7 @@ export default function TestDataPane({
   const [_, dynamicInputRows] = SelectInputRows(inputValues, dynamicVariables, testConfig)
   const shouldShowOptions = !asModalPopup && dynamicInputRows.length > 0
 
-  return (
+  return variables.length > 0 || Object.keys(inputValues).length > 0 ? (
     <div className='flex flex-col items-stretch flex-1 h-full overflow-y-auto'>
       <TableEditor
         inputValues={inputValues}
@@ -115,6 +116,8 @@ export default function TestDataPane({
         </div>
       )}
     </div>
+  ) : (
+    <EmptyTestData />
   )
 }
 
@@ -143,3 +146,19 @@ const testConfigWithAutoRespondMode = (testConfig: TestConfig, mode: DynamicMode
   autoRespond: mode === 'dynamic' ? true : mode === 'static' ? false : undefined,
   maxResponses: mode === 'manual' ? undefined : testConfig.maxResponses ?? DefaultMaxResponses,
 })
+
+const EmptyTestData = () => (
+  <div className='w-full p-4 text-gray-700'>
+    <div className='flex flex-col items-center justify-center gap-1 p-6 border border-gray-200 rounded-lg bg-gray-25'>
+      <span className='font-medium'>Create Test Data</span>
+      <span className='text-sm text-center text-gray-400'>
+        Test data allows you to test different inputs to your prompt.
+      </span>
+      <span className='mt-2'>
+        <Button type='secondary' onClick={() => {}}>
+          Start from scratch
+        </Button>
+      </span>
+    </div>
+  </div>
+)

@@ -141,28 +141,20 @@ function EndpointsGroup({
   )
 }
 
-function EmptyTable({ onAddEndpoint }: { onAddEndpoint?: () => void }) {
-  const AddPromptLink = ({ label }: { label: string }) => (
-    <span className='font-medium text-blue-400 cursor-pointer' onClick={onAddEndpoint}>
-      {label}
-    </span>
-  )
-
-  return (
-    <div className='w-full h-full pb-4 text-gray-700 bg-white'>
-      <div className='flex flex-col items-center justify-center h-full gap-1 p-6 border border-gray-200 rounded-lg bg-gray-25'>
-        <span className='font-medium'>No Endpoints</span>
-        <span className='text-sm text-center text-gray-400 w-72'>
-          {onAddEndpoint ? (
-            <span>Create an endpoint to allow integrating prompts or chains into your code base.</span>
-          ) : (
-            <span>Create some prompts or chains first to integrate this project into your code base.</span>
-          )}
-        </span>
-        <span className='mt-2'>
-          <TopBarButton type='primary' title='New Endpoint' icon={addIconWhite} onClick={onAddEndpoint} />
-        </span>
-      </div>
+const EmptyTable = ({ onAddEndpoint }: { onAddEndpoint?: () => void }) => (
+  <div className='w-full h-full pb-4 text-gray-700 bg-white'>
+    <div className='flex flex-col items-center justify-center h-full gap-1 p-6 border border-gray-200 rounded-lg bg-gray-25'>
+      <span className='font-medium'>No Endpoints</span>
+      <span className='text-sm text-center text-gray-400 w-72'>
+        {onAddEndpoint ? (
+          <span>Create an endpoint to allow integrating prompts or chains into your code base.</span>
+        ) : (
+          <span>Create some prompts or chains first to integrate this project into your code base.</span>
+        )}
+      </span>
+      <span className='mt-2'>
+        <TopBarButton type='primary' title='New Endpoint' icon={addIconWhite} onClick={onAddEndpoint} />
+      </span>
     </div>
-  )
-}
+  </div>
+)

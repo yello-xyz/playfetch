@@ -116,8 +116,6 @@ export default function ChainNodeOutput({
     refreshIntermediateRuns()
   }
 
-  const canShowTestData = variables.length > 0 || Object.keys(inputValues).length > 0
-
   const findParentRun = (run: Run) => activeVersion.runs.find(r => !!run.parentRunID && r.id === run.parentRunID)
   const lastSameParentRun = (run: Run) => intermediateRuns.findLast(r => r.parentRunID === run.parentRunID)
   const relevantRuns = [
@@ -150,7 +148,7 @@ export default function ChainNodeOutput({
   return (
     <>
       <div className='flex flex-col items-end flex-1 h-full gap-4 pb-4 overflow-hidden'>
-        {activeNode === InputNode && canShowTestData ? (
+        {activeNode === InputNode ? (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
             <SingleTabHeader label='Test Data'>{testDataActionButtons()}</SingleTabHeader>
             <TestDataPane

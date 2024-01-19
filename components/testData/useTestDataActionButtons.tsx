@@ -1,6 +1,6 @@
 import { Dispatch, MouseEvent, SetStateAction, useState } from 'react'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
-import { Chain, InputValues, ProjectItemIsChain, Prompt, Table, TestConfig } from '@/types'
+import { Chain, InputValues, Prompt, Table, TestConfig } from '@/types'
 import IconButton from '@/components/iconButton'
 import expandIcon from '@/public/expand.svg'
 import tableIcon from '@/public/table.svg'
@@ -10,7 +10,6 @@ import Icon from '@/components/icon'
 import TestDataPopup, { TestDataPopupProps } from './testDataPopup'
 import TestDataPopupMenu, { TestDataPopupMenuProps, useReplaceInputs } from './testDataPopupMenu'
 import PickTableDialog from './pickTableDialog'
-import api from '@/src/client/api'
 import GlobalPopupMenu from '../globalPopupMenu'
 
 export default function useTestDataActionButtons(
