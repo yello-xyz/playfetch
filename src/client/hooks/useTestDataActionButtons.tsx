@@ -7,12 +7,14 @@ import Label from '@/components/label'
 import IconButton from '@/components/iconButton'
 import closeIcon from '@/public/close.svg'
 import expandIcon from '@/public/expand.svg'
+import tableIcon from '@/public/table.svg'
 import dotsIcon from '@/public/dots.svg'
 import api from '../api'
-import { useRefreshActiveItem, useRefreshProject } from '../context/projectContext'
+import { useActiveProject, useRefreshActiveItem, useRefreshProject } from '../context/projectContext'
 import { useRouter } from 'next/router'
 import { TableRoute } from '@/src/common/clientRoute'
 import useModalDialogPrompt from '../context/modalDialogContext'
+import Icon from '@/components/icon'
 
 export default function useTestDataActionButtons(
   parentItem: Prompt | Chain,
@@ -26,6 +28,8 @@ export default function useTestDataActionButtons(
 ) {
   const [isMenuExpanded, setMenuExpanded] = useState(false)
   const setPopup = useGlobalPopup<TestDataPopupProps>()
+  const activeProject = useActiveProject()
+  const table = activeProject.tables.find(table => table.id === parentItem.tableID)
 
   const expandTestData = () => {
     setPopup(
@@ -44,7 +48,15 @@ export default function useTestDataActionButtons(
   }
 
   const actionButtons = (className = '') => (
-    <div className={`${className} relative flex items-center gap-1`}>
+    <div className={`${className} relative grow flex items-center gap-1`}>
+      <div className='flex flex-1'>
+        {table && (
+          <div className='flex items-center gap-1 pl-1 pr-2 bg-gray-100 rounded'>
+            <Icon icon={tableIcon} />
+            {table.name}
+          </div>
+        )}
+      </div>
       <IconButton icon={expandIcon} onClick={expandTestData} />
       <IconButton icon={dotsIcon} className='rotate-90' onClick={() => setMenuExpanded(!isMenuExpanded)} />
       {isMenuExpanded && (
