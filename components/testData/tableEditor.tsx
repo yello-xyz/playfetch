@@ -86,8 +86,8 @@ export default function TableEditor({
   }
 
   const isRowEmpty = (row: number) => allVariables.every(variable => getInputValue(row, variable).length === 0)
-
   const canAddRow = !isRowEmpty(rowCount - 1)
+  const canDeleteRow = (row: number) => rowCount > 1 && isRowEmpty(row)
 
   const addRow = () => {
     persistInputValuesIfNeeded()
@@ -95,7 +95,6 @@ export default function TableEditor({
       setInputValues(inputValues =>
         Object.fromEntries(Object.entries(inputValues).map(([variable, values]) => [variable, [...values, '']]))
       )
-      // TODO focus on last cell in newly added row?
     })
   }
 
@@ -111,7 +110,7 @@ export default function TableEditor({
   }
 
   const checkDeleteRow = (event: KeyboardEvent, row: number) => {
-    if (isRowEmpty(row) && (event.key === 'Backspace' || event.key === 'Delete')) {
+    if (canDeleteRow(row) && (event.key === 'Backspace' || event.key === 'Delete')) {
       persistInputValuesIfNeeded()
       setTimeout(() => {
         setInputValues(inputValues =>
