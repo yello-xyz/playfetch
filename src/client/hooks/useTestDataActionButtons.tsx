@@ -30,6 +30,7 @@ export default function useTestDataActionButtons(
   const setPopup = useGlobalPopup<TestDataPopupProps>()
   const activeProject = useActiveProject()
   const table = activeProject.tables.find(table => table.id === parentItem.tableID)
+  const isDataEmpty = Object.values(inputValues).every(value => value.length === 0 || value[0] === '')
 
   const expandTestData = () => {
     setPopup(
@@ -61,7 +62,7 @@ export default function useTestDataActionButtons(
       <IconButton icon={dotsIcon} className='rotate-90' onClick={() => setMenuExpanded(!isMenuExpanded)} />
       {isMenuExpanded && (
         <div className='absolute shadow-sm -right-1 top-8'>
-          <TestDataPopupMenu {...{ parentItem, isMenuExpanded, setMenuExpanded }} />
+          <TestDataPopupMenu {...{ parentItem, isDataEmpty, isMenuExpanded, setMenuExpanded }} />
         </div>
       )}
     </div>
@@ -125,10 +126,12 @@ const TestDataPopup = ({
 
 function TestDataPopupMenu({
   parentItem,
+  isDataEmpty,
   isMenuExpanded,
   setMenuExpanded,
 }: {
   parentItem: Prompt | Chain
+  isDataEmpty: boolean
   isMenuExpanded: boolean
   setMenuExpanded: (isExpanded: boolean) => void
 }) {
@@ -153,32 +156,43 @@ function TestDataPopupMenu({
     return tableID
   }
 
-  const exportData = parentItem.tableID
-    ? undefined
-    : () => exportInputs().then(tableID => router.push(TableRoute(parentItem.projectID, tableID)))
+  const exportData =
+    parentItem.tableID || isDataEmpty
+      ? undefined
+      : () => exportInputs().then(tableID => router.push(TableRoute(parentItem.projectID, tableID)))
 
   const resetInputs = () =>
     (ProjectItemIsChain(parentItem) ? api.resetChainInputs(parentItem.id) : api.resetPromptInputs(parentItem.id)).then(
       refreshActiveItem
     )
 
-  const resetData = () => {
-    setDialogPrompt({
-      title: 'Confirm Reset Test Data',
-      content:
-        'To retain the current test data, select Save below to save it in a reusable object before proceeding. ' +
-        'Resetting the data cannot be undone once confirmed.',
-      confirmTitle: 'Save and Reset',
-      alternativeTitle: 'Reset',
-      callback: () => exportInputs().then(resetInputs),
-      alternativeCallback: resetInputs,
-    })
-  }
+  const resetData = isDataEmpty
+    ? undefined
+    : parentItem.tableID
+    ? resetInputs
+    : () => {
+        setDialogPrompt({
+          title: 'Confirm Reset Test Data',
+          content:
+            'To retain the current test data, select Save below to save it in a reusable object before proceeding. ' +
+            'Resetting the data cannot be undone once confirmed.',
+          confirmTitle: 'Save and Reset',
+          alternativeTitle: 'Reset',
+          callback: () => exportInputs().then(resetInputs),
+          alternativeCallback: resetInputs,
+        })
+      }
 
   return (
     <PopupMenu className='w-40' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
       <PopupMenuItem title='Save Test Data' callback={withDismiss(exportData)} first />
-      <PopupMenuItem title='Reset Test Data' callback={withDismiss(resetData)} separated destructive last />
+      <PopupMenuItem
+        title='Reset Test Data'
+        callback={withDismiss(resetData)}
+        separated
+        destructive={!parentItem.tableID}
+        last
+      />
     </PopupMenu>
   )
 }
