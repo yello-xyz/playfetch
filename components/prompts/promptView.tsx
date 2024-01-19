@@ -16,7 +16,7 @@ import Collapsible from '../collapsible'
 import PromptTabs from './promptTabs'
 import { usePromptTabs } from '@/src/client/context/userPresetsContext'
 import { GetTableRowCount } from '../testData/tableEditor'
-import useTestDataActionButtons from '@/src/client/hooks/useTestDataActionButtons'
+import useTestDataActionButtons from '@/components/testData/useTestDataActionButtons'
 
 export default function PromptView({
   prompt,

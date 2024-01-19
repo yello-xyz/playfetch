@@ -13,7 +13,7 @@ import { ProviderForModel } from '@/src/common/providerMetadata'
 import { SelectAnyInputValue } from '@/src/client/inputRows'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import api from '@/src/client/api'
-import useTestDataActionButtons from '@/src/client/hooks/useTestDataActionButtons'
+import useTestDataActionButtons from '@/components/testData/useTestDataActionButtons'
 
 export default function ChainNodeOutput({
   chain,
