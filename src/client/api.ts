@@ -153,8 +153,8 @@ const api = {
   exportPromptInputs: function (promptID: number): Promise<number> {
     return this.updateTable({ promptID, tableID: undefined })
   },
-  resetPromptInputs: function (promptID: number) {
-    return this.updateTable({ promptID, tableID: null })
+  replacePromptInputs: function (promptID: number, tableID: number | null) {
+    return this.updateTable({ promptID, tableID })
   },
   deletePrompt: function (promptID: number) {
     return post(this.deletePrompt, { promptID })
@@ -204,8 +204,8 @@ const api = {
   exportChainInputs: function (chainID: number): Promise<number> {
     return this.updateTable({ chainID, tableID: undefined })
   },
-  resetChainInputs: function (chainID: number) {
-    return this.updateTable({ chainID, tableID: null })
+  replaceChainInputs: function (chainID: number, tableID: number | null): Promise<number> {
+    return this.updateTable({ chainID, tableID })
   },
   deleteChain: function (chainID: number) {
     return post(this.deleteChain, { chainID })

@@ -21,7 +21,6 @@ export default function TestDataPopupMenu({
 }) {
   const router = useRouter()
   const refreshProject = useRefreshProject()
-  const refreshActiveItem = useRefreshActiveItem()
   const setDialogPrompt = useModalDialogPrompt()
 
   const withDismiss = (callback?: () => void) =>
@@ -45,27 +44,25 @@ export default function TestDataPopupMenu({
       ? undefined
       : () => exportInputs().then(tableID => router.push(TableRoute(parentItem.projectID, tableID)))
 
-  const resetInputs = () =>
-    (ProjectItemIsChain(parentItem) ? api.resetChainInputs(parentItem.id) : api.resetPromptInputs(parentItem.id)).then(
-      refreshActiveItem
-    )
+  const replaceInputs = useReplaceInputs(parentItem)
+  const resetInputs = () => replaceInputs(null)
 
   const resetData = isDataEmpty
     ? undefined
     : parentItem.tableID
-    ? resetInputs
-    : () => {
-        setDialogPrompt({
-          title: 'Confirm Reset Test Data',
-          content:
-            'To retain the current test data, select Save below to save it in a reusable object before proceeding. ' +
-            'Resetting the data cannot be undone once confirmed.',
-          confirmTitle: 'Save and Reset',
-          alternativeTitle: 'Reset',
-          callback: () => exportInputs().then(resetInputs),
-          alternativeCallback: resetInputs,
-        })
-      }
+      ? resetInputs
+      : () => {
+          setDialogPrompt({
+            title: 'Confirm Reset Test Data',
+            content:
+              'To retain the current test data, select Save below to save it in a reusable object before proceeding. ' +
+              'Resetting the data cannot be undone once confirmed.',
+            confirmTitle: 'Save and Reset',
+            alternativeTitle: 'Reset',
+            callback: () => exportInputs().then(resetInputs),
+            alternativeCallback: resetInputs,
+          })
+        }
 
   const replaceData = onReplaceData
     ? parentItem.tableID || isDataEmpty
@@ -98,4 +95,14 @@ export default function TestDataPopupMenu({
       />
     </PopupMenu>
   )
+}
+
+export function useReplaceInputs(parentItem: Prompt | Chain) {
+  const refreshActiveItem = useRefreshActiveItem()
+
+  return (tableID: number | null) =>
+    (ProjectItemIsChain(parentItem)
+      ? api.replaceChainInputs(parentItem.id, tableID)
+      : api.replacePromptInputs(parentItem.id, tableID)
+    ).then(refreshActiveItem)
 }

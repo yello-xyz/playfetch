@@ -30,8 +30,8 @@ export default function PickTableDialog({
       <div className='flex flex-col gap-1'>
         {tables.map(table => (
           <div
-          key={table.id}
-          className='flex items-center gap-1 p-0.5 rounded hover:bg-gray-50'
+            key={table.id}
+            className='flex items-center gap-1 p-0.5 rounded hover:bg-gray-50'
             onClick={() => setSelectedTable(table)}>
             <Icon icon={tableIcon} />
             <div className='grow'>{table.name}</div>

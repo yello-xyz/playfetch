@@ -1,6 +1,6 @@
 import { Dispatch, MouseEvent, SetStateAction, useState } from 'react'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
-import { Chain, InputValues, Prompt, Table, TestConfig } from '@/types'
+import { Chain, InputValues, ProjectItemIsChain, Prompt, Table, TestConfig } from '@/types'
 import IconButton from '@/components/iconButton'
 import expandIcon from '@/public/expand.svg'
 import tableIcon from '@/public/table.svg'
@@ -8,8 +8,9 @@ import dotsIcon from '@/public/dots.svg'
 import { useActiveProject } from '../../src/client/context/projectContext'
 import Icon from '@/components/icon'
 import TestDataPopup, { TestDataPopupProps } from './testDataPopup'
-import TestDataPopupMenu from './testDataPopupMenu'
+import TestDataPopupMenu, { useReplaceInputs } from './testDataPopupMenu'
 import PickTableDialog from './pickTableDialog'
+import api from '@/src/client/api'
 
 export default function useTestDataActionButtons(
   parentItem: Prompt | Chain,
@@ -25,6 +26,7 @@ export default function useTestDataActionButtons(
   const [isMenuExpanded, setMenuExpanded] = useState(false)
   const setPopup = useGlobalPopup<TestDataPopupProps>()
   const activeProject = useActiveProject()
+  const replaceInputs = useReplaceInputs(parentItem)
 
   const expandTestData = () => {
     setPopup(
@@ -47,7 +49,7 @@ export default function useTestDataActionButtons(
   const isDataEmpty = Object.values(inputValues).every(value => value.length === 0 || value[0] === '')
   const canReplaceData = tables.length > 0 && (!parentItem.tableID || tables.length > 1)
   const onReplaceData = canReplaceData ? () => setShowPickTableDialog(true) : undefined
-  const replaceData = (tableID: number) => console.log('replaceData', tableID)
+  const replaceData = (tableID: number) => replaceInputs(tableID)
 
   const actionButtons = (className = '') => (
     <div className={`${className} relative grow flex items-center gap-1`}>
