@@ -19,8 +19,10 @@ export default function useInputValues(
             api.updateInputValues(parentID, variable, inputs)
           }
         }
-        for (const variable of Object.keys(originalInputValues).filter(variable => !(variable in inputValues))) {
-          api.deleteInputValues(parentID, variable)
+        for (const [variable, inputs] of Object.entries(originalInputValues)) {
+          if (!(variable in inputValues) && inputs.join(',') !== '') {
+            api.deleteInputValues(parentID, variable)
+          }
         }
         return inputValues
       })
