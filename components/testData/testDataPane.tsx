@@ -9,6 +9,7 @@ import TableEditor, { GetTableRowCount, GetTableValueForRow, HasTableData } from
 import Button from '../button'
 import { useDropzone } from 'react-dropzone'
 import { parse } from 'csv-parse/sync'
+import { useRefreshActiveItem } from '@/src/client/context/projectContext'
 
 export default function TestDataPane({
   variables,
@@ -177,6 +178,7 @@ const EmptyTestData = ({
 }) => {
   const [showFileUpload, setShowFileUpload] = useState(false)
   const [progress, setProgress] = useState<number>()
+  const refreshActiveItem = useRefreshActiveItem()
 
   const onDrop = useCallback(([file]: File[]) => {
     if (file) {
@@ -191,12 +193,13 @@ const EmptyTestData = ({
             setProgress((index + 1) / cols.length)
             await onAddInputValues(col[0], col.slice(1))
           }
+          await refreshActiveItem()
           setProgress(undefined)
         }
       }
       reader.readAsArrayBuffer(file)
     }
-  }, [])
+  }, [onAddInputValues, refreshActiveItem])
 
   const {
     getRootProps,
