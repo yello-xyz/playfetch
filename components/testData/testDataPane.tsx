@@ -21,6 +21,7 @@ export default function TestDataPane({
   testConfig,
   setTestConfig,
   importButton,
+  onImportComplete,
   asModalPopup = false,
   skipButtonBorder = false,
 }: {
@@ -32,7 +33,8 @@ export default function TestDataPane({
   addInputValues: (variable: string, inputs: string[]) => Promise<void>
   testConfig: TestConfig
   setTestConfig: (testConfig: TestConfig) => void
-  importButton: () => ReactNode
+  importButton: (onImportComplete?: () => void) => ReactNode
+  onImportComplete?: () => void
   asModalPopup?: boolean
   skipButtonBorder?: boolean
 }) {
@@ -134,6 +136,7 @@ export default function TestDataPane({
       bottomPadding={asModalPopup ? 'pb-4' : ''}
       onStartFromScratch={() => setStartFromScratch(true)}
       onAddInputValues={addInputValues}
+      onImportComplete={onImportComplete}
       importButton={importButton}
     />
   )
@@ -169,37 +172,43 @@ const EmptyTestData = ({
   bottomPadding,
   onStartFromScratch,
   onAddInputValues,
+  onImportComplete,
   importButton,
 }: {
   bottomPadding: string
   onStartFromScratch: () => void
   onAddInputValues: (variable: string, inputs: string[]) => Promise<void>
-  importButton?: () => ReactNode
+  onImportComplete?: () => void
+  importButton?: (onImportComplete?: () => void) => ReactNode
 }) => {
   const [showFileUpload, setShowFileUpload] = useState(false)
   const [progress, setProgress] = useState<number>()
   const refreshActiveItem = useRefreshActiveItem()
 
-  const onDrop = useCallback(([file]: File[]) => {
-    if (file) {
-      setShowFileUpload(false)
-      setProgress(0)
-      const reader = new FileReader()
-      reader.onload = async () => {
-        if (reader.result && typeof reader.result !== 'string') {
-          const rows: string[][] = parse(Buffer.from(reader.result))
-          const cols = rows[0].map((_, colIndex) => rows.map(row => row[colIndex]))
-          for (const [index, col] of cols.entries()) {
-            setProgress((index + 1) / cols.length)
-            await onAddInputValues(col[0], col.slice(1))
+  const onDrop = useCallback(
+    ([file]: File[]) => {
+      if (file) {
+        setShowFileUpload(false)
+        setProgress(0)
+        const reader = new FileReader()
+        reader.onload = async () => {
+          if (reader.result && typeof reader.result !== 'string') {
+            const rows: string[][] = parse(Buffer.from(reader.result))
+            const cols = rows[0].map((_, colIndex) => rows.map(row => row[colIndex]))
+            for (const [index, col] of cols.entries()) {
+              setProgress((index + 1) / cols.length)
+              await onAddInputValues(col[0], col.slice(1))
+            }
+            await refreshActiveItem()
+            setProgress(undefined)
+            onImportComplete?.()
           }
-          await refreshActiveItem()
-          setProgress(undefined)
         }
+        reader.readAsArrayBuffer(file)
       }
-      reader.readAsArrayBuffer(file)
-    }
-  }, [onAddInputValues, refreshActiveItem])
+    },
+    [onAddInputValues, refreshActiveItem]
+  )
 
   const {
     getRootProps,
@@ -239,7 +248,7 @@ const EmptyTestData = ({
               Test data allows you to test different inputs to your prompt.
             </span>
             <span className='flex items-center gap-2 mt-2'>
-              {importButton && importButton()}
+              {importButton && importButton(onImportComplete)}
               <Button type='secondary' onClick={() => setShowFileUpload(true)}>
                 Import CSV
               </Button>

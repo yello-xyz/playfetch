@@ -65,7 +65,7 @@ export default function useTestDataActionButtons(
   ]
 
   const [showImportDialog, setShowImportDialog] = useState(false)
-  const importButton = () => (
+  const importButton = (onImportComplete?: () => void) => (
     <>
       <Button disabled={!canReplaceData} type='secondary' onClick={() => setShowImportDialog(true)}>
         {replaceTitle}
@@ -77,7 +77,7 @@ export default function useTestDataActionButtons(
           tables={tables}
           initialTable={table}
           onDismiss={() => setShowImportDialog(false)}
-          onConfirm={replaceData}
+          onConfirm={tableID => replaceData(tableID).then(onImportComplete)}
         />
       )}
     </>
