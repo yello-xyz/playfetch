@@ -12,6 +12,7 @@ import TestDataPopupMenu, { TestDataPopupMenuProps, useReplaceInputs } from './t
 import PickTableDialog from './pickTableDialog'
 import GlobalPopupMenu from '../globalPopupMenu'
 import Button from '../button'
+import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 
 export default function useTestDataActionButtons(
   parentItem: Prompt | Chain,
@@ -50,9 +51,10 @@ export default function useTestDataActionButtons(
   const onReplaceData = canReplaceData ? () => setShowReplaceDialog(true) : undefined
   const replaceData = (tableID: number) => replaceInputs(tableID)
 
+  const setDialogPrompt = useModalDialogPrompt()
   const showPopupMenu = (): [typeof TestDataPopupMenu, TestDataPopupMenuProps] => [
     TestDataPopupMenu,
-    { parentItem, isDataEmpty, onReplaceData },
+    { parentItem, isDataEmpty, onReplaceData, setDialogPrompt },
   ]
 
   const [showReplaceDialog, setShowReplaceDialog] = useState(false)

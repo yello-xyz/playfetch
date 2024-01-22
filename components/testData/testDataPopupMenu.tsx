@@ -4,23 +4,24 @@ import api from '../../src/client/api'
 import { useRefreshActiveItem, useRefreshProject } from '../../src/client/context/projectContext'
 import { useRouter } from 'next/router'
 import { TableRoute } from '@/src/common/clientRoute'
-import useModalDialogPrompt from '../../src/client/context/modalDialogContext'
 import { WithDismiss } from '@/src/client/context/globalPopupContext'
+import { DialogPrompt } from '../modalDialog'
 
 export type TestDataPopupMenuProps = {
   parentItem: Prompt | Chain
   isDataEmpty: boolean
+  setDialogPrompt: (prompt: DialogPrompt) => void
   onReplaceData?: () => void
 }
 export default function TestDataPopupMenu({
   parentItem,
   isDataEmpty,
   onReplaceData,
+  setDialogPrompt,
   withDismiss,
 }: TestDataPopupMenuProps & WithDismiss) {
   const router = useRouter()
   const refreshProject = useRefreshProject()
-  const setDialogPrompt = useModalDialogPrompt()
 
   const dismiss = (callback?: () => void) => (callback ? withDismiss(callback) : undefined)
 
