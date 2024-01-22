@@ -18,7 +18,7 @@ export default function TestDataView({ table }: { table: ActiveTable }) {
   )
 
   const hasTableData = HasTableData([], inputValues)
-  const exportData = () => exportTableData(table.name, [], inputValues)
+  const exportData = hasTableData ? () => exportTableData(table.name, [], inputValues) : undefined
   const showPopupMenu = (): [typeof TestDataItemPopupMenu, TestDataItemPopupMenuProps] => [
     TestDataItemPopupMenu,
     { exportData },
@@ -27,7 +27,7 @@ export default function TestDataView({ table }: { table: ActiveTable }) {
   return (
     <div className='flex flex-col items-stretch h-full bg-gray-25'>
       <SingleTabHeader label={table.name} onUpdateLabel={name => renameItem(table, name)} dropShadow=''>
-        {hasTableData && <GlobalPopupMenu icon={chevronIcon} iconClassName='-ml-3' loadPopup={showPopupMenu} />}
+        <GlobalPopupMenu icon={chevronIcon} iconClassName='-ml-3' loadPopup={showPopupMenu} />
       </SingleTabHeader>
       <EmptyTableWrapper
         bottomPadding='pb-4 h-full'
@@ -51,11 +51,11 @@ export default function TestDataView({ table }: { table: ActiveTable }) {
 }
 
 type TestDataItemPopupMenuProps = {
-  exportData: () => void
+  exportData?: () => void
 }
 
 const TestDataItemPopupMenu = ({ exportData, withDismiss }: TestDataItemPopupMenuProps & WithDismiss) => (
   <PopupContent className='w-44'>
-    <PopupMenuItem title='Export as CSV' callback={withDismiss(exportData)} />
+    <PopupMenuItem title='Export as CSV' callback={exportData ? withDismiss(exportData) : undefined} />
   </PopupContent>
 )
