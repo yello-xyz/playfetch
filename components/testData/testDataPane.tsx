@@ -1,4 +1,4 @@
-import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
+import { Dispatch, ReactNode, SetStateAction, useCallback, useEffect, useState } from 'react'
 import { InputValues, TestConfig } from '@/types'
 import { SelectInputRows } from '@/src/client/inputRows'
 import DropdownMenu from '../dropdownMenu'
@@ -8,6 +8,7 @@ import Checkbox from '../checkbox'
 import TableEditor, { GetTableRowCount, GetTableValueForRow, HasTableData } from './tableEditor'
 import Button from '../button'
 import PickTableDialog from './pickTableDialog'
+import { useDropzone } from 'react-dropzone'
 
 export default function TestDataPane({
   variables,
@@ -169,19 +170,51 @@ const EmptyTestData = ({
   onStartFromScratch: () => void
   importButton?: () => ReactNode
 }) => {
+  const [showFileUpload, setShowFileUpload] = useState(false)
+
+  const onDrop = useCallback(([file]: File[]) => console.log(file), [])
+  const {
+    getRootProps,
+    isDragActive,
+    open: openFileDialog,
+  } = useDropzone({ onDrop, noClick: true, accept: { 'text/csv': ['.csv'] }, maxFiles: 1 })
+
+  const baseClass = 'flex flex-col items-center justify-center p-6 border border-gray-200 rounded-lg'
+  const backgroundColor = isDragActive ? 'bg-gray-100' : 'bg-gray-25'
+  const uploadClass = showFileUpload ? 'border-dashed min-h-[136px] gap-3' : 'gap-1'
+
   return (
-    <div className={`${bottomPadding} w-full px-4 pt-4 text-gray-700`}>
-      <div className='flex flex-col items-center justify-center gap-1 p-6 border border-gray-200 rounded-lg bg-gray-25'>
-        <span className='font-medium'>Create Test Data</span>
-        <span className='text-sm text-center text-gray-400'>
-          Test data allows you to test different inputs to your prompt.
-        </span>
-        <span className='flex items-center gap-2 mt-2'>
-          {importButton && importButton()}
-          <Button type='secondary' onClick={onStartFromScratch}>
-            Start from scratch
-          </Button>
-        </span>
+    <div className={`${bottomPadding} w-full px-4 pt-4 text-gray-700`} {...(showFileUpload ? getRootProps() : {})}>
+      <div className={`${baseClass} ${backgroundColor} ${uploadClass}`}>
+        {showFileUpload ? (
+          <>
+            <span>Drag and drop to upload your CSV file.</span>
+            <div className='flex items-center gap-2'>
+              <Button type='secondary' onClick={() => setShowFileUpload(false)}>
+                Cancel
+              </Button>
+              <Button type='secondary' onClick={openFileDialog}>
+                Browse for CSV file
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <span className='font-medium'>Create Test Data</span>
+            <span className='text-sm text-center text-gray-400'>
+              Test data allows you to test different inputs to your prompt.
+            </span>
+            <span className='flex items-center gap-2 mt-2'>
+              {importButton && importButton()}
+              <Button type='secondary' onClick={() => setShowFileUpload(true)}>
+                Import CSV
+              </Button>
+              <Button type='secondary' onClick={onStartFromScratch}>
+                Start from scratch
+              </Button>
+            </span>
+          </>
+        )}
       </div>
     </div>
   )
