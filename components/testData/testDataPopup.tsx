@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { WithDismiss } from '@/src/client/context/globalPopupContext'
 import { PopupContent } from '../popupMenu'
 import TestDataPane from '@/components/testData/testDataPane'
@@ -18,6 +18,7 @@ export type TestDataPopupProps = {
   addInputValues: (variable: string, inputs: string[]) => Promise<void>
   testConfig: TestConfig
   setTestConfig: (testConfig: TestConfig) => void
+  reload: () => void
 }
 
 export default function TestDataPopup({
@@ -30,6 +31,7 @@ export default function TestDataPopup({
   addInputValues,
   testConfig,
   setTestConfig,
+  reload,
   withDismiss,
 }: TestDataPopupProps & WithDismiss) {
   const [currentInputValues, setCurrentInputValues] = useState(inputValues)
@@ -62,6 +64,7 @@ export default function TestDataPopup({
         testConfig={currentTestConfig}
         setTestConfig={updateTestConfig}
         importButton={importTestDataButton}
+        onImportComplete={withDismiss(reload)}
         asModalPopup
         skipButtonBorder
       />

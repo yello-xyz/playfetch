@@ -30,23 +30,28 @@ export default function useTestDataActionButtons(
   const activeProject = useActiveProject()
   const replaceInputs = useReplaceInputs(parentItem)
 
-  const expandTestData = () => {
-    setPopup(
-      TestDataPopup,
-      {
-        parentItem,
-        variables,
-        staticVariables,
-        inputValues,
-        setInputValues,
-        persistInputValuesIfNeeded,
-        addInputValues,
-        testConfig,
-        setTestConfig,
-      },
-      { top: 0, left: 100, right: 100, bottom: 0 }
-    )
-  }
+  const expandTestData = () =>
+    setInputValues(inputValues => {
+      setTimeout(() =>
+        setPopup(
+          TestDataPopup,
+          {
+            parentItem,
+            variables,
+            staticVariables,
+            inputValues,
+            setInputValues,
+            persistInputValuesIfNeeded,
+            addInputValues,
+            testConfig,
+            setTestConfig,
+            reload: () => setTimeout(expandTestData),
+          },
+          { top: 0, left: 100, right: 100, bottom: 0 }
+        )
+      )
+      return inputValues
+    })
 
   const tables = activeProject.tables
   const table = tables.find(table => table.id === parentItem.tableID)

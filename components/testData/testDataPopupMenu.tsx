@@ -102,6 +102,6 @@ export function useReplaceInputs(parentItem: Prompt | Chain) {
       ? api.replaceChainInputs(parentItem.id, tableID)
       : api.replacePromptInputs(parentItem.id, tableID))
     refreshProject()
-    refreshActiveItem()
+    return refreshActiveItem()
   }
 }
