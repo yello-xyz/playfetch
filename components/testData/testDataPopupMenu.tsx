@@ -13,13 +13,15 @@ export type TestDataPopupMenuProps = {
   setDialogPrompt: (prompt: DialogPrompt) => void
   replaceTitle: string
   onReplaceData?: () => void
+  onExportData?: () => void
 }
 export default function TestDataPopupMenu({
   parentItem,
   isDataEmpty,
-  onReplaceData,
   setDialogPrompt,
   replaceTitle,
+  onReplaceData,
+  onExportData,
   withDismiss,
 }: TestDataPopupMenuProps & WithDismiss) {
   const router = useRouter()
@@ -82,6 +84,7 @@ export default function TestDataPopupMenu({
     <PopupContent className='w-44'>
       <PopupMenuItem title={replaceTitle} callback={dismiss(replaceData)} first />
       <PopupMenuItem title='Save Test Data' callback={dismiss(exportData)} />
+      <PopupMenuItem title='Export as CSV' callback={dismiss(onExportData)} />
       <PopupMenuItem
         title='Reset Test Data'
         callback={dismiss(resetData)}

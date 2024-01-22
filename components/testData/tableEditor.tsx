@@ -10,7 +10,7 @@ import { GetUniqueName } from '@/src/common/formatting'
 
 const DefaultVariableName = 'New Variable'
 
-const getAllVariablesAndRowCount = (variables: string[], inputValues: InputValues) => {
+export const GetAllVariablesAndRowCount = (variables: string[], inputValues: InputValues) => {
   const allVariables = [...variables, ...Object.keys(inputValues).filter(input => !variables.includes(input))]
   const rowCount = Math.max(1, ...allVariables.map(variable => inputValues[variable]?.length ?? 0))
 
@@ -18,7 +18,7 @@ const getAllVariablesAndRowCount = (variables: string[], inputValues: InputValue
 }
 
 export const GetTableRowCount = (variables: string[], inputValues: InputValues) => {
-  const [_, rowCount] = getAllVariablesAndRowCount(variables, inputValues)
+  const [_, rowCount] = GetAllVariablesAndRowCount(variables, inputValues)
   return rowCount
 }
 
@@ -55,7 +55,7 @@ export default function TableEditor({
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const [allVariables, rowCount] = getAllVariablesAndRowCount(variables, inputValues)
+  const [allVariables, rowCount] = GetAllVariablesAndRowCount(variables, inputValues)
 
   useEffect(() => {
     if (allVariables.length === 0) {

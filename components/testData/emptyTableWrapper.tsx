@@ -34,10 +34,10 @@ export default function EmptyTableWrapper({
         reader.onload = async () => {
           if (reader.result && typeof reader.result !== 'string') {
             const rows: string[][] = parse(Buffer.from(reader.result))
-            const cols = rows[0].map((_, colIndex) => rows.map(row => row[colIndex]))
-            for (const [index, col] of cols.entries()) {
-              setProgress((index + 1) / cols.length)
-              await onAddInputValues(col[0], col.slice(1))
+            const columns = rows[0].map((_, colIndex) => rows.map(row => row[colIndex]))
+            for (const [index, column] of columns.entries()) {
+              setProgress((index + 1) / columns.length)
+              await onAddInputValues(column[0], column.slice(1))
             }
             await refreshActiveItem()
             setProgress(undefined)

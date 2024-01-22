@@ -13,7 +13,8 @@ import PickTableDialog from './pickTableDialog'
 import GlobalPopupMenu from '../globalPopupMenu'
 import Button from '../button'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
-import { HasTableData } from './tableEditor'
+import { GetAllVariablesAndRowCount, HasTableData } from './tableEditor'
+import { stringify } from 'csv-stringify/sync'
 
 export default function useTestDataActionButtons(
   parentItem: Prompt | Chain,
@@ -55,18 +56,31 @@ export default function useTestDataActionButtons(
 
   const tables = activeProject.tables
   const table = tables.find(table => table.id === parentItem.tableID)
-  const isDataEmpty = !HasTableData(variables, inputValues)
   const canReplaceData = tables.length > 0 && (!table || tables.length > 1)
   const onReplaceData = canReplaceData ? () => setShowReplaceDialog(true) : undefined
   const replaceData = (tableID: number) => replaceInputs(tableID)
 
+  const isDataEmpty = !HasTableData(variables, inputValues)
   const replaceTitle = isDataEmpty ? 'Import Test Data' : 'Replace Test Data'
   const confirmTitle = isDataEmpty ? 'Import' : 'Replace'
+
+  const onExportData = () => {
+    const [allVariables, rowCount] = GetAllVariablesAndRowCount(variables, inputValues)
+    const rows = Array.from({ length: rowCount }).map((_, rowIndex) =>
+      allVariables.map(variable => (rowIndex > 0 ? inputValues[variable]?.[rowIndex - 1] ?? '' : variable))
+    )
+    const file = new Blob([stringify(rows)], { type: 'text/csv' })
+    const element = document.createElement('a')
+    element.href = URL.createObjectURL(file)
+    element.download = `${parentItem.name}.csv`
+    document.body.appendChild(element)
+    element.click()
+  }
 
   const setDialogPrompt = useModalDialogPrompt()
   const showPopupMenu = (): [typeof TestDataPopupMenu, TestDataPopupMenuProps] => [
     TestDataPopupMenu,
-    { parentItem, isDataEmpty, onReplaceData, setDialogPrompt, replaceTitle },
+    { parentItem, isDataEmpty, onReplaceData, onExportData, setDialogPrompt, replaceTitle },
   ]
 
   const [showReplaceDialog, setShowReplaceDialog] = useState(false)
