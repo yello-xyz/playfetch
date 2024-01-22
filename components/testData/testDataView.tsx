@@ -27,11 +27,7 @@ export default function TestDataView({ table }: { table: ActiveTable }) {
   return (
     <div className='flex flex-col items-stretch h-full bg-gray-25'>
       <SingleTabHeader label={table.name} onUpdateLabel={name => renameItem(table, name)} dropShadow=''>
-        {hasTableData && (
-          <div className='flex flex-1'>
-            <GlobalPopupMenu icon={chevronIcon} iconClassName='-ml-3' loadPopup={showPopupMenu} popUpRight />
-          </div>
-        )}
+        {hasTableData && <GlobalPopupMenu icon={chevronIcon} iconClassName='-ml-3' loadPopup={showPopupMenu} />}
       </SingleTabHeader>
       <EmptyTableWrapper
         bottomPadding='pb-4 h-full'
