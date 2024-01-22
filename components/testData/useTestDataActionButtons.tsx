@@ -13,6 +13,7 @@ import PickTableDialog from './pickTableDialog'
 import GlobalPopupMenu from '../globalPopupMenu'
 import Button from '../button'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
+import { HasTableData } from './tableEditor'
 
 export default function useTestDataActionButtons(
   parentItem: Prompt | Chain,
@@ -51,10 +52,14 @@ export default function useTestDataActionButtons(
   const onReplaceData = canReplaceData ? () => setShowReplaceDialog(true) : undefined
   const replaceData = (tableID: number) => replaceInputs(tableID)
 
+  const hasTableData = HasTableData(variables, inputValues)
+  const replaceTitle = hasTableData ? 'Replace Test Data' : 'Import Test Data'
+  const confirmTitle = hasTableData ? 'Replace' : 'Import'
+
   const setDialogPrompt = useModalDialogPrompt()
   const showPopupMenu = (): [typeof TestDataPopupMenu, TestDataPopupMenuProps] => [
     TestDataPopupMenu,
-    { parentItem, isDataEmpty, onReplaceData, setDialogPrompt },
+    { parentItem, isDataEmpty, onReplaceData, setDialogPrompt, replaceTitle },
   ]
 
   const [showReplaceDialog, setShowReplaceDialog] = useState(false)
@@ -67,8 +72,8 @@ export default function useTestDataActionButtons(
       <GlobalPopupMenu icon={dotsIcon} iconClassName='rotate-90' loadPopup={showPopupMenu} />
       {showReplaceDialog && (
         <PickTableDialog
-          title='Replace Test Data'
-          confirmTitle='Replace'
+          title={replaceTitle}
+          confirmTitle={confirmTitle}
           tables={tables}
           initialTable={table}
           onDismiss={() => setShowReplaceDialog(false)}
@@ -81,11 +86,11 @@ export default function useTestDataActionButtons(
   const [showImportDialog, setShowImportDialog] = useState(false)
   const importButton = () => (
     <Button disabled={!canReplaceData} type='secondary' onClick={() => setShowImportDialog(true)}>
-      Import Test Data
+      {replaceTitle}
       {showImportDialog && (
         <PickTableDialog
-          title='Import Test Data'
-          confirmTitle='Import'
+          title={replaceTitle}
+          confirmTitle={confirmTitle}
           tables={tables}
           initialTable={table}
           onDismiss={() => setShowImportDialog(false)}

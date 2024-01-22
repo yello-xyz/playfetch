@@ -11,6 +11,7 @@ export type TestDataPopupMenuProps = {
   parentItem: Prompt | Chain
   isDataEmpty: boolean
   setDialogPrompt: (prompt: DialogPrompt) => void
+  replaceTitle: string
   onReplaceData?: () => void
 }
 export default function TestDataPopupMenu({
@@ -18,6 +19,7 @@ export default function TestDataPopupMenu({
   isDataEmpty,
   onReplaceData,
   setDialogPrompt,
+  replaceTitle,
   withDismiss,
 }: TestDataPopupMenuProps & WithDismiss) {
   const router = useRouter()
@@ -44,19 +46,19 @@ export default function TestDataPopupMenu({
   const resetData = isDataEmpty
     ? undefined
     : parentItem.tableID
-      ? resetInputs
-      : () => {
-          setDialogPrompt({
-            title: 'Confirm Reset Test Data',
-            content:
-              'To retain the current test data, select Save below to save it in a reusable object before proceeding. ' +
-              'Resetting the data cannot be undone once confirmed.',
-            confirmTitle: 'Save and Reset',
-            alternativeTitle: 'Reset',
-            callback: () => exportInputs().then(resetInputs),
-            alternativeCallback: resetInputs,
-          })
-        }
+    ? resetInputs
+    : () => {
+        setDialogPrompt({
+          title: 'Confirm Reset Test Data',
+          content:
+            'To retain the current test data, select Save below to save it in a reusable object before proceeding. ' +
+            'Resetting the data cannot be undone once confirmed.',
+          confirmTitle: 'Save and Reset',
+          alternativeTitle: 'Reset',
+          callback: () => exportInputs().then(resetInputs),
+          alternativeCallback: resetInputs,
+        })
+      }
 
   const replaceData = onReplaceData
     ? parentItem.tableID || isDataEmpty
@@ -78,7 +80,7 @@ export default function TestDataPopupMenu({
 
   return (
     <PopupContent className='w-44'>
-      <PopupMenuItem title='Replace Test Data' callback={dismiss(replaceData)} first />
+      <PopupMenuItem title={replaceTitle} callback={dismiss(replaceData)} first />
       <PopupMenuItem title='Save Test Data' callback={dismiss(exportData)} />
       <PopupMenuItem
         title='Reset Test Data'
