@@ -69,7 +69,7 @@ export default function TestDataPane({
   return (
     <EmptyTableWrapper
       isTableEmpty={!HasTableData(variables, inputValues)}
-      bottomPadding={asModalPopup ? 'pb-4' : ''}
+      bottomPadding={asModalPopup ? undefined : ''}
       onAddInputValues={addInputValues}
       onImportComplete={onImportComplete}
       importButton={importButton}>

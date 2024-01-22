@@ -6,14 +6,14 @@ import { useRefreshActiveItem } from '@/src/client/context/projectContext'
 
 export default function EmptyTableWrapper({
   isTableEmpty,
-  bottomPadding,
+  bottomPadding = 'pb-4',
   onAddInputValues,
   onImportComplete,
   importButton,
   children,
 }: {
   isTableEmpty: boolean
-  bottomPadding: string
+  bottomPadding?: string
   onAddInputValues: (variable: string, inputs: string[]) => Promise<void>
   onImportComplete?: () => void
   importButton?: (onImportComplete?: () => void) => ReactNode
