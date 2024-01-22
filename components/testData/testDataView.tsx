@@ -4,6 +4,11 @@ import TableEditor, { HasTableData } from './tableEditor'
 import { SingleTabHeader } from '../tabsHeader'
 import useProjectItemActions from '@/src/client/hooks/useProjectItemActions'
 import EmptyTableWrapper from './emptyTableWrapper'
+import chevronIcon from '@/public/chevron.svg'
+import { PopupContent, PopupMenuItem } from '../popupMenu'
+import { exportTableData } from './useTestDataActionButtons'
+import GlobalPopupMenu from '../globalPopupMenu'
+import { WithDismiss } from '@/src/client/context/globalPopupContext'
 
 export default function TestDataView({ table }: { table: ActiveTable }) {
   const [renameItem] = useProjectItemActions()
@@ -12,13 +17,26 @@ export default function TestDataView({ table }: { table: ActiveTable }) {
     table.id.toString()
   )
 
+  const hasTableData = HasTableData([], inputValues)
+  const exportData = () => exportTableData(table.name, [], inputValues)
+  const showPopupMenu = (): [typeof TestDataItemPopupMenu, TestDataItemPopupMenuProps] => [
+    TestDataItemPopupMenu,
+    { exportData },
+  ]
+
   return (
     <div className='flex flex-col items-stretch h-full bg-gray-25'>
-      <SingleTabHeader label={table.name} onUpdateLabel={name => renameItem(table, name)} />
+      <SingleTabHeader label={table.name} onUpdateLabel={name => renameItem(table, name)} dropShadow=''>
+        {hasTableData && (
+          <div className='flex flex-1'>
+            <GlobalPopupMenu icon={chevronIcon} iconClassName='-ml-3' loadPopup={showPopupMenu} popUpRight />
+          </div>
+        )}
+      </SingleTabHeader>
       <EmptyTableWrapper
         bottomPadding='pb-4 h-full'
         backgroundColor={isDragActive => (isDragActive ? 'bg-gray-100 h-full' : 'bg-gray-50 h-full')}
-        isTableEmpty={!HasTableData([], inputValues)}
+        isTableEmpty={!hasTableData}
         onAddInputValues={addInputValues}>
         <div className='flex flex-col items-stretch flex-1 h-full p-4 overflow-y-auto'>
           <div className='bg-white border border-gray-200 rounded-lg'>
@@ -35,3 +53,13 @@ export default function TestDataView({ table }: { table: ActiveTable }) {
     </div>
   )
 }
+
+type TestDataItemPopupMenuProps = {
+  exportData: () => void
+}
+
+const TestDataItemPopupMenu = ({ exportData, withDismiss }: TestDataItemPopupMenuProps & WithDismiss) => (
+  <PopupContent className='w-44'>
+    <PopupMenuItem title='Export as CSV' callback={withDismiss(exportData)} />
+  </PopupContent>
+)
