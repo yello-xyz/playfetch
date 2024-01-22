@@ -64,25 +64,6 @@ export default function useTestDataActionButtons(
     { parentItem, isDataEmpty, onReplaceData, setDialogPrompt, replaceTitle },
   ]
 
-  const [showImportDialog, setShowImportDialog] = useState(false)
-  const importButton = (onImportComplete?: () => void) => (
-    <>
-      <Button disabled={!canReplaceData} type='secondary' onClick={() => setShowImportDialog(true)}>
-        {replaceTitle}
-      </Button>
-      {showImportDialog && (
-        <PickTableDialog
-          title={replaceTitle}
-          confirmTitle={confirmTitle}
-          tables={tables}
-          initialTable={table}
-          onDismiss={() => setShowImportDialog(false)}
-          onConfirm={tableID => replaceData(tableID).then(onImportComplete)}
-        />
-      )}
-    </>
-  )
-
   const [showReplaceDialog, setShowReplaceDialog] = useState(false)
   const actionButtons = (className = '') => (
     <div className={`${className} relative grow flex items-center gap-1`}>
@@ -104,7 +85,37 @@ export default function useTestDataActionButtons(
     </div>
   )
 
-  return [importButton, actionButtons] as const
+  const importButton = useTestDataImportButton(parentItem)
+
+  return [actionButtons, importButton] as const
+}
+
+export const useTestDataImportButton = (parentItem: Prompt | Chain) => {
+  const activeProject = useActiveProject()
+  const replaceInputs = useReplaceInputs(parentItem)
+
+  const tables = activeProject.tables
+  const table = tables.find(table => table.id === parentItem.tableID)
+
+  const [showImportDialog, setShowImportDialog] = useState(false)
+
+  return (onImportComplete?: () => void) => (
+    <>
+      <Button disabled={tables.length === 0} type='secondary' onClick={() => setShowImportDialog(true)}>
+        Import Test Data
+      </Button>
+      {showImportDialog && (
+        <PickTableDialog
+          title='Import Test Data'
+          confirmTitle='Import'
+          tables={tables}
+          initialTable={table}
+          onDismiss={() => setShowImportDialog(false)}
+          onConfirm={tableID => replaceInputs(tableID).then(onImportComplete)}
+        />
+      )}
+    </>
+  )
 }
 
 function LinkedTableItem({ table, onReplaceData }: { table?: Table; onReplaceData?: () => void }) {

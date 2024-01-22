@@ -6,7 +6,7 @@ import { Chain, InputValues, Prompt, TestConfig } from '@/types'
 import Label from '@/components/label'
 import IconButton from '@/components/iconButton'
 import closeIcon from '@/public/close.svg'
-import useTestDataActionButtons from './useTestDataActionButtons'
+import { useTestDataImportButton } from './useTestDataActionButtons'
 
 export type TestDataPopupProps = {
   parentItem: Prompt | Chain
@@ -44,17 +44,7 @@ export default function TestDataPopup({
     setTestConfig(testConfig)
   }
 
-  const [importTestDataButton] = useTestDataActionButtons(
-    parentItem,
-    variables,
-    staticVariables,
-    inputValues,
-    setInputValues,
-    persistInputValuesIfNeeded,
-    addInputValues,
-    testConfig,
-    setTestConfig
-  )
+  const importTestDataButton = useTestDataImportButton(parentItem)
 
   return (
     <PopupContent className='flex flex-col h-full'>
