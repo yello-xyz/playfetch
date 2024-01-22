@@ -222,12 +222,7 @@ const EmptyTestData = ({
         ) : progress !== undefined ? (
           <>
             <span>Uploading...</span>
-            <div className='max-w-[380px] w-full rounded h-1.5 bg-gray-200'>
-              <div
-                className={`h-full bg-blue-400 rounded-l ${progress < 1 ? '' : 'rounded-r'}`}
-                style={{ width: `${progress * 100}%` }}
-              />
-            </div>
+            <ProgressBar progress={progress} maxWidth='max-w-[380px]' />
           </>
         ) : (
           <>
@@ -250,3 +245,12 @@ const EmptyTestData = ({
     </div>
   )
 }
+
+const ProgressBar = ({ progress, maxWidth = '' }: { progress: number; maxWidth?: string }) => (
+  <div className={`${maxWidth} w-full rounded h-1.5 bg-gray-200`}>
+    <div
+      className={`h-full bg-blue-400 rounded-l ${progress < 1 ? '' : 'rounded-r'}`}
+      style={{ width: `${progress * 100}%` }}
+    />
+  </div>
+)
