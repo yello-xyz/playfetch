@@ -7,6 +7,7 @@ import { useRefreshActiveItem } from '@/src/client/context/projectContext'
 export default function EmptyTableWrapper({
   isTableEmpty,
   bottomPadding = 'pb-4',
+  backgroundColor = (isDragActive: boolean) => isDragActive ? 'bg-gray-100' : 'bg-gray-25',
   onAddInputValues,
   onImportComplete,
   importButton,
@@ -14,6 +15,7 @@ export default function EmptyTableWrapper({
 }: {
   isTableEmpty: boolean
   bottomPadding?: string
+  backgroundColor?: (isDragActive: boolean) => string
   onAddInputValues: (variable: string, inputs: string[]) => Promise<void>
   onImportComplete?: () => void
   importButton?: (onImportComplete?: () => void) => ReactNode
@@ -55,7 +57,6 @@ export default function EmptyTableWrapper({
   } = useDropzone({ onDrop, noClick: true, accept: { 'text/csv': ['.csv'] }, maxFiles: 1 })
 
   const baseClass = 'flex flex-col items-center justify-center p-6 border border-gray-200 rounded-lg'
-  const backgroundColor = isDragActive ? 'bg-gray-100' : 'bg-gray-25'
   const layoutClass = showFileUpload || progress !== undefined ? 'min-h-[136px] gap-3' : 'gap-1'
   const borderClass = showFileUpload ? 'border-dashed' : ''
 
@@ -67,7 +68,7 @@ export default function EmptyTableWrapper({
     <>{children}</>
   ) : (
     <div className={`${bottomPadding} w-full px-4 pt-4 text-gray-700`} {...(showFileUpload ? getRootProps() : {})}>
-      <div className={`${baseClass} ${backgroundColor} ${layoutClass} ${borderClass}`}>
+      <div className={`${baseClass} ${backgroundColor(isDragActive)} ${layoutClass} ${borderClass}`}>
         {showFileUpload ? (
           <>
             <span>Drag and drop to upload your CSV file.</span>
