@@ -7,8 +7,8 @@ import RangeInput from '../rangeInput'
 import Checkbox from '../checkbox'
 import TableEditor, { GetTableRowCount, GetTableValueForRow, HasTableData } from './tableEditor'
 import Button from '../button'
-import PickTableDialog from './pickTableDialog'
 import { useDropzone } from 'react-dropzone'
+import { parse } from 'csv-parse/sync'
 
 export default function TestDataPane({
   variables,
@@ -171,8 +171,28 @@ const EmptyTestData = ({
   importButton?: () => ReactNode
 }) => {
   const [showFileUpload, setShowFileUpload] = useState(false)
+  const [progress, setProgress] = useState<number>()
 
-  const onDrop = useCallback(([file]: File[]) => console.log(file), [])
+  const onDrop = useCallback(([file]: File[]) => {
+    if (file) {
+      setShowFileUpload(false)
+      setProgress(0)
+      const reader = new FileReader()
+      reader.onload = async () => {
+        if (reader.result && typeof reader.result !== 'string') {
+          const rows: string[][] = parse(Buffer.from(reader.result))
+          const cols = rows[0].map((_, colIndex) => rows.map(row => row[colIndex]))
+          for (const [index, col] of cols.entries()) {
+            setProgress((index + 1) / cols.length)
+            await new Promise(resolve => setTimeout(resolve, 1000))
+          }
+          setProgress(undefined)
+        }
+      }
+      reader.readAsArrayBuffer(file)
+    }
+  }, [])
+
   const {
     getRootProps,
     isDragActive,
@@ -181,11 +201,12 @@ const EmptyTestData = ({
 
   const baseClass = 'flex flex-col items-center justify-center p-6 border border-gray-200 rounded-lg'
   const backgroundColor = isDragActive ? 'bg-gray-100' : 'bg-gray-25'
-  const uploadClass = showFileUpload ? 'border-dashed min-h-[136px] gap-3' : 'gap-1'
+  const layoutClass = showFileUpload || progress !== undefined ? 'min-h-[136px] gap-3' : 'gap-1'
+  const borderClass = showFileUpload ? 'border-dashed' : ''
 
   return (
     <div className={`${bottomPadding} w-full px-4 pt-4 text-gray-700`} {...(showFileUpload ? getRootProps() : {})}>
-      <div className={`${baseClass} ${backgroundColor} ${uploadClass}`}>
+      <div className={`${baseClass} ${backgroundColor} ${layoutClass} ${borderClass}`}>
         {showFileUpload ? (
           <>
             <span>Drag and drop to upload your CSV file.</span>
@@ -196,6 +217,16 @@ const EmptyTestData = ({
               <Button type='secondary' onClick={openFileDialog}>
                 Browse for CSV file
               </Button>
+            </div>
+          </>
+        ) : progress !== undefined ? (
+          <>
+            <span>Uploading...</span>
+            <div className='max-w-[380px] w-full rounded h-1.5 bg-gray-200'>
+              <div
+                className={`h-full bg-blue-400 rounded-l ${progress < 1 ? '' : 'rounded-r'}`}
+                style={{ width: `${progress * 100}%` }}
+              />
             </div>
           </>
         ) : (
