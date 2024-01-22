@@ -66,8 +66,10 @@ export default function useTestDataActionButtons(
 
   const [showImportDialog, setShowImportDialog] = useState(false)
   const importButton = () => (
-    <Button disabled={!canReplaceData} type='secondary' onClick={() => setShowImportDialog(true)}>
-      {replaceTitle}
+    <>
+      <Button disabled={!canReplaceData} type='secondary' onClick={() => setShowImportDialog(true)}>
+        {replaceTitle}
+      </Button>
       {showImportDialog && (
         <PickTableDialog
           title={replaceTitle}
@@ -78,7 +80,7 @@ export default function useTestDataActionButtons(
           onConfirm={replaceData}
         />
       )}
-    </Button>
+    </>
   )
 
   const [showReplaceDialog, setShowReplaceDialog] = useState(false)
