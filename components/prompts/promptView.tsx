@@ -35,7 +35,10 @@ export default function PromptView({
 }) {
   const [promptTabs, setPromptTabs] = usePromptTabs()
   const [testDataExpanded, setTestDataExpanded] = useState(false)
-  const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, testDataExpanded.toString())
+  const [inputValues, setInputValues, persistInputValuesIfNeeded, addInputValues] = useInputValues(
+    prompt,
+    testDataExpanded.toString()
+  )
   const [testConfig, setTestConfig] = useState<TestConfig>({ rowIndices: [0] })
 
   const [runVersion, partialRuns, isRunning] = useRunVersion(activeVersion.id)
@@ -69,6 +72,7 @@ export default function PromptView({
     inputValues,
     setInputValues,
     persistInputValuesIfNeeded,
+    addInputValues,
     testConfig,
     setTestConfig
   )
@@ -81,6 +85,7 @@ export default function PromptView({
   const rowCount = GetTableRowCount(variables, inputValues)
   const minBottomPaneHeight = testDataExpanded ? (hasTestData ? Math.min(240, 150 + rowCount * 33) : 224) : 84
   const maxBottomPaneHeight = testDataExpanded ? (hasTestData ? Infinity : 224) : minBottomPaneHeight
+  const testDataBorder = hasTestData ? 'mt-1.5 border-t border-b border-gray-200' : '-mt-2.5'
   return (
     <Allotment vertical>
       <Allotment.Pane minSize={minTopPaneHeight}>
@@ -124,7 +129,7 @@ export default function PromptView({
             title='Test Data'
             initiallyExpanded={testDataExpanded}
             className='flex flex-col h-full'
-            contentClassName={`${hasTestData ? 'mt-1.5 border-t border-b' : '-mt-2.5'}  border-gray-200 overflow-y-auto`}
+            contentClassName={`${testDataBorder} overflow-y-auto`}
             titleClassName='pt-1.5 pl-0.5'
             rightHandItems={testDataActionButtons('mr-3')}
             onSetExpanded={setTestDataExpanded}>
@@ -133,6 +138,7 @@ export default function PromptView({
               staticVariables={staticVariables}
               inputValues={inputValues}
               setInputValues={setInputValues}
+              addInputValues={addInputValues}
               persistInputValuesIfNeeded={persistInputValuesIfNeeded}
               testConfig={testConfig}
               setTestConfig={setTestConfig}

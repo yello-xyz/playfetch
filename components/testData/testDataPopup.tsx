@@ -13,6 +13,7 @@ export type TestDataPopupProps = {
   inputValues: InputValues
   setInputValues: Dispatch<SetStateAction<InputValues>>
   persistInputValuesIfNeeded: () => void
+  addInputValues: (variable: string, inputs: string[]) => Promise<void>
   testConfig: TestConfig
   setTestConfig: (testConfig: TestConfig) => void
 }
@@ -23,6 +24,7 @@ export default function TestDataPopup({
   inputValues,
   setInputValues,
   persistInputValuesIfNeeded,
+  addInputValues,
   testConfig,
   setTestConfig,
   withDismiss,
@@ -50,6 +52,7 @@ export default function TestDataPopup({
         staticVariables={staticVariables}
         inputValues={currentInputValues}
         setInputValues={updateInputValues}
+        addInputValues={addInputValues}
         persistInputValuesIfNeeded={persistInputValuesIfNeeded}
         testConfig={currentTestConfig}
         setTestConfig={updateTestConfig}

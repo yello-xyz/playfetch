@@ -22,6 +22,7 @@ export default function useTestDataActionButtons(
   inputValues: InputValues,
   setInputValues: Dispatch<SetStateAction<InputValues>>,
   persistInputValuesIfNeeded: () => void,
+  addInputValues: (variable: string, inputs: string[]) => Promise<void>,
   testConfig: TestConfig,
   setTestConfig: (testConfig: TestConfig) => void
 ) {
@@ -38,6 +39,7 @@ export default function useTestDataActionButtons(
         inputValues,
         setInputValues,
         persistInputValuesIfNeeded,
+        addInputValues,
         testConfig,
         setTestConfig,
       },

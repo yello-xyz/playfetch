@@ -6,20 +6,24 @@ import useInitialState from './useInitialState'
 const sameValues = (a: string[] | undefined, b: string[] | undefined) =>
   (a ?? []).length === (b ?? []).length && (a ?? []).join(',') === (b ?? []).join(',')
 
+type AddInputValues = (variable: string, inputs: string[]) => Promise<void>
+
 export default function useInputValues(
   parent: ActivePrompt | ActiveChain | ActiveTable,
   context: string
-): [InputValues, Dispatch<SetStateAction<InputValues>>, () => void] {
+): [InputValues, Dispatch<SetStateAction<InputValues>>, () => void, AddInputValues] {
   const [originalInputValues, setOriginalInputValues] = useInitialState(parent.inputValues)
   const [inputValues, setInputValues] = useInitialState(originalInputValues)
+
+  const parentID = IsProjectItem(parent) ? parent.tableID ?? parent.id : parent.id
+  const updateInputValues = (variable: string, inputs: string[]) => api.updateInputValues(parentID, variable, inputs)
 
   const persistInputValuesIfNeeded = () => {
     setInputValues(inputValues => {
       setOriginalInputValues(originalInputValues => {
-        const parentID = IsProjectItem(parent) ? parent.tableID ?? parent.id : parent.id
         for (const [variable, inputs] of Object.entries(inputValues)) {
           if (!sameValues(inputs, originalInputValues[variable])) {
-            api.updateInputValues(parentID, variable, inputs)
+            updateInputValues(variable, inputs)
           }
         }
         for (const [variable, inputs] of Object.entries(originalInputValues)) {
@@ -39,5 +43,5 @@ export default function useInputValues(
     persistInputValuesIfNeeded()
   }
 
-  return [inputValues, setInputValues, persistInputValuesIfNeeded]
+  return [inputValues, setInputValues, persistInputValuesIfNeeded, updateInputValues]
 }

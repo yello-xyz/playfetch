@@ -16,6 +16,7 @@ export default function TestDataPane({
   inputValues,
   setInputValues,
   persistInputValuesIfNeeded,
+  addInputValues,
   testConfig,
   setTestConfig,
   importButton,
@@ -27,6 +28,7 @@ export default function TestDataPane({
   inputValues: InputValues
   setInputValues: Dispatch<SetStateAction<InputValues>>
   persistInputValuesIfNeeded: () => void
+  addInputValues: (variable: string, inputs: string[]) => Promise<void>
   testConfig: TestConfig
   setTestConfig: (testConfig: TestConfig) => void
   importButton?: () => ReactNode
@@ -130,6 +132,7 @@ export default function TestDataPane({
     <EmptyTestData
       bottomPadding={asModalPopup ? 'pb-4' : ''}
       onStartFromScratch={() => setStartFromScratch(true)}
+      onAddInputValues={addInputValues}
       importButton={importButton}
     />
   )
@@ -164,10 +167,12 @@ const testConfigWithAutoRespondMode = (testConfig: TestConfig, mode: DynamicMode
 const EmptyTestData = ({
   bottomPadding,
   onStartFromScratch,
+  onAddInputValues,
   importButton,
 }: {
   bottomPadding: string
   onStartFromScratch: () => void
+  onAddInputValues: (variable: string, inputs: string[]) => Promise<void>
   importButton?: () => ReactNode
 }) => {
   const [showFileUpload, setShowFileUpload] = useState(false)
@@ -184,7 +189,7 @@ const EmptyTestData = ({
           const cols = rows[0].map((_, colIndex) => rows.map(row => row[colIndex]))
           for (const [index, col] of cols.entries()) {
             setProgress((index + 1) / cols.length)
-            await new Promise(resolve => setTimeout(resolve, 1000))
+            await onAddInputValues(col[0], col.slice(1))
           }
           setProgress(undefined)
         }

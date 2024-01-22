@@ -42,7 +42,10 @@ export default function ChainNodeOutput({
 }) {
   const activeNode = nodes[activeIndex]
   const items = nodes.filter(IsChainItem)
-  const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(chain, JSON.stringify(activeNode))
+  const [inputValues, setInputValues, persistInputValuesIfNeeded, addInputValues] = useInputValues(
+    chain,
+    JSON.stringify(activeNode)
+  )
   const [testConfig, setTestConfig] = useState<TestConfig>({ rowIndices: [0] })
 
   const [checkProviderAvailable, checkModelAvailable] = useCheckProviders()
@@ -141,6 +144,7 @@ export default function ChainNodeOutput({
     inputValues,
     setInputValues,
     persistInputValuesIfNeeded,
+    addInputValues,
     testConfig,
     setTestConfig
   )
@@ -158,6 +162,7 @@ export default function ChainNodeOutput({
               staticVariables={staticVariables}
               inputValues={inputValues}
               setInputValues={setInputValues}
+              addInputValues={addInputValues}
               persistInputValuesIfNeeded={persistInputValuesIfNeeded}
               testConfig={testConfig}
               setTestConfig={setTestConfig}
