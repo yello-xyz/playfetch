@@ -1,21 +1,23 @@
-import { ReactNode, useCallback, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
 import Button from '../button'
 import { useDropzone } from 'react-dropzone'
 import { parse } from 'csv-parse/sync'
 import { useRefreshActiveItem } from '@/src/client/context/projectContext'
 
-export default function EmptyTable({
+export default function EmptyTableWrapper({
+  isTableEmpty,
   bottomPadding,
-  onStartFromScratch,
   onAddInputValues,
   onImportComplete,
   importButton,
+  children,
 }: {
+  isTableEmpty: boolean
   bottomPadding: string
-  onStartFromScratch: () => void
   onAddInputValues: (variable: string, inputs: string[]) => Promise<void>
   onImportComplete?: () => void
   importButton?: (onImportComplete?: () => void) => ReactNode
+  children?: ReactNode
 }) {
   const [showFileUpload, setShowFileUpload] = useState(false)
   const [progress, setProgress] = useState<number>()
@@ -57,7 +59,13 @@ export default function EmptyTable({
   const layoutClass = showFileUpload || progress !== undefined ? 'min-h-[136px] gap-3' : 'gap-1'
   const borderClass = showFileUpload ? 'border-dashed' : ''
 
-  return (
+  const [startFromScratch, setStartFromScratch] = useState(false)
+
+  useEffect(() => setStartFromScratch(startFromScratch && isTableEmpty), [startFromScratch, isTableEmpty])
+
+  return !isTableEmpty || startFromScratch ? (
+    <>{children}</>
+  ) : (
     <div className={`${bottomPadding} w-full px-4 pt-4 text-gray-700`} {...(showFileUpload ? getRootProps() : {})}>
       <div className={`${baseClass} ${backgroundColor} ${layoutClass} ${borderClass}`}>
         {showFileUpload ? (
@@ -88,7 +96,7 @@ export default function EmptyTable({
               <Button type='secondary' onClick={() => setShowFileUpload(true)}>
                 Import CSV
               </Button>
-              <Button type='secondary' onClick={onStartFromScratch}>
+              <Button type='secondary' onClick={() => setStartFromScratch(true)}>
                 Start from scratch
               </Button>
             </span>
