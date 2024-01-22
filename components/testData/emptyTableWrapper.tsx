@@ -7,7 +7,7 @@ import { useRefreshActiveItem } from '@/src/client/context/projectContext'
 export default function EmptyTableWrapper({
   isTableEmpty,
   bottomPadding = 'pb-4',
-  backgroundColor = (isDragActive: boolean) => isDragActive ? 'bg-gray-100' : 'bg-gray-25',
+  backgroundColor = (isDragActive: boolean) => (isDragActive ? 'bg-gray-100' : 'bg-gray-25'),
   onAddInputValues,
   onImportComplete,
   importButton,
