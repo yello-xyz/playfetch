@@ -47,7 +47,7 @@ export default function EmptyTableWrapper({
         reader.readAsArrayBuffer(file)
       }
     },
-    [onAddInputValues, refreshActiveItem]
+    [onAddInputValues, refreshActiveItem, onImportComplete]
   )
 
   const {

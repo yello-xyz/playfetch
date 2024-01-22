@@ -104,7 +104,7 @@ export const useTestDataImportButton = (parentItem: Prompt | Chain) => {
 
   const [showImportDialog, setShowImportDialog] = useState(false)
 
-  return (onImportComplete?: () => void) => (
+  const importButton = (onImportComplete?: () => void) => (
     <>
       <Button disabled={tables.length === 0} type='secondary' onClick={() => setShowImportDialog(true)}>
         Import Test Data
@@ -121,6 +121,8 @@ export const useTestDataImportButton = (parentItem: Prompt | Chain) => {
       )}
     </>
   )
+
+  return importButton
 }
 
 function LinkedTableItem({ table, onReplaceData }: { table?: Table; onReplaceData?: () => void }) {
