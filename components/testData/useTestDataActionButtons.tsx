@@ -47,14 +47,13 @@ export default function useTestDataActionButtons(
 
   const tables = activeProject.tables
   const table = tables.find(table => table.id === parentItem.tableID)
-  const isDataEmpty = Object.values(inputValues).every(value => value.length === 0 || value[0] === '')
+  const isDataEmpty = !HasTableData(variables, inputValues)
   const canReplaceData = tables.length > 0 && (!table || tables.length > 1)
   const onReplaceData = canReplaceData ? () => setShowReplaceDialog(true) : undefined
   const replaceData = (tableID: number) => replaceInputs(tableID)
 
-  const hasTableData = HasTableData(variables, inputValues)
-  const replaceTitle = hasTableData ? 'Replace Test Data' : 'Import Test Data'
-  const confirmTitle = hasTableData ? 'Replace' : 'Import'
+  const replaceTitle = isDataEmpty ? 'Import Test Data' : 'Replace Test Data'
+  const confirmTitle = isDataEmpty ? 'Import' : 'Replace'
 
   const setDialogPrompt = useModalDialogPrompt()
   const showPopupMenu = (): [typeof TestDataPopupMenu, TestDataPopupMenuProps] => [
