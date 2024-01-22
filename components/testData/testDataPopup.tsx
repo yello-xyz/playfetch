@@ -2,12 +2,14 @@ import { Dispatch, SetStateAction, useState } from 'react'
 import { WithDismiss } from '@/src/client/context/globalPopupContext'
 import { PopupContent } from '../popupMenu'
 import TestDataPane from '@/components/testData/testDataPane'
-import { InputValues, TestConfig } from '@/types'
+import { Chain, InputValues, Prompt, TestConfig } from '@/types'
 import Label from '@/components/label'
 import IconButton from '@/components/iconButton'
 import closeIcon from '@/public/close.svg'
+import useTestDataActionButtons from './useTestDataActionButtons'
 
 export type TestDataPopupProps = {
+  parentItem: Prompt | Chain
   variables: string[]
   staticVariables: string[]
   inputValues: InputValues
@@ -19,6 +21,7 @@ export type TestDataPopupProps = {
 }
 
 export default function TestDataPopup({
+  parentItem,
   variables,
   staticVariables,
   inputValues,
@@ -41,6 +44,18 @@ export default function TestDataPopup({
     setTestConfig(testConfig)
   }
 
+  const [importTestDataButton] = useTestDataActionButtons(
+    parentItem,
+    variables,
+    staticVariables,
+    inputValues,
+    setInputValues,
+    persistInputValuesIfNeeded,
+    addInputValues,
+    testConfig,
+    setTestConfig
+  )
+
   return (
     <PopupContent className='flex flex-col h-full'>
       <div className='flex items-center p-1.5 border-b border-gray-200'>
@@ -56,6 +71,7 @@ export default function TestDataPopup({
         persistInputValuesIfNeeded={persistInputValuesIfNeeded}
         testConfig={currentTestConfig}
         setTestConfig={updateTestConfig}
+        importButton={importTestDataButton}
         asModalPopup
         skipButtonBorder
       />

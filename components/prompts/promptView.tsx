@@ -65,7 +65,7 @@ export default function PromptView({
   const variables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, true)
   const staticVariables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, false)
 
-  const [testDataActionButtons, importTestDataButton] = useTestDataActionButtons(
+  const [importTestDataButton, testDataActionButtons] = useTestDataActionButtons(
     prompt,
     variables,
     staticVariables,

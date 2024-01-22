@@ -32,7 +32,7 @@ export default function TestDataPane({
   addInputValues: (variable: string, inputs: string[]) => Promise<void>
   testConfig: TestConfig
   setTestConfig: (testConfig: TestConfig) => void
-  importButton?: () => ReactNode
+  importButton: () => ReactNode
   asModalPopup?: boolean
   skipButtonBorder?: boolean
 }) {
@@ -222,7 +222,7 @@ const EmptyTestData = ({
               <Button type='secondary' onClick={() => setShowFileUpload(false)}>
                 Cancel
               </Button>
-              <Button type='secondary' onClick={openFileDialog}>
+              <Button type='primary' onClick={openFileDialog}>
                 Browse for CSV file
               </Button>
             </div>

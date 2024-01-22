@@ -34,6 +34,7 @@ export default function useTestDataActionButtons(
     setPopup(
       TestDataPopup,
       {
+        parentItem,
         variables,
         staticVariables,
         inputValues,
@@ -63,6 +64,23 @@ export default function useTestDataActionButtons(
     { parentItem, isDataEmpty, onReplaceData, setDialogPrompt, replaceTitle },
   ]
 
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const importButton = () => (
+    <Button disabled={!canReplaceData} type='secondary' onClick={() => setShowImportDialog(true)}>
+      {replaceTitle}
+      {showImportDialog && (
+        <PickTableDialog
+          title={replaceTitle}
+          confirmTitle={confirmTitle}
+          tables={tables}
+          initialTable={table}
+          onDismiss={() => setShowImportDialog(false)}
+          onConfirm={replaceData}
+        />
+      )}
+    </Button>
+  )
+
   const [showReplaceDialog, setShowReplaceDialog] = useState(false)
   const actionButtons = (className = '') => (
     <div className={`${className} relative grow flex items-center gap-1`}>
@@ -84,24 +102,7 @@ export default function useTestDataActionButtons(
     </div>
   )
 
-  const [showImportDialog, setShowImportDialog] = useState(false)
-  const importButton = () => (
-    <Button disabled={!canReplaceData} type='secondary' onClick={() => setShowImportDialog(true)}>
-      {replaceTitle}
-      {showImportDialog && (
-        <PickTableDialog
-          title={replaceTitle}
-          confirmTitle={confirmTitle}
-          tables={tables}
-          initialTable={table}
-          onDismiss={() => setShowImportDialog(false)}
-          onConfirm={replaceData}
-        />
-      )}
-    </Button>
-  )
-
-  return [actionButtons, importButton] as const
+  return [importButton, actionButtons] as const
 }
 
 function LinkedTableItem({ table, onReplaceData }: { table?: Table; onReplaceData?: () => void }) {
