@@ -63,19 +63,7 @@ export default function useTestDataActionButtons(
   const isDataEmpty = !HasTableData(variables, inputValues)
   const replaceTitle = isDataEmpty ? 'Import Test Data' : 'Replace Test Data'
   const confirmTitle = isDataEmpty ? 'Import' : 'Replace'
-
-  const onExportData = () => {
-    const [allVariables, rowCount] = GetAllVariablesAndRowCount(variables, inputValues)
-    const rows = Array.from({ length: rowCount }).map((_, rowIndex) =>
-      allVariables.map(variable => (rowIndex > 0 ? inputValues[variable]?.[rowIndex - 1] ?? '' : variable))
-    )
-    const file = new Blob([stringify(rows)], { type: 'text/csv' })
-    const element = document.createElement('a')
-    element.href = URL.createObjectURL(file)
-    element.download = `${parentItem.name}.csv`
-    document.body.appendChild(element)
-    element.click()
-  }
+  const onExportData = () => exportTableData(parentItem.name, variables, inputValues)
 
   const setDialogPrompt = useModalDialogPrompt()
   const showPopupMenu = (): [typeof TestDataPopupMenu, TestDataPopupMenuProps] => [
@@ -107,6 +95,19 @@ export default function useTestDataActionButtons(
   const importButton = useTestDataImportButton(parentItem)
 
   return [actionButtons, importButton] as const
+}
+
+export const exportTableData = (fileName: string, variables: string[], inputValues: InputValues) => {
+  const [allVariables, rowCount] = GetAllVariablesAndRowCount(variables, inputValues)
+  const rows = Array.from({ length: rowCount }).map((_, rowIndex) =>
+    allVariables.map(variable => (rowIndex > 0 ? inputValues[variable]?.[rowIndex - 1] ?? '' : variable))
+  )
+  const file = new Blob([stringify(rows)], { type: 'text/csv' })
+  const element = document.createElement('a')
+  element.href = URL.createObjectURL(file)
+  element.download = `${fileName}.csv`
+  document.body.appendChild(element)
+  element.click()
 }
 
 export const useTestDataImportButton = (parentItem: Prompt | Chain) => {
