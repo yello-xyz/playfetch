@@ -73,6 +73,26 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
   const sendData = (data: object) => res.write(`data: ${JSON.stringify(data)}\n\n`)
   const abortController = detectRequestClosed(res)
 
+  req.on('aborted', () => console.log('request aborted'))
+  req.on('close', () => console.log('request closed'))
+  req.on('end', () => console.log('request end'))
+  req.on('error', err => console.log('request error', err))
+
+  req.socket.on('aborted', () => console.log('request socket aborted'))
+  req.socket.on('close', () => console.log('request socket closed'))
+  req.socket.on('finish', () => console.log('request socket finished'))
+  req.socket.on('error', err => console.log('request socket error', err))
+
+  res.on('aborted', () => console.log('response aborted'))
+  res.on('close', () => console.log('response closed'))
+  res.on('finish', () => console.log('response finished'))
+  res.on('error', err => console.log('response error', err))
+
+  res.socket?.on('aborted', () => console.log('response socket aborted'))
+  res.socket?.on('close', () => console.log('response socket closed'))
+  res.socket?.on('finish', () => console.log('response socket finished'))
+  res.socket?.on('error', err => console.log('response socket error', err))
+
   for (let autoRunIndex = 0; autoRunIndex < 1 + autoRepeatCount && multipleInputs.length > 0; autoRunIndex++) {
     const runIDs = await allocateRunIDs(multipleInputs.length)
     const lastIndices = multipleInputs.map(_ => 0)
@@ -120,6 +140,15 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
       )
     )
 
+    console.log(
+      req.readableAborted,
+      req.socket.readableAborted,
+      req.socket.closed,
+      req.destroyed,
+      res.destroyed,
+      res.socket?.readableAborted,
+      res.socket?.destroyed
+    )
     if (abortController.signal.aborted) {
       break
     }
