@@ -339,7 +339,7 @@ async function getProjectAndWorkspaceUsers(
   const [workspaceUsers, pendingWorkspaceUsers] = await getWorkspaceUsers(workspaceID)
 
   return [
-    [...projectUsers, ...filterObjects(workspaceUsers, projectUsers)],
+    [...projectOwners, ...filterObjects(projectUsers, projectOwners), ...filterObjects(workspaceUsers, projectUsers)],
     [
       ...filterObjects(pendingProjectUsers, workspaceUsers),
       ...filterObjects(pendingWorkspaceUsers, [...projectUsers, ...pendingProjectUsers]),

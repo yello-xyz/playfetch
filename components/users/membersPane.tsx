@@ -39,8 +39,6 @@ export default function MembersPane({
   const emailsAreValid =
     emails.length > 0 && emails.every(email => CheckValidEmail(email) && !previousEmails.has(email))
 
-  const onLoad = useCallback((node: HTMLInputElement | null) => node?.focus(), [])
-
   return (
     <>
       <div className='flex items-center gap-2.5'>
