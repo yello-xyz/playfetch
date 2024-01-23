@@ -2,6 +2,7 @@ import api, { StreamReader } from '@/src/client/api'
 import { useState } from 'react'
 import { PartialRun, PromptInputs } from '@/types'
 import { useRefreshActiveItem } from '../context/projectContext'
+import ShortUniqueId from 'short-unique-id'
 
 export const ConsumeStream = async (
   inputs: PromptInputs[],
@@ -70,7 +71,7 @@ export default function useRunVersion(activeVersionID: number) {
     const versionID = await getVersion()
     setRunningVersionID(versionID)
     const abortController = new AbortController()
-    const requestID = new Uint32Array(Float64Array.of(Math.random()).buffer)[0].toString()
+    const requestID = new ShortUniqueId({ length: 16 })()
     const cancelRun = () => {
       abortController.abort()
       api.cancelRun(requestID)
