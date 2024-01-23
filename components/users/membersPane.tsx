@@ -44,7 +44,7 @@ export default function MembersPane({
   return (
     <>
       <div className='flex items-center gap-2.5'>
-        <TextInput placeholder='Add email addresses' onLoad={onLoad} value={email} setValue={setEmail} />
+        <TextInput placeholder='Add email addresses' value={email} setValue={setEmail} />
         <Button disabled={!emailsAreValid} onClick={() => onInvite(emails)}>
           Invite
         </Button>

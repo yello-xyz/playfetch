@@ -33,8 +33,8 @@ export default function Collapsible({
     <div className={className}>
       <div className={`${titleClassName} flex items-center cursor-pointer`} onClick={toggleExpanded}>
         <Icon className={isExpanded ? '' : '-rotate-90'} icon={chevronIcon} />
-        <span className='flex-1 font-medium text-gray-700'>{title}</span>
-        {rightHandItems && <div className='self-end'>{rightHandItems}</div>}
+        <span className='font-medium text-gray-700'>{title}</span>
+        {rightHandItems && <div className='flex-1 pl-2'>{rightHandItems}</div>}
       </div>
       {isExpanded && <div className={contentClassName}>{children}</div>}
     </div>

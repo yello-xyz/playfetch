@@ -32,12 +32,14 @@ import { ActiveItem, CompareItem, EndpointsItem, SettingsItem } from '@/src/comm
 import loadActiveItem from '@/src/server/activeItem'
 import useActiveItem from '@/src/client/hooks/useActiveItem'
 import useCommentSelection from '@/src/client/hooks/useCommentSelection'
-import { PromptConfigContext } from '@/src/client/context/promptConfigContext'
+import { UserPresetsContext } from '@/src/client/context/userPresetsContext'
 import { useDocumentationCookie } from '@/components/cookieBanner'
 import { ProviderContext } from '@/src/client/context/providerContext'
 
 import dynamic from 'next/dynamic'
 import ProjectPaneWrapper from '@/components/projects/projectPaneWrapper'
+import { UserPresets } from '@/src/common/userPresets'
+import useTable from '@/src/client/hooks/useTable'
 
 const MainProjectPane = dynamic(() => import('@/components/projects/mainProjectPane'))
 const ProjectSidebar = dynamic(() => import('@/components/projects/projectSidebar'))
@@ -55,7 +57,7 @@ export default function Home({
   initialAnalytics,
   initialAvailableProviders,
   initialScopedProviders,
-  initialPromptConfig,
+  initialUserPresets,
 }: {
   user: User
   workspaces: Workspace[]
@@ -64,7 +66,7 @@ export default function Home({
   initialAnalytics: Analytics | null
   initialAvailableProviders: AvailableProvider[]
   initialScopedProviders: AvailableProvider[]
-  initialPromptConfig: PromptConfig
+  initialUserPresets: UserPresets
 }) {
   useDocumentationCookie('set')
   const [
@@ -74,6 +76,7 @@ export default function Home({
     setActiveItem,
     activePrompt,
     activeChain,
+    activeTable,
     activeVersion,
     setActiveVersion,
     activePromptVersion,
@@ -104,13 +107,20 @@ export default function Home({
     setModifiedVersion(undefined)
   }
 
+  const [refreshTable, selectTable, addTable] = useTable(
+    activeProject,
+    refreshProject,
+    activeTable,
+    setActiveItem,
+    savePrompt,
+    () => updateVersion(undefined)
+  )
+
   const selectVersion = (version: PromptVersion | ChainVersion) => {
-    if (version.id !== activeVersion?.id) {
-      if (activePrompt) {
-        savePrompt(_ => refreshPrompt(activePrompt.id, version.id))
-      }
-      updateVersion(version)
+    if (activePrompt) {
+      savePrompt(_ => refreshPrompt(activePrompt.id, version.id))
     }
+    updateVersion(version)
   }
 
   const refreshActiveItem = (versionID?: number, allowResave?: boolean) => {
@@ -118,6 +128,8 @@ export default function Home({
       return refreshPrompt(activePrompt.id, versionID, allowResave)
     } else if (activeChain) {
       return refreshChain(activeChain.id, versionID)
+    } else if (activeTable) {
+      return refreshTable(activeTable.id)
     } else {
       return refreshProject()
     }
@@ -130,11 +142,11 @@ export default function Home({
     }).then(versionID => versionID!)
 
   const router = useRouter()
-  const { promptID, chainID, compare, endpoints, settings } = ParseActiveItemQuery(router.query, activeProject)
+  const { promptID, chainID, tableID, compare, endpoints, settings } = ParseActiveItemQuery(router.query, activeProject)
 
   const onDeleteItem = async (itemID: number) => {
     refreshProject()
-    if (itemID === activePrompt?.id || itemID === activeChain?.id) {
+    if (itemID === activePrompt?.id || itemID === activeChain?.id || itemID === activeTable?.id) {
       setModifiedVersion(undefined)
       router.push(ProjectRoute(activeProject.id))
     }
@@ -189,7 +201,7 @@ export default function Home({
       ? EndpointsItem
       : settings
         ? SettingsItem
-        : promptID ?? chainID
+        : promptID ?? chainID ?? tableID
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
     if (compare) {
@@ -202,6 +214,8 @@ export default function Home({
       selectPrompt(promptID)
     } else if (chainID) {
       selectChain(chainID)
+    } else if (tableID) {
+      selectTable(tableID)
     }
     setQuery(currentQueryState)
   }
@@ -230,13 +244,13 @@ export default function Home({
     }
   })
 
-  const [defaultPromptConfig, setDefaultPromptConfig] = useState(initialPromptConfig)
+  const [currentUserPresets, setCurrentUserPresets] = useState(initialUserPresets)
 
   return (
     <>
       <UserContext.Provider value={{ loggedInUser: user }}>
         <ProviderContext.Provider value={{ availableProviders }}>
-          <PromptConfigContext.Provider value={{ defaultPromptConfig, setDefaultPromptConfig }}>
+          <UserPresetsContext.Provider value={{ currentUserPresets, setCurrentUserPresets }}>
             <ProjectContext.Provider value={{ activeProject, refreshActiveItem, refreshProject }}>
               <ModalDialogContext.Provider value={{ setDialogPrompt }}>
                 <GlobalPopupContext.Provider value={globalPopupProviderProps}>
@@ -260,9 +274,11 @@ export default function Home({
                             workspaces={workspaces}
                             onAddPrompt={addPrompt}
                             onAddChain={addChain}
+                            onAddTable={addTable}
                             onDeleteItem={onDeleteItem}
                             onSelectPrompt={selectPrompt}
                             onSelectChain={selectChain}
+                            onSelectTable={selectTable}
                             onSelectCompare={selectCompare}
                             onSelectEndpoints={selectEndpoints}
                             onSelectSettings={selectSettings}
@@ -276,6 +292,7 @@ export default function Home({
                             activeItem={activeItem}
                             activePrompt={activePrompt}
                             activeChain={activeChain}
+                            activeTable={activeTable}
                             activePromptVersion={activePromptVersion}
                             activeChainVersion={activeChainVersion}
                             selectVersion={selectVersion}
@@ -301,7 +318,7 @@ export default function Home({
               <GlobalPopup {...globalPopupProps} {...popupProps} />
               <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
             </ProjectContext.Provider>
-          </PromptConfigContext.Provider>
+          </UserPresetsContext.Provider>
         </ProviderContext.Provider>
       </UserContext.Provider>
     </>

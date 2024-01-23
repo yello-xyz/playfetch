@@ -8,6 +8,7 @@ import UserSidebarItem from '../users/userSidebarItem'
 import PickNameDialog from '../pickNameDialog'
 import { useLoggedInUser } from '@/src/client/context/userContext'
 import { FeedbackSection, SidebarButton, SidebarSection } from '../sidebar'
+import useWorkspaceActions from '@/src/client/hooks/useWorkspaceActions'
 
 export default function WorkspaceSidebar({
   workspaces,
@@ -16,6 +17,7 @@ export default function WorkspaceSidebar({
   sharedProjects,
   onSelectWorkspace,
   onSelectSharedProjects,
+  onRefreshWorkspace,
   onRefreshWorkspaces,
 }: {
   workspaces: Workspace[]
@@ -24,6 +26,7 @@ export default function WorkspaceSidebar({
   sharedProjects?: ActiveWorkspace
   onSelectWorkspace: (workspaceID: number) => void
   onSelectSharedProjects?: () => void
+  onRefreshWorkspace: () => void
   onRefreshWorkspaces: () => Promise<void>
 }) {
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
@@ -32,6 +35,13 @@ export default function WorkspaceSidebar({
     const workspaceID = await api.addWorkspace(name)
     onRefreshWorkspaces().then(() => onSelectWorkspace(workspaceID))
   }
+
+  const refresh = () => {
+    onRefreshWorkspace()
+    return onRefreshWorkspaces()
+  }
+
+  const [renameWorkspace] = useWorkspaceActions(refresh)
 
   const user = useLoggedInUser()
 
@@ -71,6 +81,7 @@ export default function WorkspaceSidebar({
                 icon={folderIcon}
                 active={activeWorkspaceID === workspace.id}
                 onClick={() => onSelectWorkspace(workspace.id)}
+                onRename={properWorkspaces.includes(workspace) ? name => renameWorkspace(workspace, name) : undefined}
               />
             ))}
             <SidebarButton title='New Workspace…' icon={addIcon} onClick={() => setShowPickNamePrompt(true)} />

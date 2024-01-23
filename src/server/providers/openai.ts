@@ -10,7 +10,18 @@ export default function predict(
   userID: number,
   model: OpenAILanguageModel | CustomLanguageModel
 ): Predictor {
-  return (prompts, temperature, maxTokens, context, useContext, streamChunks, seed, jsonMode, continuationInputs) =>
+  return (
+    prompts,
+    temperature,
+    maxTokens,
+    context,
+    useContext,
+    streamChunks,
+    abortSignal,
+    seed,
+    jsonMode,
+    continuationInputs
+  ) =>
     tryCompleteChat(
       apiKey,
       userID,
@@ -24,6 +35,7 @@ export default function predict(
       jsonMode,
       context,
       useContext,
+      abortSignal,
       streamChunks,
       continuationInputs
     )
@@ -64,6 +76,7 @@ async function tryCompleteChat(
   jsonMode: boolean | undefined,
   context: PromptContext,
   useContext: boolean,
+  abortSignal: AbortSignal,
   streamChunks?: (chunk: string) => void,
   continuationInputs?: PromptInputs
 ) {
@@ -104,7 +117,7 @@ async function tryCompleteChat(
         seed,
         ...(SupportsJsonMode(model) && !!jsonMode ? { response_format: { type: 'json_object' } } : {}),
       },
-      { timeout: 30 * 1000 }
+      { timeout: 30 * 1000, signal: abortSignal }
     )
 
     let output = ''

@@ -9,40 +9,28 @@ import {
   TagStyle,
 } from '@codemirror/language'
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
-import { Inter, Roboto_Mono } from 'next/font/google'
+import { CompletionContext, autocompletion } from '@codemirror/autocomplete'
+import EditorTheme from '@/styles/editorTheme'
 
-const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
-const mono = Roboto_Mono({ subsets: ['latin'], weight: ['400', '500', '600'] })
-
-const editorTheme = (preformatted: boolean, bordered: boolean) =>
-  EditorView.theme({
-    '&': {
-      ...(bordered ? { border: '1px solid #CFD3D8', borderRadius: '8px' } : {}),
-      overflowY: 'auto',
-      height: '100%',
-    },
-    '&.cm-focused': { outline: 'none', ...(bordered ? { border: '1px solid #3B8CEB', borderRadius: '8px' } : {}) },
-    '.cm-content': {
-      fontFamily: preformatted ? mono.style.fontFamily : inter.style.fontFamily,
-      color: preformatted ? '#71B892' : '#333A46',
-      padding: '6px 12px',
-    },
-    '.cm-line': { padding: '0px' },
-    '.cm-placeholder': { color: '#B5B7BF' },
-    '.cm-gutters': {
-      color: '#898D96',
-      backgroundColor: 'transparent',
-      border: 'none',
-      fontFamily: mono.style.fontFamily,
-      padding: '0px 6px',
-    },
-  })
+const buildCompletions = (regexp: RegExp, completions: string[] | undefined) =>
+  completions
+    ? [
+        (context: CompletionContext) => {
+          const word = context.matchBefore(regexp)
+          return word && word.from !== word.to
+            ? { from: word.from, options: completions.map(completion => ({ label: completion })) }
+            : null
+        },
+      ]
+    : []
 
 export default function Editor({
   value,
   setValue,
   tokenizer,
   tokenStyle,
+  variables,
+  completions,
   setExtractSelection,
   className = '',
   placeholder,
@@ -58,6 +46,8 @@ export default function Editor({
   setValue: (value: string) => void
   tokenizer?: (stream: StringStream) => string
   tokenStyle?: TagStyle
+  variables?: string[]
+  completions?: string[]
   setExtractSelection?: (
     extractSelection: () => (tokenType: string) => {
       root: Node
@@ -97,20 +87,40 @@ export default function Editor({
     []
   )
 
+  const autocomplete = useMemo(
+    () =>
+      variables || completions
+        ? autocompletion({
+            activateOnTyping: true,
+            icons: false,
+            override: [
+              ...buildCompletions(
+                /{[^}]*}?/,
+                variables?.map(v => `{{${v}}}`)
+              ),
+              ...buildCompletions(/\w*/, completions),
+            ],
+          })
+        : undefined,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  )
+
   const extensions = useMemo(
     () => [
       ...(tokenizer ? [StreamLanguage.define({ token: tokenizer })] : []),
+      ...(autocomplete ? [autocomplete] : []),
       ...(tokenStyle ? [syntaxHighlighting(HighlightStyle.define([tokenStyle]))] : []),
       ...(preformatted ? [lineNumbers()] : []),
       EditorView.lineWrapping,
       placeholderText(placeholder ?? ''),
       EditorView.editable.of(!disabled),
-      editorTheme(preformatted, bordered),
+      EditorTheme(preformatted, bordered, tokenStyle),
       onUpdate,
       history(),
       keymap.of([...defaultKeymap, ...historyKeymap]),
     ],
-    [tokenizer, tokenStyle, disabled, placeholder, preformatted, bordered, onUpdate]
+    [tokenizer, tokenStyle, disabled, placeholder, preformatted, bordered, onUpdate, autocomplete]
   )
 
   useEffect(() => {

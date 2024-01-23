@@ -11,7 +11,7 @@ import {
   getRecentEntities,
   getTimestamp,
 } from './datastore'
-import { getUniqueNameWithFormat, getVerifiedProjectScopedData } from './prompts'
+import { getVerifiedProjectScopedData } from './prompts'
 import { saveUsage } from './usage'
 import { CheckValidURLPath } from '@/src/common/formatting'
 import { getTrustedUserPromptOrChainData } from './chains'
@@ -74,17 +74,19 @@ const getValidURLPath = async (
   if (!CheckValidURLPath(name)) {
     throw new Error(`Invalid name ${name} for endpoint`)
   }
-  return getUniqueNameWithFormat(
-    name,
-    async urlPath => {
-      const endpoints = await getFilteredEntities(Entity.ENDPOINT, buildPathFilter(projectID, urlPath))
-      return (
-        endpoints.some(endpoint => endpoint.parentID !== parentID) ||
-        endpoints.filter(endpoint => endpoint.flavor === flavor).some(endpoint => getID(endpoint) !== endpointID)
-      )
-    },
-    (name, counter) => `${name}${counter}`
-  )
+  const isNameInUse = async (urlPath: string) => {
+    const endpoints = await getFilteredEntities(Entity.ENDPOINT, buildPathFilter(projectID, urlPath))
+    return (
+      endpoints.some(endpoint => endpoint.parentID !== parentID) ||
+      endpoints.filter(endpoint => endpoint.flavor === flavor).some(endpoint => getID(endpoint) !== endpointID)
+    )
+  }
+  let uniqueName = name
+  let counter = 2
+  while (await isNameInUse(uniqueName)) {
+    uniqueName = `${name}${counter++}`
+  }
+  return uniqueName
 }
 
 export async function saveEndpoint(

@@ -1,9 +1,12 @@
-import { PromptConfig, PromptVersion, Prompts } from '@/types'
+import { ActivePrompt, ChainVersion, PromptConfig, PromptVersion, Prompts } from '@/types'
 import useInitialState from './useInitialState'
 import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
-import { SupportedPromptKeysForModel, SupportsJsonMode, SupportsSeed } from '@/src/common/providerMetadata'
+import { SupportedPromptKeysForModel, ValidatePromptConfig } from '@/src/common/providerMetadata'
+import { useEffect, useState } from 'react'
+import { useLoggedInUser } from '../context/userContext'
 
 export default function usePromptVersion(
+  prompt: ActivePrompt,
   activeVersion: PromptVersion,
   setModifiedVersion: (version: PromptVersion) => void
 ) {
@@ -21,11 +24,7 @@ export default function usePromptVersion(
           SupportedPromptKeysForModel(config.model).includes(key as keyof Prompts)
         )
       ) as Prompts
-      config = {
-        ...config,
-        seed: SupportsSeed(config.model) ? config.seed : undefined,
-        jsonMode: SupportsJsonMode(config.model) ? config.jsonMode ?? false : undefined,
-      }
+      config = ValidatePromptConfig(config)
       onUpdate(prompts, config)
       return { ...currentVersion, prompts, config }
     })
@@ -37,5 +36,52 @@ export default function usePromptVersion(
       return { ...currentVersion, prompts }
     })
 
-  return [currentVersion, updatePrompt, updateConfig, isDirty] as const
+  const draftVersion = prompt.versions.find(version => !version.didRun)
+
+  const loggedInUser = useLoggedInUser()
+  const versions = isDirty
+    ? [
+        ...prompt.versions.filter(version => version.didRun),
+        AugmentVersion(draftVersion ?? DummyVersion, currentVersion, loggedInUser.id),
+      ]
+    : prompt.versions
+
+  const lastVersion = versions.slice(-1)[0]
+  const [previousLastVersion, setPreviousLastVersion] = useState(lastVersion)
+  useEffect(() => {
+    if (lastVersion.id !== previousLastVersion.id) {
+      if (IsDummyVersion(previousLastVersion) && !IsDummyVersion(lastVersion)) {
+        setCurrentVersion(activeVersion)
+      }
+      setPreviousLastVersion(lastVersion)
+    }
+  }, [setCurrentVersion, previousLastVersion, lastVersion, activeVersion])
+
+  return [currentVersion, versions, updatePrompt, updateConfig, isDirty] as const
 }
+
+type PartialVersion = Omit<PromptVersion, 'previousID' | 'prompts' | 'config' | 'userID' | 'parentID' | 'timestamp'>
+
+const AugmentVersion = (partialVersion: PartialVersion | PromptVersion, version: PromptVersion, userID: number) => ({
+  ...partialVersion,
+  previousID: version.id,
+  prompts: version.prompts,
+  config: version.config,
+  parentID: version.parentID,
+  timestamp: version.timestamp,
+  userID,
+})
+
+const DummyVersionID = 1
+
+const DummyVersion: PartialVersion = {
+  id: DummyVersionID,
+  labels: [],
+  runs: [],
+  comments: [],
+  didRun: false,
+  usedAsEndpoint: false,
+  usedInChain: null,
+}
+
+export const IsDummyVersion = (version: PromptVersion | ChainVersion) => version.id === DummyVersionID

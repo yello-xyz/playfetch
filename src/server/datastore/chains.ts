@@ -11,11 +11,12 @@ import {
 } from './datastore'
 import { Chain, ChainItemWithInputs, InputValues, RawChainVersion } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
-import { getTrustedProjectScopedData, getUniqueName, getVerifiedProjectScopedData } from './prompts'
-import { getTrustedParentInputValues } from './inputs'
+import { getTrustedProjectScopedData, getVerifiedProjectScopedData } from './prompts'
+import { getTrustedParentInputValues, relinkInputValues } from './inputs'
 import { addInitialVersion, saveChainVersionForUser, toUserVersions } from './versions'
 import { getOrderedRunsForParentID } from './runs'
 import { deleteEntity } from './cleanup'
+import { GetUniqueName } from '@/src/common/formatting'
 
 export async function migrateChains(postMerge: boolean) {
   if (postMerge) {
@@ -36,6 +37,7 @@ const toChainData = (
   references: References,
   createdAt: Date,
   lastEditedAt: Date,
+  tableID: number | undefined,
   chainID: number
 ) => ({
   key: buildKey(Entity.CHAIN, chainID),
@@ -45,6 +47,7 @@ const toChainData = (
     references: JSON.stringify(references),
     createdAt,
     lastEditedAt,
+    tableID,
   },
   excludeFromIndexes: ['name', 'references'],
 })
@@ -54,6 +57,7 @@ export const toChain = (data: any): Chain => ({
   name: data.name,
   referencedItemIDs: [...new Set(Object.values(JSON.parse(data.references) as References).flat())],
   projectID: data.projectID,
+  tableID: data.tableID ?? null,
 })
 
 export async function getChainForUser(
@@ -65,7 +69,7 @@ export async function getChainForUser(
   const versions = await getOrderedEntities(Entity.VERSION, 'parentID', chainID)
   const runs = await getOrderedRunsForParentID(chainID)
 
-  const inputValues = await getTrustedParentInputValues(chainID)
+  const inputValues = await getTrustedParentInputValues(chainData.tableID ?? chainID)
 
   return {
     chain: toChain(chainData),
@@ -79,7 +83,7 @@ const DefaultChainName = 'New Chain'
 export async function addChainForUser(userID: number, projectID: number, name = DefaultChainName) {
   await ensureProjectAccess(userID, projectID)
   const chainNames = await getEntities(Entity.CHAIN, 'projectID', projectID)
-  const uniqueName = await getUniqueName(
+  const uniqueName = GetUniqueName(
     name,
     chainNames.map(chain => chain.name)
   )
@@ -87,7 +91,7 @@ export async function addChainForUser(userID: number, projectID: number, name = 
   const chainID = await allocateID(Entity.CHAIN)
   const versionData = await addInitialVersion(userID, chainID, true)
   const versionID = getID(versionData)
-  const chainData = toChainData(projectID, uniqueName, { [versionID]: [] }, createdAt, createdAt, chainID)
+  const chainData = toChainData(projectID, uniqueName, { [versionID]: [] }, createdAt, createdAt, undefined, chainID)
   await getDatastore().save([chainData, versionData])
   updateProjectLastEditedAt(projectID)
   return { chainID: getID(chainData), versionID }
@@ -110,6 +114,7 @@ export async function updateChain(chainData: any, updateLastEditedTimestamp: boo
       JSON.parse(chainData.references),
       chainData.createdAt,
       updateLastEditedTimestamp ? new Date() : chainData.lastEditedAt,
+      chainData.tableID,
       getID(chainData)
     )
   )
@@ -166,3 +171,6 @@ export async function deleteChainForUser(userID: number, chainID: number) {
   }
   await deleteEntity(Entity.CHAIN, chainID)
 }
+
+export const updateTableForChain = (userID: number, chainID: number, tableID: number | null | undefined) =>
+  relinkInputValues(userID, chainID, tableID, getVerifiedUserChainData, data => updateChain(data, false))

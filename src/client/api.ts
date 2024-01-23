@@ -21,10 +21,12 @@ import {
   CostUsage,
   Run,
   SourceControlProvider,
+  ActiveTable,
 } from '@/types'
 import ClientRoute from '../common/clientRoute'
-import { BuildActiveChain, BuildActivePrompt } from '../common/activeItem'
+import { BuildActiveChain, BuildActivePrompt, BuildActiveTable } from '../common/activeItem'
 import Progress from 'nprogress'
+import { LayoutConfig } from '../common/userPresets'
 
 export type StreamReader = ReadableStreamDefaultReader<Uint8Array>
 
@@ -48,7 +50,8 @@ export async function postToAPI(
   apiPath: string,
   apiCall: string,
   body: Record<string, any>,
-  responseType: ResponseType
+  responseType: ResponseType,
+  signal?: AbortSignal
 ) {
   Progress.start()
   return fetch(`${apiPath}/${apiCall}`, {
@@ -58,13 +61,14 @@ export async function postToAPI(
       'content-type': 'application/json',
     },
     body: JSON.stringify(body),
+    signal,
   })
     .then(response => parseResponse(response, responseType))
     .finally(() => Progress.done())
 }
 
-const post = (apiCall: Function, json: any = {}, responseType: ResponseType = 'json') => {
-  return postToAPI('/api', apiCall.name, json, responseType)
+const post = (apiCall: Function, json: any = {}, responseType: ResponseType = 'json', signal?: AbortSignal) => {
+  return postToAPI('/api', apiCall.name, json, responseType, signal)
 }
 
 const api = {
@@ -146,6 +150,12 @@ const api = {
   renamePrompt: function (promptID: number, name: string) {
     return post(this.renamePrompt, { promptID, name })
   },
+  exportPromptInputs: function (promptID: number): Promise<number> {
+    return this.updateTable({ promptID, tableID: undefined })
+  },
+  replacePromptInputs: function (promptID: number, tableID: number | null) {
+    return this.updateTable({ promptID, tableID })
+  },
   deletePrompt: function (promptID: number) {
     return post(this.deletePrompt, { promptID })
   },
@@ -156,15 +166,21 @@ const api = {
     versionID: number,
     inputs: PromptInputs[],
     dynamicInputs: PromptInputs[],
+    signal: AbortSignal,
+    requestID: string,
     continuationID?: number,
     autoRespond?: boolean,
     maxResponses?: number
   ): Promise<StreamReader> {
     return post(
       this.runVersion,
-      { versionID, inputs, dynamicInputs, continuationID, autoRespond, maxResponses },
-      'stream'
+      { versionID, inputs, dynamicInputs, continuationID, autoRespond, maxResponses, requestID },
+      'stream',
+      signal
     )
+  },
+  cancelRun: function (requestID: string) {
+    return post(this.cancelRun, { requestID })
   },
   getIntermediateRuns: function (parentRunID: number, continuationID?: number): Promise<Run[]> {
     return post(this.getIntermediateRuns, { parentRunID, continuationID })
@@ -189,8 +205,37 @@ const api = {
   renameChain: function (chainID: number, name: string) {
     return post(this.renameChain, { chainID, name })
   },
+  exportChainInputs: function (chainID: number): Promise<number> {
+    return this.updateTable({ chainID, tableID: undefined })
+  },
+  replaceChainInputs: function (chainID: number, tableID: number | null): Promise<number> {
+    return this.updateTable({ chainID, tableID })
+  },
   deleteChain: function (chainID: number) {
     return post(this.deleteChain, { chainID })
+  },
+  getTable: function (tableID: number): Promise<ActiveTable> {
+    return post(this.getTable, { tableID }).then(BuildActiveTable)
+  },
+  addTable: function (projectID: number): Promise<number> {
+    return post(this.addTable, { projectID })
+  },
+  renameTable: function (tableID: number, name: string) {
+    return post(this.renameTable, { tableID, name })
+  },
+  updateTable: function ({
+    promptID,
+    chainID,
+    tableID,
+  }: {
+    promptID?: number
+    chainID?: number
+    tableID: number | null | undefined
+  }) {
+    return post(this.updateTable, { promptID, chainID, tableID })
+  },
+  deleteTable: function (tableID: number) {
+    return post(this.deleteTable, { tableID })
   },
   publishEndpoint: function (
     isEnabled: boolean,
@@ -275,11 +320,17 @@ const api = {
   updateInputValues: function (parentID: number, name: string, values: string[]) {
     return post(this.updateInputValues, { parentID, name, values })
   },
+  deleteInputValues: function (parentID: number, name: string) {
+    return post(this.updateInputValues, { parentID, name })
+  },
   deleteVersion: function (versionID: number) {
     return post(this.deleteVersion, { versionID })
   },
-  updateDefaultConfig: function (defaultPromptConfig: Partial<PromptConfig>) {
-    return post(this.updateDefaultConfig, { defaultPromptConfig })
+  updateDefaultPromptConfig: function (defaultPromptConfig: Partial<PromptConfig>) {
+    return post(this.updateDefaultPromptConfig, { defaultPromptConfig })
+  },
+  updateLayoutConfig: function (layoutConfig: Partial<LayoutConfig>) {
+    return post(this.updateLayoutConfig, { layoutConfig })
   },
   getAvailableProviders: function (projectID: number): Promise<AvailableProvider[]> {
     return post(this.getAvailableProviders, { projectID })

@@ -18,7 +18,7 @@ import EndpointSettingsPane, { EndpointSettings } from './endpointSettingsPane'
 import EndpointsTable from './endpointsTable'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
-import TabSelector, { HeaderItem, SingleTabHeader } from '../tabSelector'
+import TabsHeader, { SingleTabHeader } from '../tabsHeader'
 import LogEntriesView from './logEntriesView'
 import LogEntryDetailsPane from './logEntryDetailsPane'
 import IconButton from '../iconButton'
@@ -27,9 +27,10 @@ import { EndpointsRoute, LogsRoute, ParseNumberQuery } from '@/src/common/client
 import { useRouter } from 'next/router'
 import Icon from '../icon'
 import chevronIcon from '@/public/chevron.svg'
-import { ExtractUnboundChainInputs } from '../chains/chainNodeOutput'
 import useActiveItemCache from '@/src/client/hooks/useActiveItemCache'
 import { useActiveProject, useRefreshProject } from '@/src/client/context/projectContext'
+import { HeaderItem } from '../headerItem'
+import { ExtractUnboundChainInputs } from '../chains/chainItems'
 
 const NewEndpointSettings = (parentID?: number, versionID?: number): EndpointSettings => ({
   id: undefined,
@@ -82,14 +83,14 @@ export default function EndpointsView({
   }
 
   const tabSelector = (children?: ReactNode) => (
-    <TabSelector
+    <TabsHeader
       tabs={
         logEntries.some(entry => endpoints.some(e => e.id === entry.endpointID)) ? ['Endpoints', 'Logs'] : ['Endpoints']
       }
       activeTab={activeTab}
       setActiveTab={selectTab}>
       {children}
-    </TabSelector>
+    </TabsHeader>
   )
 
   const startsEditing = newParentID !== undefined && newVersionID !== undefined
@@ -196,7 +197,7 @@ export default function EndpointsView({
               onNavigateBack={() => setEditing(false)}
               onCollapse={() => setActiveEndpointID(undefined)}
             />
-            <div className='flex flex-col gap-6 p-4 overflow-y-auto max-w-[680px]'>
+            <div className='flex flex-col gap-4 py-4 px-2 overflow-y-auto max-w-[680px]'>
               <EndpointSettingsPane
                 endpoint={activeEndpoint}
                 activeParent={activeParent}
@@ -264,7 +265,7 @@ function SettingsPaneHeader({
 }) {
   const labelSuffix = secondaryLabel ? ` (${secondaryLabel})` : ''
   return isEditing ? (
-    <div className='flex mt-1 -mb-2'>
+    <div className='flex mt-1 -mb-2 -ml-1'>
       <HeaderItem active={false} className='cursor-pointer' onClick={onNavigateBack}>
         <Icon className='rotate-90 -mr-0.5' icon={chevronIcon} />
         Endpoints /

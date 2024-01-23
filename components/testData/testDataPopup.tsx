@@ -1,62 +1,39 @@
-import { Dispatch, SetStateAction, useState } from 'react'
-import useGlobalPopup, { WithDismiss } from '@/src/client/context/globalPopupContext'
-import { PopupContent } from '../../../components/popupMenu'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import { WithDismiss } from '@/src/client/context/globalPopupContext'
+import { PopupContent } from '../popupMenu'
 import TestDataPane from '@/components/testData/testDataPane'
-import { InputValues, TestConfig } from '@/types'
+import { Chain, InputValues, Prompt, TestConfig } from '@/types'
 import Label from '@/components/label'
 import IconButton from '@/components/iconButton'
 import closeIcon from '@/public/close.svg'
+import { useTestDataImportButton } from './useTestDataActionButtons'
 
-export default function useTestDataPopup(
-  variables: string[],
-  staticVariables: string[],
-  inputValues: InputValues,
-  setInputValues: Dispatch<SetStateAction<InputValues>>,
-  persistInputValuesIfNeeded: () => void,
-  testConfig: TestConfig,
-  setTestConfig: (testConfig: TestConfig) => void
-) {
-  const setPopup = useGlobalPopup<TestDataPopupProps>()
-
-  const expandCell = () => {
-    setPopup(
-      TestDataPopup,
-      {
-        variables,
-        staticVariables,
-        inputValues,
-        setInputValues,
-        persistInputValuesIfNeeded,
-        testConfig,
-        setTestConfig,
-      },
-      { top: 0, left: 100, right: 100, bottom: 0 }
-    )
-  }
-
-  return expandCell
-}
-
-type TestDataPopupProps = {
+export type TestDataPopupProps = {
+  parentItem: Prompt | Chain
   variables: string[]
   staticVariables: string[]
   inputValues: InputValues
   setInputValues: Dispatch<SetStateAction<InputValues>>
   persistInputValuesIfNeeded: () => void
+  addInputValues: (variable: string, inputs: string[]) => Promise<void>
   testConfig: TestConfig
   setTestConfig: (testConfig: TestConfig) => void
+  reload: () => void
 }
 
-const TestDataPopup = ({
+export default function TestDataPopup({
+  parentItem,
   variables,
   staticVariables,
   inputValues,
   setInputValues,
   persistInputValuesIfNeeded,
+  addInputValues,
   testConfig,
   setTestConfig,
+  reload,
   withDismiss,
-}: TestDataPopupProps & WithDismiss) => {
+}: TestDataPopupProps & WithDismiss) {
   const [currentInputValues, setCurrentInputValues] = useState(inputValues)
   const updateInputValues = (inputValues: SetStateAction<InputValues>) => {
     setCurrentInputValues(inputValues)
@@ -69,6 +46,8 @@ const TestDataPopup = ({
     setTestConfig(testConfig)
   }
 
+  const importTestDataButton = useTestDataImportButton(parentItem)
+
   return (
     <PopupContent className='flex flex-col h-full'>
       <div className='flex items-center p-1.5 border-b border-gray-200'>
@@ -80,10 +59,14 @@ const TestDataPopup = ({
         staticVariables={staticVariables}
         inputValues={currentInputValues}
         setInputValues={updateInputValues}
+        addInputValues={addInputValues}
         persistInputValuesIfNeeded={persistInputValuesIfNeeded}
         testConfig={currentTestConfig}
         setTestConfig={updateTestConfig}
+        importButton={importTestDataButton}
+        onImportComplete={withDismiss(reload)}
         asModalPopup
+        skipButtonBorder
       />
     </PopupContent>
   )

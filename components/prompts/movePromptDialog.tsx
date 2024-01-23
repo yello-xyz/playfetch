@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import ModalDialog from '../modalDialog'
+import ModalDialog, { DialogPrompt } from '../modalDialog'
 import { ActiveWorkspace, Project, Prompt, Workspace } from '@/types'
 import DropdownMenu from '../dropdownMenu'
 import api from '@/src/client/api'
@@ -46,7 +46,7 @@ export default function MovePromptDialog({
     setProjectID(projects[0]?.id ?? NoProjectID)
   }
 
-  const dialogPrompt = {
+  const dialogPrompt: DialogPrompt = {
     title: `Copy “${item.name}”`,
     confirmTitle: 'Copy',
     callback: () => onConfirm(projectID),

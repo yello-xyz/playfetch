@@ -5,7 +5,9 @@ export type DialogPrompt = {
   title?: string
   content?: string
   confirmTitle?: string
+  alternativeTitle?: string
   callback?: () => void
+  alternativeCallback?: () => void
   destructive?: boolean
   disabled?: boolean
   cancellable?: boolean
@@ -22,6 +24,11 @@ export default function ModalDialog({
 }) {
   const confirm = useCallback(() => {
     prompt?.callback?.()
+    onDismiss()
+  }, [prompt, onDismiss])
+
+  const cancel = useCallback(() => {
+    prompt?.alternativeCallback?.()
     onDismiss()
   }, [prompt, onDismiss])
 
@@ -63,8 +70,8 @@ export default function ModalDialog({
           {(children || !prompt.content) && <div className='text-left'>{children}</div>}
           <div className='flex justify-end gap-4'>
             {prompt.cancellable !== false && (
-              <Button type='secondary' onClick={onDismiss}>
-                Cancel
+              <Button type='secondary' onClick={cancel}>
+                {prompt.alternativeTitle ?? 'Cancel'}
               </Button>
             )}
             <Button type={prompt.destructive ? 'destructive' : 'primary'} disabled={prompt.disabled} onClick={confirm}>

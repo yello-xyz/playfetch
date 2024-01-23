@@ -61,12 +61,16 @@ export default function PromptInput({
   placeholder,
   disabled,
   preformatted,
+  variables,
+  completions,
 }: {
   value: string
   setValue: (value: string) => void
   placeholder?: string
   disabled?: boolean
   preformatted?: boolean
+  variables?: string[]
+  completions?: string[]
 }) {
   const toggleInput = useCallback(
     (selection: Selection) => {
@@ -104,7 +108,7 @@ export default function PromptInput({
 
   return (
     <Editor
-      className={disabled ? undefined : 'bg-white'}
+      className={`rounded-lg ${disabled ? undefined : 'bg-white'}`}
       value={value}
       setValue={setValue}
       tokenizer={variableParser}
@@ -113,6 +117,8 @@ export default function PromptInput({
       placeholder={placeholder}
       disabled={disabled}
       preformatted={preformatted}
+      variables={variables}
+      completions={completions}
     />
   )
 }
@@ -124,7 +130,7 @@ function VariablePopup({ selection, toggleInput }: VariablePopupProps) {
     <div className='flex items-center justify-center overflow-visible text-center max-w-0'>
       <div className='bg-white border border-gray-200 rounded-lg shadow-md whitespace-nowrap hover:border-gray-300'>
         <div
-          className='py-1.5 px-2 text-gray-600 rounded cursor-pointer hover:bg-gray-50 hover:text-gray-700 rounded-lg'
+          className='py-1.5 px-1.5 text-dark-gray-700 rounded cursor-pointer hover:bg-gray-50 hover:text-gray-700 rounded-lg'
           onMouseDown={() => toggleInput(selection)}>
           {selection.isToken ? 'Remove Input' : 'Create Input'}
         </div>

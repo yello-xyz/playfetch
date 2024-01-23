@@ -164,7 +164,8 @@ export default function EndpointSettingsPane({
   const gridConfig = 'grid grid-cols-[160px_minmax(0,1fr)]'
   return (
     <>
-      <div className={`${gridConfig} w-full items-center gap-4 p-4 py-4 bg-white border-gray-200 border rounded-lg`}>
+      <div
+        className={`${gridConfig} w-full items-center gap-3 p-4 pt-4 pb-2 bg-white border-gray-200 border rounded-lg`}>
         <Label disabled={disabled}>Enabled</Label>
         <Checkbox disabled={disabled} checked={isEnabled} setChecked={setEnabled} />
         <Label disabled={disabled}>Prompt / Chain</Label>

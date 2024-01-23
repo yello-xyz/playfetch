@@ -1,5 +1,5 @@
 import { ActiveChain, ChainVersion } from '@/types'
-import { CustomHeader, EditableHeaderItem } from '../tabSelector'
+import { CustomHeader } from '../tabsHeader'
 import Icon from '../icon'
 import chainIcon from '@/public/chain.svg'
 import historyIcon from '@/public/history.svg'
@@ -7,6 +7,7 @@ import { StaticImageData } from 'next/image'
 import { useState } from 'react'
 import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/projectContext'
 import api from '@/src/client/api'
+import { EditableHeaderItem } from '../headerItem'
 
 export default function ChainEditorHeader({
   chain,
@@ -61,11 +62,11 @@ function HeaderTitle({
   const submitRename = (name: string) => onRename(name).then(() => setLabel(undefined))
 
   return (
-    <div className='flex flex-wrap items-center justify-center h-full gap-2 overflow-hidden shrink-0 max-h-11'>
+    <div className='flex flex-wrap items-center justify-center h-full gap-2 overflow-hidden shrink-0 max-h-9'>
       <div
-        className='flex items-center h-full font-medium select-none whitespace-nowrap cursor-text'
+        className='flex items-center h-full gap-1 font-medium select-none whitespace-nowrap cursor-text'
         onClick={() => setLabel(chainName)}>
-        {label === undefined && <Icon icon={chainIcon} className='h-full py-2.5' />}
+        {label === undefined && <Icon icon={chainIcon} className='h-full py-1.5' />}
         {label !== undefined ? (
           <EditableHeaderItem
             value={label}
@@ -81,7 +82,7 @@ function HeaderTitle({
         (versionIsSaved && versionIsPublished ? (
           <span className='text-gray-400 whitespace-nowrap'>Version {versionIndex + 1}</span>
         ) : (
-          <span className='px-2 py-1 text-gray-400 rounded bg-gray-50'>
+          <span className='px-2 py-0.5 text-gray-400 rounded bg-gray-50'>
             {versionIsSaved ? 'Draft Version' : 'Unsaved'}
           </span>
         ))}

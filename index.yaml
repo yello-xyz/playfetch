@@ -35,6 +35,12 @@ indexes:
   - name: createdAt
     direction: desc
 
+- kind: table
+  properties:
+  - name: projectID
+  - name: createdAt
+    direction: desc
+
 - kind: version
   properties:
   - name: parentID

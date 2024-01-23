@@ -77,13 +77,13 @@ export function PopupLabelItem({
   const disabledClass = disabled ? 'opacity-50' : ''
   return (
     <PopupItem className={`flex flex-col gap-1 ${disabledClass}`} onClick={disabled ? undefined : onClick}>
-      <div className={`flex items-center gap-1 ${description ? 'py-2 px-3' : 'p-1'}`}>
+      <div className={`flex items-center gap-1 ${description ? 'py-2 px-2' : 'p-1'}`}>
         {icon && <Icon icon={icon} />}
         {title}
         {label}
         {checked && <Icon className='ml-auto' icon={checkIcon} />}
       </div>
-      {description && <span className='px-3 pb-2 -mt-2 text-gray-400'>{description}</span>}
+      {description && <span className='px-2 pb-2 -mt-2 text-gray-400'>{description}</span>}
     </PopupItem>
   )
 }

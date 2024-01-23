@@ -2,6 +2,7 @@ import api, { StreamReader } from '@/src/client/api'
 import { useState } from 'react'
 import { PartialRun, PromptInputs } from '@/types'
 import { useRefreshActiveItem } from '../context/projectContext'
+import ShortUniqueId from 'short-unique-id'
 
 export const ConsumeStream = async (
   inputs: PromptInputs[],
@@ -10,7 +11,7 @@ export const ConsumeStream = async (
 ) => {
   const runs = Object.fromEntries(inputs.map((_, inputIndex) => [inputIndex, {} as { [id: number]: PartialRun }]))
   while (streamReader) {
-    const { done, value } = await streamReader.read()
+    const { done, value } = await streamReader.read().catch(() => ({ done: true, value: undefined }))
     if (done) {
       break
     }
@@ -69,10 +70,18 @@ export default function useRunVersion(activeVersionID: number) {
     setHighestRunIndex(-1)
     const versionID = await getVersion()
     setRunningVersionID(versionID)
+    const abortController = new AbortController()
+    const requestID = new ShortUniqueId({ length: 16 })()
+    const cancelRun = () => {
+      abortController.abort()
+      api.cancelRun(requestID)
+    }
     const streamReader = await api.runVersion(
       versionID,
       inputs,
       dynamicInputs,
+      abortController.signal,
+      requestID,
       continuationID,
       autoRespond,
       maxResponses
@@ -80,7 +89,7 @@ export default function useRunVersion(activeVersionID: number) {
     let anyRunFailed = false
     await ConsumeStream(inputs, streamReader, runs => {
       anyRunFailed = runs.some(run => run.failed)
-      setPartialRuns(runs)
+      setPartialRuns(runs.map(run => ({ ...run, onCancel: run.failed === undefined ? cancelRun : undefined })))
       setHighestRunIndex(highestRunIndex => Math.max(highestRunIndex, ...runs.map(run => run.index)))
     })
     await refreshActiveItem(versionID, true)

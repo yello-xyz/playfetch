@@ -1,7 +1,7 @@
 import { ExtractCodeInterrupts, ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
-import { ChainItemWithInputs, PromptConfig, Prompts } from '@/types'
+import { ChainItemWithInputs, Prompts } from '@/types'
 import { DefaultPromptConfig } from '@/src/common/defaultConfig'
-import { ExtractUnboundChainInputs } from '@/components/chains/chainNodeOutput'
+import { ExtractUnboundChainInputs } from '@/components/chains/chainItems'
 
 const testExtractVariables = (testDescription: string, expectedVariables: string[], content: string) =>
   test(`Test ${testDescription}`, () => {

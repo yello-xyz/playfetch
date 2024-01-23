@@ -16,6 +16,7 @@ import logUserRequest, { RunEvent } from '@/src/server/analytics'
 import { getVerifiedUserPromptOrChainData } from '@/src/server/datastore/chains'
 import { generateAutoResponse, predictRatingForRun } from '@/src/server/providers/playfetch'
 import { TimedRunResponse } from '@/src/server/evaluationEngine/runResponse'
+import { detectRequestClosed } from './cancelRun'
 
 export const loadConfigsFromVersion = (version: RawPromptVersion | RawChainVersion): (RunConfig | CodeConfig)[] =>
   (version.items as (RunConfig | CodeConfig)[] | undefined) ?? [{ versionID: version.id, branch: 0 }]
@@ -65,6 +66,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
 
   res.setHeader('X-Accel-Buffering', 'no')
   const sendData = (data: object) => res.write(`data: ${JSON.stringify(data)}\n\n`)
+  const abortController = detectRequestClosed(req)
 
   for (let autoRunIndex = 0; autoRunIndex < 1 + autoRepeatCount && multipleInputs.length > 0; autoRunIndex++) {
     const runIDs = await allocateRunIDs(multipleInputs.length)
@@ -97,6 +99,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
           configs,
           inputs,
           false,
+          abortController.signal,
           (index, message, response, stepInputs, canLoop) => {
             lastIndices[inputIndex] = index
             sendDataForInput(inputIndex, message, response)
@@ -111,6 +114,10 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
         )
       )
     )
+
+    if (abortController.signal.aborted) {
+      break
+    }
 
     for (const [index, response] of responses.entries()) {
       logUserRequest(req, res, user.id, RunEvent(version.parentID, response.failed, response.cost, response.duration))

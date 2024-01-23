@@ -1,7 +1,8 @@
 import { StaticImageData } from 'next/image'
-import { KeyboardEvent, ReactNode, useCallback, useState } from 'react'
+import { ReactNode, useState } from 'react'
 import Icon from './icon'
-import { useDraggable, useDroppable } from '@dnd-kit/core'
+import { useDroppable } from '@dnd-kit/core'
+import { EditableHeaderItem, HeaderItem } from './headerItem'
 
 export function SingleTabHeader({
   label,
@@ -10,30 +11,33 @@ export function SingleTabHeader({
   onUpdateLabel,
   draggableTab,
   dropTarget,
+  dropShadow,
   children,
 }: {
   label: string
   icon?: StaticImageData
   secondaryLabel?: string
-  onUpdateLabel?: (label: string) => void
+  onUpdateLabel?: (label: string) => void | Promise<void>
   draggableTab?: boolean
   dropTarget?: string
+  dropShadow?: string
   children?: ReactNode
 }) {
   return (
-    <TabSelector
+    <TabsHeader
       tabs={[label]}
       icon={icon}
       secondaryLabel={secondaryLabel}
       onUpdateLabel={onUpdateLabel}
       draggableTabs={draggableTab}
-      dropTarget={dropTarget}>
+      dropTarget={dropTarget}
+      dropShadow={dropShadow}>
       {children}
-    </TabSelector>
+    </TabsHeader>
   )
 }
 
-export default function TabSelector<T extends string>({
+export default function TabsHeader<T extends string>({
   tabs,
   activeTab,
   setActiveTab,
@@ -42,6 +46,7 @@ export default function TabSelector<T extends string>({
   onUpdateLabel,
   draggableTabs,
   dropTarget,
+  dropShadow,
   children,
 }: {
   tabs: T[]
@@ -49,19 +54,20 @@ export default function TabSelector<T extends string>({
   setActiveTab?: (tab: T) => void
   icon?: StaticImageData
   secondaryLabel?: string
-  onUpdateLabel?: (label: string) => void
+  onUpdateLabel?: (label: string) => void | Promise<void>
   draggableTabs?: boolean
   dropTarget?: string
+  dropShadow?: string
   children?: ReactNode
 }) {
   const [label, setLabel] = useState<string>()
-  const submitRename = (name: string) => {
-    onUpdateLabel?.(name)
+  const submitRename = async (name: string) => {
+    await onUpdateLabel?.(name)
     setLabel(undefined)
   }
 
   return (
-    <CustomHeader dropTarget={dropTarget}>
+    <CustomHeader dropTarget={dropTarget} dropShadow={dropShadow}>
       <div className='flex items-center gap-0.5'>
         {icon && label === undefined && <Icon className='-mr-1.5' icon={icon} />}
         {label !== undefined ? (
@@ -90,12 +96,22 @@ export default function TabSelector<T extends string>({
   )
 }
 
-export function CustomHeader({ children, dropTarget }: { children?: ReactNode; dropTarget?: string }) {
+export function CustomHeader({
+  children,
+  dropTarget,
+  dropShadow = 'drop-shadow-[0_4px_14px_rgba(0,0,0,0.03)]',
+}: {
+  children?: ReactNode
+  dropTarget?: string
+  dropShadow?: string
+}) {
   const { isOver, setNodeRef } = useDroppable({ id: dropTarget ?? '', disabled: !dropTarget })
   const color = isOver ? 'bg-gray-50' : 'bg-white'
 
   return (
-    <div ref={setNodeRef} className={`${color} flex items-center justify-between gap-2 px-2 border-b border-gray-200`}>
+    <div
+      ref={setNodeRef}
+      className={`${color} ${dropShadow} flex items-center justify-between gap-2 pl-2 pr-1 border-b border-gray-200`}>
       {children}
     </div>
   )
@@ -122,71 +138,5 @@ function TabButton<T extends string>({
       draggableID={draggable ? tab : undefined}>
       {tab}
     </HeaderItem>
-  )
-}
-
-const headerClassName =
-  'select-none px-2 py-2.5 font-medium outline-none whitespace-nowrap leading-6 text-gray-700 bg-transparent'
-
-export function HeaderItem({
-  active = true,
-  className = '',
-  onClick,
-  draggableID,
-  children,
-}: {
-  active?: boolean
-  className?: string
-  onClick?: () => void
-  draggableID?: string
-  children?: ReactNode
-}) {
-  const { attributes, listeners, setNodeRef } = useDraggable({
-    disabled: !draggableID,
-    id: draggableID ?? '',
-    data: { name: draggableID },
-  })
-  const activeClass = active ? '' : 'opacity-40 hover:opacity-70'
-
-  return (
-    <div
-      {...(draggableID ? { ref: setNodeRef, ...listeners, ...attributes } : {})}
-      className={`flex ${className} ${headerClassName} ${activeClass}`}
-      onClick={onClick}>
-      {children}
-    </div>
-  )
-}
-
-export function EditableHeaderItem({
-  value,
-  onChange,
-  onSubmit,
-  onCancel,
-}: {
-  value: string
-  onChange: (value: string) => void
-  onSubmit: () => void
-  onCancel: () => void
-}) {
-  const inputRef = useCallback((node: any) => node?.select(), [])
-
-  const onKeyDown = (event: KeyboardEvent) => {
-    if (event.key === 'Enter') {
-      onSubmit()
-    } else if (event.key === 'Escape') {
-      onCancel()
-    }
-  }
-
-  return (
-    <input
-      ref={inputRef}
-      className={headerClassName}
-      value={value}
-      onChange={event => onChange(event.target.value)}
-      onKeyDown={onKeyDown}
-      onBlur={onSubmit}
-    />
   )
 }

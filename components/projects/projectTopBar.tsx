@@ -1,5 +1,5 @@
 import { Workspace } from '@/types'
-import { ReactNode, Suspense, useState } from 'react'
+import { ReactNode, useState } from 'react'
 import Icon from '../icon'
 import commentIcon from '@/public/commentBadge.svg'
 import chevronIcon from '@/public/chevron.svg'
@@ -8,10 +8,9 @@ import { TopBarButton } from '../topBarButton'
 import { UserAvatars } from '@/components/users/userAvatars'
 import TopBar, { TopBarAccessoryItem, TopBarBackItem } from '../topBar'
 
-import dynamic from 'next/dynamic'
 import InviteButton from '../users/inviteButton'
 import { useActiveProject, useRefreshProject } from '@/src/client/context/projectContext'
-const ProjectPopupMenu = dynamic(() => import('./projectPopupMenu'))
+import ProjectPopupMenu from './projectPopupMenu'
 
 export default function ProjectTopBar({
   workspaces,
@@ -54,21 +53,19 @@ export default function ProjectTopBar({
             <span className='font-medium'>{activeProject.name}</span>
             <Icon icon={chevronIcon} />
             <div className='absolute right-0 shadow-sm top-8'>
-              <Suspense>
-                <ProjectPopupMenu
-                  project={activeProject}
-                  isMenuExpanded={isMenuExpanded}
-                  setMenuExpanded={setMenuExpanded}
-                  workspaces={workspaces}
-                  isSharedProject={!workspace}
-                  onRefresh={refreshProject}
-                  onDeleted={onNavigateBack}
-                />
-              </Suspense>
+              <ProjectPopupMenu
+                project={activeProject}
+                isMenuExpanded={isMenuExpanded}
+                setMenuExpanded={setMenuExpanded}
+                workspaces={workspaces}
+                isSharedProject={!workspace}
+                onRefresh={refreshProject}
+                onDeleted={onNavigateBack}
+              />
             </div>
           </div>
         </div>
-        <TopBarAccessoryItem className='flex items-center justify-end gap-4'>
+        <TopBarAccessoryItem className='flex items-center justify-end gap-2'>
           <UserAvatars users={activeProject.users} />
           <InviteButton
             users={activeProject.users}

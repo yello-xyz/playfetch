@@ -22,15 +22,15 @@ import { getRecentEndpoints } from './endpoints'
 import { and } from '@google-cloud/datastore'
 import { getRecentProjects, getSharedProjectsForUser } from './projects'
 import { getRecentRuns } from './runs'
-import { DefaultPromptConfig } from '@/src/common/defaultConfig'
+import { DefaultPromptConfig, DefaultLayoutConfig } from '@/src/common/defaultConfig'
+import { ValidatePromptConfig } from '@/src/common/providerMetadata'
+import { LayoutConfig, UserPresets } from '@/src/common/userPresets'
 
 export async function migrateUsers(postMerge: boolean) {
-  if (postMerge) {
-    return
-  }
   const datastore = getDatastore()
   const [allUsers] = await datastore.runQuery(datastore.createQuery(Entity.USER))
   for (const userData of allUsers) {
+    const defaultPromptConfig = userData.defaultPromptConfig ? JSON.parse(userData.defaultPromptConfig) : undefined
     await getDatastore().save(
       toUserData(
         userData.email,
@@ -41,8 +41,9 @@ export async function migrateUsers(postMerge: boolean) {
         userData.isAdmin,
         userData.createdAt,
         userData.lastLoginAt,
-        userData.defaultPromptConfig ? JSON.parse(userData.defaultPromptConfig) : undefined,
-        getID(userData)
+        userData.presets ? JSON.parse(userData.presets) : defaultPromptConfig,
+        getID(userData),
+        postMerge ? undefined : defaultPromptConfig
       )
     )
   }
@@ -58,8 +59,9 @@ const updateUserData = (userData: any) =>
     userData.isAdmin,
     userData.createdAt,
     userData.lastLoginAt,
-    userData.defaultPromptConfig ? JSON.parse(userData.defaultPromptConfig) : undefined,
-    getID(userData)
+    userData.presets ? JSON.parse(userData.presets) : undefined,
+    getID(userData),
+    userData.defaultPromptConfig ? JSON.parse(userData.defaultPromptConfig) : undefined
   )
 
 const updateUser = (userData: any) => getDatastore().save(updateUserData(userData))
@@ -73,8 +75,9 @@ const toUserData = (
   isAdmin: boolean,
   createdAt: Date,
   lastLoginAt?: Date,
-  defaultPromptConfig?: Partial<PromptConfig>,
-  userID?: number
+  presets?: any,
+  userID?: number,
+  defaultPromptConfig?: Partial<PromptConfig> // TODO delete after next push to prod (also in excludeFromIndexes)
 ) => ({
   key: buildKey(Entity.USER, userID),
   data: {
@@ -86,9 +89,10 @@ const toUserData = (
     isAdmin,
     createdAt,
     lastLoginAt,
+    presets: presets ? JSON.stringify(presets) : undefined,
     defaultPromptConfig: defaultPromptConfig ? JSON.stringify(defaultPromptConfig) : undefined,
   },
-  excludeFromIndexes: ['fullName', 'imageURL', 'defaultPromptConfig'],
+  excludeFromIndexes: ['fullName', 'imageURL', 'presets', 'defaultPromptConfig'],
 })
 
 export const toUser = (data: any): User => ({
@@ -110,27 +114,57 @@ export async function getUserForEmail(email: string, includingWithoutAccess = fa
 
 const getUserData = (userID: number) => getKeyedEntity(Entity.USER, userID)
 
-export async function getDefaultPromptConfigForUser(userID: number): Promise<PromptConfig> {
+const ensureUserData = async (userID: number) => {
   const userData = await getUserData(userID)
-  const userConfig: Partial<PromptConfig> = userData?.defaultPromptConfig
-    ? JSON.parse(userData.defaultPromptConfig)
-    : {}
-  return { ...DefaultPromptConfig, ...userConfig }
+  if (!userData) {
+    throw new Error(`User with ID ${userID} does not exist or user has no access`)
+  }
+  return userData
+}
+
+const loadFilteredPresets = <T extends object>(userData: any, keys: (keyof T)[]): [Partial<T>, any] => {
+  const presetEntries = Object.entries(userData.presets ? JSON.parse(userData.presets) : {})
+  const [filteredEntries, otherEntries] = presetEntries.reduce(
+    ([pass, fail], entry) => (keys.includes(entry[0] as keyof T) ? [[...pass, entry], fail] : [pass, [...fail, entry]]),
+    [[], []] as [[string, unknown][], [string, unknown][]]
+  )
+  return [Object.fromEntries(filteredEntries) as Partial<T>, Object.fromEntries(otherEntries)]
+}
+
+const promptConfigKeys: (keyof PromptConfig)[] = ['model', 'isChat', 'temperature', 'maxTokens', 'seed', 'jsonMode']
+const layoutConfigKeys: (keyof LayoutConfig)[] = ['floatingSidebar', 'promptTabs']
+
+const filterOptionalKeys = <T extends object>(obj: T): T =>
+  Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined)) as T
+
+const ensureValidPromptConfig = (config: PromptConfig) => filterOptionalKeys(ValidatePromptConfig(config))
+
+export async function getPresetsForUser(userID: number): Promise<UserPresets> {
+  const userData = await getUserData(userID)
+  const [userPromptConfig] = loadFilteredPresets(userData, promptConfigKeys)
+  const [userLayoutConfig] = loadFilteredPresets(userData, layoutConfigKeys)
+  return {
+    defaultPromptConfig: ensureValidPromptConfig({ ...DefaultPromptConfig, ...userPromptConfig }),
+    layoutConfig: { ...DefaultLayoutConfig, ...userLayoutConfig },
+  }
 }
 
 export async function saveDefaultPromptConfigForUser(userID: number, config: Partial<PromptConfig>) {
-  let userConfig: Partial<PromptConfig> = {}
+  const userData = await ensureUserData(userID)
+  const [previousConfig, otherPresets] = loadFilteredPresets(userData, promptConfigKeys)
+  const userConfig = config.model ? { ...previousConfig, ...config } : { model: previousConfig.model, ...config }
+  await updateUser({ ...userData, presets: JSON.stringify({ ...userConfig, ...otherPresets }) })
 
+  return ensureValidPromptConfig({ ...DefaultPromptConfig, ...userConfig })
+}
+
+export async function saveLayoutConfigForUser(userID: number, config: Partial<LayoutConfig>) {
   const userData = await getUserData(userID)
-  if (userData) {
-    const previousConfig: Partial<PromptConfig> = userData.defaultPromptConfig
-      ? JSON.parse(userData.defaultPromptConfig)
-      : {}
-    userConfig = config.model ? { ...previousConfig, ...config } : { model: previousConfig.model, ...config }
-    await updateUser({ ...userData, defaultPromptConfig: JSON.stringify(userConfig) })
-  }
+  const [previousConfig, otherPresets] = loadFilteredPresets(userData, layoutConfigKeys)
+  const userConfig = { ...previousConfig, ...config }
+  await updateUser({ ...userData, presets: JSON.stringify({ ...userConfig, ...otherPresets }) })
 
-  return { ...DefaultPromptConfig, ...userConfig }
+  return { ...DefaultLayoutConfig, ...userConfig }
 }
 
 export async function markUserAsOnboarded(userID: number) {
@@ -167,8 +201,9 @@ export async function saveUser(email: string, fullName: string, hasAccess = fals
     isAdmin,
     hasAccess ? previousUserData?.createdAt ?? new Date() : new Date(),
     previousUserData?.lastLoginAt,
-    previousUserData?.defaultPromptConfig ? JSON.parse(previousUserData.defaultPromptConfig) : undefined,
-    previousUserData ? getID(previousUserData) : undefined
+    previousUserData?.presets ? JSON.parse(previousUserData.presets) : undefined,
+    previousUserData ? getID(previousUserData) : undefined,
+    previousUserData?.defaultPromptConfig ? JSON.parse(previousUserData.defaultPromptConfig) : undefined
   )
   await getDatastore().save(userData)
   if (hasAccess && (!previousUserData || !previousUserData.hasAccess)) {

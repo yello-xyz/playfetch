@@ -2,15 +2,14 @@ import api from '@/src/client/api'
 import { ActiveChain, ChainItemWithInputs, ChainVersion } from '@/types'
 import { ChainVersionsAreEqual } from '@/src/common/versionsEqual'
 
+export type OnSavedChain = (versionID: number) => Promise<void>
+
 export default function useSaveChain(
   activeChain: ActiveChain | undefined,
   activeVersion: ChainVersion | undefined,
   setActiveVersion: (version: ChainVersion) => void
 ) {
-  const saveChain = async (
-    items: ChainItemWithInputs[],
-    onSaved?: ((versionID: number) => Promise<void>) | (() => void)
-  ) => {
+  const saveChain = async (items: ChainItemWithInputs[], onSaved?: OnSavedChain) => {
     const versionNeedsSaving = activeChain && activeVersion && !ChainVersionsAreEqual(activeVersion, { items })
     if (!versionNeedsSaving) {
       return activeVersion?.id

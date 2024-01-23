@@ -19,7 +19,7 @@ import VersionComparison from './versions/versionComparison'
 import { LabelForModel } from '@/src/common/providerMetadata'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 import { AvailableLabelColorsForItem } from './labelPopupMenu'
-import { SingleTabHeader } from './tabSelector'
+import { SingleTabHeader } from './tabsHeader'
 import useAvailableModelProviders from '@/src/client/context/providerContext'
 import { useActiveProject } from '@/src/client/context/projectContext'
 

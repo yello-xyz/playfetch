@@ -15,7 +15,11 @@ export default function GlobalPopup<T>(props: GlobalPopupProps & T) {
       ref={parentRef}
       onClick={onDismissGlobalPopup}
       className={`fixed inset-0 z-40 w-full h-full text-sm ${isModalDialog ? 'bg-gray-600 bg-opacity-50' : ''}`}>
-      <div ref={childRef} onClick={event => event.stopPropagation()} className='absolute shadow-sm' style={position}>
+      <div
+        ref={childRef}
+        onClick={event => event.stopPropagation()}
+        className='absolute rounded-lg shadow-sm'
+        style={position}>
         {render({ ...other, withDismiss })}
       </div>
     </div>

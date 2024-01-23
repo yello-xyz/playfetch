@@ -1,9 +1,31 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react'
-import { ActiveChain, ActivePrompt, ChainVersion, PromptVersion } from '@/types'
+import { ActiveChain, ActivePrompt, ChainVersion, IsPromptVersion, PromptVersion } from '@/types'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
-import VersionFilters, { BuildVersionFilter, VersionFilter } from './versionFilters'
+import FiltersHeader from '../filters/filtersHeader'
 import VersionCell from './versionCell'
 import { ActiveItemCache } from '@/src/client/hooks/useActiveItemCache'
+import { IsDummyVersion } from '@/src/client/hooks/usePromptVersion'
+import { FilterContentsForPromptVersion } from '@/src/common/versionsEqual'
+import { ContentsForChainVersion } from '../chains/chainVersionCellBody'
+import { BuildFilter, Filter, FilterItem } from '../filters/filters'
+
+const FilterItemFromVersion = <Version extends PromptVersion | ChainVersion>(
+  version: Version,
+  chainItemCache: ActiveItemCache | undefined
+): FilterItem => ({
+  userIDs: [version.userID],
+  labels: version.labels,
+  contents: IsPromptVersion(version)
+    ? FilterContentsForPromptVersion(version)
+    : chainItemCache
+      ? ContentsForChainVersion(version, chainItemCache)
+      : [],
+})
+
+const BuildVersionFilter =
+  (filters: Filter[], chainItemCache: ActiveItemCache | undefined) =>
+  <Version extends PromptVersion | ChainVersion>(version: Version) =>
+    BuildFilter(filters)(FilterItemFromVersion(version, chainItemCache))
 
 export default function VersionTimeline<Version extends PromptVersion | ChainVersion>({
   activeItem,
@@ -20,7 +42,7 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
   tabSelector: (children?: ReactNode) => ReactNode
   chainItemCache?: ActiveItemCache
 }) {
-  const [filters, setFilters] = useState<VersionFilter[]>([])
+  const [filters, setFilters] = useState<Filter[]>([])
 
   const labelColors = AvailableLabelColorsForItem(activeItem)
 
@@ -29,8 +51,10 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
   const [focusedVersion, setFocusedVersion] = useState(versions[0])
 
   const selectVersion = (version: Version) => {
-    setFocusedVersion(version)
-    setActiveVersion(version)
+    if (!IsDummyVersion(version)) {
+      setFocusedVersion(version)
+      setActiveVersion(version)
+    }
   }
 
   useEffect(() => {
@@ -43,21 +67,21 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
     }
   }, [focusedVersion, activeVersion, identifierForVersion])
 
-  const filteredVersions = versions.filter(BuildVersionFilter(filters))
+  const filteredVersions = versions.filter(BuildVersionFilter(filters, chainItemCache))
 
   return (
     <div className='relative flex h-full'>
       {versions.length > 0 ? (
         <div className={`flex flex-col w-full ${filteredVersions.length > 0 ? 'overflow-hidden' : ''}`}>
-          <VersionFilters
+          <FiltersHeader
             users={activeItem.users}
             labelColors={labelColors}
-            versions={versions}
+            items={versions.map(version => FilterItemFromVersion(version, chainItemCache))}
             filters={filters}
             setFilters={setFilters}
             tabSelector={tabSelector}
           />
-          <div className='flex flex-col px-3 pb-1.5 pt-3 overflow-y-auto gap-0'>
+          <div className='flex flex-col pl-1.5 pr-3 pb-1.5 pt-2 overflow-y-auto gap-0'>
             {filteredVersions.map((version, index) => (
               <VersionCell
                 key={index}
@@ -66,7 +90,7 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
                 labelColors={labelColors}
                 version={version}
                 index={versions.findIndex(v => v.id === version.id)}
-                isActiveVersion={version.id === activeVersion.id}
+                isActiveVersion={version.id === (versions.find(IsDummyVersion)?.id ?? activeVersion.id)}
                 compareVersion={versions.find(v => v.id === version.previousID)}
                 activeItem={activeItem}
                 onSelect={selectVersion}

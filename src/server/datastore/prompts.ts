@@ -22,8 +22,8 @@ import {
 } from './versions'
 import { InputValues, Prompt, PromptConfig, Prompts, RawPromptVersion } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
-import { StripVariableSentinels } from '@/src/common/formatting'
-import { getTrustedParentInputValues } from './inputs'
+import { GetUniqueName, StripVariableSentinels } from '@/src/common/formatting'
+import { getTrustedParentInputValues, relinkInputValues } from './inputs'
 import { getOrderedRunsForParentID } from './runs'
 import { canSuggestImprovedPrompt } from './ratings'
 import { PropertyFilter, and } from '@google-cloud/datastore'
@@ -46,10 +46,11 @@ const toPromptData = (
   createdAt: Date,
   lastEditedAt: Date,
   sourcePath: string | undefined,
+  tableID: number | undefined,
   promptID: number
 ) => ({
   key: buildKey(Entity.PROMPT, promptID),
-  data: { projectID, name, createdAt, lastEditedAt, sourcePath },
+  data: { projectID, name, createdAt, lastEditedAt, sourcePath, tableID },
   excludeFromIndexes: ['name'],
 })
 
@@ -58,6 +59,7 @@ export const toPrompt = (data: any): Prompt => ({
   name: data.name,
   projectID: data.projectID,
   sourcePath: data.sourcePath ?? null,
+  tableID: data.tableID ?? null,
 })
 
 export async function getPromptForUser(
@@ -74,7 +76,7 @@ export async function getPromptForUser(
   const versions = await getOrderedEntities(Entity.VERSION, 'parentID', promptID)
   const runs = await getOrderedRunsForParentID(promptID)
 
-  const inputValues = await getTrustedParentInputValues(promptID)
+  const inputValues = await getTrustedParentInputValues(promptData.tableID ?? promptID)
   const canSuggestImprovements = await canSuggestImprovedPrompt(promptID)
 
   return {
@@ -84,26 +86,6 @@ export async function getPromptForUser(
     canSuggestImprovements,
   }
 }
-
-export const getUniqueNameWithFormat = async (
-  name: string,
-  nameExists: (name: string) => Promise<boolean> | boolean,
-  format: (name: string, suffix: number) => string
-) => {
-  let uniqueName = name
-  let counter = 2
-  while (await nameExists(uniqueName)) {
-    uniqueName = format(name, counter++)
-  }
-  return uniqueName
-}
-
-export const getUniqueName = (name: string, existingNames: string[]) =>
-  getUniqueNameWithFormat(
-    name,
-    name => existingNames.includes(name),
-    (name, counter) => `${name} ${counter}`
-  )
 
 export const matchesDefaultName = (name: string, defaultName: string) =>
   name.match(new RegExp(`^${defaultName}( \\d+)?$`))
@@ -118,7 +100,7 @@ export async function addPromptForUser(
 ) {
   await ensureProjectAccess(userID, projectID)
   const promptNames = await getEntities(Entity.PROMPT, 'projectID', projectID)
-  const uniqueName = await getUniqueName(
+  const uniqueName = GetUniqueName(
     name,
     promptNames.map(prompt => prompt.name)
   )
@@ -137,7 +119,7 @@ export async function addPromptToProject(
   const createdAt = new Date()
   const promptID = await allocateID(Entity.PROMPT)
   const versionData = await addInitialVersion(userID, promptID, false)
-  const promptData = toPromptData(projectID, name, createdAt, createdAt, sourcePath, promptID)
+  const promptData = toPromptData(projectID, name, createdAt, createdAt, sourcePath, undefined, promptID)
   return [promptData, versionData]
 }
 
@@ -228,6 +210,7 @@ async function updatePrompt(promptData: any, updateLastEditedTimestamp: boolean)
       promptData.createdAt,
       updateLastEditedTimestamp ? new Date() : promptData.lastEditedAt,
       promptData.sourcePath,
+      promptData.tableID,
       getID(promptData)
     )
   )
@@ -260,17 +243,13 @@ export async function updatePromptOnDeletedVersion(promptID: number) {
 }
 
 export const getTrustedProjectScopedData = async (entities: Entity[], id: number) => {
-  let data
   for (const entity of entities) {
-    data = await getKeyedEntity(entity, id)
+    const data = await getKeyedEntity(entity, id)
     if (data) {
-      break
+      return data
     }
   }
-  if (!data) {
-    throw new Error(`Entity with ID ${id} does not exist or user has no access`)
-  }
-  return data
+  throw new Error(`Entity with ID ${id} does not exist or user has no access`)
 }
 
 export const getVerifiedProjectScopedData = async (userID: number, entities: Entity[], id: number) => {
@@ -297,3 +276,6 @@ export async function deletePromptForUser(userID: number, promptID: number) {
   }
   await deleteEntity(Entity.PROMPT, promptID)
 }
+
+export const updateTableForPrompt = (userID: number, promptID: number, tableID: number | null | undefined) =>
+  relinkInputValues(userID, promptID, tableID, getVerifiedUserPromptData, data => updatePrompt(data, false))

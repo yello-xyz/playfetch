@@ -13,6 +13,7 @@ import { withErrorRoute } from '@/src/server/session'
 import { EndpointEvent, getClientID, logUnknownUserEvent } from '@/src/server/analytics'
 import { updateAnalytics } from '@/src/server/datastore/analytics'
 import { DefaultChatContinuationInputKey } from '@/src/common/formatting'
+import { detectRequestClosed } from '../cancelRun'
 
 const logResponse = (
   clientID: string,
@@ -119,7 +120,18 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
               }
             : undefined
 
-          response = await runChain(endpoint.userID, projectID, version, configs, inputs, true, stream, continuationID)
+          const abortController = detectRequestClosed(req)
+          response = await runChain(
+            endpoint.userID,
+            projectID,
+            version,
+            configs,
+            inputs,
+            true,
+            abortController.signal,
+            stream,
+            continuationID
+          )
 
           if (endpoint.useCache && !response.failed && !continuationID && !response.continuationID) {
             cacheResponse(versionID, inputs, response.output, endpoint.parentID)

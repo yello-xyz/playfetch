@@ -1,5 +1,5 @@
 import { SupportsFunctionsPrompt, SupportsSystemPrompt } from '@/src/common/providerMetadata'
-import { PromptConfig, Prompts } from '@/types'
+import { InputValues, PromptConfig, Prompts } from '@/types'
 
 const validEmailRegExp =
   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
@@ -103,6 +103,7 @@ export const ExtractVariables = (text: string) => [
 
 export const CodeModuleName = 'PlayFetch'
 export const InterruptOnceFunctionName = 'InterruptOnce'
+export const InterruptPrefix = `${CodeModuleName}.${InterruptOnceFunctionName}(`
 
 const interruptPrefix = `${CodeModuleName}\.${InterruptOnceFunctionName}\\(`
 const matchAll = (text: string, expression: string) =>
@@ -158,9 +159,23 @@ export const ExtractPromptVariables = (prompts: Prompts, config: PromptConfig, i
   ]),
 ]
 
+export const GetEditorVariables = (inputValues: InputValues, variables: string[], staticVariables: string[]) => [
+  ...staticVariables,
+  ...Object.keys(inputValues).filter(variable => !variables.includes(variable)),
+]
+
 export const CheckValidURLPath = (urlPath: string) => {
   const validRegexp = /^[a-zA-Z0-9\-]+$/
   const digitsOnlyRegexp = /^\d*$/
 
   return urlPath.length > 2 && validRegexp.test(urlPath) && !digitsOnlyRegexp.test(urlPath)
+}
+
+export const GetUniqueName = (name: string, existingNames: string[]) => {
+  let uniqueName = name
+  let counter = 2
+  while (existingNames.includes(uniqueName)) {
+    uniqueName = `${name} ${counter++}`
+  }
+  return uniqueName
 }

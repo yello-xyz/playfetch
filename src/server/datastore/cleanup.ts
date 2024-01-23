@@ -53,6 +53,9 @@ export default async function cleanUpEntities() {
         await deleteBatchedEntities(Entity.RUN, 'parentID', entityID)
         await deleteBatchedEntities(Entity.VERSION, 'parentID', entityID)
         break
+      case Entity.TABLE:
+        await deleteBatchedEntities(Entity.INPUT, 'parentID', entityID)
+        break
       case Entity.PROJECT:
         await deleteSingleEntity(Entity.BUDGET, entityID)
         await deleteBatchedEntities(Entity.COST, 'scopeID', entityID)
@@ -65,6 +68,7 @@ export default async function cleanUpEntities() {
         await deleteBatchedEntities(Entity.COMMENT, 'projectID', entityID)
         await cleanUpBatchedEntities(Entity.PROMPT, 'projectID', entityID)
         await cleanUpBatchedEntities(Entity.CHAIN, 'projectID', entityID)
+        await cleanUpBatchedEntities(Entity.TABLE, 'projectID', entityID)
         break
       case Entity.WORKSPACE:
         await deleteBatchedEntities(Entity.ACCESS, 'objectID', entityID)

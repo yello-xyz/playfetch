@@ -3,52 +3,18 @@ import { useCallback, useState } from 'react'
 import api from '@/src/client/api'
 import ChainNodeEditor from './chainNodeEditor'
 import ChainEditor from './chainEditor'
-import {
-  ChainNode,
-  InputNode,
-  IsBranchChainItem,
-  IsChainItem,
-  IsCodeChainItem,
-  IsPromptChainItem,
-  IsQueryChainItem,
-  OutputNode,
-} from './chainNode'
+import { ChainNode, InputNode, IsChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import { Allotment } from 'allotment'
 import { useActiveProject, useRefreshActiveItem, useRefreshProject } from '@/src/client/context/projectContext'
 import VersionTimeline from '../versions/versionTimeline'
-import { SingleTabHeader } from '../tabSelector'
+import { SingleTabHeader } from '../tabsHeader'
 import IconButton from '../iconButton'
 import closeIcon from '@/public/close.svg'
-import ChainNodeOutput, { ExtractChainItemVariables } from './chainNodeOutput'
-import useChainPromptCache, { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
-
-const StripItemsToSave = (items: ChainItem[]): ChainItem[] =>
-  items.map(item => {
-    return IsCodeChainItem(item) || IsBranchChainItem(item) || IsQueryChainItem(item)
-      ? item
-      : {
-          ...item,
-          activePrompt: undefined,
-          version: undefined,
-        }
-  })
-
-const AugmentItemsToSave = (items: ChainItem[], promptCache: ChainPromptCache) =>
-  items.map(item => {
-    const inputs = ExtractChainItemVariables(item, promptCache, false)
-    return IsCodeChainItem(item) || IsBranchChainItem(item) || IsQueryChainItem(item)
-      ? { ...item, inputs }
-      : {
-          ...item,
-          inputs,
-          dynamicInputs: ExtractChainItemVariables(item, promptCache, true).filter(input => !inputs.includes(input)),
-        }
-  })
-
-const GetItemsToSave = (items: ChainItem[], promptCache: ChainPromptCache) =>
-  AugmentItemsToSave(StripItemsToSave(items), promptCache)
-
-export const GetChainItemsSaveKey = (items: ChainItem[]) => JSON.stringify(StripItemsToSave(items))
+import ChainNodeOutput from './chainNodeOutput'
+import useChainPromptCache from '../../src/client/hooks/useChainPromptCache'
+import { OnSavedChain } from '@/src/client/hooks/useSaveChain'
+import { ExtractUnboundChainVariables, GetChainItemsSaveKey, GetItemsToSave } from './chainItems'
+import { GetEditorVariables } from '@/src/common/formatting'
 
 export default function ChainView({
   chain,
@@ -60,10 +26,7 @@ export default function ChainView({
   chain: ActiveChain
   activeVersion: ChainVersion
   setActiveVersion: (version: ChainVersion) => void
-  saveChain: (
-    items: ChainItemWithInputs[],
-    onSaved?: ((versionID: number) => Promise<void>) | (() => void)
-  ) => Promise<number | undefined>
+  saveChain: (items: ChainItemWithInputs[], onSaved?: OnSavedChain) => Promise<number | undefined>
   focusRunID?: number
 }) {
   const [nodes, setNodes] = useState([InputNode, ...activeVersion.items, OutputNode] as ChainNode[])
@@ -164,6 +127,9 @@ export default function ChainView({
     }
   }
 
+  const variables = ExtractUnboundChainVariables(items, promptCache, true)
+  const staticVariables = ExtractUnboundChainVariables(items, promptCache, false)
+
   const minWidth = 300
   return (
     <Allotment>
@@ -175,9 +141,12 @@ export default function ChainView({
               versions={chain.versions}
               activeVersion={activeVersion}
               setActiveVersion={setActiveVersion}
-              tabSelector={() => (
+              tabSelector={children => (
                 <SingleTabHeader label='Version history'>
-                  <IconButton icon={closeIcon} onClick={() => setShowVersions(false)} />
+                  <div className='flex items-center gap-1'>
+                    {children}
+                    <IconButton icon={closeIcon} onClick={() => setShowVersions(false)} />
+                  </div>
                 </SingleTabHeader>
               )}
               chainItemCache={promptCache}
@@ -214,6 +183,8 @@ export default function ChainView({
                 chain={chain}
                 activeVersion={activeVersion}
                 nodes={nodes}
+                variables={variables}
+                staticVariables={staticVariables}
                 activeIndex={activeNodeIndex}
                 setActiveIndex={updateActiveNodeIndex}
                 promptCache={promptCache}
@@ -229,6 +200,7 @@ export default function ChainView({
                 setDirty={setNodeDirty}
                 promptCache={promptCache}
                 dismiss={() => updateActiveNodeIndex(undefined)}
+                variables={GetEditorVariables(chain.inputValues, variables, staticVariables)}
               />
             )}
           </Allotment.Pane>

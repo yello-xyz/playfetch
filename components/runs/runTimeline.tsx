@@ -9,28 +9,21 @@ import {
   Run,
 } from '@/types'
 import { useState } from 'react'
-import RunCell from './runCell'
-import { SingleTabHeader } from '../tabSelector'
+import { SingleTabHeader } from '../tabsHeader'
 import useInitialState from '@/src/client/hooks/useInitialState'
-
-const lastContinuationTimestamp = <T extends { timestamp: number; continuationID?: number }>(run: T, runs: T[]) =>
-  run.continuationID
-    ? Math.max(...runs.filter(r => r.continuationID === run.continuationID).map(r => r.timestamp))
-    : run.timestamp
-
-const sortByTimestamp = <T extends { timestamp: number; continuationID?: number }>(items: T[]): T[] =>
-  items.sort((a, b) =>
-    a.continuationID === b.continuationID
-      ? a.timestamp - b.timestamp
-      : lastContinuationTimestamp(a, items) - lastContinuationTimestamp(b, items)
-  )
-
-const hasTimestamp = <T extends { timestamp?: number }>(run: T): run is T & { timestamp: number } => !!run.timestamp
-
-const sortRuns = <T extends { timestamp?: number }>(runs: T[]): T[] => [
-  ...sortByTimestamp(runs.filter(hasTimestamp)),
-  ...runs.filter(run => !hasTimestamp(run)),
-]
+import {
+  BuildRunFilter,
+  GroupRuns,
+  IdentifierForRun,
+  MergeRuns,
+  FilterItemFromRun,
+  SortRuns,
+  BuildInputMap,
+} from '@/src/client/runMerging'
+import { RunGroup } from './runGroup'
+import FiltersHeader from '../filters/filtersHeader'
+import { AvailableLabelColorsForItem } from '../labelPopupMenu'
+import { Filter } from '../filters/filters'
 
 export default function RunTimeline({
   runs = [],
@@ -39,6 +32,7 @@ export default function RunTimeline({
   focusRunID,
   setFocusRunID,
   runVersion,
+  inputs = [[], []],
   selectInputValue = () => undefined,
   onRatingUpdate,
   isRunning,
@@ -55,17 +49,16 @@ export default function RunTimeline({
     dynamicInputs: PromptInputs[],
     continuationID?: number
   ) => Promise<any>
+  inputs?: [{ [key: string]: string }[], number[]]
   selectInputValue?: (inputKey: string) => string | undefined
   onRatingUpdate?: (run: Run) => Promise<void>
   isRunning?: boolean
   skipHeader?: boolean
 }) {
-  const identifierForRun = (runID: number) => `r${runID}`
-
   const focusRun = (focusRunID?: number) => {
     if (focusRunID !== undefined) {
       setTimeout(() => {
-        const element = document.getElementById(identifierForRun(focusRunID))
+        const element = document.getElementById(IdentifierForRun(focusRunID))
         if (runs.length > 1 && element) {
           element.scrollIntoView({ behavior: 'auto', block: 'start' })
         }
@@ -80,32 +73,16 @@ export default function RunTimeline({
     setPreviousActiveRunID(activeRunID)
   }
 
-  const sortedRuns = sortRuns(runs).reduce(
-    (sortedRuns, run) => {
-      const previousRun = sortedRuns.slice(-1)[0]
-      const compareRun = previousRun?.continuations ? previousRun.continuations.slice(-1)[0] : previousRun
+  type SortOption = 'Date' | 'Test Data Row'
+  const sortOptions: SortOption[] = ['Date', 'Test Data Row']
+  const [activeSortOption, setActiveSortOption] = useState(sortOptions[0])
+  const [filters, setFilters] = useState<Filter[]>([])
+  const labelColors = activeItem ? AvailableLabelColorsForItem(activeItem) : {}
 
-      const wasPartialRun = compareRun && !IsProperRun(compareRun) && compareRun.index < run.index
-      const isParentRun = compareRun && compareRun.parentRunID === run.id
-      const sameParentRun = compareRun && !!run.parentRunID && run.parentRunID === compareRun.parentRunID
-      const sameContinuation = compareRun && !!run.continuationID && run.continuationID === compareRun.continuationID
+  const sortByInputMap = activeSortOption === 'Test Data Row' ? BuildInputMap(inputs) : undefined
+  const mergedRuns = MergeRuns(SortRuns(runs)).filter(BuildRunFilter(filters))
 
-      return wasPartialRun || isParentRun || sameParentRun || sameContinuation
-        ? [
-            ...sortedRuns.slice(0, -1),
-            {
-              ...previousRun,
-              id: (wasPartialRun && previousRun.id === compareRun.id) || isParentRun ? run.id : previousRun.id,
-              continuations: [...(previousRun.continuations ?? []), run],
-              continuationID: compareRun.continuationID ?? run.continuationID,
-            },
-          ]
-        : [...sortedRuns, run]
-    },
-    [] as (PartialRun | Run)[]
-  )
-
-  const lastPartialRunID = sortedRuns.filter(run => !('inputs' in run)).slice(-1)[0]?.id
+  const lastPartialRunID = mergedRuns.filter(run => !('inputs' in run)).slice(-1)[0]?.id
   const [previousLastRunID, setPreviousLastRunID] = useState(lastPartialRunID)
   if (lastPartialRunID !== previousLastRunID) {
     focusRun(lastPartialRunID)
@@ -118,38 +95,40 @@ export default function RunTimeline({
     run.id === activeRunID ||
     (run.continuations ?? []).some(run => run.id === activeRunID)
   const selectRun = (run: PartialRun | Run) =>
-    sortedRuns.length > 1 && (setFocusRunID ? activeRunID !== run.id : activeRunID !== undefined)
+    mergedRuns.length > 1 && (setFocusRunID ? activeRunID !== run.id : activeRunID !== undefined)
       ? () => (setFocusRunID ? setFocusRunID(run.id) : setActiveRunID(undefined))
-      : undefined
-
-  const runContinuation =
-    version && runVersion
-      ? async (continuationID: number, message: string, inputKey: string) =>
-          runVersion(() => Promise.resolve(version.id), [{ [inputKey]: message }], [{}], continuationID)
       : undefined
 
   return (
     <div className='relative flex flex-col h-full'>
-      {!skipHeader && (
-        <div className='z-5 drop-shadow-[0_4px_14px_rgba(0,0,0,0.03)]'>
-          <SingleTabHeader label='Responses' />
-        </div>
+      {!skipHeader && activeItem && (
+        <FiltersHeader
+          users={activeItem.users}
+          labelColors={labelColors}
+          items={mergedRuns.filter(IsProperRun).map(FilterItemFromRun)}
+          filters={filters}
+          setFilters={setFilters}
+          sortOptions={sortOptions}
+          activeSortOption={activeSortOption}
+          setActiveSortOption={setActiveSortOption}
+          tabSelector={children => <SingleTabHeader label='Responses'>{children}</SingleTabHeader>}
+        />
       )}
       {runs.length > 0 ? (
-        <div className='flex flex-col flex-1 gap-3 p-4 overflow-y-auto'>
-          {sortedRuns.map(run => (
-            <RunCell
-              key={run.id}
-              identifierForRun={identifierForRun}
-              run={run}
+        <div className='flex flex-col flex-1 gap-3 p-3 overflow-y-auto'>
+          {GroupRuns(mergedRuns, sortByInputMap).map((group, index) => (
+            <RunGroup
+              key={index}
+              group={group}
+              sortByInputMap={sortByInputMap}
               version={version}
               activeItem={activeItem}
-              isRunning={isRunning}
-              isSelected={isRunSelected(run)}
-              onSelect={selectRun(run)}
-              runContinuation={runContinuation}
+              isRunSelected={isRunSelected}
+              selectRun={selectRun}
+              runVersion={runVersion}
               selectInputValue={selectInputValue}
               onRatingUpdate={onRatingUpdate}
+              isRunning={isRunning}
             />
           ))}
         </div>
@@ -162,11 +141,11 @@ export default function RunTimeline({
 
 function EmptyRuns({ isRunning }: { isRunning?: boolean }) {
   return isRunning ? (
-    <div className='flex flex-col items-center justify-center h-full gap-2 p-6 m-4 bg-gray-100 rounded-lg'>
+    <div className='flex flex-col items-center justify-center h-full gap-2 p-6 m-4 rounded-lg bg-gray-50'>
       <span className='font-medium text-gray-600'>Waiting for responses…</span>
     </div>
   ) : (
-    <div className='flex flex-col gap-3 px-4 pt-4 overflow-y-hidden'>
+    <div className='flex flex-col gap-3 px-3 pt-3 overflow-y-hidden'>
       {Array.from({ length: 3 }, (_, index) => (
         <div key={index} className='min-h-[320px] bg-gray-50 rounded-lg'></div>
       ))}

@@ -1,4 +1,4 @@
-import { Chain, Endpoint, Project, Prompt, Workspace } from '@/types'
+import { Chain, Endpoint, IsProjectItem, Project, ProjectItemIsChain, Prompt, Table, Workspace } from '@/types'
 import api from '@/src/client/api'
 import PopupMenu, { PopupMenuItem } from '../popupMenu'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
@@ -7,7 +7,8 @@ import PickNameDialog from '../pickNameDialog'
 import MovePromptDialog from '../prompts/movePromptDialog'
 import { useLoggedInUser } from '@/src/client/context/userContext'
 import { SharedProjectsWorkspace } from '@/pages'
-import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/projectContext'
+import { useRefreshProject } from '@/src/client/context/projectContext'
+import useProjectItemActions from '@/src/client/hooks/useProjectItemActions'
 
 export default function ProjectItemPopupMenu({
   item,
@@ -17,9 +18,9 @@ export default function ProjectItemPopupMenu({
   setMenuExpanded,
   onDelete,
 }: {
-  item: Prompt | Chain
+  item: Prompt | Chain | Table
   workspaces: Workspace[]
-  reference: Chain | Endpoint | undefined
+  reference: Prompt | Chain | Endpoint | undefined
   isMenuExpanded: boolean
   setMenuExpanded: (isExpanded: boolean) => void
   onDelete: () => void
@@ -30,26 +31,23 @@ export default function ProjectItemPopupMenu({
   const [showMovePromptDialog, setShowMovePromptDialog] = useState(false)
   const [sharedProjects, setSharedProjects] = useState<Project[]>([])
 
-  const isChain = 'referencedItemIDs' in item
-
-  const refreshActiveItem = useRefreshActiveItem()
+  const isTable = !IsProjectItem(item)
+  const isChain = !isTable && ProjectItemIsChain(item)
+  const isPrompt = !isTable && !isChain
   const refreshProject = useRefreshProject()
-  const refreshOnRename = () => {
-    if (isChain) {
-      refreshActiveItem()
-    }
-    refreshProject()
+  const [renameItem, duplicateItem, deleteItem] = useProjectItemActions(onDelete)
+
+  const withDismiss = (callback: () => void) => () => {
+    setMenuExpanded(false)
+    callback()
   }
 
-  const deleteCall = () => (isChain ? api.deleteChain(item.id) : api.deletePrompt(item.id))
-  const duplicateCall = () => (isChain ? api.duplicateChain(item.id) : api.duplicatePrompt(item.id))
-  const renameCall = (name: string) => (isChain ? api.renameChain(item.id, name) : api.renamePrompt(item.id, name))
-
-  const deleteItem = () => {
-    setMenuExpanded(false)
-    const label = isChain ? 'chain' : 'prompt'
+  const promptDeleteItem = () => {
+    const label = isTable ? 'table' : isChain ? 'chain' : 'prompt'
     if (reference) {
-      const reason = 'name' in reference ? `it is referenced by chain “${reference.name}”` : `has published endpoints`
+      const referenced = isTable ? 'used' : 'referenced'
+      const reason =
+        'name' in reference ? `it is ${referenced} by chain “${reference.name}”` : `has published endpoints`
       setDialogPrompt({
         title: `Cannot delete ${label} because ${reason}.`,
         confirmTitle: 'OK',
@@ -58,24 +56,13 @@ export default function ProjectItemPopupMenu({
     } else {
       setDialogPrompt({
         title: `Are you sure you want to delete this ${label}? This action cannot be undone.`,
-        callback: () => deleteCall().then(onDelete),
+        callback: () => deleteItem(item),
         destructive: true,
       })
     }
   }
 
-  const renameItem = () => {
-    setMenuExpanded(false)
-    setShowPickNamePrompt(true)
-  }
-
-  const duplicateItem = async () => {
-    setMenuExpanded(false)
-    duplicateCall().then(refreshProject)
-  }
-
   const copyPromptToProject = () => {
-    setMenuExpanded(false)
     api.getSharedProjects().then(([projects]) => setSharedProjects(projects))
     setShowMovePromptDialog(true)
   }
@@ -91,10 +78,10 @@ export default function ProjectItemPopupMenu({
   return (
     <>
       <PopupMenu className='w-40' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
-        <PopupMenuItem title='Rename…' callback={renameItem} first />
-        <PopupMenuItem title='Duplicate' callback={duplicateItem} />
-        {!isChain && <PopupMenuItem title='Copy to Project…' callback={copyPromptToProject} />}
-        <PopupMenuItem separated destructive title='Delete' callback={deleteItem} last />
+        <PopupMenuItem title='Rename…' callback={withDismiss(() => setShowPickNamePrompt(true))} first />
+        {!isTable && <PopupMenuItem title='Duplicate' callback={withDismiss(() => duplicateItem(item))} />}
+        {isPrompt && <PopupMenuItem title='Copy to Project…' callback={withDismiss(copyPromptToProject)} />}
+        <PopupMenuItem separated destructive title='Delete' callback={withDismiss(promptDeleteItem)} last />
       </PopupMenu>
       {showPickNamePrompt && (
         <PickNameDialog
@@ -102,11 +89,11 @@ export default function ProjectItemPopupMenu({
           confirmTitle='Rename'
           label='Name'
           initialName={item.name}
-          onConfirm={name => renameCall(name).then(refreshOnRename)}
+          onConfirm={name => renameItem(item, name)}
           onDismiss={() => setShowPickNamePrompt(false)}
         />
       )}
-      {!isChain && showMovePromptDialog && (
+      {isPrompt && showMovePromptDialog && (
         <MovePromptDialog
           item={item}
           workspaces={allWorkspaces}

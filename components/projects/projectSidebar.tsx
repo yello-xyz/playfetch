@@ -1,28 +1,30 @@
-import { Chain, Endpoint, Prompt, Workspace } from '@/types'
+import { Chain, Endpoint, Prompt, Table, Workspace } from '@/types'
 import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'
 import chainIcon from '@/public/chain.svg'
+import tableIcon from '@/public/table.svg'
 import compareIcon from '@/public/compare.svg'
 import endpointIcon from '@/public/endpoint.svg'
 import settingsIcon from '@/public/settings.svg'
 import dotsIcon from '@/public/dots.svg'
 import Sidebar, { SidebarButton, SidebarSection } from '../sidebar'
-import { Suspense, useState } from 'react'
+import { useState } from 'react'
 import IconButton from '../iconButton'
 import { ActiveItem, CompareItem, EndpointsItem, SettingsItem } from '@/src/common/activeItem'
 import { useActiveProject } from '@/src/client/context/projectContext'
-
-import dynamic from 'next/dynamic'
-const ProjectItemPopupMenu = dynamic(() => import('./projectItemPopupMenu'))
+import useProjectItemActions from '@/src/client/hooks/useProjectItemActions'
+import ProjectItemPopupMenu from './projectItemPopupMenu'
 
 export default function ProjectSidebar({
   activeItem,
   workspaces,
   onAddPrompt,
   onAddChain,
+  onAddTable,
   onDeleteItem,
   onSelectPrompt,
   onSelectChain,
+  onSelectTable,
   onSelectCompare,
   onSelectEndpoints,
   onSelectSettings,
@@ -32,20 +34,25 @@ export default function ProjectSidebar({
   workspaces: Workspace[]
   onAddPrompt: () => void
   onAddChain: () => void
+  onAddTable: () => void
   onDeleteItem: (itemID: number) => void
   onSelectPrompt: (promptID: number) => void
   onSelectChain: (chainID: number) => void
+  onSelectTable: (tableID: number) => void
   onSelectCompare: () => void
   onSelectEndpoints: () => void
   onSelectSettings: () => void
   rightBorder: boolean
 }) {
   const activeProject = useActiveProject()
-  const reference = (item: Prompt | Chain) =>
+  const reference = (item: Prompt | Chain | Table) =>
     activeProject.endpoints.find(endpoint => endpoint.enabled && endpoint.parentID === item.id) ??
-    activeProject.chains.find(chain => chain.referencedItemIDs.includes(item.id))
+    activeProject.chains.find(chain => chain.referencedItemIDs.includes(item.id)) ??
+    activeProject.chains.find(chain => chain.tableID === item.id) ??
+    activeProject.prompts.find(prompt => prompt.tableID === item.id)
 
-  const actionButtonForProjectItem = (item: Prompt | Chain, activeItem: boolean) => (
+  const [renameItem] = useProjectItemActions()
+  const actionButtonForProjectItem = (item: Prompt | Chain | Table, activeItem: boolean) => (
     <ProjectItemActionButton
       item={item}
       workspaces={workspaces}
@@ -55,9 +62,10 @@ export default function ProjectSidebar({
     />
   )
 
-  const addPromptButton = <IconButton className='opacity-50 hover:opacity-100' icon={addIcon} onClick={onAddPrompt} />
-  const addChainButton = <IconButton className='opacity-50 hover:opacity-100' icon={addIcon} onClick={onAddChain} />
-  const isActiveItem = (item: Prompt | Chain) =>
+  const addButton = (onAdd: () => void) => (
+    <IconButton className='opacity-50 hover:opacity-100' icon={addIcon} onClick={onAdd} />
+  )
+  const isActiveItem = (item: Prompt | Chain | Table) =>
     activeItem !== CompareItem &&
     activeItem !== EndpointsItem &&
     activeItem !== SettingsItem &&
@@ -87,7 +95,7 @@ export default function ProjectSidebar({
           />
         )}
       </SidebarSection>
-      <SidebarSection title='Prompts' actionComponent={addPromptButton}>
+      <SidebarSection title='Prompts' actionComponent={addButton(onAddPrompt)}>
         {activeProject.prompts.map((prompt, promptIndex) => (
           <SidebarButton
             key={promptIndex}
@@ -96,10 +104,11 @@ export default function ProjectSidebar({
             active={isActiveItem(prompt)}
             onClick={() => onSelectPrompt(prompt.id)}
             actionComponent={actionButtonForProjectItem(prompt, isActiveItem(prompt))}
+            onRename={name => renameItem(prompt, name)}
           />
         ))}
       </SidebarSection>
-      <SidebarSection title='Chains' className='flex-1' actionComponent={addChainButton}>
+      <SidebarSection title='Chains' actionComponent={addButton(onAddChain)}>
         {activeProject.chains.map((chain, chainIndex) => (
           <SidebarButton
             key={chainIndex}
@@ -108,6 +117,20 @@ export default function ProjectSidebar({
             active={isActiveItem(chain)}
             onClick={() => onSelectChain(chain.id)}
             actionComponent={actionButtonForProjectItem(chain, isActiveItem(chain))}
+            onRename={name => renameItem(chain, name)}
+          />
+        ))}
+      </SidebarSection>
+      <SidebarSection title='Test Data' className='flex-1' actionComponent={addButton(onAddTable)}>
+        {activeProject.tables.map((table, tableIndex) => (
+          <SidebarButton
+            key={tableIndex}
+            title={table.name}
+            icon={tableIcon}
+            active={isActiveItem(table)}
+            onClick={() => onSelectTable(table.id)}
+            actionComponent={actionButtonForProjectItem(table, isActiveItem(table))}
+            onRename={name => renameItem(table, name)}
           />
         ))}
       </SidebarSection>
@@ -122,9 +145,9 @@ function ProjectItemActionButton({
   onDelete,
   active,
 }: {
-  item: Prompt | Chain
+  item: Prompt | Chain | Table
   workspaces: Workspace[]
-  reference: Chain | Endpoint | undefined
+  reference: Prompt | Chain | Endpoint | undefined
   onDelete: () => void
   active?: boolean
 }) {
@@ -140,9 +163,7 @@ function ProjectItemActionButton({
         hoverType={{ background: active ? '' : '' }}
       />
       <div className='absolute shadow-sm -right-1 top-8'>
-        <Suspense>
-          <ProjectItemPopupMenu {...{ item, workspaces, reference, isMenuExpanded, setMenuExpanded, onDelete }} />
-        </Suspense>
+        <ProjectItemPopupMenu {...{ item, workspaces, reference, isMenuExpanded, setMenuExpanded, onDelete }} />
       </div>
     </div>
   )

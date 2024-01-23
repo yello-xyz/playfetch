@@ -1,7 +1,8 @@
 import { ActivePrompt, PromptVersion, Prompts } from '@/types'
 
+import { PromptTab } from '@/src/common/userPresets'
 import { ReactNode, useState } from 'react'
-import TabSelector, { SingleTabHeader } from '../tabSelector'
+import TabsHeader, { SingleTabHeader } from '../tabsHeader'
 import PromptPanel from './promptPanel'
 import VersionTimeline from '../versions/versionTimeline'
 import {
@@ -16,41 +17,53 @@ import {
 } from '@dnd-kit/core'
 import { Allotment } from 'allotment'
 
-type Tab = 'New Prompt' | 'Version History'
-type Target = Tab | 'left' | 'right' | 'mergedTabs'
+type Target = PromptTab | 'left' | 'right' | 'mergedTabs'
 
 export default function PromptTabs({
   prompt,
+  versions,
   activeVersion,
   setActiveVersion,
   currentVersion,
   updatePrompt,
   updateConfig,
+  initialTabs,
+  persistTabs,
+  variables,
 }: {
   prompt: ActivePrompt
+  versions: PromptVersion[]
   activeVersion: PromptVersion
   setActiveVersion: (version: PromptVersion) => void
   currentVersion: PromptVersion
   updatePrompt: (promptKey: keyof Prompts, prompt: string) => void
   updateConfig: (config: PromptVersion['config']) => void
+  initialTabs: PromptTab[][]
+  persistTabs: (tabs: PromptTab[][]) => void
+  variables: string[]
 }) {
-  const [areTabsMerged, setTabsMerged] = useState(true)
-  const [tabs, setTabs] = useState<Tab[]>(['New Prompt', 'Version History'])
-  const [activeTab, setActiveTab] = useState<Tab>('New Prompt')
+  const [tabs, setTabs] = useState(initialTabs.flat())
+  const [areTabsMerged, setTabsMerged] = useState(initialTabs.length === 1)
+  const [activeTab, setActiveTab] = useState<PromptTab>('New Prompt')
 
   const tabSelector = (children?: ReactNode) => (
-    <TabSelector tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} draggableTabs dropTarget='mergedTabs'>
+    <TabsHeader tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} draggableTabs dropTarget='mergedTabs'>
       {children}
-    </TabSelector>
+    </TabsHeader>
   )
 
-  const renderTab = (tab: Tab, tabSelector: (children?: ReactNode) => ReactNode) => {
+  const renderTab = (tab: PromptTab, tabSelector: (children?: ReactNode) => ReactNode) => {
     switch (tab) {
       case 'New Prompt':
         return (
           <div className='flex flex-col flex-1 h-full'>
             {tabSelector()}
-            <PromptPanel version={currentVersion} updatePrompt={updatePrompt} updateConfig={updateConfig} />
+            <PromptPanel
+              version={currentVersion}
+              updatePrompt={updatePrompt}
+              updateConfig={updateConfig}
+              variables={variables}
+            />
           </div>
         )
       case 'Version History':
@@ -58,7 +71,7 @@ export default function PromptTabs({
           <div className='flex-1 h-full min-h-0'>
             <VersionTimeline
               activeItem={prompt}
-              versions={prompt.versions}
+              versions={versions}
               activeVersion={activeVersion}
               setActiveVersion={setActiveVersion}
               tabSelector={tabSelector}
@@ -68,26 +81,29 @@ export default function PromptTabs({
     }
   }
 
-  const onDrag = (tab: Tab) => {
+  const onDrag = (tab: PromptTab) => {
     setTabs([...tabs.filter(t => t !== tab)])
   }
 
-  const onDrop = (tab: Tab, target: Target | undefined) => {
+  const updateTabs = (tabs: PromptTab[], merged: boolean) => {
+    setTabs(tabs)
+    setTabsMerged(merged)
+    persistTabs?.(merged ? [tabs] : tabs.map(tab => [tab]))
+  }
+
+  const onDrop = (tab: PromptTab, target: Target | undefined) => {
     switch (target) {
       case undefined:
         setTabs([...tabs, tab])
         return
       case 'left':
-        setTabs([tab, ...tabs])
-        setTabsMerged(false)
+        updateTabs([tab, ...tabs], false)
         return
       case 'right':
-        setTabs([...tabs, tab])
-        setTabsMerged(false)
+        updateTabs([...tabs, tab], false)
         return
       default:
-        setTabs([...tabs, tab])
-        setTabsMerged(true)
+        updateTabs([...tabs, tab], true)
         return
     }
   }
@@ -120,21 +136,21 @@ const DragAndDropContext = ({
   onDrop,
 }: {
   children: ReactNode
-  onDrag: (tab: Tab) => void
-  onDrop: (tab: Tab, target: Target | undefined) => void
+  onDrag: (tab: PromptTab) => void
+  onDrop: (tab: PromptTab, target: Target | undefined) => void
 }) => {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
-  const [draggingTab, setDraggingTab] = useState<Tab>()
+  const [draggingTab, setDraggingTab] = useState<PromptTab>()
 
   const onDragStart = (event: DragStartEvent) => {
-    const tab = event.active.id as Tab
+    const tab = event.active.id as PromptTab
     setDraggingTab(tab)
     onDrag(tab)
   }
 
   const onDragEnd = (event: DragEndEvent) => {
     setDraggingTab(undefined)
-    onDrop(event.active.id as Tab, event.over?.id as Target | undefined)
+    onDrop(event.active.id as PromptTab, event.over?.id as Target | undefined)
   }
 
   return (
@@ -149,7 +165,7 @@ const DragAndDropContext = ({
   )
 }
 
-const DropHeader = ({ tab, children }: { tab: Tab; children: ReactNode }) => {
+const DropHeader = ({ tab, children }: { tab: PromptTab; children: ReactNode }) => {
   return (
     <SingleTabHeader label={tab} draggableTab dropTarget={tab}>
       {children}
@@ -164,7 +180,7 @@ const DropZone = ({ target }: { target: Target }) => {
   )
 }
 
-const DraggingTab = ({ tab }: { tab?: Tab }) => (
+const DraggingTab = ({ tab }: { tab?: PromptTab }) => (
   <DragOverlay dropAnimation={null}>
     {tab ? (
       <div className='px-4 py-2 bg-white border border-gray-200 cursor-pointer min-w-fit whitespace-nowrap'>{tab}</div>

@@ -12,7 +12,7 @@ export default function SettingsSidebar<T>({
   titleForPane: (pane: T) => string
 }) {
   return (
-    <div className='flex flex-col min-w-[220px] overflow-y-auto'>
+    <div className='flex flex-col min-w-[220px] overflow-y-auto gap-1'>
       {panes.map((pane, index) => (
         <InnerSidebarItem
           key={index}

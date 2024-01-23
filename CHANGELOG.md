@@ -1,5 +1,10 @@
 ## PlayFetch Changelog
 
+### v0.23 - 2024-01-23
+- Reusable test data
+- Cancel long running LLM requests
+- Sort and filter responses
+
 ### v0.22 - 2024-01-12
 - Improved layout for prompts
 - Support for Gemini Pro (preview)

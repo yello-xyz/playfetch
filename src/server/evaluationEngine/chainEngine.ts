@@ -34,6 +34,7 @@ export default async function runChain(
   configs: (RunConfig | CodeConfig)[],
   inputs: PromptInputs,
   isEndpointEvaluation: boolean,
+  abortSignal: AbortSignal,
   stream?: (
     index: number,
     chunk: string,
@@ -73,7 +74,7 @@ export default async function runChain(
   let branch = configs[continuationIndex ?? 0].branch
   const configsAsChainItems = configs.map(item => ({ ...item, code: '' }))
 
-  for (let index = continuationIndex ?? 0; index < configs.length; ++index) {
+  for (let index = continuationIndex ?? 0; index < configs.length && !abortSignal.aborted; ++index) {
     const config = configs[index]
     if (config.branch !== branch) {
       continue
@@ -93,6 +94,7 @@ export default async function runChain(
           promptContext,
           index === continuationIndex || (config.includeContext ?? false),
           (chunk: string) => stream?.(index, chunk),
+          abortSignal,
           index === continuationIndex ? continuationInputs : {}
         )
       )

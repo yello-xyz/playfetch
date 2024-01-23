@@ -1,16 +1,19 @@
 import PromptInput from '../prompts/promptInput'
 import { NameForCodeChainItem } from './chainNode'
-import { SingleTabHeader } from '../tabSelector'
+import { SingleTabHeader } from '../tabsHeader'
 import codeIcon from '@/public/code.svg'
 import { CodeChainItem } from '@/types'
 import TextInput from '../textInput'
+import { InterruptPrefix } from '@/src/common/formatting'
 
 export default function CodeNodeEditor({
   item,
   updateItem,
+  variables,
 }: {
   item: CodeChainItem
   updateItem: (item: CodeChainItem) => void
+  variables: string[]
 }) {
   const updateCode = (code: string) => updateItem({ ...item, code })
   const updateName = (name: string) => updateItem({ ...item, name })
@@ -28,7 +31,14 @@ export default function CodeNodeEditor({
             setValue={updateDescription}
           />
           <span className='font-medium mt-2.5'>JavaScript Code</span>
-          <PromptInput placeholder={`return 'Hello World!'`} value={item.code} setValue={updateCode} preformatted />
+          <PromptInput
+            placeholder={`return 'Hello World!'`}
+            value={item.code}
+            setValue={updateCode}
+            variables={variables}
+            completions={[InterruptPrefix]}
+            preformatted
+          />
         </div>
       </div>
     </>

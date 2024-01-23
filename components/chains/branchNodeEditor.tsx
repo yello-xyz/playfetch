@@ -1,11 +1,12 @@
 import PromptInput from '../prompts/promptInput'
-import { SingleTabHeader } from '../tabSelector'
+import { SingleTabHeader } from '../tabsHeader'
 import branchIcon from '@/public/branch.svg'
 import { BranchChainItem, ChainItem } from '@/types'
 import TextInput from '../textInput'
 import Button from '../button'
 import { Fragment } from 'react'
 import { ShiftRight, PruneBranchAndShiftLeft } from '@/src/common/branching'
+import { InterruptPrefix } from '@/src/common/formatting'
 
 const placeholderSuffix = (branchIndex: number) => {
   switch (branchIndex) {
@@ -22,10 +23,12 @@ export default function BranchNodeEditor({
   index,
   items,
   updateItems,
+  variables,
 }: {
   index: number
   items: ChainItem[]
   updateItems: (items: ChainItem[]) => void
+  variables: string[]
 }) {
   const item = items[index] as BranchChainItem
 
@@ -107,6 +110,8 @@ export default function BranchNodeEditor({
               placeholder={`return Math.random() < 0.5 ? 'left' : 'right'`}
               value={item.code}
               setValue={updateCode}
+              variables={variables}
+              completions={[InterruptPrefix]}
               preformatted
             />
           </div>

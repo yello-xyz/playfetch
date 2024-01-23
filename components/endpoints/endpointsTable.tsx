@@ -1,5 +1,4 @@
 import {
-  ActiveProject,
   Chain,
   ProjectItemIsChain,
   ItemsInProject,
@@ -11,6 +10,7 @@ import {
 import { ReactNode } from 'react'
 import Checkbox from '../checkbox'
 import addIcon from '@/public/add.svg'
+import addIconWhite from '@/public/addWhite.svg'
 import promptIcon from '@/public/prompt.svg'
 import chainIcon from '@/public/chain.svg'
 import Icon from '../icon'
@@ -18,6 +18,7 @@ import TableCell, { TableHeader } from '../tableCell'
 
 import dynamic from 'next/dynamic'
 import { useActiveProject } from '@/src/client/context/projectContext'
+import { TopBarButton } from '../topBarButton'
 const AnalyticsDashboards = dynamic(() => import('./analyticsDashboards'), { ssr: false })
 
 export default function EndpointsTable({
@@ -39,8 +40,13 @@ export default function EndpointsTable({
   const groups = ItemsInProject(activeProject)
     .map(parent => activeProject.endpoints.filter(endpoint => endpoint.parentID === parent.id))
     .filter(group => group.length > 0)
+  const groupsLength = groups.length
+  const baseClass = 'flex flex-col w-full h-full min-h-0 gap-2 px-4 pt-4 overflow-y-auto text-gray-500'
+  const bgColor = groupsLength > 0 ? 'bg-gray-25' : 'bg-white'
+  const containerClass = baseClass + ' ' + bgColor
+
   return (
-    <div className='flex flex-col h-full bg-gray-25'>
+    <div className='flex flex-col h-full'>
       {tabSelector(
         onAddEndpoint && (
           <div
@@ -51,9 +57,9 @@ export default function EndpointsTable({
           </div>
         )
       )}
-      <div className='flex flex-col w-full h-full min-h-0 gap-2 px-4 pt-4 overflow-y-auto text-gray-500'>
+      <div className={containerClass}>
         <AnalyticsDashboards analytics={analytics} refreshAnalytics={refreshAnalytics} />
-        {groups.length > 0 ? (
+        {groupsLength > 0 ? (
           groups.map((group, index) => (
             <EndpointsGroup
               key={index}
@@ -84,7 +90,7 @@ function EndpointsGroup({
 }) {
   return (
     <>
-      <div className='flex items-center gap-1 text-gray-700 '>
+      <div className='flex items-center gap-1 text-gray-700'>
         <Icon icon={ProjectItemIsChain(parent) ? chainIcon : promptIcon} />
         {parent.name}
       </div>
@@ -135,28 +141,20 @@ function EndpointsGroup({
   )
 }
 
-function EmptyTable({ onAddEndpoint }: { onAddEndpoint?: () => void }) {
-  const AddPromptLink = ({ label }: { label: string }) => (
-    <span className='font-medium text-blue-400 cursor-pointer' onClick={onAddEndpoint}>
-      {label}
-    </span>
-  )
-
-  return (
-    <div className='w-full h-full pb-4'>
-      <div className='flex flex-col items-center justify-center h-full gap-1 p-6 border border-gray-200 rounded-lg bg-gray-50'>
-        <span className='font-medium'>No Endpoints</span>
-
-        <span className='w-64 text-sm text-center text-gray-400'>
-          {onAddEndpoint ? (
-            <span>
-              Create a <AddPromptLink label={'New Endpoint'} /> to integrate this project in your code base.
-            </span>
-          ) : (
-            <span>Create some prompts or chains first to integrate this project into your code base.</span>
-          )}
-        </span>
-      </div>
+const EmptyTable = ({ onAddEndpoint }: { onAddEndpoint?: () => void }) => (
+  <div className='w-full h-full pb-4 text-gray-700 bg-white'>
+    <div className='flex flex-col items-center justify-center h-full gap-1 p-6 border border-gray-200 rounded-lg bg-gray-25'>
+      <span className='font-medium'>No Endpoints</span>
+      <span className='text-sm text-center text-gray-400 w-72'>
+        {onAddEndpoint ? (
+          <span>Create an endpoint to allow integrating prompts or chains into your code base.</span>
+        ) : (
+          <span>Create some prompts or chains first to integrate this project into your code base.</span>
+        )}
+      </span>
+      <span className='mt-2'>
+        <TopBarButton type='primary' title='New Endpoint' icon={addIconWhite} onClick={onAddEndpoint} />
+      </span>
     </div>
-  )
-}
+  </div>
+)

@@ -5,6 +5,7 @@ import {
   ActiveItem,
   BuildActiveChain,
   BuildActivePrompt,
+  BuildActiveTable,
   CompareItem,
   EndpointsItem,
   SettingsItem,
@@ -15,7 +16,8 @@ import { loadAvailableProviders, loadScopedProviders } from './datastore/provide
 import { ParsedUrlQuery } from 'querystring'
 import { ParseActiveItemQuery, ParseNumberQuery, ParseQuery } from '../common/clientRoute'
 import { getAnalyticsForProject } from './datastore/analytics'
-import { getDefaultPromptConfigForUser } from './datastore/users'
+import { getPresetsForUser } from './datastore/users'
+import { getTableForUser } from './datastore/tables'
 
 export default async function loadActiveItem(user: User, query: ParsedUrlQuery) {
   const { projectID } = ParseNumberQuery(query)
@@ -24,7 +26,7 @@ export default async function loadActiveItem(user: User, query: ParsedUrlQuery) 
 
   const initialActiveProject = await getActiveProject(user.id, projectID!)
 
-  const { promptID, chainID, compare, endpoints, settings } = ParseActiveItemQuery(query, initialActiveProject)
+  const { promptID, chainID, tableID, compare, endpoints, settings } = ParseActiveItemQuery(query, initialActiveProject)
 
   const initialActiveItem: ActiveItem | null = compare
     ? CompareItem
@@ -36,11 +38,13 @@ export default async function loadActiveItem(user: User, query: ParsedUrlQuery) 
           ? await getPromptForUser(user.id, promptID).then(BuildActivePrompt(initialActiveProject))
           : chainID
             ? await getChainForUser(user.id, chainID).then(BuildActiveChain(initialActiveProject))
-            : null
+            : tableID
+              ? await getTableForUser(user.id, tableID).then(BuildActiveTable)
+              : null
 
   const initialAvailableProviders = await loadAvailableProviders([projectID!, user.id])
   const initialScopedProviders = await loadScopedProviders(projectID!)
-  const initialPromptConfig = await getDefaultPromptConfigForUser(user.id)
+  const initialUserPresets = await getPresetsForUser(user.id)
 
   let initialAnalytics: Analytics | null =
     initialActiveItem === EndpointsItem || initialActiveItem === CompareItem
@@ -56,7 +60,7 @@ export default async function loadActiveItem(user: User, query: ParsedUrlQuery) 
     initialAnalytics,
     initialAvailableProviders,
     initialScopedProviders,
-    initialPromptConfig,
+    initialUserPresets,
   }
 }
 

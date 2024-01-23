@@ -52,6 +52,7 @@ export type ActiveProject = Project & {
   availableFlavors: string[]
   prompts: Prompt[]
   chains: Chain[]
+  tables: Table[]
   users: User[]
   pendingUsers: PendingUser[]
   projectOwners: User[]
@@ -65,6 +66,7 @@ export type Prompt = {
   id: number
   name: string
   projectID: number
+  tableID: number | null
   sourcePath: string | null
 }
 
@@ -79,8 +81,9 @@ export type ActivePrompt = Prompt & {
 export type Chain = {
   id: number
   name: string
-  referencedItemIDs: number[]
   projectID: number
+  tableID: number | null
+  referencedItemIDs: number[]
 }
 
 export type ActiveChain = Chain & {
@@ -196,6 +199,7 @@ export type PartialRun = {
   parentRunID?: number | null
   continuations?: (PartialRun | Run)[]
   userID?: number
+  onCancel?: () => void
 }
 
 export type Run = PartialRun & {
@@ -294,6 +298,8 @@ export type ResolvedEndpoint = Endpoint & {
 export const ItemsInProject = (project: ActiveProject) => [...project.prompts, ...project.chains]
 export const FindItemInProject = (itemID: number | undefined, project: ActiveProject) =>
   ItemsInProject(project).find(item => item.id === itemID)!
+export const IsProjectItem = (item: Prompt | Chain | Table): item is Prompt | Chain =>
+  'referencedItemIDs' in item || 'sourcePath' in item
 export const ProjectItemIsChain = (item: Chain | Prompt | undefined): item is Chain =>
   !!item && 'referencedItemIDs' in item
 
@@ -412,3 +418,11 @@ export type OnboardingResponse = {
   area?: 'product' | 'engineering' | 'marketing' | 'content' | 'design' | 'sales'
   otherArea?: string
 }
+
+export type Table = {
+  id: number
+  name: string
+  projectID: number
+}
+
+export type ActiveTable = Table & { inputValues: InputValues }

@@ -22,7 +22,7 @@ export function withErrorRoute(handler: NextApiHandler): NextApiHandler {
   }
 }
 
-type LoggedInAPIHandler = (req: NextApiRequest, res: NextApiResponse, user: User) => Promise<void> | void
+type LoggedInAPIHandler = (req: NextApiRequest, res: NextApiResponse, user: User) => void | Promise<void>
 
 const ensureValidUser = (user: User) => ({
   ...user,

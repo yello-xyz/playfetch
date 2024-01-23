@@ -12,16 +12,16 @@ import PromptConfigSettings from './promptConfigSettings'
 import { ModelUnavailableWarning } from './modelUnavailableWarning'
 import Collapsible from '../collapsible'
 
-export type PromptTab = keyof Prompts
-
 export default function PromptPanel({
   version,
   updatePrompt,
   updateConfig,
+  variables,
 }: {
   version: PromptVersion
   updatePrompt?: (promptKey: keyof Prompts, prompt: string) => void
   updateConfig?: (config: PromptConfig) => void
+  variables?: string[]
 }) {
   const config = version.config
 
@@ -36,7 +36,7 @@ export default function PromptPanel({
   const setExpanded = (expanded: boolean, shiftClick: boolean) => shiftClick && setAllSectionsExpanded(expanded)
 
   return (
-    <div className='flex flex-col flex-1 h-full gap-4 px-4 pt-4 overflow-y-auto text-gray-500'>
+    <div className='flex flex-col flex-1 h-full gap-4 pt-2 pl-4 pr-3 overflow-y-auto text-gray-500'>
       <div className='flex flex-col flex-1 min-h-0 gap-3'>
         {primaryPromptKeys.map(promptKey => (
           <PromptInputSection
@@ -46,6 +46,7 @@ export default function PromptPanel({
             updatePrompt={updatePrompt}
             isExpanded={areAllSectionsExpanded}
             setExpanded={setExpanded}
+            variables={variables}
           />
         ))}
         <PromptSection title='Parameters' isExpanded={areAllSectionsExpanded ?? true} setExpanded={setExpanded}>
@@ -63,6 +64,7 @@ export default function PromptPanel({
             updatePrompt={updatePrompt}
             isExpanded={areAllSectionsExpanded}
             setExpanded={setExpanded}
+            variables={variables}
           />
         ))}
         {!isModelAvailable && canModifyPrompt && (
@@ -80,12 +82,14 @@ const PromptInputSection = ({
   updatePrompt,
   isExpanded,
   setExpanded,
+  variables,
 }: {
   promptKey: keyof Prompts
   version: PromptVersion
   updatePrompt?: (promptKey: keyof Prompts, prompt: string) => void
   isExpanded?: boolean
   setExpanded: (expanded: boolean, shiftClick: boolean) => void
+  variables?: string[]
 }) => (
   <PromptSection
     key={promptKey}
@@ -100,6 +104,7 @@ const PromptInputSection = ({
         placeholder={updatePrompt ? PlaceholderForPromptKey(promptKey) : undefined}
         preformatted={PromptKeyNeedsPreformatted(promptKey)}
         disabled={!updatePrompt}
+        variables={variables}
       />
     </div>
   </PromptSection>

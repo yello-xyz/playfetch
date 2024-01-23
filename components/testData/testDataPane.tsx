@@ -1,28 +1,12 @@
-import { Dispatch, Fragment, KeyboardEvent, ReactNode, SetStateAction, useRef, useState } from 'react'
-import addIcon from '@/public/add.svg'
-import expandIcon from '@/public/expand.svg'
-import Icon from '../icon'
+import { Dispatch, ReactNode, SetStateAction } from 'react'
 import { InputValues, TestConfig } from '@/types'
-import TestDataHeader from './testDataHeader'
-import useTestDataValuePopup from '@/src/client/hooks/useTestDataValuePopup'
 import { SelectInputRows } from '@/src/client/inputRows'
 import DropdownMenu from '../dropdownMenu'
 import Label from '../label'
 import RangeInput from '../rangeInput'
-import Editor from '../editor'
 import Checkbox from '../checkbox'
-
-const getAllVariablesAndRowCount = (variables: string[], inputValues: InputValues) => {
-  const allVariables = [...variables, ...Object.keys(inputValues).filter(input => !variables.includes(input))]
-  const rowCount = Math.max(1, ...allVariables.map(variable => inputValues[variable]?.length ?? 0))
-
-  return [allVariables, rowCount] as const
-}
-
-export const GetTestDataRowCount = (variables: string[], inputValues: InputValues) => {
-  const [_, rowCount] = getAllVariablesAndRowCount(variables, inputValues)
-  return rowCount
-}
+import TableEditor, { GetTableRowCount, GetTableValueForRow, HasTableData } from './tableEditor'
+import EmptyTableWrapper from './emptyTableWrapper'
 
 export default function TestDataPane({
   variables,
@@ -30,69 +14,34 @@ export default function TestDataPane({
   inputValues,
   setInputValues,
   persistInputValuesIfNeeded,
+  addInputValues,
   testConfig,
   setTestConfig,
+  importButton,
+  onImportComplete,
   asModalPopup = false,
+  skipButtonBorder = false,
 }: {
   variables: string[]
   staticVariables: string[]
   inputValues: InputValues
   setInputValues: Dispatch<SetStateAction<InputValues>>
   persistInputValuesIfNeeded: () => void
+  addInputValues: (variable: string, inputs: string[]) => Promise<void>
   testConfig: TestConfig
   setTestConfig: (testConfig: TestConfig) => void
+  importButton: (onImportComplete?: () => void) => ReactNode
+  onImportComplete?: () => void
   asModalPopup?: boolean
+  skipButtonBorder?: boolean
 }) {
-  const containerRef = useRef<HTMLDivElement>(null)
+  const rowCount = GetTableRowCount(variables, inputValues)
 
-  const [allVariables, rowCount] = getAllVariablesAndRowCount(variables, inputValues)
-
-  const getInputValue = (row: number, variable: string) => inputValues[variable]?.[row] ?? ''
-  const setInputValue = (row: number, variable: string, value: string) =>
-    setInputValues(inputValues => {
-      const paddedColumn = [
-        ...(inputValues[variable] ?? []),
-        ...Array.from({ length: Math.max(0, length - (inputValues[variable]?.length ?? 0)) }, _ => ''),
-      ]
-      return {
-        ...inputValues,
-        [variable]: [...paddedColumn.slice(0, row), value, ...paddedColumn.slice(row + 1)],
-      }
-    })
-
-  const isRowEmpty = (row: number) => allVariables.every(variable => getInputValue(row, variable).length === 0)
   const isRelevantRowEmpty = (row: number) =>
     (testConfig.autoRespond !== undefined ? variables : staticVariables).every(
-      variable => getInputValue(row, variable).length === 0
+      variable => GetTableValueForRow(row, variable, inputValues).length === 0
     )
-
-  const addInput = () => {
-    if (!isRowEmpty(rowCount - 1)) {
-      persistInputValuesIfNeeded()
-      setTimeout(() => {
-        setInputValues(inputValues =>
-          Object.fromEntries(Object.entries(inputValues).map(([variable, values]) => [variable, [...values, '']]))
-        )
-        // TODO focus on last cell in newly added row?
-      })
-    }
-  }
-
-  const checkDeleteRow = (event: KeyboardEvent, row: number) => {
-    if (isRowEmpty(row) && (event.key === 'Backspace' || event.key === 'Delete')) {
-      persistInputValuesIfNeeded()
-      setTimeout(() => {
-        setInputValues(inputValues =>
-          Object.fromEntries(
-            Object.entries(inputValues).map(([variable, values]) => [
-              variable,
-              [...values.slice(0, row), ...values.slice(row + 1)],
-            ])
-          )
-        )
-      })
-    }
-  }
+  const isRowSelected = (row: number) => testConfig.rowIndices.includes(row)
 
   const toggleRow = (row: number) => {
     const rowIndices = testConfig.rowIndices.includes(row)
@@ -113,121 +62,74 @@ export default function TestDataPane({
     }
   }
 
-  const [activeCell, setActiveCell] = useState<[number, number]>()
-  const isRowActive = (row: number) => activeCell?.[0] === row
-  const isCellActive = (row: number, col: number) => isRowActive(row) && activeCell?.[1] === col
-
-  const expandCell = useTestDataValuePopup(variables, staticVariables, getInputValue, (row, variable, value) => {
-    setInputValue(row, variable, value)
-    persistInputValuesIfNeeded()
-  })
-
   const dynamicVariables = variables.filter(variable => !staticVariables.includes(variable))
   const [_, dynamicInputRows] = SelectInputRows(inputValues, dynamicVariables, testConfig)
+  const shouldShowOptions = !asModalPopup && dynamicInputRows.length > 0
 
-  const gridTemplateColumns = `58px repeat(${allVariables.length}, minmax(240px, 1fr))`
   return (
-    <div className='flex flex-col items-stretch flex-1 h-full overflow-y-auto'>
-      <div
-        key={allVariables.join(',')}
-        ref={containerRef}
-        className='grid w-full overflow-x-auto bg-gray-25 shrink-0'
-        style={{ gridTemplateColumns }}>
-        <div className='border-b border-gray-200 cursor-pointer bg-gray-25' onClick={toggleAll} />
-        {allVariables.map((variable, index) => (
-          <TestDataHeader key={index} variable={variable} variables={variables} staticVariables={staticVariables} />
-        ))}
-        {Array.from({ length: rowCount }, (_, row) => {
-          const isRowSelected = testConfig.rowIndices.includes(row)
-          const border = (col: number) =>
-            isCellActive(row, col) ? 'border border-blue-400' : 'border-b border-l border-gray-200'
-          const truncate = isRowActive(row) ? '' : `max-h-[46px] ${isRowEmpty(row) ? '' : 'line-clamp-2'}`
-          const iconPosition = (col: number) => (col === allVariables.length - 1 ? 'right-3' : 'right-0.5')
-          const iconOpacity = (col: number) =>
-            isCellActive(row, col) ? 'hover:opacity-100' : 'group-hover:opacity-100'
-          const iconStyle = 'bg-gray-25 rounded cursor-pointer opacity-0'
-          return (
-            <Fragment key={row}>
-              <div className='px-2 py-1 border-b border-gray-200'>
-                <Checkbox
-                  checked={isRowSelected}
-                  disabled={isRowSelected ? selectedRowCount === 1 : isRelevantRowEmpty(row) || selectedRowCount === 0}
-                  setChecked={() => toggleRow(row)}
-                />
-              </div>
-              {allVariables.map((variable, col) => (
-                <div className='relative group' key={`${rowCount}-${col}`}>
-                  <Editor
-                    className={`h-full ${border(col)} ${truncate}`}
-                    value={getInputValue(row, variable)}
-                    setValue={value => setInputValue(row, variable, value)}
-                    onBlur={() => {
-                      persistInputValuesIfNeeded()
-                      setActiveCell(activeCell =>
-                        activeCell?.[0] === row && activeCell?.[1] === col ? undefined : activeCell
-                      )
-                    }}
-                    onFocus={() => setActiveCell([row, col])}
-                    onKeyDown={event => checkDeleteRow(event, row)}
-                    bordered={false}
-                    focusOnLoad={false}
-                  />
-                  {!asModalPopup && (
-                    <Icon
-                      className={`absolute top-0.5 ${iconPosition(col)} ${iconOpacity(col)} ${iconStyle}`}
-                      icon={expandIcon}
-                      onClick={() => expandCell(row, variable)}
-                    />
-                  )}
-                </div>
-              ))}
-            </Fragment>
-          )
-        })}
-      </div>
-      <div
-        className='flex items-center justify-center py-1 border-b border-gray-200 cursor-pointer bg-gray-25 hover:bg-gray-50 font-regular'
-        onClick={addInput}>
-        <Icon icon={addIcon} />
-        Add Row
-      </div>
-      {!asModalPopup && dynamicInputRows.length > 0 && (
-        <div className='flex flex-wrap items-center px-3 pt-2 gap-y-2 gap-x-4'>
-          <OptionSection
-            label={
-              <>
-                Use values for <span className='font-medium text-purple-400'>dynamic inputs</span> as
-              </>
-            }>
-            <DropdownMenu
-              size='xs'
-              value={autoRespondModeFromTestConfig(testConfig)}
-              onChange={value => setTestConfig(testConfigWithAutoRespondMode(testConfig, value as DynamicMode))}>
-              <option value='manual'>suggested manual responses</option>
-              <option value='static'>fixed mocked responses</option>
-              <option value='dynamic'>personas for automated responses</option>
-            </DropdownMenu>
-          </OptionSection>
-          {testConfig.autoRespond !== undefined && (
-            <OptionSection label='Maximum number of responses'>
-              <div className='flex items-center flex-1 gap-2'>
-                <RangeInput
-                  size='xs'
-                  className='flex-1'
-                  value={testConfig.maxResponses ?? DefaultMaxResponses}
-                  setValue={value =>
-                    setTestConfig({ ...testConfig, maxResponses: isNaN(Number(value)) ? 0 : Number(value) })
-                  }
-                  min={1}
-                  max={10}
-                  step={1}
-                />
-              </div>
-            </OptionSection>
+    <EmptyTableWrapper
+      isTableEmpty={!HasTableData(variables, inputValues)}
+      bottomPadding={asModalPopup ? undefined : ''}
+      onAddInputValues={addInputValues}
+      onImportComplete={onImportComplete}
+      importButton={importButton}>
+      <div className='flex flex-col items-stretch flex-1 h-full overflow-y-auto'>
+        <TableEditor
+          inputValues={inputValues}
+          setInputValues={setInputValues}
+          persistInputValuesIfNeeded={persistInputValuesIfNeeded}
+          variables={variables}
+          staticVariables={staticVariables}
+          gutterColumn={row => (
+            <Checkbox
+              checked={isRowSelected(row)}
+              disabled={isRowSelected(row) ? selectedRowCount === 1 : isRelevantRowEmpty(row) || selectedRowCount === 0}
+              setChecked={() => toggleRow(row)}
+            />
           )}
-        </div>
-      )}
-    </div>
+          onToggleAll={toggleAll}
+          skipExpandButtons={asModalPopup}
+          inModal={asModalPopup}
+        />
+        {(!skipButtonBorder || shouldShowOptions) && <div className='border-b border-gray-200' />}
+        {shouldShowOptions && (
+          <div className='flex flex-wrap items-center px-3 py-2 gap-y-2 gap-x-4'>
+            <OptionSection
+              label={
+                <>
+                  Use values for <span className='font-medium text-purple-400'>dynamic inputs</span> as
+                </>
+              }>
+              <DropdownMenu
+                size='xs'
+                value={autoRespondModeFromTestConfig(testConfig)}
+                onChange={value => setTestConfig(testConfigWithAutoRespondMode(testConfig, value as DynamicMode))}>
+                <option value='manual'>suggested manual responses</option>
+                <option value='static'>fixed mocked responses</option>
+                <option value='dynamic'>personas for automated responses</option>
+              </DropdownMenu>
+            </OptionSection>
+            {testConfig.autoRespond !== undefined && (
+              <OptionSection label='Maximum number of responses'>
+                <div className='flex items-center flex-1 gap-2'>
+                  <RangeInput
+                    size='xs'
+                    className='flex-1'
+                    value={testConfig.maxResponses ?? DefaultMaxResponses}
+                    setValue={value =>
+                      setTestConfig({ ...testConfig, maxResponses: isNaN(Number(value)) ? 0 : Number(value) })
+                    }
+                    min={1}
+                    max={10}
+                    step={1}
+                  />
+                </div>
+              </OptionSection>
+            )}
+          </div>
+        )}
+      </div>
+    </EmptyTableWrapper>
   )
 }
 

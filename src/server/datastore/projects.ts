@@ -25,16 +25,17 @@ import {
   revokeUserAccess,
   getAccessibleObjectIDs,
 } from './access'
-import { addPromptToProject, getUniqueName, matchesDefaultName, toPrompt } from './prompts'
+import { addPromptToProject, matchesDefaultName, toPrompt } from './prompts'
 import { getActiveUsers, toUser } from './users'
 import { DefaultEndpointFlavor, toEndpoint } from './endpoints'
 import { toChain } from './chains'
 import { ensureWorkspaceAccess, getPendingAccessObjects, getWorkspaceUsers } from './workspaces'
 import { toUsage } from './usage'
-import { StripVariableSentinels } from '@/src/common/formatting'
+import { GetUniqueName, StripVariableSentinels } from '@/src/common/formatting'
 import { getAnalyticsForProject } from './analytics'
 import { toComment } from './comments'
 import { deleteEntity } from './cleanup'
+import { toTable } from './tables'
 
 export async function migrateProjects(postMerge: boolean) {
   if (postMerge) {
@@ -108,6 +109,8 @@ export async function getActiveProject(userID: number, projectID: number): Promi
   const prompts = promptData.map(toPrompt)
   const chainData = await getOrderedEntities(Entity.CHAIN, 'projectID', projectID)
   const chains = chainData.map(toChain)
+  const tableData = await getOrderedEntities(Entity.TABLE, 'projectID', projectID)
+  const tables = tableData.map(toTable)
   const commentsData = await getOrderedEntities(Entity.COMMENT, 'projectID', projectID)
   const comments = commentsData.map(toComment).reverse()
   const [users, pendingUsers, projectOwners, projectMembers, pendingProjectMembers] = await getProjectAndWorkspaceUsers(
@@ -123,6 +126,7 @@ export async function getActiveProject(userID: number, projectID: number): Promi
     endpoints: await loadEndpoints(projectID, projectData.encryptedAPIKey ? decrypt(projectData.encryptedAPIKey) : ''),
     prompts,
     chains,
+    tables,
     users,
     pendingUsers,
     projectOwners: projectOwner ? [projectOwner, ...filterObjects(projectOwners, [projectOwner])] : [],
@@ -143,7 +147,7 @@ export async function addProjectForUser(
 ): Promise<number> {
   await ensureWorkspaceAccess(userID, workspaceID)
   const projectNames = await getEntities(Entity.PROJECT, 'workspaceID', workspaceID)
-  const uniqueName = await getUniqueName(
+  const uniqueName = GetUniqueName(
     name,
     projectNames.map(project => project.name)
   )

@@ -33,6 +33,7 @@ export enum Entity {
   COST = 'cost',
   BUDGET = 'budget',
   RATING = 'rating',
+  TABLE = 'table',
 }
 
 export enum NextAuthEntity {

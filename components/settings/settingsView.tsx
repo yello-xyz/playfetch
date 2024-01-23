@@ -149,7 +149,7 @@ export default function SettingsView({
   ]
 
   return !isProjectScope || activeProject.isOwner ? (
-    <div className='flex h-full gap-10 p-10 overflow-hidden bg-gray-25'>
+    <div className='flex h-full gap-10 p-8 overflow-hidden bg-gray-25'>
       <SettingsSidebar
         panes={availablePanes as ActivePane[]}
         activePane={activePane}
