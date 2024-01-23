@@ -10,7 +10,6 @@ import {
   PromptVersion,
   ChainVersion,
   Analytics,
-  PromptConfig,
 } from '@/types'
 import ClientRoute, {
   CompareRoute,
@@ -35,12 +34,11 @@ import useCommentSelection from '@/src/client/hooks/useCommentSelection'
 import { UserPresetsContext } from '@/src/client/context/userPresetsContext'
 import { useDocumentationCookie } from '@/components/cookieBanner'
 import { ProviderContext } from '@/src/client/context/providerContext'
-
-import dynamic from 'next/dynamic'
 import ProjectPaneWrapper from '@/components/projects/projectPaneWrapper'
 import { UserPresets } from '@/src/common/userPresets'
 import useTable from '@/src/client/hooks/useTable'
 
+import dynamic from 'next/dynamic'
 const MainProjectPane = dynamic(() => import('@/components/projects/mainProjectPane'))
 const ProjectSidebar = dynamic(() => import('@/components/projects/projectSidebar'))
 const ProjectTopBar = dynamic(() => import('@/components/projects/projectTopBar'))
@@ -198,10 +196,10 @@ export default function Home({
   const currentQueryState = compare
     ? CompareItem
     : endpoints
-      ? EndpointsItem
-      : settings
-        ? SettingsItem
-        : promptID ?? chainID ?? tableID
+    ? EndpointsItem
+    : settings
+    ? SettingsItem
+    : promptID ?? chainID ?? tableID
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
     if (compare) {
@@ -289,25 +287,27 @@ export default function Home({
                       <div className='flex-1'>
                         <Suspense>
                           <MainProjectPane
-                            activeItem={activeItem}
-                            activePrompt={activePrompt}
-                            activeChain={activeChain}
-                            activeTable={activeTable}
-                            activePromptVersion={activePromptVersion}
-                            activeChainVersion={activeChainVersion}
-                            selectVersion={selectVersion}
-                            setModifiedVersion={setModifiedVersion}
-                            addPrompt={addPrompt}
-                            savePrompt={savePromptCallback}
-                            saveChain={saveChain}
-                            focusRunID={focusRunID}
-                            analytics={analytics}
-                            refreshAnalytics={refreshAnalytics}
-                            scopedProviders={scopedProviders}
-                            refreshProviders={refreshProviders}
-                            showComments={showComments}
-                            setShowComments={setShowComments}
-                            selectComment={selectComment}
+                            {...{
+                              activeItem,
+                              activePrompt,
+                              activeChain,
+                              activeTable,
+                              activePromptVersion,
+                              activeChainVersion,
+                              selectVersion,
+                              setModifiedVersion,
+                              addPrompt,
+                              savePrompt: savePromptCallback,
+                              saveChain,
+                              focusRunID,
+                              analytics,
+                              refreshAnalytics,
+                              scopedProviders,
+                              refreshProviders,
+                              showComments,
+                              setShowComments,
+                              selectComment,
+                            }}
                           />
                         </Suspense>
                       </div>

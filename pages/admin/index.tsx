@@ -2,27 +2,15 @@ import { withAdminSession } from '@/src/server/session'
 import { ActiveUser, ProjectMetrics, RecentProject, User, UserMetrics, Workspace, WorkspaceMetrics } from '@/types'
 import TopBar, { TopBarAccessoryItem, TopBarBackItem } from '@/components/topBar'
 import AdminSidebar from '@/components/admin/adminSidebar'
-import Waitlist from '@/components/admin/waitlist'
 import ClientRoute, { ParseNumberQuery } from '@/src/common/clientRoute'
 import { useRouter } from 'next/router'
 import { Suspense, useState } from 'react'
-import ActiveUsers from '@/components/admin/activeUsers'
 import api from '@/src/client/admin/api'
-import RecentProjects from '@/components/admin/recentProjects'
-import {
-  ActiveUsersItem,
-  AdminItem,
-  AdminItemIsProject,
-  AdminItemIsUser,
-  RecentProjectsItem,
-  WaitlistItem,
-} from '@/src/common/admin/adminItem'
+import { ActiveUsersItem, AdminItem, RecentProjectsItem, WaitlistItem } from '@/src/common/admin/adminItem'
 import loadAdminItem from '@/src/server/admin/adminItem'
 
 import dynamic from 'next/dynamic'
-const ActiveUserMetrics = dynamic(() => import('@/components/admin/activeUserMetrics'))
-const RecentProjectMetrics = dynamic(() => import('@/components/admin/recentProjectMetrics'))
-const WorkspaceMetrics = dynamic(() => import('@/components/admin/workspaceMetrics'))
+const MainAdminPane = dynamic(() => import('@/components/admin/mainAdminPane'))
 
 export const getServerSideProps = withAdminSession(async ({ query }) => ({
   props: await loadAdminItem(query),
@@ -66,10 +54,10 @@ export default function Admin({
         item === WaitlistItem
           ? '?w=1'
           : item === RecentProjectsItem
-            ? '?p=1'
-            : item !== ActiveUsersItem
-              ? `?i=${item}`
-              : ''
+          ? '?p=1'
+          : item !== ActiveUsersItem
+          ? `?i=${item}`
+          : ''
       }${isWorkspace ? '&s=1' : ''}`,
       undefined,
       {
@@ -85,10 +73,10 @@ export default function Admin({
   const currentQueryState = waitlist
     ? WaitlistItem
     : projects
-      ? RecentProjectsItem
-      : isWorkspace
-        ? `${itemID}s`
-        : itemID ?? ActiveUsersItem
+    ? RecentProjectsItem
+    : isWorkspace
+    ? `${itemID}s`
+    : itemID ?? ActiveUsersItem
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
     const knownUsers = [
@@ -144,50 +132,21 @@ export default function Admin({
             analyticsLinks={analyticsLinks}
             debugLinks={debugLinks}
           />
-          <div className='flex flex-col flex-1 bg-gray-25'>
-            {adminItem === WaitlistItem && <Waitlist initialWaitlistUsers={waitlistUsers} />}
-            {adminItem === ActiveUsersItem && (
-              <ActiveUsers activeUsers={activeUsers} onFetchBefore={fetchActiveUsersBefore} onSelectUser={selectItem} />
-            )}
-            {adminItem === RecentProjectsItem && (
-              <RecentProjects
-                recentProjects={recentProjects}
-                onSelectProject={selectItem}
-                onSelectWorkspace={workspaceID => selectItem(workspaceID, true)}
-              />
-            )}
-            {userMetrics && AdminItemIsUser(adminItem) && (
-              <Suspense>
-                <ActiveUserMetrics
-                  user={adminItem}
-                  metrics={userMetrics}
-                  onDismiss={() => router.back()}
-                  onSelectProject={selectItem}
-                  onSelectWorkspace={workspaceID => selectItem(workspaceID, true)}
-                />
-              </Suspense>
-            )}
-            {projectMetrics && AdminItemIsProject(adminItem) && (
-              <Suspense>
-                <RecentProjectMetrics
-                  project={adminItem}
-                  projectMetrics={projectMetrics}
-                  onSelectUser={selectItem}
-                  onDismiss={() => router.back()}
-                />
-              </Suspense>
-            )}
-            {workspaceMetrics && (
-              <Suspense>
-                <WorkspaceMetrics
-                  workspaceMetrics={workspaceMetrics}
-                  onSelectUser={selectItem}
-                  onSelectProject={selectItem}
-                  onDismiss={() => router.back()}
-                />
-              </Suspense>
-            )}
-          </div>
+          <Suspense>
+            <MainAdminPane
+              {...{
+                adminItem,
+                userMetrics,
+                projectMetrics,
+                workspaceMetrics,
+                activeUsers,
+                waitlistUsers,
+                recentProjects,
+                selectItem,
+                fetchActiveUsersBefore,
+              }}
+            />
+          </Suspense>
         </div>
       </main>
     </>
