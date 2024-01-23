@@ -70,20 +70,26 @@ export default function useRunVersion(activeVersionID: number) {
     const versionID = await getVersion()
     setRunningVersionID(versionID)
     const abortController = new AbortController()
+    const requestID = new Uint32Array(Float64Array.of(Math.random()).buffer)[0].toString()
+    const cancelRun = () => {
+      abortController.abort()
+      api.cancelRun(requestID)
+    }
     const streamReader = await api.runVersion(
       versionID,
       inputs,
       dynamicInputs,
+      abortController.signal,
+      requestID,
       continuationID,
       autoRespond,
       maxResponses,
-      abortController.signal
     )
     let anyRunFailed = false
     await ConsumeStream(inputs, streamReader, runs => {
       anyRunFailed = runs.some(run => run.failed)
       setPartialRuns(
-        runs.map(run => ({ ...run, onCancel: run.failed === undefined ? () => abortController.abort() : undefined }))
+        runs.map(run => ({ ...run, onCancel: run.failed === undefined ? cancelRun : undefined }))
       )
       setHighestRunIndex(highestRunIndex => Math.max(highestRunIndex, ...runs.map(run => run.index)))
     })

@@ -16,15 +16,10 @@ import logUserRequest, { RunEvent } from '@/src/server/analytics'
 import { getVerifiedUserPromptOrChainData } from '@/src/server/datastore/chains'
 import { generateAutoResponse, predictRatingForRun } from '@/src/server/providers/playfetch'
 import { TimedRunResponse } from '@/src/server/evaluationEngine/runResponse'
+import { detectRequestClosed } from './cancelRun'
 
 export const loadConfigsFromVersion = (version: RawPromptVersion | RawChainVersion): (RunConfig | CodeConfig)[] =>
   (version.items as (RunConfig | CodeConfig)[] | undefined) ?? [{ versionID: version.id, branch: 0 }]
-
-export const detectRequestClosed = (res: NextApiResponse) => {
-  const abortController = new AbortController()
-  res.on('close', () => abortController.abort())
-  return abortController
-}
 
 const saveRun = (
   userID: number,
@@ -71,12 +66,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
 
   res.setHeader('X-Accel-Buffering', 'no')
   const sendData = (data: object) => res.write(`data: ${JSON.stringify(data)}\n\n`)
-  const abortController = detectRequestClosed(res)
-
-  if (Math.random() < 0.5) {
-    console.log('Setting timeout')
-    req.socket.setTimeout(500)
-  }
+  const abortController = detectRequestClosed(req)
 
   req.on('aborted', () => console.log('request aborted'))
   req.on('close', () => console.log('request closed'))

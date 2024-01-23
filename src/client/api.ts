@@ -166,17 +166,21 @@ const api = {
     versionID: number,
     inputs: PromptInputs[],
     dynamicInputs: PromptInputs[],
+    signal: AbortSignal,
+    requestID: string,
     continuationID?: number,
     autoRespond?: boolean,
     maxResponses?: number,
-    signal?: AbortSignal
   ): Promise<StreamReader> {
     return post(
       this.runVersion,
-      { versionID, inputs, dynamicInputs, continuationID, autoRespond, maxResponses },
+      { versionID, inputs, dynamicInputs, continuationID, autoRespond, maxResponses, requestID },
       'stream',
       signal
     )
+  },
+  cancelRun: function (requestID: string) {
+    return post(this.cancelRun, { requestID })
   },
   getIntermediateRuns: function (parentRunID: number, continuationID?: number): Promise<Run[]> {
     return post(this.getIntermediateRuns, { parentRunID, continuationID })

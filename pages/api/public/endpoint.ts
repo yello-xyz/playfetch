@@ -4,7 +4,7 @@ import { getActiveEndpointFromPath } from '@/src/server/datastore/endpoints'
 import { checkProject } from '@/src/server/datastore/projects'
 import { updateUsage } from '@/src/server/datastore/usage'
 import { Endpoint, PromptInputs } from '@/types'
-import { detectRequestClosed, loadConfigsFromVersion } from '../runVersion'
+import { loadConfigsFromVersion } from '../runVersion'
 import { saveLogEntry } from '@/src/server/datastore/logs'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 import runChain, { ChainResponseFromValue } from '@/src/server/evaluationEngine/chainEngine'
@@ -13,6 +13,7 @@ import { withErrorRoute } from '@/src/server/session'
 import { EndpointEvent, getClientID, logUnknownUserEvent } from '@/src/server/analytics'
 import { updateAnalytics } from '@/src/server/datastore/analytics'
 import { DefaultChatContinuationInputKey } from '@/src/common/formatting'
+import { detectRequestClosed } from '../cancelRun'
 
 const logResponse = (
   clientID: string,
@@ -119,7 +120,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
               }
             : undefined
 
-          const abortController = detectRequestClosed(res)
+          const abortController = detectRequestClosed(req)
           response = await runChain(
             endpoint.userID,
             projectID,
