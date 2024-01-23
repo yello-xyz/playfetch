@@ -4,7 +4,7 @@ import TableEditor, { HasTableData } from './tableEditor'
 import { SingleTabHeader } from '../tabsHeader'
 import useProjectItemActions from '@/src/client/hooks/useProjectItemActions'
 import EmptyTableWrapper from './emptyTableWrapper'
-import chevronIcon from '@/public/chevron.svg'
+import dotsIcon from '@/public/dots.svg'
 import { PopupContent, PopupMenuItem } from '../popupMenu'
 import { exportTableData } from './useTestDataActionButtons'
 import GlobalPopupMenu from '../globalPopupMenu'
@@ -27,7 +27,7 @@ export default function TestDataView({ table }: { table: ActiveTable }) {
   return (
     <div className='flex flex-col items-stretch h-full bg-gray-25'>
       <SingleTabHeader label={table.name} onUpdateLabel={name => renameItem(table, name)} dropShadow=''>
-        <GlobalPopupMenu icon={chevronIcon} iconClassName='-ml-3' loadPopup={showPopupMenu} />
+        <GlobalPopupMenu icon={dotsIcon} iconClassName='rotate-90' loadPopup={showPopupMenu} />
       </SingleTabHeader>
       <EmptyTableWrapper
         bottomPadding='pb-4 h-full'

@@ -63,7 +63,7 @@ export default function useTestDataActionButtons(
   const isDataEmpty = !HasTableData(variables, inputValues)
   const replaceTitle = isDataEmpty ? 'Import Test Data' : 'Replace Test Data'
   const confirmTitle = isDataEmpty ? 'Import' : 'Replace'
-  const onExportData = () => exportTableData(parentItem.name, variables, inputValues)
+  const onExportData = () => exportTableData(parentItem.name.trim(), variables, inputValues)
 
   const setDialogPrompt = useModalDialogPrompt()
   const showPopupMenu = (): [typeof TestDataPopupMenu, TestDataPopupMenuProps] => [
