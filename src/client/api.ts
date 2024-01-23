@@ -170,7 +170,7 @@ const api = {
     requestID: string,
     continuationID?: number,
     autoRespond?: boolean,
-    maxResponses?: number,
+    maxResponses?: number
   ): Promise<StreamReader> {
     return post(
       this.runVersion,

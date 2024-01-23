@@ -145,10 +145,12 @@ export const useTestDataImportButton = (parentItem: Prompt | Chain) => {
 
 function LinkedTableItem({ table, onReplaceData }: { table?: Table; onReplaceData?: () => void }) {
   const cursorClass = onReplaceData ? 'cursor-pointer hover:bg-gray-200' : ''
-  const onClick = (event: MouseEvent) => {
-    event.stopPropagation()
-    onReplaceData?.()
-  }
+  const onClick = onReplaceData
+    ? (event: MouseEvent) => {
+        event.stopPropagation()
+        onReplaceData()
+      }
+    : undefined
 
   return table ? (
     <div className={`flex items-center gap-1 pl-1 pr-2 bg-gray-100 rounded ${cursorClass}`} onClick={onClick}>
