@@ -20,9 +20,9 @@ import { TimedRunResponse } from '@/src/server/evaluationEngine/runResponse'
 export const loadConfigsFromVersion = (version: RawPromptVersion | RawChainVersion): (RunConfig | CodeConfig)[] =>
   (version.items as (RunConfig | CodeConfig)[] | undefined) ?? [{ versionID: version.id, branch: 0 }]
 
-export const detectRequestClosed = (req: NextApiRequest) => {
+export const detectRequestClosed = (res: NextApiResponse) => {
   const abortController = new AbortController()
-  req.on('close', () => abortController.abort())
+  res.on('close', () => abortController.abort())
   return abortController
 }
 
@@ -71,7 +71,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
 
   res.setHeader('X-Accel-Buffering', 'no')
   const sendData = (data: object) => res.write(`data: ${JSON.stringify(data)}\n\n`)
-  const abortController = detectRequestClosed(req)
+  const abortController = detectRequestClosed(res)
 
   for (let autoRunIndex = 0; autoRunIndex < 1 + autoRepeatCount && multipleInputs.length > 0; autoRunIndex++) {
     const runIDs = await allocateRunIDs(multipleInputs.length)
