@@ -119,7 +119,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
               }
             : undefined
 
-          const abortController = detectRequestClosed(req)
+          const abortController = detectRequestClosed(res)
           response = await runChain(
             endpoint.userID,
             projectID,
