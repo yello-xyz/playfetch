@@ -99,9 +99,12 @@ export default function useTestDataActionButtons(
 
 export const exportTableData = (fileName: string, variables: string[], inputValues: InputValues) => {
   const [allVariables, rowCount] = GetAllVariablesAndRowCount(variables, inputValues)
-  const rows = Array.from({ length: rowCount }).map((_, rowIndex) =>
-    allVariables.map(variable => (rowIndex > 0 ? inputValues[variable]?.[rowIndex - 1] ?? '' : variable))
-  )
+  const rows = [
+    allVariables,
+    ...Array.from({ length: rowCount }).map((_, rowIndex) =>
+      allVariables.map(variable => inputValues[variable]?.[rowIndex] ?? '')
+    ),
+  ]
   const file = new Blob([stringify(rows)], { type: 'text/csv' })
   const element = document.createElement('a')
   element.href = URL.createObjectURL(file)
