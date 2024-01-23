@@ -144,9 +144,11 @@ async function completePreview(
     const input = inputContents.map(extractContent).join('\n')
     const [cost, inputTokens, outputTokens] = CostForModel(model, input, output)
 
-    const aggregatedResponse = await responseStream.response
-    const responseContent = getContent(aggregatedResponse)
-    context.contents = [...inputContents, ...(responseContent ? [responseContent] : [])]
+    if (!abortSignal.aborted) {
+      const aggregatedResponse = await responseStream.response
+      const responseContent = getContent(aggregatedResponse)
+      context.contents = [...inputContents, ...(responseContent ? [responseContent] : [])]
+    }
 
     return { output, cost, inputTokens, outputTokens, functionCall: null }
   } catch (error: any) {
