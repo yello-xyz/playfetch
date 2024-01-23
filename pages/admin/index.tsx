@@ -1,7 +1,6 @@
 import { withAdminSession } from '@/src/server/session'
 import { ActiveUser, ProjectMetrics, RecentProject, User, UserMetrics, Workspace, WorkspaceMetrics } from '@/types'
 import TopBar, { TopBarAccessoryItem, TopBarBackItem } from '@/components/topBar'
-import AdminSidebar from '@/components/admin/adminSidebar'
 import ClientRoute, { ParseNumberQuery } from '@/src/common/clientRoute'
 import { useRouter } from 'next/router'
 import { Suspense, useState } from 'react'
@@ -11,6 +10,7 @@ import loadAdminItem from '@/src/server/admin/adminItem'
 
 import dynamic from 'next/dynamic'
 const MainAdminPane = dynamic(() => import('@/components/admin/mainAdminPane'))
+const AdminSidebar = dynamic(() => import('@/components/admin/adminSidebar'))
 
 export const getServerSideProps = withAdminSession(async ({ query }) => ({
   props: await loadAdminItem(query),
@@ -125,13 +125,16 @@ export default function Admin({
           <TopBarAccessoryItem />
         </TopBar>
         <div className='flex items-stretch flex-1 overflow-hidden'>
-          <AdminSidebar
-            onSelectWaitlist={() => selectItem(WaitlistItem)}
-            onSelectActiveUsers={() => selectItem(ActiveUsersItem)}
-            onSelectRecentProjects={() => selectItem(RecentProjectsItem)}
-            analyticsLinks={analyticsLinks}
-            debugLinks={debugLinks}
-          />
+          <Suspense>
+            <AdminSidebar
+              onSelectWaitlist={() => selectItem(WaitlistItem)}
+              onSelectActiveUsers={() => selectItem(ActiveUsersItem)}
+              onSelectRecentProjects={() => selectItem(RecentProjectsItem)}
+              analyticsLinks={analyticsLinks}
+              debugLinks={debugLinks}
+            />
+          </Suspense>
+
           <Suspense>
             <MainAdminPane
               {...{
