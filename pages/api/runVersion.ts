@@ -73,11 +73,6 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
   const sendData = (data: object) => res.write(`data: ${JSON.stringify(data)}\n\n`)
   const abortController = detectRequestClosed(res)
 
-  if (Math.random() < 0.5) {
-    console.log('Setting timeout')
-    req.socket.setTimeout(500)
-  }
-
   req.on('aborted', () => console.log('request aborted'))
   req.on('close', () => console.log('request closed'))
   req.on('end', () => console.log('request end'))
