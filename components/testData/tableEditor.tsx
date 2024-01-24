@@ -190,21 +190,27 @@ export default function TableEditor({
                 {gutterColumn && <div className='px-2 py-1 border-b border-gray-200'>{gutterColumn(row)}</div>}
                 {allVariables.map((variable, col) => (
                   <div className='relative group' key={`${rowCount}-${col}`}>
-                    <Editor
-                      className={`h-full ${border(col)} ${truncate}`}
-                      value={getInputValue(row, variable)}
-                      setValue={value => setInputValue(row, variable, value)}
-                      onBlur={() => {
-                        persistInputValuesIfNeeded()
-                        setActiveCell(activeCell =>
-                          activeCell?.[0] === row && activeCell?.[1] === col ? undefined : activeCell
-                        )
-                      }}
-                      onFocus={() => setActiveCell([row, col])}
-                      onKeyDown={event => checkDeleteRow(event, row)}
-                      bordered={false}
-                      focusOnLoad={false}
-                    />
+                    {isCellActive(row, col) ? (
+                      <Editor
+                        className={`h-full ${border(col)} ${truncate}`}
+                        value={getInputValue(row, variable)}
+                        setValue={value => setInputValue(row, variable, value)}
+                        onBlur={() => {
+                          persistInputValuesIfNeeded()
+                          setActiveCell(activeCell =>
+                            activeCell?.[0] === row && activeCell?.[1] === col ? undefined : activeCell
+                          )
+                        }}
+                        onKeyDown={event => checkDeleteRow(event, row)}
+                        bordered={false}
+                      />
+                    ) : (
+                      <div
+                        className={`h-full px-2.5 py-1.5 ${border(col)} ${truncate}`}
+                        onClick={() => setActiveCell([row, col])}>
+                        {getInputValue(row, variable)}
+                      </div>
+                    )}
                     {!skipExpandButtons && (
                       <Icon
                         className={`absolute top-0.5 ${iconPosition(col)} ${iconOpacity(col)} ${iconStyle}`}
