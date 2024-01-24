@@ -1,4 +1,14 @@
-import { Dispatch, Fragment, KeyboardEvent, ReactNode, SetStateAction, useEffect, useRef, useState } from 'react'
+import {
+  Dispatch,
+  Fragment,
+  KeyboardEvent,
+  MouseEvent,
+  ReactNode,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import addIcon from '@/public/add.svg'
 import expandIcon from '@/public/expand.svg'
 import Icon from '../icon'
@@ -141,6 +151,17 @@ export default function TableEditor({
     persistInputValuesIfNeeded()
   })
 
+  const [initialCursorLocation, setInitialCursorLocation] = useState<{ x: number; y: number }>()
+  const activateCell = (event: MouseEvent, row: number, col: number) => {
+    setActiveCell([row, col])
+    setInitialCursorLocation({ x: event.clientX, y: event.clientY })
+  }
+
+  const deactivateCell = () => {
+    persistInputValuesIfNeeded()
+    setActiveCell(undefined)
+  }
+
   const gridTemplateColumns = `${gutterColumn ? '58px ' : ''}repeat(${allVariables.length}, minmax(240px, 1fr))`
   const addRowButtonBaseClass = 'flex items-center justify-center py-1 font-regular'
   const cursor = 'cursor-pointer hover:bg-gray-50'
@@ -192,17 +213,15 @@ export default function TableEditor({
                         className={`h-full border border-blue-400`}
                         value={getInputValue(row, variable)}
                         setValue={value => setInputValue(row, variable, value)}
-                        onBlur={() => {
-                          persistInputValuesIfNeeded()
-                          setActiveCell(undefined)
-                        }}
+                        onBlur={deactivateCell}
                         onKeyDown={event => checkDeleteRow(event, row)}
                         bordered={false}
+                        initialCursorLocation={initialCursorLocation}
                       />
                     ) : (
                       <div
                         className={`h-full px-2.5 py-1.5 whitespace-pre-wrap ${border(col)} ${truncate}`}
-                        onMouseDown={() => setActiveCell([row, col])}>
+                        onMouseDown={event => activateCell(event, row, col)}>
                         {getInputValue(row, variable)}
                       </div>
                     )}
