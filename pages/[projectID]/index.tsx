@@ -2,15 +2,7 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { Suspense, useState } from 'react'
-import {
-  User,
-  ActiveProject,
-  AvailableProvider,
-  Workspace,
-  PromptVersion,
-  ChainVersion,
-  Analytics,
-} from '@/types'
+import { User, ActiveProject, AvailableProvider, Workspace, PromptVersion, ChainVersion, Analytics } from '@/types'
 import ClientRoute, {
   CompareRoute,
   EndpointsRoute,
@@ -196,10 +188,10 @@ export default function Home({
   const currentQueryState = compare
     ? CompareItem
     : endpoints
-    ? EndpointsItem
-    : settings
-    ? SettingsItem
-    : promptID ?? chainID ?? tableID
+      ? EndpointsItem
+      : settings
+        ? SettingsItem
+        : promptID ?? chainID ?? tableID
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
     if (compare) {
