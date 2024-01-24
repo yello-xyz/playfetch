@@ -194,9 +194,7 @@ export default function TableEditor({
                         setValue={value => setInputValue(row, variable, value)}
                         onBlur={() => {
                           persistInputValuesIfNeeded()
-                          setActiveCell(activeCell =>
-                            activeCell?.[0] === row && activeCell?.[1] === col ? undefined : activeCell
-                          )
+                          setActiveCell(undefined)
                         }}
                         onKeyDown={event => checkDeleteRow(event, row)}
                         bordered={false}
