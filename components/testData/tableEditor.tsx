@@ -154,6 +154,7 @@ export default function TableEditor({
 
   const [initialCursorLocation, setInitialCursorLocation] = useState<{ x: number; y: number }>()
   const activateCell = (event: MouseEvent, row: number, col: number) => {
+    persistInputValuesIfNeeded()
     setActiveCell([row, col])
     setInitialCursorLocation({ x: event.clientX, y: event.clientY })
   }
