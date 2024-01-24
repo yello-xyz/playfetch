@@ -176,11 +176,8 @@ export default function TableEditor({
             <Icon icon={addIcon} />
           </div>
           {Array.from({ length: rowCount }, (_, row) => {
-            const border = (col: number) =>
-              isCellActive(row, col)
-                ? 'border border-blue-400'
-                : `${gutterColumn || col > 0 ? 'border-l' : ''} border-b border-gray-200`
-            const truncate = isRowActive(row) ? '' : `max-h-[46px] ${isRowEmpty(row) ? '' : 'line-clamp-2'}`
+            const border = (col: number) => `${gutterColumn || col > 0 ? 'border-l' : ''} border-b border-gray-200`
+            const truncate = isRowActive(row) ? '' : 'max-h-[46px] line-clamp-2'
             const iconPosition = (col: number) => (col === allVariables.length - 1 ? 'right-3' : 'right-0.5')
             const iconOpacity = (col: number) =>
               isCellActive(row, col) ? 'hover:opacity-100' : 'group-hover:opacity-100'
@@ -189,10 +186,10 @@ export default function TableEditor({
               <Fragment key={row}>
                 {gutterColumn && <div className='px-2 py-1 border-b border-gray-200'>{gutterColumn(row)}</div>}
                 {allVariables.map((variable, col) => (
-                  <div className='relative group' key={`${rowCount}-${col}`}>
+                  <div className='relative group min-h-[32px]' key={`${rowCount}-${col}`}>
                     {isCellActive(row, col) ? (
                       <Editor
-                        className={`h-full ${border(col)} ${truncate}`}
+                        className={`h-full border border-blue-400`}
                         value={getInputValue(row, variable)}
                         setValue={value => setInputValue(row, variable, value)}
                         onBlur={() => {
@@ -206,8 +203,8 @@ export default function TableEditor({
                       />
                     ) : (
                       <div
-                        className={`h-full px-2.5 py-1.5 ${border(col)} ${truncate}`}
-                        onClick={() => setActiveCell([row, col])}>
+                        className={`h-full px-2.5 py-1.5 whitespace-pre-wrap ${border(col)} ${truncate}`}
+                        onMouseDown={() => setActiveCell([row, col])}>
                         {getInputValue(row, variable)}
                       </div>
                     )}
