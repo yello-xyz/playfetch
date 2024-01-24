@@ -3,7 +3,7 @@ import { ChainNode, IsBranchChainItem, IsChainItem } from './chainNode'
 import { ChainNodeBox } from './chainNodeBox'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import { FirstBranchForBranchOfNode, ShouldBranchLoopOnCompletion } from '@/src/common/branching'
-import ChainNodeBoxConnector, { DownConnector, DownStroke } from './chainNodeBoxConnector'
+import ChainNodeBoxConnector, { DownArrow, DownStroke } from './chainNodeBoxConnector'
 
 export type InsertActions = {
   insertItem: (index: number, branch: number, item: ChainItem) => void
@@ -291,7 +291,7 @@ export const EndBranchConnector = ({
     />
     <RowFiller start={maxNonLoopingBranch + 1} end={maxBranch} colSpans={colSpans} />
     <div className='flex flex-col items-center'>
-      <DownConnector height='min-h-[18px]' />
+      <DownArrow height='min-h-[18px]' />
     </div>
     <RowFiller start={1} end={maxBranch} colSpans={colSpans} />
   </>
