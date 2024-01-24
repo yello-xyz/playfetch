@@ -17,7 +17,7 @@ import TestDataHeader from './testDataHeader'
 import useTestDataValuePopup from '@/src/client/hooks/useTestDataValuePopup'
 import Editor from '../editor'
 import { GetUniqueName } from '@/src/common/formatting'
-import VisibilitySensor from 'react-visibility-sensor'
+import { InView } from 'react-intersection-observer'
 
 const DefaultVariableName = 'New Variable'
 
@@ -205,12 +205,12 @@ export default function TableEditor({
               isCellActive(row, col) ? 'hover:opacity-100' : 'group-hover:opacity-100'
             const iconStyle = `${backgroundColor} rounded cursor-pointer opacity-0`
             return (
-              <VisibilitySensor partialVisibility key={row}>
-                {({ isVisible }: { isVisible: boolean }) => (
+              <InView key={row}>
+                {({ inView, ref }) => (
                   <>
                     {gutterColumn && <div className='px-2 py-1 border-b border-gray-200'>{gutterColumn(row)}</div>}
                     {allVariables.map((variable, col) => (
-                      <div className='relative group min-h-[32px]' key={`${rowCount}-${col}`}>
+                      <div ref={ref} className='relative group min-h-[32px]' key={`${rowCount}-${col}`}>
                         {isCellActive(row, col) ? (
                           <Editor
                             className={`h-full border border-blue-400`}
@@ -228,7 +228,7 @@ export default function TableEditor({
                             {getInputValue(row, variable)}
                           </div>
                         )}
-                        {!skipExpandButtons && isVisible && (
+                        {!skipExpandButtons && inView && (
                           <Icon
                             className={`absolute top-0.5 ${iconPosition(col)} ${iconOpacity(col)} ${iconStyle}`}
                             icon={expandIcon}
@@ -239,7 +239,7 @@ export default function TableEditor({
                     ))}
                   </>
                 )}
-              </VisibilitySensor>
+              </InView>
             )
           })}
         </div>
