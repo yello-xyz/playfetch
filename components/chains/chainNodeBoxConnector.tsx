@@ -29,6 +29,7 @@ export default function ChainNodeBoxConnector({
   onInsertBranch,
   prompts,
   skipConnector,
+  hasEndBranchConnector,
 }: {
   isDisabled: boolean
   isActive: boolean
@@ -44,6 +45,7 @@ export default function ChainNodeBoxConnector({
   onInsertBranch: () => void
   prompts: Prompt[]
   skipConnector?: boolean
+  hasEndBranchConnector?: boolean
 }) {
   return (
     <div className='flex flex-col items-center'>
@@ -76,7 +78,7 @@ export default function ChainNodeBoxConnector({
       ) : hasCompleted ? (
         <div className={skipConnector ? '' : 'min-h-[18px]'} />
       ) : (
-        <DownStroke height={skipConnector ? '' : 'min-h-[18px]'} grow />
+        <DownStroke height={skipConnector || !hasEndBranchConnector ? '' : 'min-h-[18px]'} grow />
       )}
     </div>
   )

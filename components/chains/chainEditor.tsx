@@ -154,6 +154,7 @@ export default function ChainEditor({
                   previousRow={row}
                   nextRow={rows[rowIndex + 1]}
                   maxBranch={maxBranch}
+                  maxNonLoopingBranch={maxNonLoopingBranch}
                   prompts={prompts}
                   isDisabled={isTestMode}
                   activeMenuIndex={activeMenuIndex}

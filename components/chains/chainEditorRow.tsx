@@ -45,6 +45,7 @@ const shouldBranchLoopOnCompletion = (nodes: ChainNode[], branch: number) =>
 export const ConnectorRow = (props: {
   nodes: ChainNode[]
   maxBranch: number
+  maxNonLoopingBranch: number
   previousRow: ChainNode[]
   nextRow: ChainNode[]
   isDisabled: boolean
@@ -63,6 +64,7 @@ export const ConnectorRow = (props: {
 const ConnectorCell = ({
   nodes,
   branch,
+  maxNonLoopingBranch,
   previousRow,
   nextRow,
   isDisabled,
@@ -73,6 +75,7 @@ const ConnectorCell = ({
 }: {
   nodes: ChainNode[]
   branch: number
+  maxNonLoopingBranch: number
   previousRow: ChainNode[]
   nextRow: ChainNode[]
   isDisabled: boolean
@@ -104,6 +107,7 @@ const ConnectorCell = ({
       hasPrevious={!!precedingNode && !IsBranchChainItem(precedingNode)}
       hasNext={!!nextNode && IsChainItem(nextNode)}
       hasCompleted={hasCompletedBranch}
+      hasEndBranchConnector={maxNonLoopingBranch > 0}
       {...bindInsertActions(insertActions, index, branch)}
     />
   ) : didStartBranchInColumn(nodes, previousNodeIndex, branch) && !hasCompletedBranch ? (
