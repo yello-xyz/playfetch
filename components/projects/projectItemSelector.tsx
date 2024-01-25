@@ -32,6 +32,7 @@ export default function ProjectItemSelector({
   const items = [...ItemsInProject(project), ...(includeEndpoints ? project.endpoints : [])]
   const selectedItem = items.find(item => item.id === selectedItemID)
   const isPrompt = selectedItem && project.prompts.some(prompt => prompt.id === selectedItemID)
+  const isChain = selectedItem && project.chains.some(chain => chain.id === selectedItemID)
 
   const selectedName = selectedItem
     ? 'name' in selectedItem
@@ -45,7 +46,7 @@ export default function ProjectItemSelector({
       fixedWidth={fixedWidth}
       className={className}
       onSetPopup={onSetPopup}>
-      {selectedItem && <Icon icon={isPrompt ? promptIcon : chainIcon} />}
+      {selectedItem && <Icon icon={isPrompt ? promptIcon : isChain ? chainIcon : endpointIcon} />}
       <span className='flex-1 overflow-hidden whitespace-nowrap text-ellipsis'>
         {selectedName ?? (includeEndpoints ? 'Select a Project Item' : 'Select a Prompt or Chain')}
       </span>
