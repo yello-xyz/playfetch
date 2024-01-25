@@ -4,6 +4,7 @@ import { User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { LinearRedirectURI, validateStateForUser } from '../authorizeLinear'
 import { LinearClient } from '@linear/sdk'
+import { saveProviderKey } from '@/src/server/datastore/providers'
 
 async function linear(req: NextApiRequest, res: NextApiResponse, user: User) {
   const { code, state } = req.query
@@ -22,11 +23,7 @@ async function linear(req: NextApiRequest, res: NextApiResponse, user: User) {
       body: query.toString(),
     }).then(response => response.json())
 
-    console.log(response)
-
-    const client = new LinearClient({ accessToken: response.access_token })
-    const me = await client.viewer
-    console.log(me)
+    await saveProviderKey(user.id, user.id, 'linear', response.access_token, undefined)
   }
 
   res.redirect(UserSettingsRoute('issueTracker'))
