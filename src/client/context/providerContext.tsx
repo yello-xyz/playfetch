@@ -1,4 +1,5 @@
 import {
+  AvailableIssueTrackerProvider,
   AvailableProvider,
   AvailableSourceControlProvider,
   EmbeddingModel,
@@ -11,6 +12,7 @@ import {
   IsModelAvailable,
   IsModelDisabled,
   IsProviderAvailable,
+  IssueTrackerProviders,
   SourceControlProviders,
 } from '@/src/common/providerMetadata'
 import { createContext, useContext } from 'react'
@@ -41,6 +43,13 @@ export function useSourceControlProvider() {
   const availableProviders = useAvailableProviders()
   return availableProviders.find(p => (SourceControlProviders as string[]).includes(p.provider)) as
     | AvailableSourceControlProvider
+    | undefined
+}
+
+export function useIssueTrackerProvider() {
+  const availableProviders = useAvailableProviders()
+  return availableProviders.find(p => (IssueTrackerProviders as string[]).includes(p.provider)) as
+    | AvailableIssueTrackerProvider
     | undefined
 }
 
