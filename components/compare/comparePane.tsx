@@ -2,9 +2,11 @@ import {
   ActiveChain,
   ActiveProject,
   ActivePrompt,
+  Chain,
   ChainVersion,
   IsPromptVersion,
   LogEntry,
+  Prompt,
   PromptVersion,
   ResolvedEndpoint,
   Run,
@@ -18,6 +20,7 @@ import { ExtractInputKey } from '@/src/common/formatting'
 
 export default function ComparePane({
   project,
+  comparableItems,
   logEntries,
   activeItem,
   activeVersion,
@@ -27,6 +30,7 @@ export default function ComparePane({
   includeResponses,
 }: {
   project: ActiveProject
+  comparableItems: (Prompt | Chain | ResolvedEndpoint)[]
   logEntries: LogEntry[]
   activeItem?: ActivePrompt | ActiveChain | ResolvedEndpoint
   activeVersion?: PromptVersion | ChainVersion
@@ -76,7 +80,7 @@ export default function ComparePane({
         <ProjectItemSelector
           className='w-full max-w-[240px]'
           project={project}
-          items={[...project.prompts, ...project.chains, ...project.endpoints]}
+          items={comparableItems}
           selectedItemID={activeItem?.id}
           onSelectItemID={setItemID}
           disabled={disabled}

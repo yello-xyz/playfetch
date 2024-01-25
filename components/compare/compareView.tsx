@@ -1,4 +1,4 @@
-import { Endpoint, ItemsInProject, LogEntry } from '@/types'
+import { Endpoint, LogEntry } from '@/types'
 import ComparePane from './comparePane'
 import useActiveItemCache from '@/src/client/hooks/useActiveItemCache'
 import { useCallback, useEffect, useState } from 'react'
@@ -83,12 +83,15 @@ export default function CompareView({ logEntries = [] }: { logEntries?: LogEntry
     }
   }, [leftItem, leftVersion, rightItem, rightVersion, updateRightVersionID])
 
-  return ItemsInProject(activeProject).length > 0 ? (
+  const comparableItems = [...activeProject.prompts, ...activeProject.chains, ...activeProject.endpoints]
+
+  return comparableItems.length > 0 ? (
     <>
       <div className='flex flex-col h-full bg-gray-25'>
         <div className={isDiffMode ? 'flex' : 'flex h-full'}>
           <ComparePane
             project={activeProject}
+            comparableItems={comparableItems}
             logEntries={logEntries}
             activeItem={leftItem}
             activeVersion={leftVersion}
@@ -100,6 +103,7 @@ export default function CompareView({ logEntries = [] }: { logEntries?: LogEntry
           <div className='h-full border-l border-gray-200' />
           <ComparePane
             project={activeProject}
+            comparableItems={comparableItems}
             logEntries={logEntries}
             activeItem={rightItem}
             activeVersion={rightVersion}
