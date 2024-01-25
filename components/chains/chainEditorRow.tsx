@@ -1,7 +1,7 @@
 import { ActiveChain, ChainItem, ChainVersion, Prompt } from '@/types'
 import { ChainNode, IsBranchChainItem, IsChainItem } from './chainNode'
 import { ChainNodeBox } from './chainNodeBox'
-import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
+import { ChainItemCache } from '@/src/client/hooks/useChainItemCache'
 import { FirstBranchForBranchOfNode, ShouldBranchLoopOnCompletion } from '@/src/common/branching'
 import ChainNodeBoxConnector, { DownArrow, DownStroke } from './chainNodeBoxConnector'
 
@@ -131,7 +131,7 @@ export const NodesRow = (props: {
   savedVersion: ChainVersion | null
   setTestMode: (testMode: boolean) => void
   prompts: Prompt[]
-  promptCache: ChainPromptCache
+  itemCache: ChainItemCache
 }) => (
   <>
     {Array.from({ length: props.maxBranch + 1 }, (_, branch) => (
@@ -154,7 +154,7 @@ const NodeCell = ({
   savedVersion,
   setTestMode,
   prompts,
-  promptCache,
+  itemCache,
 }: {
   chain: ActiveChain
   nodes: ChainNode[]
@@ -169,7 +169,7 @@ const NodeCell = ({
   savedVersion: ChainVersion | null
   setTestMode: (testMode: boolean) => void
   prompts: Prompt[]
-  promptCache: ChainPromptCache
+  itemCache: ChainItemCache
 }) => {
   const firstNodeOfRowIndex = nodes.indexOf(row[0])
   const isLastRow = firstNodeOfRowIndex === nodes.length - 1
@@ -220,7 +220,7 @@ const NodeCell = ({
         savedVersion={savedVersion}
         setTestMode={setTestMode}
         prompts={prompts}
-        promptCache={promptCache}
+        itemCache={itemCache}
       />
     )
   ) : !isLastRow && !hasCompletedBranch && didStartBranchInColumn(nodes, firstNodeOfRowIndex, branch) ? (

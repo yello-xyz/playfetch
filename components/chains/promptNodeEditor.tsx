@@ -1,24 +1,24 @@
 import { ActivePrompt, PromptChainItem, PromptVersion } from '@/types'
 import usePromptVersion from '@/src/client/hooks/usePromptVersion'
-import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
+import { ChainItemCache } from '../../src/client/hooks/useChainItemCache'
 import PromptTabs from '../prompts/promptTabs'
 import { usePromptTabs } from '@/src/client/context/userPresetsContext'
 
 export default function PromptNodeEditor({
   item,
-  promptCache,
+  itemCache,
   selectVersion,
   setModifiedVersion,
   variables,
 }: {
   item: PromptChainItem
-  promptCache: ChainPromptCache
+  itemCache: ChainItemCache
   selectVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
   variables: string[]
 }) {
-  const loadedPrompt = promptCache.promptForItem(item)
-  const activeVersion = promptCache.versionForItem(item)
+  const loadedPrompt = itemCache.promptForItem(item)
+  const activeVersion = itemCache.versionForItem(item)
 
   return loadedPrompt && activeVersion ? (
     <PromptEditor

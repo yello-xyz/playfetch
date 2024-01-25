@@ -11,7 +11,7 @@ import { SingleTabHeader } from '../tabsHeader'
 import IconButton from '../iconButton'
 import closeIcon from '@/public/close.svg'
 import ChainNodeOutput from './chainNodeOutput'
-import useChainPromptCache from '../../src/client/hooks/useChainPromptCache'
+import useChainItemCache from '../../src/client/hooks/useChainItemCache'
 import { OnSavedChain } from '@/src/client/hooks/useSaveChain'
 import { ExtractUnboundChainVariables, GetChainItemsSaveKey, GetItemsToSave } from './chainItems'
 import { GetEditorVariables } from '@/src/common/formatting'
@@ -32,7 +32,7 @@ export default function ChainView({
   const [nodes, setNodes] = useState([InputNode, ...activeVersion.items, OutputNode] as ChainNode[])
 
   const activeProject = useActiveProject()
-  const promptCache = useChainPromptCache(activeProject, nodes, setNodes)
+  const itemCache = useChainItemCache(activeProject, nodes, setNodes)
   const [activeNodeIndex, setActiveNodeIndex] = useState<number>()
 
   const items = nodes.filter(IsChainItem)
@@ -47,14 +47,14 @@ export default function ChainView({
     const activeNode = activeNodeIndex !== undefined ? nodes[activeNodeIndex] : undefined
     if (activeNode && IsPromptChainItem(activeNode)) {
       await refreshProject()
-      promptCache.refreshItem(activeNode.promptID)
+      itemCache.refreshItem(activeNode.promptID)
     }
-  }, [nodes, activeNodeIndex, promptCache, refreshActiveItem, refreshProject])
+  }, [nodes, activeNodeIndex, itemCache, refreshActiveItem, refreshProject])
 
   const saveItems = (items: ChainItem[]): Promise<number | undefined> => {
     const loadedItems = items.filter(item => !IsPromptChainItem(item) || !!item.versionID)
     setSavedItemsKey(GetChainItemsSaveKey(loadedItems))
-    return saveChain(GetItemsToSave(loadedItems, promptCache), refreshOnSave)
+    return saveChain(GetItemsToSave(loadedItems, itemCache), refreshOnSave)
   }
 
   const [syncedVersionID, setSyncedVersionID] = useState(activeVersion.id)
@@ -77,7 +77,7 @@ export default function ChainView({
   const isInputOutputIndex = (index: number | undefined, nodes: ChainNode[]) =>
     index === 0 || index === nodes.length - 1
   const isInputOutputNode = isInputOutputIndex(activeNodeIndex, nodes)
-  const isUnloadedPromptNode = (node: ChainNode) => IsPromptChainItem(node) && !promptCache.promptForItem(node)
+  const isUnloadedPromptNode = (node: ChainNode) => IsPromptChainItem(node) && !itemCache.promptForItem(node)
 
   const [isNodeDirty, setNodeDirty] = useState(false)
   const updateActiveNodeIndex = (index: number | undefined) => {
@@ -127,8 +127,8 @@ export default function ChainView({
     }
   }
 
-  const variables = ExtractUnboundChainVariables(items, promptCache, true)
-  const staticVariables = ExtractUnboundChainVariables(items, promptCache, false)
+  const variables = ExtractUnboundChainVariables(items, itemCache, true)
+  const staticVariables = ExtractUnboundChainVariables(items, itemCache, false)
 
   const minWidth = 300
   return (
@@ -149,7 +149,7 @@ export default function ChainView({
                   </div>
                 </SingleTabHeader>
               )}
-              chainItemCache={promptCache}
+              chainItemCache={itemCache}
             />
           </div>
         </Allotment.Pane>
@@ -170,7 +170,7 @@ export default function ChainView({
           isTestMode={isTestMode}
           setTestMode={updateTestMode}
           disabled={!isTestMode && activeNodeIndex !== undefined && isNodeDirty}
-          promptCache={promptCache}
+          itemCache={itemCache}
         />
       </Allotment.Pane>
       {!showVersions &&
@@ -187,7 +187,7 @@ export default function ChainView({
                 staticVariables={staticVariables}
                 activeIndex={activeNodeIndex}
                 setActiveIndex={updateActiveNodeIndex}
-                promptCache={promptCache}
+                itemCache={itemCache}
                 saveItems={items => saveItems(items).then(versionID => versionID!)}
                 focusRunID={focusRunID}
                 showRunButtons={isTestMode}
@@ -198,7 +198,7 @@ export default function ChainView({
                 saveItems={updateItems}
                 activeIndex={activeNodeIndex - 1}
                 setDirty={setNodeDirty}
-                promptCache={promptCache}
+                itemCache={itemCache}
                 dismiss={() => updateActiveNodeIndex(undefined)}
                 variables={GetEditorVariables(chain.inputValues, variables, staticVariables)}
               />

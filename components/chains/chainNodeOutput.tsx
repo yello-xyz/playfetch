@@ -7,7 +7,7 @@ import RunButtons from '../runs/runButtons'
 import { ChainNode, InputNode, IsChainItem, IsPromptChainItem, IsQueryChainItem, OutputNode } from './chainNode'
 import { SingleTabHeader } from '../tabsHeader'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
-import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
+import { ChainItemCache } from '../../src/client/hooks/useChainItemCache'
 import { useCheckProviders } from '@/src/client/context/providerContext'
 import { ProviderForModel } from '@/src/common/providerMetadata'
 import { SelectAnyInputValue } from '@/src/client/inputRows'
@@ -24,7 +24,7 @@ export default function ChainNodeOutput({
   staticVariables,
   activeIndex,
   setActiveIndex,
-  promptCache,
+  itemCache,
   saveItems,
   showRunButtons,
 }: {
@@ -36,7 +36,7 @@ export default function ChainNodeOutput({
   staticVariables: string[]
   activeIndex: number
   setActiveIndex: (index: number) => void
-  promptCache: ChainPromptCache
+  itemCache: ChainItemCache
   saveItems: (items: ChainItem[]) => Promise<number>
   showRunButtons: boolean
 }) {
@@ -52,7 +52,7 @@ export default function ChainNodeOutput({
   const areProvidersAvailable = (items: ChainItem[]) =>
     items
       .filter(IsPromptChainItem)
-      .map(promptCache.versionForItem)
+      .map(itemCache.versionForItem)
       .every(version => !!version && checkModelAvailable(version.config.model)) &&
     items
       .filter(IsQueryChainItem)

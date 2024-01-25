@@ -1,6 +1,6 @@
 import { ActiveChain, BranchChainItem, ChainItem, ChainVersion, Prompt } from '@/types'
 import { ChainNode, InputNode, IsBranchChainItem, IsChainItem, OutputNode } from './chainNode'
-import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
+import { ChainItemCache } from '@/src/client/hooks/useChainItemCache'
 import ChainNodeBoxHeader from './chainNodeBoxHeader'
 import ChainNodeBoxBody from './chainNodeBoxBody'
 import ChainNodeBoxFooter from './chainNodeBoxFooter'
@@ -19,7 +19,7 @@ export function ChainNodeBox({
   savedVersion,
   setTestMode,
   prompts,
-  promptCache,
+  itemCache,
 }: {
   chain: ActiveChain
   index: number
@@ -31,7 +31,7 @@ export function ChainNodeBox({
   savedVersion: ChainVersion | null
   setTestMode: (testMode: boolean) => void
   prompts: Prompt[]
-  promptCache: ChainPromptCache
+  itemCache: ChainItemCache
 }) {
   const chainNode = nodes[index]
   const isSelected = index === activeIndex
@@ -98,13 +98,13 @@ export function ChainNodeBox({
           prompts={prompts}
           users={chain.users}
         />
-        <ChainNodeBoxBody chainNode={chainNode} items={items} isSelected={isSelected} promptCache={promptCache} />
+        <ChainNodeBoxBody chainNode={chainNode} items={items} isSelected={isSelected} itemCache={itemCache} />
         <ChainNodeBoxFooter
           nodes={nodes}
           index={index}
           onUpdate={updateItem}
           isSelected={isSelected}
-          promptCache={promptCache}
+          itemCache={itemCache}
         />
         {chainNode !== OutputNode && <SmallDot position='bottom' />}
       </div>

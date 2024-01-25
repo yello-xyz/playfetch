@@ -1,6 +1,6 @@
 import { LoopCompletionIndexForNode, ShouldBranchLoopOnCompletion, SubtreeForNode } from '@/src/common/branching'
 import { BranchChainItem, ChainItem, CodeChainItem, PromptChainItem, QueryChainItem } from '@/types'
-import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
+import { ChainItemCache } from '@/src/client/hooks/useChainItemCache'
 import { ExtractChainItemVariables } from './chainItems'
 
 export const InputNode = 'input'
@@ -54,11 +54,11 @@ export const CanChainNodeIncludeContext = (chainNode: ChainNode, nodes: ChainNod
 export const MappableTargetInputsForChainNode = (
   chainNode: ChainNode,
   nodes: ChainNode[],
-  promptCache: ChainPromptCache
+  itemCache: ChainItemCache
 ): string[] => [
   ...new Set(
     SubtreeForChainNode(chainNode, nodes, false, true).flatMap(item =>
-      ExtractChainItemVariables(item, promptCache, false)
+      ExtractChainItemVariables(item, itemCache, false)
     )
   ),
 ]

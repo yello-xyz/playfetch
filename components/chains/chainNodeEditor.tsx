@@ -5,7 +5,7 @@ import CodeNodeEditor from './codeNodeEditor'
 import Button, { PendingButton } from '../button'
 import { useState } from 'react'
 import useSavePrompt from '@/src/client/hooks/useSavePrompt'
-import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
+import { ChainItemCache } from '../../src/client/hooks/useChainItemCache'
 import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import QueryNodeEditor from './queryNodeEditor'
@@ -18,7 +18,7 @@ export default function ChainNodeEditor({
   saveItems,
   activeIndex,
   setDirty,
-  promptCache,
+  itemCache,
   dismiss,
   variables,
 }: {
@@ -26,7 +26,7 @@ export default function ChainNodeEditor({
   saveItems: (items: ChainItem[]) => void
   activeIndex: number
   setDirty: (dirty: boolean) => void
-  promptCache: ChainPromptCache
+  itemCache: ChainItemCache
   dismiss: () => void
   variables: string[]
 }) {
@@ -60,8 +60,8 @@ export default function ChainNodeEditor({
 
   const activeItem = updatedItems[activeIndex] ?? items[activeIndex]
   const isPromptChainItemActive = IsPromptChainItem(activeItem)
-  const activePrompt = isPromptChainItemActive ? promptCache.promptForItem(activeItem) : undefined
-  const initialActivePromptVersion = isPromptChainItemActive ? promptCache.versionForItem(activeItem) : undefined
+  const activePrompt = isPromptChainItemActive ? itemCache.promptForItem(activeItem) : undefined
+  const initialActivePromptVersion = isPromptChainItemActive ? itemCache.versionForItem(activeItem) : undefined
   const [activePromptVersion, setActivePromptVersion] = useInitialState(
     initialActivePromptVersion,
     (a, b) => a?.id === b?.id
@@ -74,7 +74,7 @@ export default function ChainNodeEditor({
   }
 
   const selectVersion = (version?: PromptVersion) => {
-    isPromptChainItemActive && savePrompt(() => promptCache.refreshItem(activeItem.promptID))
+    isPromptChainItemActive && savePrompt(() => itemCache.refreshItem(activeItem.promptID))
     setActivePromptVersion(version)
     updatePromptDirty(false)
     if (version) {
@@ -113,7 +113,7 @@ export default function ChainNodeEditor({
         {IsPromptChainItem(activeItem) && (
           <PromptNodeEditor
             item={activeItem}
-            promptCache={promptCache}
+            itemCache={itemCache}
             selectVersion={selectVersion}
             setModifiedVersion={updateVersion}
             variables={variables}

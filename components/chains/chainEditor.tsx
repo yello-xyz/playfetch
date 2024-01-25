@@ -11,7 +11,7 @@ import {
 import { ChainNode, IsBranchChainItem } from './chainNode'
 import ChainEditorHeader from './chainEditorHeader'
 import SegmentedControl, { Segment } from '../segmentedControl'
-import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
+import { ChainItemCache } from '@/src/client/hooks/useChainItemCache'
 import { Fragment, useState } from 'react'
 import { useCheckProviders } from '@/src/client/context/providerContext'
 import { EmbeddingModels, QueryProviders } from '@/src/common/providerMetadata'
@@ -33,7 +33,7 @@ export default function ChainEditor({
   isTestMode,
   setTestMode,
   disabled,
-  promptCache,
+  itemCache,
 }: {
   chain: ActiveChain
   activeVersion: ChainVersion
@@ -49,7 +49,7 @@ export default function ChainEditor({
   isTestMode: boolean
   setTestMode: (testMode: boolean) => void
   disabled: boolean
-  promptCache: ChainPromptCache
+  itemCache: ChainItemCache
 }) {
   const [checkProviderAvailable, checkModelAvailable] = useCheckProviders()
   const provider = QueryProviders.find(provider => checkProviderAvailable(provider))
@@ -89,7 +89,7 @@ export default function ChainEditor({
   const insertPrompt = (index: number, branch: number, promptID: number, versionID?: number) =>
     insertItem(index, branch, {
       promptID,
-      versionID: versionID ?? promptCache.versionForItem({ promptID })?.id,
+      versionID: versionID ?? itemCache.versionForItem({ promptID })?.id,
     })
 
   const insertNewPrompt = (index: number, branch: number) =>
@@ -145,7 +145,7 @@ export default function ChainEditor({
                 savedVersion={isVersionSaved ? activeVersion : null}
                 setTestMode={setTestMode}
                 prompts={prompts}
-                promptCache={promptCache}
+                itemCache={itemCache}
               />
               {<StartBranchConnector row={row} maxBranch={maxBranch} nodes={nodes} colSpans={colSpans} />}
               {rowIndex < rows.length - 1 && (
