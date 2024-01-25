@@ -152,9 +152,11 @@ const EmptyTable = ({ onAddEndpoint }: { onAddEndpoint?: () => void }) => (
           <span>Create some prompts or chains first to integrate this project into your code base.</span>
         )}
       </span>
-      <span className='mt-2'>
-        <TopBarButton type='primary' title='New Endpoint' icon={addIconWhite} onClick={onAddEndpoint} />
-      </span>
+      {onAddEndpoint && (
+        <span className='mt-2'>
+          <TopBarButton type='primary' title='New Endpoint' icon={addIconWhite} onClick={onAddEndpoint} />
+        </span>
+      )}
     </div>
   </div>
 )
