@@ -1,4 +1,4 @@
-import { ActiveChain, ActiveProject, ActivePrompt, ItemsInProject, ProjectItemIsChain } from '@/types'
+import { ActiveChain, ActiveProject, ActivePrompt, ProjectItemIsChain } from '@/types'
 import { useCallback, useEffect, useState } from 'react'
 import api from '@/src/client/api'
 
@@ -16,7 +16,7 @@ export default function useActiveItemCache(
   const [activeItemCache, setActiveItemCache] = useState<Record<number, ActivePrompt | ActiveChain>>({})
 
   const findItemForID = useCallback(
-    (itemID: number) => ItemsInProject(project).find(item => item.id === itemID),
+    (itemID: number) => [...project.prompts, ...project.chains].find(item => item.id === itemID),
     [project]
   )
 
