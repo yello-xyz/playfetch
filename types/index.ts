@@ -295,10 +295,12 @@ export type ResolvedEndpoint = Endpoint & {
   usage: Usage
 }
 
-export const IsProjectItem = (item: Prompt | Chain | Table): item is Prompt | Chain =>
-  'referencedItemIDs' in item || 'sourcePath' in item
-export const ProjectItemIsChain = (item: Chain | Prompt | undefined): item is Chain =>
+export const ProjectItemIsChain = (item: Chain | Prompt | Table | undefined): item is Chain =>
   !!item && 'referencedItemIDs' in item
+export const ProjectItemIsPrompt = (item: Chain | Prompt | Table | undefined): item is Prompt =>
+  !!item && 'sourcePath' in item
+export const ProjectItemIsTable = (item: Chain | Prompt | Table | undefined) =>
+  !!item && !ProjectItemIsChain(item) && !ProjectItemIsPrompt(item)
 
 export type Usage = {
   requests: number

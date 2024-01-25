@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useState } from 'react'
-import { ActiveChain, ActivePrompt, ActiveTable, InputValues, IsProjectItem } from '@/types'
+import { ActiveChain, ActivePrompt, ActiveTable, InputValues } from '@/types'
 import api from '@/src/client/api'
 import useInitialState from './useInitialState'
 
@@ -15,7 +15,7 @@ export default function useInputValues(
   const [originalInputValues, setOriginalInputValues] = useInitialState(parent.inputValues)
   const [inputValues, setInputValues] = useInitialState(originalInputValues)
 
-  const parentID = IsProjectItem(parent) ? parent.tableID ?? parent.id : parent.id
+  const parentID = 'tableID' in parent && parent.tableID ? parent.tableID : parent.id
   const updateInputValues = (variable: string, inputs: string[]) => api.updateInputValues(parentID, variable, inputs)
 
   const persistInputValuesIfNeeded = () => {

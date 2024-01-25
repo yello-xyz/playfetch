@@ -1,4 +1,4 @@
-import { Chain, Endpoint, IsProjectItem, Project, ProjectItemIsChain, Prompt, Table, Workspace } from '@/types'
+import { Chain, Endpoint, Project, ProjectItemIsChain, ProjectItemIsPrompt, Prompt, Table, Workspace } from '@/types'
 import api from '@/src/client/api'
 import PopupMenu, { PopupMenuItem } from '../popupMenu'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
@@ -30,9 +30,9 @@ export default function ProjectItemPopupMenu({
   const [showMovePromptDialog, setShowMovePromptDialog] = useState(false)
   const [sharedProjects, setSharedProjects] = useState<Project[]>([])
 
-  const isTable = !IsProjectItem(item)
-  const isChain = !isTable && ProjectItemIsChain(item)
-  const isPrompt = !isTable && !isChain
+  const isChain = ProjectItemIsChain(item)
+  const isPrompt = ProjectItemIsPrompt(item)
+  const isTable = !isChain && !isPrompt
   const [renameItem, duplicateItem, deleteItem, copyItemToProject] = useProjectItemActions(onDelete)
 
   const withDismiss = (callback: () => void) => () => {
