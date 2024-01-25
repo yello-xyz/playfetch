@@ -207,7 +207,7 @@ export default function TableEditor({
             const iconStyle = `${backgroundColor} rounded cursor-pointer opacity-0`
             return (
               <InView key={row}>
-                {({ inView, ref }) => (
+                {({ inView, ref, entry }) => (
                   <>
                     {gutterColumn && <div className='px-2 py-1 border-b border-gray-200'>{gutterColumn(row)}</div>}
                     {allVariables.map((variable, col) => (
@@ -226,10 +226,10 @@ export default function TableEditor({
                           <div
                             className={`h-full px-2.5 py-1.5 whitespace-pre-wrap ${border(col)} ${truncate}`}
                             onMouseDown={event => activateCell(event, row, col)}>
-                            {inView && getInputValue(row, variable)}
+                            {(!entry || inView) && getInputValue(row, variable)}
                           </div>
                         )}
-                        {!skipExpandButtons && inView && (
+                        {!skipExpandButtons && (!entry || inView) && (
                           <Icon
                             className={`absolute top-0.5 ${iconPosition(col)} ${iconOpacity(col)} ${iconStyle}`}
                             icon={expandIcon}
