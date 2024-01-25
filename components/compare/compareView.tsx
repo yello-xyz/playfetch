@@ -113,7 +113,11 @@ export default function CompareView({ logEntries = [] }: { logEntries?: LogEntry
           />
         </div>
         {isDiffMode && leftContent && rightContent && (
-          <DiffPane leftContent={leftContent} rightContent={rightContent} />
+          <div className='overflow-y-auto'>
+            <div className='pb-16'>
+              <DiffPane leftContent={leftContent} rightContent={rightContent} />
+            </div>
+          </div>
         )}
       </div>
       {(IsEndpoint(leftItem) || leftVersionID) && (IsEndpoint(rightItem) || rightVersionID) && (

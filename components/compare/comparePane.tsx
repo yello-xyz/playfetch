@@ -109,11 +109,13 @@ export default function ComparePane({
       )}
       {includeResponses && (activeVersion || IsEndpoint(activeItem)) && (
         <div className='overflow-y-auto'>
+          <div className='pb-14'>
           {activeVersion && !IsEndpoint(activeItem) ? (
             <RunTimeline runs={activeVersion!.runs} activeItem={activeItem} version={activeVersion} skipHeader />
           ) : (
             <RunTimeline runs={logsAsRuns} skipHeader />
           )}
+          </div>
         </div>
       )}
     </div>
