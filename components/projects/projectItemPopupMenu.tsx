@@ -4,7 +4,7 @@ import PopupMenu, { PopupMenuItem } from '../popupMenu'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 import { useState } from 'react'
 import PickNameDialog from '../pickNameDialog'
-import MovePromptDialog from '../prompts/movePromptDialog'
+import PickProjectDialog from './pickProjectDialog'
 import { useLoggedInUser } from '@/src/client/context/userContext'
 import { SharedProjectsWorkspace } from '@/pages'
 import useProjectItemActions from '@/src/client/hooks/useProjectItemActions'
@@ -92,8 +92,10 @@ export default function ProjectItemPopupMenu({
         />
       )}
       {isPrompt && showMovePromptDialog && (
-        <MovePromptDialog
-          item={item}
+        <PickProjectDialog
+          initialProjectID={item.projectID}
+          title={`Copy “${item.name}”`}
+          confirmTitle='Copy'
           workspaces={allWorkspaces}
           onConfirm={projectID => copyItemToProject(item, projectID)}
           onDismiss={() => setShowMovePromptDialog(false)}

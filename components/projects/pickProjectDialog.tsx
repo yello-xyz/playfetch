@@ -1,16 +1,20 @@
 import { useState } from 'react'
 import ModalDialog, { DialogPrompt } from '../modalDialog'
-import { ActiveWorkspace, Project, Prompt, Workspace } from '@/types'
+import { ActiveWorkspace, Project, Workspace } from '@/types'
 import DropdownMenu from '../dropdownMenu'
 import api from '@/src/client/api'
 
-export default function MovePromptDialog({
-  item,
+export default function PickProjectDialog({
+  initialProjectID,
+  title,
+  confirmTitle,
   workspaces,
   onConfirm,
   onDismiss,
 }: {
-  item: Prompt
+  initialProjectID: number
+  title: string
+  confirmTitle: string
   workspaces: (Workspace | ActiveWorkspace)[]
   onConfirm: (projectID: number) => void
   onDismiss: () => void
@@ -20,7 +24,7 @@ export default function MovePromptDialog({
 
   const [workspaceID, setWorkspaceID] = useState(NoWorkspaceID)
   const [loadedProjects, setLoadedProjects] = useState<Record<number, Project[]>>({})
-  const [projectID, setProjectID] = useState(item.projectID)
+  const [projectID, setProjectID] = useState(initialProjectID)
 
   const updateWorkspaceID = (workspaceID: number) => {
     setWorkspaceID(workspaceID)
@@ -47,8 +51,8 @@ export default function MovePromptDialog({
   }
 
   const dialogPrompt: DialogPrompt = {
-    title: `Copy “${item.name}”`,
-    confirmTitle: 'Copy',
+    title,
+    confirmTitle,
     callback: () => onConfirm(projectID),
     disabled: projectID === NoProjectID,
   }
