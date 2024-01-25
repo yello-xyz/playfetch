@@ -371,6 +371,9 @@ const api = {
   completeOnboarding: function (response: OnboardingResponse) {
     return post(this.completeOnboarding, { response })
   },
+  authorizeLinear: function (): Promise<string> {
+    return post(this.authorizeLinear)
+  },
 }
 
 export default api
