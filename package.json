@@ -29,6 +29,7 @@
     "@google-cloud/datastore": "^7.5.1",
     "@google-cloud/storage": "^7.1.0",
     "@google-cloud/vertexai": "^0.2.1",
+    "@linear/sdk": "^13.0.0",
     "@notionhq/client": "^2.2.13",
     "@pinecone-database/pinecone": "^1.1.0",
     "@react-hook/resize-observer": "^1.2.6",
