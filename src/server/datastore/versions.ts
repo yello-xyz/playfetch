@@ -15,6 +15,7 @@ import { toRun } from './runs'
 import {
   augmentPromptDataWithNewVersion,
   ensurePromptAccess,
+  getTrustedProjectScopedData,
   getVerifiedUserPromptData,
   updatePromptOnDeletedVersion,
 } from './prompts'
@@ -120,6 +121,11 @@ export async function addInitialVersion(userID: number, parentID: number, type: 
   const versionID = await allocateID(Entity.VERSION)
   const { prompts, config, items } = await initialVersionAttributes(userID, type)
   return toVersionData(userID, parentID, prompts, config, items, [], new Date(), false, undefined, versionID)
+}
+
+const saveInitialVersion = async (userID: number, parentData: any, type: VersionType) => {
+  const { prompts, config, items } = await initialVersionAttributes(userID, type)
+  return saveVersionForUser(userID, parentData, prompts, config, items)
 }
 
 export async function savePromptVersionForUser(
@@ -357,12 +363,8 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
 
   const anyVersionWithSameParentKey = await getEntityKey(Entity.VERSION, 'parentID', parentID)
   if (!anyVersionWithSameParentKey) {
-    if (wasPromptVersion) {
-      const { defaultPromptConfig } = await getPresetsForUser(userID)
-      await savePromptVersionForUser(userID, parentID, DefaultPrompts, defaultPromptConfig)
-    } else {
-      await saveChainVersionForUser(userID, parentID, [])
-    }
+    const parentData = await getTrustedProjectScopedData([wasPromptVersion ? Entity.PROMPT : Entity.CHAIN], parentID)
+    await saveInitialVersion(userID, parentData, wasPromptVersion ? 'prompt' : 'chain')
   }
 
   if (wasPromptVersion) {
