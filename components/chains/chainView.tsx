@@ -149,7 +149,7 @@ export default function ChainView({
                   </div>
                 </SingleTabHeader>
               )}
-              chainItemCache={itemCache}
+              itemCache={itemCache}
             />
           </div>
         </Allotment.Pane>

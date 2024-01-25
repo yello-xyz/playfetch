@@ -3,7 +3,7 @@ import { Dispatch, SetStateAction, useCallback } from 'react'
 import { ChainNode, IsPromptChainItem } from '../../../components/chains/chainNode'
 import useActiveItemCache, { ActiveItemCache } from './useActiveItemCache'
 
-export type ChainItemCache = ActiveItemCache & {
+export type ChainItemCache = ActiveItemCache<ActivePrompt> & {
   promptForItem: (item: Omit<PromptChainItem, 'branch'>) => ActivePrompt | undefined
   versionForItem: (item: Omit<PromptChainItem, 'branch'>) => PromptVersion | undefined
 }
@@ -37,9 +37,8 @@ export default function useChainItemCache(
 
   const promptIDs = nodes.filter(IsPromptChainItem).map(item => item.promptID)
 
-  const activeItemCache = useActiveItemCache(project, promptIDs, item => onRefreshPrompt(item as ActivePrompt))
-  const promptForItem = (item: Omit<PromptChainItem, 'branch'>) =>
-    activeItemCache.itemForID(item.promptID) as ActivePrompt | undefined
+  const activeItemCache = useActiveItemCache<ActivePrompt>(project, promptIDs, item => onRefreshPrompt(item))
+  const promptForItem = (item: Omit<PromptChainItem, 'branch'>) => activeItemCache.itemForID(item.promptID)
 
   const chainItemCache: ChainItemCache = {
     ...activeItemCache,

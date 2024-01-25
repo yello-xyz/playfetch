@@ -13,7 +13,7 @@ export default function ChainVersionCellBody({
   version: ChainVersion
   isActiveVersion: boolean
   compareVersion?: ChainVersion
-  itemCache: ActiveItemCache
+  itemCache: ActiveItemCache<ActivePrompt>
 }) {
   const getContent = (version: ChainVersion) => ContentsForChainVersion(version, itemCache).join('\n')
 
@@ -27,10 +27,10 @@ export default function ChainVersionCellBody({
   )
 }
 
-export const ContentsForChainVersion = (version: ChainVersion, itemCache: ActiveItemCache) =>
+export const ContentsForChainVersion = (version: ChainVersion, itemCache: ActiveItemCache<ActivePrompt>) =>
   version.items.map(item => GetChainItemTitle(item, itemCache))
 
-export const GetChainItemTitle = (item: ChainItemWithInputs, itemCache: ActiveItemCache) => {
+export const GetChainItemTitle = (item: ChainItemWithInputs, itemCache: ActiveItemCache<ActivePrompt>) => {
   if (IsCodeChainItem(item)) {
     return `• Code block${item.name ? `: ${item.name}` : ''}`
   } else if (IsBranchChainItem(item)) {
@@ -40,7 +40,7 @@ export const GetChainItemTitle = (item: ChainItemWithInputs, itemCache: ActiveIt
     return `• Query: ${LabelForProvider(item.provider)}${indexNameInfix} (${item.topK} Top-K)`
   } else {
     let versionSuffix = ''
-    const prompt = itemCache.itemForID(item.promptID) as ActivePrompt | undefined
+    const prompt = itemCache.itemForID(item.promptID)
     if (prompt) {
       const versionIndex = prompt.versions.findIndex(version => version.id === item.versionID)
       if (versionIndex >= 0) {
