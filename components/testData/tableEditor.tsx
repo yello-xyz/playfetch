@@ -226,7 +226,7 @@ export default function TableEditor({
                           <div
                             className={`h-full px-2.5 py-1.5 whitespace-pre-wrap ${border(col)} ${truncate}`}
                             onMouseDown={event => activateCell(event, row, col)}>
-                            {getInputValue(row, variable)}
+                            {inView && getInputValue(row, variable)}
                           </div>
                         )}
                         {!skipExpandButtons && inView && (
