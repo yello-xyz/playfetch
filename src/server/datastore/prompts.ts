@@ -118,7 +118,7 @@ export async function addPromptToProject(
 ) {
   const createdAt = new Date()
   const promptID = await allocateID(Entity.PROMPT)
-  const versionData = await addInitialVersion(userID, promptID, false)
+  const versionData = await addInitialVersion(userID, promptID, 'prompt')
   const promptData = toPromptData(projectID, name, createdAt, createdAt, sourcePath, undefined, promptID)
   return [promptData, versionData]
 }

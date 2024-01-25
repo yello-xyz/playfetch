@@ -89,7 +89,7 @@ export async function addChainForUser(userID: number, projectID: number, name = 
   )
   const createdAt = new Date()
   const chainID = await allocateID(Entity.CHAIN)
-  const versionData = await addInitialVersion(userID, chainID, true)
+  const versionData = await addInitialVersion(userID, chainID, 'chain')
   const versionID = getID(versionData)
   const chainData = toChainData(projectID, uniqueName, { [versionID]: [] }, createdAt, createdAt, undefined, chainID)
   await getDatastore().save([chainData, versionData])

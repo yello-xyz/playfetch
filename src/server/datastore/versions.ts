@@ -105,15 +105,17 @@ export async function getTrustedVersion(versionID: number, markAsRun = false) {
   return toVersion(versionData, [])
 }
 
-export async function addInitialVersion(userID: number, parentID: number, isChainVersion: boolean) {
+type VersionType = 'prompt' | 'chain'
+
+export async function addInitialVersion(userID: number, parentID: number, type: VersionType) {
   const versionID = await allocateID(Entity.VERSION)
-  const { defaultPromptConfig } = isChainVersion ? { defaultPromptConfig: null } : await getPresetsForUser(userID)
+  const { defaultPromptConfig } = type === 'prompt' ? await getPresetsForUser(userID) : { defaultPromptConfig: null }
   return toVersionData(
     userID,
     parentID,
-    isChainVersion ? null : DefaultPrompts,
+    type === 'prompt' ? DefaultPrompts : null,
     defaultPromptConfig,
-    isChainVersion ? [] : null,
+    type === 'chain' ? [] : null,
     [],
     new Date(),
     false,
