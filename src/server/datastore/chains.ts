@@ -156,8 +156,7 @@ const getChainData = (chainID: number) => getKeyedEntity(Entity.CHAIN, chainID)
 
 export const getTrustedChain = (chainID: number) => getChainData(chainID).then(toChain)
 
-export async function updateChainOnDeletedVersion(chainID: number, deletedVersionID: number) {
-  const chainData = await getChainData(chainID)
+export async function updateChainOnDeletedVersion(chainData: any, deletedVersionID: number) {
   const references = chainData.references ? JSON.parse(chainData.references) : {}
   references[deletedVersionID] = undefined
   await updateChain({ ...chainData, references: JSON.stringify(references) }, true)

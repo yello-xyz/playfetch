@@ -236,11 +236,7 @@ const getPromptData = (promptID: number) => getKeyedEntity(Entity.PROMPT, prompt
 
 export const getTrustedPrompt = (promptID: number) => getPromptData(promptID).then(toPrompt)
 
-export async function updatePromptOnDeletedVersion(promptID: number) {
-  // TODO update previous version references in other versions?
-  const promptData = await getPromptData(promptID)
-  await updatePrompt({ ...promptData }, true)
-}
+export const updatePromptLastEditedAt = (promptData: any) => updatePrompt({ ...promptData }, true)
 
 export const getTrustedProjectScopedData = async (entities: Entity[], id: number) => {
   for (const entity of entities) {

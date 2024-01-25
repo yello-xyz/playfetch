@@ -17,7 +17,7 @@ import {
   ensurePromptAccess,
   getTrustedProjectScopedData,
   getVerifiedUserPromptData,
-  updatePromptOnDeletedVersion,
+  updatePromptLastEditedAt,
 } from './prompts'
 import { augmentProjectWithNewVersion, ensureProjectLabel } from './projects'
 import { saveComment } from './comments'
@@ -358,19 +358,19 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
 
   const parentID = versionData.parentID
   const wasPromptVersion = IsPromptVersion(versionData)
+  const parentData = await getTrustedProjectScopedData([wasPromptVersion ? Entity.PROMPT : Entity.CHAIN], parentID)
+  const anyVersionWithSameParentKey = await getEntityKey(Entity.VERSION, 'parentID', parentID)
 
   await deleteEntity(Entity.VERSION, versionID)
 
-  const anyVersionWithSameParentKey = await getEntityKey(Entity.VERSION, 'parentID', parentID)
-  if (!anyVersionWithSameParentKey) {
-    const parentData = await getTrustedProjectScopedData([wasPromptVersion ? Entity.PROMPT : Entity.CHAIN], parentID)
-    await saveInitialVersion(userID, parentData, wasPromptVersion ? 'prompt' : 'chain')
+  if (!wasPromptVersion) {
+    await updateChainOnDeletedVersion(parentData, versionID)
+  } else if (anyVersionWithSameParentKey) {
+    await updatePromptLastEditedAt(parentData)
   }
 
-  if (wasPromptVersion) {
-    await updatePromptOnDeletedVersion(parentID)
-  } else {
-    await updateChainOnDeletedVersion(parentID, versionID)
+  if (!anyVersionWithSameParentKey) {
+    await saveInitialVersion(userID, parentData, wasPromptVersion ? 'prompt' : 'chain')
   }
 }
 
