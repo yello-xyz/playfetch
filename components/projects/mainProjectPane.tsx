@@ -41,6 +41,7 @@ export default function MainProjectPane({
   showComments,
   setShowComments,
   selectComment,
+  setRefreshCompareItems,
 }: {
   activeItem: ActiveItem | undefined
   activePrompt: ActivePrompt | undefined
@@ -61,6 +62,7 @@ export default function MainProjectPane({
   showComments: boolean
   setShowComments: (show: boolean) => void
   selectComment: (parentID: number, versionID: number, runID?: number) => void
+  setRefreshCompareItems: (refresh: () => void) => void
 }) {
   return (
     <Allotment>
@@ -86,7 +88,9 @@ export default function MainProjectPane({
           />
         )}
         {activeTable && <TestDataView key={activeTable.id} table={activeTable} />}
-        {activeItem === CompareItem && <CompareView logEntries={analytics?.recentLogEntries} />}
+        {activeItem === CompareItem && (
+          <CompareView logEntries={analytics?.recentLogEntries} setRefreshItems={setRefreshCompareItems} />
+        )}
         {activeItem === EndpointsItem && <EndpointsView analytics={analytics} refreshAnalytics={refreshAnalytics} />}
         {activeItem === SettingsItem && (
           <SettingsView scope='project' providers={scopedProviders} refresh={refreshProviders} />

@@ -113,6 +113,7 @@ export default function Home({
     updateVersion(version)
   }
 
+  const [refreshCompareItems, setRefreshCompareItems] = useState(() => () => {})
   const refreshActiveItem = (versionID?: number, allowResave?: boolean) => {
     if (activePrompt) {
       return refreshPrompt(activePrompt.id, versionID, allowResave)
@@ -120,6 +121,8 @@ export default function Home({
       return refreshChain(activeChain.id, versionID)
     } else if (activeTable) {
       return refreshTable(activeTable.id)
+    } else if (compare) {
+      return Promise.resolve(refreshCompareItems())
     } else {
       return refreshProject()
     }
@@ -299,6 +302,7 @@ export default function Home({
                               showComments,
                               setShowComments,
                               selectComment,
+                              setRefreshCompareItems,
                             }}
                           />
                         </Suspense>

@@ -10,7 +10,13 @@ import useDiffContent from '@/src/client/hooks/useDiffContent'
 import { IsEndpoint } from '@/src/common/activeItem'
 import { useActiveProject } from '@/src/client/context/projectContext'
 
-export default function CompareView({ logEntries = [] }: { logEntries?: LogEntry[] }) {
+export default function CompareView({
+  logEntries = [],
+  setRefreshItems,
+}: {
+  logEntries?: LogEntry[]
+  setRefreshItems: (refresh: () => void) => void
+}) {
   const router = useRouter()
   const { i: itemID, v: versionID, p: previousVersionID } = ParseNumberQuery(router.query)
 
@@ -21,12 +27,32 @@ export default function CompareView({ logEntries = [] }: { logEntries?: LogEntry
   const [leftVersionID, setLeftVersionID] = useState(previousVersionID)
 
   const activeProject = useActiveProject()
-  const endpointForID = (endpointID: number) => activeProject.endpoints.find(endpoint => endpoint.id === endpointID)
+  const endpointForID = useCallback(
+    (endpointID: number) => activeProject.endpoints.find(endpoint => endpoint.id === endpointID),
+    [activeProject]
+  )
 
   const itemCache = useActiveItemCache(activeProject, [
     ...(leftItemID && !endpointForID(leftItemID) ? [leftItemID] : []),
     ...(rightItemID && !endpointForID(rightItemID) ? [rightItemID] : []),
   ])
+
+  const refreshItem = useCallback(
+    (itemID: number) => itemCache.refreshItem(itemID),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  )
+
+  useEffect(() => {
+    setRefreshItems(() => () => {
+      if (leftItemID && !endpointForID(leftItemID)) {
+        refreshItem(leftItemID)
+      }
+      if (rightItemID !== leftItemID && rightItemID && !endpointForID(rightItemID)) {
+        refreshItem(rightItemID)
+      }
+    })
+  }, [leftItemID, rightItemID, setRefreshItems, endpointForID, refreshItem])
 
   const loadItem = (itemID: number | undefined) =>
     itemID ? endpointForID(itemID) ?? itemCache.itemForID(itemID) : undefined
