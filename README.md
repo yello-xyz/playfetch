@@ -75,6 +75,12 @@ In order to run the app locally, you will need to add some additional variables 
 
 `GITHUB_APP_PRIVATE_KEY=` *[Generate a new private key at https://github.com/organizations/yello-xyz/settings/apps/play-fetch-local]*
 
+- **To use Linear integration:**
+
+`LINEAR_APP_CLIENT_ID=` *[Copy this from https://linear.app/playfetch-dev/settings/api]*
+
+`LINEAR_APP_CLIENT_SECRET=` *[Generate a new secret at https://linear.app/playfetch-dev/settings/api]*
+
 - **To use Email authentication:**
 
 `NOREPLY_EMAIL_USER=no-reply@yello.xyz`
