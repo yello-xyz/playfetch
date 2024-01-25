@@ -1,5 +1,5 @@
 import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/context/globalPopupContext'
-import { ActiveProject, ItemsInProject } from '@/types'
+import { ActiveProject, Chain, ItemsInProject, Prompt, ResolvedEndpoint } from '@/types'
 import { PopupContent, PopupLabelItem, PopupSectionTitle } from '../popupMenu'
 import promptIcon from '@/public/prompt.svg'
 import chainIcon from '@/public/chain.svg'
@@ -7,38 +7,49 @@ import endpointIcon from '@/public/endpoint.svg'
 import Icon from '../icon'
 import { PopupButton } from '../popupButton'
 
-export default function ProjectItemSelector({
+export default function ProjectItemSelector<T extends Prompt | Chain | ResolvedEndpoint>({
   project,
+  items,
   selectedItemID,
   onSelectItemID,
-  includeEndpoints,
   disabled,
   fixedWidth,
   className = '',
 }: {
   project: ActiveProject
+  items: T[]
   selectedItemID?: number
   onSelectItemID: (itemID: number) => void
-  includeEndpoints?: boolean
   disabled?: boolean
   fixedWidth?: boolean
   className?: string
 }) {
+  const promptIDs = new Set(project.prompts.map(prompt => prompt.id))
+  const chainIDs = new Set(project.chains.map(chain => chain.id))
+  const endpointIDs = new Set(project.endpoints.map(endpoint => endpoint.id))
+
+  const isPrompt = (item: T) => promptIDs.has(item.id)
+  const isChain = (item: T) => chainIDs.has(item.id)
+  const isEndpoint = (item: T) => endpointIDs.has(item.id)
+
+  const prompts = items.filter(isPrompt) as Prompt[]
+  const chains = items.filter(isChain) as Chain[]
+  const endpoints = items.filter(isEndpoint) as ResolvedEndpoint[]
+
   const setPopup = useGlobalPopup<PropjectItemSelectorPopupProps>()
 
   const onSetPopup = (location: GlobalPopupLocation) =>
-    setPopup(PropjectItemSelectorPopup, { project, onSelectItemID, includeEndpoints }, location)
+    setPopup(PropjectItemSelectorPopup, { prompts, chains, endpoints, onSelectItemID }, location)
 
-  const items = [...ItemsInProject(project), ...(includeEndpoints ? project.endpoints : [])]
   const selectedItem = items.find(item => item.id === selectedItemID)
-  const isPrompt = selectedItem && project.prompts.some(prompt => prompt.id === selectedItemID)
-  const isChain = selectedItem && project.chains.some(chain => chain.id === selectedItemID)
 
-  const selectedName = selectedItem
+  const buttonTitle = selectedItem
     ? 'name' in selectedItem
       ? selectedItem.name
       : `${selectedItem.urlPath} (${selectedItem.flavor})`
-    : undefined
+    : endpoints.length > 0
+    ? 'Select a Project Item'
+    : 'Select a Prompt or Chain'
 
   return (
     <PopupButton
@@ -46,30 +57,32 @@ export default function ProjectItemSelector({
       fixedWidth={fixedWidth}
       className={className}
       onSetPopup={onSetPopup}>
-      {selectedItem && <Icon icon={isPrompt ? promptIcon : isChain ? chainIcon : endpointIcon} />}
-      <span className='flex-1 overflow-hidden whitespace-nowrap text-ellipsis'>
-        {selectedName ?? (includeEndpoints ? 'Select a Project Item' : 'Select a Prompt or Chain')}
-      </span>
+      {selectedItem && (
+        <Icon icon={isPrompt(selectedItem) ? promptIcon : isChain(selectedItem) ? chainIcon : endpointIcon} />
+      )}
+      <span className='flex-1 overflow-hidden whitespace-nowrap text-ellipsis'>{buttonTitle}</span>
     </PopupButton>
   )
 }
 
 type PropjectItemSelectorPopupProps = {
-  project: ActiveProject
-  includeEndpoints?: boolean
+  prompts: Prompt[]
+  chains: Chain[]
+  endpoints: ResolvedEndpoint[]
   onSelectItemID: (itemID: number) => void
 }
 
 function PropjectItemSelectorPopup({
-  project,
-  includeEndpoints,
+  prompts,
+  chains,
+  endpoints,
   onSelectItemID,
   withDismiss,
 }: PropjectItemSelectorPopupProps & WithDismiss) {
   return (
     <PopupContent className='p-3'>
-      {project.prompts.length > 0 && <PopupSectionTitle>Prompts</PopupSectionTitle>}
-      {project.prompts.map((prompt, index) => (
+      {prompts.length > 0 && <PopupSectionTitle>Prompts</PopupSectionTitle>}
+      {prompts.map((prompt, index) => (
         <PopupLabelItem
           key={index}
           title={prompt.name}
@@ -77,8 +90,8 @@ function PropjectItemSelectorPopup({
           onClick={withDismiss(() => onSelectItemID(prompt.id))}
         />
       ))}
-      {project.chains.length > 0 && <PopupSectionTitle>Chains</PopupSectionTitle>}
-      {project.chains.map((chain, index) => (
+      {chains.length > 0 && <PopupSectionTitle>Chains</PopupSectionTitle>}
+      {chains.map((chain, index) => (
         <PopupLabelItem
           key={index}
           title={chain.name}
@@ -86,19 +99,18 @@ function PropjectItemSelectorPopup({
           onClick={withDismiss(() => onSelectItemID(chain.id))}
         />
       ))}
-      {includeEndpoints && project.endpoints.length > 0 && <PopupSectionTitle>Endpoints</PopupSectionTitle>}
-      {includeEndpoints &&
-        project.endpoints
-          .slice()
-          .sort((a, b) => a.urlPath.localeCompare(b.urlPath))
-          .map((endpoint, index) => (
-            <PopupLabelItem
-              key={index}
-              title={`${endpoint.urlPath} (${endpoint.flavor})`}
-              icon={endpointIcon}
-              onClick={withDismiss(() => onSelectItemID(endpoint.id))}
-            />
-          ))}
+      {endpoints.length > 0 && <PopupSectionTitle>Endpoints</PopupSectionTitle>}
+      {endpoints
+        .slice()
+        .sort((a, b) => a.urlPath.localeCompare(b.urlPath))
+        .map((endpoint, index) => (
+          <PopupLabelItem
+            key={index}
+            title={`${endpoint.urlPath} (${endpoint.flavor})`}
+            icon={endpointIcon}
+            onClick={withDismiss(() => onSelectItemID(endpoint.id))}
+          />
+        ))}
     </PopupContent>
   )
 }

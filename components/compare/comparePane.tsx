@@ -76,9 +76,9 @@ export default function ComparePane({
         <ProjectItemSelector
           className='w-full max-w-[240px]'
           project={project}
+          items={[...project.prompts, ...project.chains, ...project.endpoints]}
           selectedItemID={activeItem?.id}
           onSelectItemID={setItemID}
-          includeEndpoints
           disabled={disabled}
         />
         {!IsEndpoint(activeItem) && (
