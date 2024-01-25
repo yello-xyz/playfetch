@@ -1,5 +1,5 @@
 import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/context/globalPopupContext'
-import { ActiveProject, Chain, ItemsInProject, Prompt, ResolvedEndpoint } from '@/types'
+import { ActiveProject, Chain, Prompt, ResolvedEndpoint } from '@/types'
 import { PopupContent, PopupLabelItem, PopupSectionTitle } from '../popupMenu'
 import promptIcon from '@/public/prompt.svg'
 import chainIcon from '@/public/chain.svg'
@@ -48,8 +48,8 @@ export default function ProjectItemSelector<T extends Prompt | Chain | ResolvedE
       ? selectedItem.name
       : `${selectedItem.urlPath} (${selectedItem.flavor})`
     : endpoints.length > 0
-    ? 'Select a Project Item'
-    : 'Select a Prompt or Chain'
+      ? 'Select a Project Item'
+      : 'Select a Prompt or Chain'
 
   return (
     <PopupButton
