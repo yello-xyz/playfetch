@@ -71,7 +71,7 @@ export const ParseActiveItemQuery = (query: any, project: ActiveProject) => {
   return { promptID, chainID, tableID, compare, endpoints, settings }
 }
 
-type ActiveSettingsTab = 'providers' | 'usage' | 'team' | 'connectors' | 'sourceControl'
+type ActiveSettingsTab = 'providers' | 'usage' | 'team' | 'connectors' | 'sourceControl' | 'issueTracker'
 
 export const UserSettingsRoute = (activeTab: ActiveSettingsTab = 'providers') =>
   `${ClientRoute.Settings}${activeTab !== 'providers' ? `?t=${activeTab[0]}` : ''}`
@@ -90,6 +90,8 @@ export const ParseActiveSettingsTabQuery = (query: any) => {
       return 'connectors'
     case 's':
       return 'sourceControl'
+    case 'i':
+      return 'issueTracker'
     default:
       return 'providers'
   }

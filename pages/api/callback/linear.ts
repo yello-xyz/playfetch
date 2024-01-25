@@ -29,7 +29,7 @@ async function linear(req: NextApiRequest, res: NextApiResponse, user: User) {
     console.log(me)
   }
 
-  res.redirect(UserSettingsRoute('sourceControl'))
+  res.redirect(UserSettingsRoute('issueTracker'))
 }
 
 export default withLoggedInUserRoute(linear)

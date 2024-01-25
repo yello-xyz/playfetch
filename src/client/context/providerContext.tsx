@@ -6,7 +6,6 @@ import {
   LanguageModel,
   ModelProvider,
   QueryProvider,
-  SourceControlProvider,
 } from '@/types'
 import {
   IsModelAvailable,

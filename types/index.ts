@@ -143,12 +143,22 @@ export type AvailableSourceControlProvider = {
   environment: string
   scopeID: number
 }
-export type AvailableProvider = AvailableModelProvider | AvailableQueryProvider | AvailableSourceControlProvider
+export type AvailableIssueTrackerProvider = {
+  provider: IssueTrackerProvider
+  environment: string
+  scopeID: number
+}
+export type AvailableProvider =
+  | AvailableModelProvider
+  | AvailableQueryProvider
+  | AvailableSourceControlProvider
+  | AvailableIssueTrackerProvider
 export const IsModelProvider = (provider: AvailableProvider): provider is AvailableModelProvider =>
   'customModels' in provider
 
 export type QueryProvider = 'pinecone'
 export type SourceControlProvider = 'github'
+export type IssueTrackerProvider = 'linear'
 
 type Version = {
   id: number

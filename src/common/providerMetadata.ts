@@ -11,6 +11,7 @@ import {
   Prompts,
   QueryProvider,
   SourceControlProvider,
+  IssueTrackerProvider,
 } from '@/types'
 import openaiIcon from '@/public/openai.svg'
 import anthropicIcon from '@/public/anthropic.svg'
@@ -18,10 +19,12 @@ import googleIcon from '@/public/google.svg'
 import cohereIcon from '@/public/cohere.svg'
 import pineconeIcon from '@/public/pinecone.svg'
 import githubIcon from '@/public/github.svg'
+import linearIcon from '@/public/linear.svg'
 
 export const ModelProviders: ModelProvider[] = ['anthropic', 'cohere', 'google', 'openai']
 export const QueryProviders: QueryProvider[] = ['pinecone']
 export const SourceControlProviders: SourceControlProvider[] = ['github']
+export const IssueTrackerProviders: IssueTrackerProvider[] = ['linear']
 
 export const EmbeddingModels: EmbeddingModel[] = ['text-embedding-ada-002']
 export const PublicLanguageModels: DefaultLanguageModel[] = [
@@ -38,7 +41,9 @@ export const PublicLanguageModels: DefaultLanguageModel[] = [
 ]
 export const GatedLanguageModels: DefaultLanguageModel[] = [] // used to contain 'gpt-4-32k'
 
-export const IconForProvider = (provider: ModelProvider | QueryProvider | SourceControlProvider) => {
+export const IconForProvider = (
+  provider: ModelProvider | QueryProvider | SourceControlProvider | IssueTrackerProvider
+) => {
   switch (provider) {
     case 'openai':
       return openaiIcon
@@ -52,10 +57,14 @@ export const IconForProvider = (provider: ModelProvider | QueryProvider | Source
       return pineconeIcon
     case 'github':
       return githubIcon
+    case 'linear':
+      return linearIcon
   }
 }
 
-export const LabelForProvider = (provider: ModelProvider | QueryProvider | SourceControlProvider) => {
+export const LabelForProvider = (
+  provider: ModelProvider | QueryProvider | SourceControlProvider | IssueTrackerProvider
+) => {
   switch (provider) {
     case 'openai':
       return 'OpenAI'
@@ -69,6 +78,8 @@ export const LabelForProvider = (provider: ModelProvider | QueryProvider | Sourc
       return 'Pinecone'
     case 'github':
       return 'GitHub'
+    case 'linear':
+      return 'Linear'
   }
 }
 
@@ -106,7 +117,7 @@ const customModelFromProviders = (model: LanguageModel, providers: AvailableMode
 }
 
 export const IsProviderAvailable = (
-  provider: ModelProvider | QueryProvider | SourceControlProvider,
+  provider: ModelProvider | QueryProvider | SourceControlProvider | IssueTrackerProvider,
   providers: AvailableProvider[]
 ): boolean => !!providers.find(p => p.provider === provider)
 

@@ -14,12 +14,14 @@ import { useActiveProject } from '@/src/client/context/projectContext'
 import { ParseActiveSettingsTabQuery, ProjectSettingsRoute, UserSettingsRoute } from '@/src/common/clientRoute'
 import { useRouter } from 'next/router'
 import GitHubSettings from './githubSettings'
+import LinearSettings from './linearSettings'
 
 const ProvidersPane = 'providers'
 const UsagePane = 'usage'
 const TeamPane = 'team'
 const ConnectorsPane = 'connectors'
 const SourceControlPane = 'sourceControl'
+const IssueTrackerPane = 'issueTracker'
 
 type ActivePane =
   | typeof ProvidersPane
@@ -27,6 +29,7 @@ type ActivePane =
   | typeof TeamPane
   | typeof ConnectorsPane
   | typeof SourceControlPane
+  | typeof IssueTrackerPane
 
 const titleForPane = (pane: ActivePane) => {
   switch (pane) {
@@ -40,6 +43,8 @@ const titleForPane = (pane: ActivePane) => {
       return 'Connectors'
     case SourceControlPane:
       return 'Source control'
+    case IssueTrackerPane:
+      return 'Task management'
   }
 }
 
@@ -71,6 +76,8 @@ const descriptionForPane = (pane: ActivePane, isProjectScope: boolean) => {
       )
     case SourceControlPane:
       return 'Synchronise prompt files between your PlayFetch project and your source control system.'
+    case IssueTrackerPane:
+      return 'Integrate PlayFetch with your issue tracking system.'
   }
 }
 
@@ -88,6 +95,7 @@ const scopeDescriptionForPane = (pane: ActivePane, isProjectScope: boolean) => {
     case UsagePane:
     case TeamPane:
     case SourceControlPane:
+    case IssueTrackerPane:
       return undefined
   }
 }
@@ -146,6 +154,7 @@ export default function SettingsView({
     ...(isProjectScope ? [TeamPane] : []),
     ConnectorsPane,
     SourceControlPane,
+    // IssueTrackerPane,
   ]
 
   return !isProjectScope || activeProject.isOwner ? (
@@ -195,6 +204,7 @@ export default function SettingsView({
               onRefresh={refresh}
             />
           )}
+          {activePane === IssueTrackerPane && <LinearSettings scope={scope} />}
         </SettingsPane>
       </div>
     </div>
