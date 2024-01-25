@@ -103,19 +103,22 @@ export default function ComparePane({
         )}
       </div>
       {activeVersion && IsPromptVersion(activeVersion) && (
-        <div className='border-b border-gray-200 min-h-[226px] h-[226px] bg-gray-25'>
+        <div className='border-b border-gray-200 min-h-[245px] h-[245px] bg-gray-25'>
           <PromptPanel version={activeVersion} />
         </div>
       )}
       {includeResponses && (activeVersion || IsEndpoint(activeItem)) && (
-        <div className='overflow-y-auto'>
-          <div className='pb-14'>
+        <div className='min-h-0'>
           {activeVersion && !IsEndpoint(activeItem) ? (
-            <RunTimeline runs={activeVersion!.runs} activeItem={activeItem} version={activeVersion} skipHeader />
+            <RunTimeline
+              runs={activeVersion!.runs}
+              activeItem={activeItem}
+              version={activeVersion}
+              extraPadding='pb-16'
+            />
           ) : (
-            <RunTimeline runs={logsAsRuns} skipHeader />
+            <RunTimeline runs={logsAsRuns} extraPadding='pb-16' />
           )}
-          </div>
         </div>
       )}
     </div>
