@@ -31,5 +31,9 @@ export default function useProjectItemActions(onDelete?: () => void) {
     ProjectItemIsChain(item) ? api.duplicateChain(item.id) : api.duplicatePrompt(item.id)
   const duplicateAndRefresh = (item: Prompt | Chain) => duplicateItem(item).then(refreshProject)
 
-  return [renameAndRefresh, duplicateAndRefresh, deleteAndRefresh] as const
+  const copyToProject = (item: Prompt, projectID: number) => api.duplicatePrompt(item.id, projectID)
+  const copyToProjectAndRefresh = (item: Prompt, projectID: number) =>
+    copyToProject(item, projectID).then(refreshProject)
+
+  return [renameAndRefresh, duplicateAndRefresh, deleteAndRefresh, copyToProjectAndRefresh] as const
 }

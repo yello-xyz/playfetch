@@ -7,7 +7,6 @@ import PickNameDialog from '../pickNameDialog'
 import MovePromptDialog from '../prompts/movePromptDialog'
 import { useLoggedInUser } from '@/src/client/context/userContext'
 import { SharedProjectsWorkspace } from '@/pages'
-import { useRefreshProject } from '@/src/client/context/projectContext'
 import useProjectItemActions from '@/src/client/hooks/useProjectItemActions'
 
 export default function ProjectItemPopupMenu({
@@ -34,8 +33,7 @@ export default function ProjectItemPopupMenu({
   const isTable = !IsProjectItem(item)
   const isChain = !isTable && ProjectItemIsChain(item)
   const isPrompt = !isTable && !isChain
-  const refreshProject = useRefreshProject()
-  const [renameItem, duplicateItem, deleteItem] = useProjectItemActions(onDelete)
+  const [renameItem, duplicateItem, deleteItem, copyItemToProject] = useProjectItemActions(onDelete)
 
   const withDismiss = (callback: () => void) => () => {
     setMenuExpanded(false)
@@ -97,7 +95,7 @@ export default function ProjectItemPopupMenu({
         <MovePromptDialog
           item={item}
           workspaces={allWorkspaces}
-          onConfirm={projectID => api.duplicatePrompt(item.id, projectID).then(refreshProject)}
+          onConfirm={projectID => copyItemToProject(item, projectID)}
           onDismiss={() => setShowMovePromptDialog(false)}
         />
       )}
