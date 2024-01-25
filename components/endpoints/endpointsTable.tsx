@@ -1,12 +1,4 @@
-import {
-  Chain,
-  ProjectItemIsChain,
-  ItemsInProject,
-  FindItemInProject,
-  Prompt,
-  ResolvedEndpoint,
-  Analytics,
-} from '@/types'
+import { Chain, ProjectItemIsChain, Prompt, ResolvedEndpoint, Analytics } from '@/types'
 import { ReactNode } from 'react'
 import Checkbox from '../checkbox'
 import addIcon from '@/public/add.svg'
@@ -17,11 +9,13 @@ import Icon from '../icon'
 import TableCell, { TableHeader } from '../tableCell'
 
 import dynamic from 'next/dynamic'
-import { useActiveProject } from '@/src/client/context/projectContext'
 import { TopBarButton } from '../topBarButton'
 const AnalyticsDashboards = dynamic(() => import('./analyticsDashboards'), { ssr: false })
 
 export default function EndpointsTable({
+  endpoints,
+  parents,
+  findParent,
   tabSelector,
   activeEndpoint,
   setActiveEndpoint,
@@ -29,6 +23,9 @@ export default function EndpointsTable({
   analytics,
   refreshAnalytics,
 }: {
+  endpoints: ResolvedEndpoint[]
+  parents: (Chain | Prompt)[]
+  findParent: (id: number) => Chain | Prompt
   tabSelector: (children?: ReactNode) => ReactNode
   activeEndpoint?: ResolvedEndpoint
   setActiveEndpoint: (endpoint: ResolvedEndpoint) => void
@@ -36,9 +33,8 @@ export default function EndpointsTable({
   analytics?: Analytics
   refreshAnalytics: (dayRange: number) => void
 }) {
-  const activeProject = useActiveProject()
-  const groups = ItemsInProject(activeProject)
-    .map(parent => activeProject.endpoints.filter(endpoint => endpoint.parentID === parent.id))
+  const groups = parents
+    .map(parent => endpoints.filter(endpoint => endpoint.parentID === parent.id))
     .filter(group => group.length > 0)
   const groupsLength = groups.length
   const baseClass = 'flex flex-col w-full h-full min-h-0 gap-2 px-4 pt-4 overflow-y-auto text-gray-500'
@@ -63,7 +59,7 @@ export default function EndpointsTable({
           groups.map((group, index) => (
             <EndpointsGroup
               key={index}
-              parent={FindItemInProject(group[0].parentID, activeProject)}
+              parent={findParent(group[0].parentID)}
               endpoints={group}
               activeEndpoint={activeEndpoint}
               setActiveEndpoint={setActiveEndpoint}
