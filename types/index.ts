@@ -159,6 +159,7 @@ export const IsModelProvider = (provider: AvailableProvider): provider is Availa
 export type QueryProvider = 'pinecone'
 export type SourceControlProvider = 'github'
 export type IssueTrackerProvider = 'linear'
+export type SupportedProvider = ModelProvider | QueryProvider | SourceControlProvider | IssueTrackerProvider
 
 type Version = {
   id: number

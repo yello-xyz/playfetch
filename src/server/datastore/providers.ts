@@ -6,10 +6,8 @@ import {
   AvailableProvider,
   CustomModel,
   DefaultLanguageModel,
-  IssueTrackerProvider,
   ModelProvider,
-  QueryProvider,
-  SourceControlProvider,
+  SupportedProvider,
 } from '@/types'
 import { ExtraModelsForProvider } from '../providers/integration'
 import { IssueTrackerProviders, ModelProviders, SourceControlProviders } from '@/src/common/providerMetadata'
@@ -22,8 +20,6 @@ const getFilteredProviderData = (filter: EntityFilter, scopeIDs: number[]) =>
 
 const buildScopeFilter = (scopeIDs: number[]) => new PropertyFilter('scopeID', 'IN', scopeIDs)
 const getMultipleProviderData = (scopeIDs: number[]) => getFilteredProviderData(buildScopeFilter(scopeIDs), scopeIDs)
-
-type SupportedProvider = ModelProvider | QueryProvider | SourceControlProvider | IssueTrackerProvider
 
 const getSingleProviderData = (scopeIDs: number[], provider: SupportedProvider) =>
   getFilteredProviderData(and([buildScopeFilter(scopeIDs), buildFilter('provider', provider)]), scopeIDs).then(

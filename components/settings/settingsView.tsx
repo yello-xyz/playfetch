@@ -205,7 +205,12 @@ export default function SettingsView({
             />
           )}
           {activePane === IssueTrackerPane && (
-            <LinearSettings scope={scope} provider={providers.find(provider => provider.provider === 'linear')} />
+            <LinearSettings
+              scope={scope}
+              scopeID={scopeID}
+              provider={providers.find(provider => provider.provider === 'linear')}
+              onRefresh={refresh}
+            />
           )}
         </SettingsPane>
       </div>

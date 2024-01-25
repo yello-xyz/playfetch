@@ -1,13 +1,6 @@
 import Label from '../label'
 import { IconForProvider, LabelForProvider } from '@/src/common/providerMetadata'
-import {
-  AvailableProvider,
-  IsModelProvider,
-  ModelProvider,
-  QueryProvider,
-  SourceControlProvider,
-  IssueTrackerProvider,
-} from '@/types'
+import { AvailableProvider, IsModelProvider, ModelProvider, QueryProvider, SupportedProvider } from '@/types'
 import { ReactNode, useState } from 'react'
 import api from '@/src/client/api'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
@@ -151,7 +144,7 @@ export function ProviderRow({
   flexLayout = 'justify-between',
   children,
 }: {
-  provider: ModelProvider | QueryProvider | SourceControlProvider | IssueTrackerProvider
+  provider: SupportedProvider
   flexLayout?: string
   children?: ReactNode
 }) {

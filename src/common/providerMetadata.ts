@@ -12,6 +12,7 @@ import {
   QueryProvider,
   SourceControlProvider,
   IssueTrackerProvider,
+  SupportedProvider,
 } from '@/types'
 import openaiIcon from '@/public/openai.svg'
 import anthropicIcon from '@/public/anthropic.svg'
@@ -41,9 +42,7 @@ export const PublicLanguageModels: DefaultLanguageModel[] = [
 ]
 export const GatedLanguageModels: DefaultLanguageModel[] = [] // used to contain 'gpt-4-32k'
 
-export const IconForProvider = (
-  provider: ModelProvider | QueryProvider | SourceControlProvider | IssueTrackerProvider
-) => {
+export const IconForProvider = (provider: SupportedProvider) => {
   switch (provider) {
     case 'openai':
       return openaiIcon
@@ -62,9 +61,7 @@ export const IconForProvider = (
   }
 }
 
-export const LabelForProvider = (
-  provider: ModelProvider | QueryProvider | SourceControlProvider | IssueTrackerProvider
-) => {
+export const LabelForProvider = (provider: SupportedProvider) => {
   switch (provider) {
     case 'openai':
       return 'OpenAI'
@@ -116,10 +113,8 @@ const customModelFromProviders = (model: LanguageModel, providers: AvailableMode
   return providers.flatMap(provider => provider.customModels).find(m => m.id === model) ?? null
 }
 
-export const IsProviderAvailable = (
-  provider: ModelProvider | QueryProvider | SourceControlProvider | IssueTrackerProvider,
-  providers: AvailableProvider[]
-): boolean => !!providers.find(p => p.provider === provider)
+export const IsProviderAvailable = (provider: SupportedProvider, providers: AvailableProvider[]): boolean =>
+  !!providers.find(p => p.provider === provider)
 
 export const IsModelDisabled = (model: LanguageModel, providers: AvailableModelProvider[]): boolean => {
   const customModel = customModelFromProviders(model, providers)

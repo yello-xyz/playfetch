@@ -13,15 +13,14 @@ import {
   Prompts,
   Analytics,
   AvailableProvider,
-  QueryProvider,
   PendingWorkspace,
   PendingProject,
   OnboardingResponse,
   RunRating,
   CostUsage,
   Run,
-  SourceControlProvider,
   ActiveTable,
+  SupportedProvider,
 } from '@/types'
 import ClientRoute from '../common/clientRoute'
 import { BuildActiveChain, BuildActivePrompt, BuildActiveTable } from '../common/activeItem'
@@ -340,7 +339,7 @@ const api = {
   },
   updateProviderKey: function (
     scopeID: number,
-    provider: ModelProvider | QueryProvider | SourceControlProvider,
+    provider: SupportedProvider,
     apiKey: string | null,
     environment?: string
   ) {
