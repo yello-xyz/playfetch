@@ -17,6 +17,7 @@ import RunTimeline from '../runs/runTimeline'
 import PromptPanel from '../prompts/promptPanel'
 import { IsEndpoint } from '@/src/common/activeItem'
 import { ExtractInputKey } from '@/src/common/formatting'
+import { useState } from 'react'
 
 export default function ComparePane({
   project,
@@ -74,6 +75,12 @@ export default function ComparePane({
     reason: null,
   }))
 
+  const [pendingID, setPendingID] = useState<number>()
+  const selectItemID = (itemID: number) => {
+    setPendingID(itemID)
+    setItemID(itemID)
+  }
+
   return (
     <div className='flex flex-col w-1/2 h-full grow'>
       <div className='flex items-center gap-1 p-2.5 border-b border-gray-200 bg-white'>
@@ -81,8 +88,8 @@ export default function ComparePane({
           className='w-full max-w-[240px]'
           project={project}
           items={comparableItems}
-          selectedItemID={activeItem?.id}
-          onSelectItemID={setItemID}
+          selectedItemID={activeItem?.id ?? pendingID}
+          onSelectItemID={selectItemID}
           disabled={disabled}
         />
         {!IsEndpoint(activeItem) && (
