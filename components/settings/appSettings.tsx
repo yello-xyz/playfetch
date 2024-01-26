@@ -59,9 +59,9 @@ export default function AppSettings({
           provider={provider}
           flexLayout={(scopedProvider && activeProject) || isUpdating ? 'flex-col' : 'justify-between'}>
           {activeProject ? (
-            <div className='flex items-center gap-2.5'>
+            <div className='flex gap-2.5'>
               {projectConfiguration(isProviderAvailable, isUpdating, isProcessing)}
-              <div className='flex gap-2.5 justify-end grow cursor-pointer'>
+              <div className='flex justify-end cursor-pointer grow'>
                 {isUpdating ? (
                   <Button type='primary' disabled={isProcessing} onClick={() => updateEnvironment(getEnvironment())}>
                     Confirm

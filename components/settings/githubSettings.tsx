@@ -84,7 +84,7 @@ export default function GitHubSettings({
           </Link>
         )}
         projectConfiguration={(isConfigured, isUpdating, isProcessing) => (
-          <>
+          <div className='flex items-center gap-2.5'>
             {isConfigured && <TextInput disabled value={scopedPath} />}
             {isUpdating && (
               <>
@@ -104,7 +104,7 @@ export default function GitHubSettings({
                 />
               </>
             )}
-          </>
+          </div>
         )}
       />
       {activeProject && scopedProvider && (

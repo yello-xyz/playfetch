@@ -4,8 +4,8 @@ import { useRouter } from 'next/router'
 import { useIssueTrackerProvider } from '@/src/client/context/providerContext'
 import { ActiveProject, AvailableIssueTrackerProvider, AvailableProvider } from '@/types'
 import AppSettings from './appSettings'
-import { useState } from 'react'
-import { DefaultLabels, NeedsUpdatesLabel } from '@/src/common/defaults'
+import { ReactNode, useState } from 'react'
+import { NeedsUpdatesLabel } from '@/src/common/defaults'
 import { ItemLabels } from '../versions/versionLabels'
 import LabelPopupMenu, { AvailableLabelColorsForItem } from '../labelPopupMenu'
 
@@ -24,14 +24,18 @@ export default function LinearSettings({
   const availableProvider = useIssueTrackerProvider()
 
   const scopedProvider = provider as AvailableIssueTrackerProvider | undefined
-  const scopedLabels: [[string[], string[]]] = scopedProvider?.environment
+  const scopedLabels: [string[], string[]][] = scopedProvider?.environment
     ? JSON.parse(scopedProvider.environment)
-    : [[DefaultLabels, [NeedsUpdatesLabel]]]
+    : [[[NeedsUpdatesLabel], [NeedsUpdatesLabel]]]
 
   const availableLabels = activeProject ? activeProject.availableLabels : []
   const labelColors = activeProject ? AvailableLabelColorsForItem(activeProject) : {}
 
   const [labels, setLabels] = useState(scopedLabels)
+  const toggle = (labels: string[], label: string) =>
+    labels.includes(label) ? labels.filter(l => l !== label) : [...labels, label]
+
+  const gridConfig = 'w-full grid grid-cols-[180px_minmax(120px,1fr)_24px] items-start gap-1'
 
   return (
     <AppSettings
@@ -58,22 +62,32 @@ export default function LinearSettings({
             ))}
           {isUpdating &&
             labels.map(([triggers, toggles], index) => (
-              <div className='grid items-start gap-y-1 grid-cols-[180px_minmax(120px,1fr)_40px]' key={index}>
-                Create task on adding label:
-                <ItemLabels labels={triggers} colors={labelColors} />
+              <div
+                className={`px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg ${gridConfig}`}
+                key={index}>
+                <GridCell className='font-medium'>Create task on adding label:</GridCell>
+                <GridCell>
+                  <ItemLabels labels={triggers} colors={labelColors} />
+                </GridCell>
                 <LabelPopupMenu
                   activeLabels={triggers}
                   availableLabels={availableLabels}
                   labelColors={labelColors}
-                  toggleLabel={() => {}}
+                  toggleLabel={l =>
+                    setLabels(labels.map(([t, _], i) => (i === index ? [toggle(t, l), toggles] : [t, toggles])))
+                  }
                 />
-                Toggle labels on closing task:
-                <ItemLabels labels={toggles} colors={labelColors} />
+                <GridCell className='font-medium'>Toggle labels on closing task:</GridCell>
+                <GridCell>
+                  <ItemLabels labels={toggles} colors={labelColors} />
+                </GridCell>
                 <LabelPopupMenu
                   activeLabels={toggles}
                   availableLabels={availableLabels}
                   labelColors={labelColors}
-                  toggleLabel={() => {}}
+                  toggleLabel={l =>
+                    setLabels(labels.map(([_, t], i) => (i === index ? [triggers, toggle(t, l)] : [triggers, t])))
+                  }
                 />
               </div>
             ))}
@@ -82,3 +96,7 @@ export default function LinearSettings({
     />
   )
 }
+
+const GridCell = ({ className = '', children }: { className?: string; children: ReactNode }) => (
+  <div className={`${className} flex items-center min-h-[24px]`}>{children}</div>
+)
