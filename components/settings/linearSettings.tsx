@@ -105,11 +105,11 @@ const LabelConfigurationPanes = ({
   return (
     <>
       {labels.map(([triggers, toggles], index) => (
-        <div className='flex items-center gap-2'>
+        <div key={index} className='flex items-center gap-2'>
           {isUpdating && (
             <IconButton icon={cancelIcon} onClick={() => setLabels(labels.filter((_, i) => i !== index))} />
           )}
-          <div className={`px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg ${gridConfig}`} key={index}>
+          <div className={`px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg ${gridConfig}`}>
             <GridCell className='font-medium'>Create task on adding label:</GridCell>
             <GridCell>
               <ItemLabels labels={triggers} colors={labelColors} />
