@@ -1,7 +1,7 @@
 import { DefaultProvider } from '@/src/common/defaults'
 import { ModelProviders, QueryProviders } from '@/src/common/providerMetadata'
 import ProviderSettings from './providerSettings'
-import { AvailableProvider, CostUsage, IsModelProvider } from '@/types'
+import { ActiveProject, AvailableProvider, CostUsage, IsModelProvider } from '@/types'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import SettingsPane from './settingsPane'
 import api from '@/src/client/api'
@@ -10,7 +10,6 @@ import { useLoggedInUser } from '@/src/client/context/userContext'
 import SettingsSidebar from './settingsSidebar'
 import TeamSettings from './teamSettings'
 import { Capitalize } from '@/src/common/formatting'
-import { useActiveProject } from '@/src/client/context/projectContext'
 import { ParseActiveSettingsTabQuery, ProjectSettingsRoute, UserSettingsRoute } from '@/src/common/clientRoute'
 import { useRouter } from 'next/router'
 import GitHubSettings from './githubSettings'
@@ -102,19 +101,17 @@ const scopeDescriptionForPane = (pane: ActivePane, isProjectScope: boolean) => {
 }
 
 export default function SettingsView({
-  scope,
   providers,
+  activeProject,
   refresh,
 }: {
-  scope: 'user' | 'project'
   providers: AvailableProvider[]
+  activeProject?: ActiveProject
   refresh: () => void
 }) {
   const user = useLoggedInUser()
-  const activeProject = useActiveProject()
-  const isProjectScope = scope === 'project'
-  const scopeID = isProjectScope ? activeProject.id : user.id
-  const labelColors = isProjectScope ? AvailableLabelColorsForItem(activeProject) : {}
+  const scopeID = activeProject?.id ?? user.id
+  const labelColors = activeProject ? AvailableLabelColorsForItem(activeProject) : {}
 
   const router = useRouter()
   const activePaneFromQuery = ParseActiveSettingsTabQuery(router.query)
@@ -126,7 +123,7 @@ export default function SettingsView({
 
   const updateActivePane = (pane: ActivePane) => {
     if (pane !== activePane) {
-      router.push(isProjectScope ? ProjectSettingsRoute(scopeID, pane) : UserSettingsRoute(pane), undefined, {
+      router.push(activeProject ? ProjectSettingsRoute(scopeID, pane) : UserSettingsRoute(pane), undefined, {
         shallow: true,
       })
       setActivePane(pane)
@@ -153,13 +150,13 @@ export default function SettingsView({
   const availablePanes = [
     ProvidersPane,
     UsagePane,
-    ...(isProjectScope ? [TeamPane] : []),
+    ...(activeProject ? [TeamPane] : []),
     ConnectorsPane,
     SourceControlPane,
     // IssueTrackerPane,
   ]
 
-  return !isProjectScope || activeProject.isOwner ? (
+  return !activeProject || activeProject.isOwner ? (
     <div className='flex h-full gap-10 p-8 overflow-hidden bg-gray-25'>
       <SettingsSidebar
         panes={availablePanes as ActivePane[]}
@@ -170,8 +167,8 @@ export default function SettingsView({
       <div className='flex flex-col items-start flex-1 gap-3 text-gray-500 max-w-[680px] overflow-y-auto'>
         <SettingsPane
           title={titleForPane(activePane)}
-          description={descriptionForPane(activePane, isProjectScope)}
-          scopeDescription={scopeDescriptionForPane(activePane, isProjectScope)}>
+          description={descriptionForPane(activePane, !!activeProject)}
+          scopeDescription={scopeDescriptionForPane(activePane, !!activeProject)}>
           {activePane === ProvidersPane && (
             <ProviderSettings
               scopeID={scopeID}
@@ -200,7 +197,7 @@ export default function SettingsView({
           )}
           {activePane === SourceControlPane && (
             <GitHubSettings
-              scope={scope}
+              activeProject={activeProject}
               scopeID={scopeID}
               provider={providers.find(provider => provider.provider === 'github')}
               onRefresh={refresh}
@@ -208,7 +205,7 @@ export default function SettingsView({
           )}
           {activePane === IssueTrackerPane && (
             <LinearSettings
-              scope={scope}
+              activeProject={activeProject}
               scopeID={scopeID}
               provider={providers.find(provider => provider.provider === 'linear')}
               labelColors={labelColors}

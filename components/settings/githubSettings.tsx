@@ -1,4 +1,4 @@
-import { AvailableProvider, AvailableSourceControlProvider } from '@/types'
+import { ActiveProject, AvailableProvider, AvailableSourceControlProvider } from '@/types'
 import { useState } from 'react'
 import api from '@/src/client/api'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
@@ -12,12 +12,12 @@ import { useLoggedInUser } from '@/src/client/context/userContext'
 import AppSettings from './appSettings'
 
 export default function GitHubSettings({
-  scope,
+  activeProject,
   scopeID,
   provider,
   onRefresh,
 }: {
-  scope: 'user' | 'project'
+  activeProject?: ActiveProject
   scopeID: number
   provider?: AvailableProvider
   onRefresh: () => void
@@ -36,7 +36,6 @@ export default function GitHubSettings({
   const [rootDirectory, setRootDirectory] = useState(scopedRootDirectory)
 
   const refreshProject = useRefreshProject()
-  const activeProject = useActiveProject()
 
   const [isProcessing, setProcessing] = useState(false)
 
@@ -71,7 +70,7 @@ export default function GitHubSettings({
     <>
       <AppSettings
         provider='github'
-        scope={scope}
+        activeProject={activeProject}
         scopeID={scopeID}
         scopedProvider={scopedProvider}
         availableProvider={availableProvider}
@@ -108,7 +107,7 @@ export default function GitHubSettings({
           </>
         )}
       />
-      {scope === 'project' && scopedProvider && (
+      {activeProject && scopedProvider && (
         <div className='flex items-center gap-2'>
           <Button type='outline' disabled={isProcessing} onClick={importPrompts}>
             Import Prompts

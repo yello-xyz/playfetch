@@ -1,4 +1,4 @@
-import { AvailableProvider, IssueTrackerProvider, SourceControlProvider } from '@/types'
+import { ActiveProject, AvailableProvider, IssueTrackerProvider, SourceControlProvider } from '@/types'
 import { ReactNode, useState } from 'react'
 import api from '@/src/client/api'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
@@ -10,7 +10,7 @@ import { LabelForProvider } from '@/src/common/providerMetadata'
 
 export default function AppSettings({
   provider,
-  scope,
+  activeProject,
   scopeID,
   scopedProvider,
   availableProvider,
@@ -20,7 +20,7 @@ export default function AppSettings({
   projectConfiguration,
 }: {
   provider: SourceControlProvider | IssueTrackerProvider
-  scope: 'user' | 'project'
+  activeProject?: ActiveProject
   scopeID: number
   scopedProvider?: AvailableProvider
   availableProvider?: AvailableProvider
@@ -51,15 +51,14 @@ export default function AppSettings({
   }
 
   const isProviderAvailable = !!scopedProvider && !isUpdating
-  const isProjectScope = scope === 'project'
 
   return (
     <>
-      {!isProjectScope || availableProvider ? (
+      {!activeProject || availableProvider ? (
         <ProviderRow
           provider={provider}
-          flexLayout={(scopedProvider && isProjectScope) || isUpdating ? 'flex-col' : 'justify-between'}>
-          {isProjectScope ? (
+          flexLayout={(scopedProvider && activeProject) || isUpdating ? 'flex-col' : 'justify-between'}>
+          {activeProject ? (
             <div className='flex items-center gap-2.5'>
               {projectConfiguration(isProviderAvailable, isUpdating, isProcessing)}
               <div className='flex gap-2.5 justify-end grow cursor-pointer'>

@@ -283,6 +283,7 @@ export default function Home({
                         <Suspense>
                           <MainProjectPane
                             {...{
+                              activeProject,
                               activeItem,
                               activePrompt,
                               activeChain,

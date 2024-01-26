@@ -2,20 +2,20 @@ import api from '@/src/client/api'
 import Button from '../button'
 import { useRouter } from 'next/router'
 import { useIssueTrackerProvider } from '@/src/client/context/providerContext'
-import { AvailableIssueTrackerProvider, AvailableProvider } from '@/types'
+import { ActiveProject, AvailableIssueTrackerProvider, AvailableProvider } from '@/types'
 import AppSettings from './appSettings'
 import { useState } from 'react'
 import { DefaultLabels, NeedsUpdatesLabel } from '@/src/common/defaults'
 import { ItemLabels } from '../versions/versionLabels'
 
 export default function LinearSettings({
-  scope,
+  activeProject,
   scopeID,
   provider,
   labelColors,
   onRefresh,
 }: {
-  scope: 'user' | 'project'
+  activeProject?: ActiveProject
   scopeID: number
   provider?: AvailableProvider
   labelColors: Record<string, string>
@@ -34,7 +34,7 @@ export default function LinearSettings({
   return (
     <AppSettings
       provider='linear'
-      scope={scope}
+      activeProject={activeProject}
       scopeID={scopeID}
       scopedProvider={scopedProvider}
       availableProvider={availableProvider}

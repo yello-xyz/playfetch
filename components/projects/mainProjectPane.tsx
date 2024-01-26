@@ -22,6 +22,7 @@ import { OnSavedChain } from '@/src/client/hooks/useSaveChain'
 import TestDataView from '../testData/testDataView'
 
 export default function MainProjectPane({
+  activeProject,
   activeItem,
   activePrompt,
   activeChain,
@@ -43,6 +44,7 @@ export default function MainProjectPane({
   selectComment,
   setRefreshCompareItems,
 }: {
+  activeProject: ActiveProject
   activeItem: ActiveItem | undefined
   activePrompt: ActivePrompt | undefined
   activeChain: ActiveChain | undefined
@@ -93,7 +95,7 @@ export default function MainProjectPane({
         )}
         {activeItem === EndpointsItem && <EndpointsView analytics={analytics} refreshAnalytics={refreshAnalytics} />}
         {activeItem === SettingsItem && (
-          <SettingsView scope='project' providers={scopedProviders} refresh={refreshProviders} />
+          <SettingsView activeProject={activeProject} providers={scopedProviders} refresh={refreshProviders} />
         )}
         {!activeItem && <EmptyProjectView onAddPrompt={addPrompt} />}
       </Allotment.Pane>
