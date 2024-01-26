@@ -1,3 +1,5 @@
+import { getTaskForIdentifier } from '@/src/server/datastore/tasks'
+import { toggleVersionLabels } from '@/src/server/datastore/versions'
 import { withErrorRoute } from '@/src/server/session'
 import { LINEAR_WEBHOOK_SIGNATURE_HEADER, LINEAR_WEBHOOK_TS_FIELD, LinearWebhooks } from '@linear/sdk'
 import type { NextApiRequest, NextApiResponse } from 'next'
@@ -14,17 +16,23 @@ const parsePayload: (req: NextApiRequest) => Promise<Buffer> = (req: NextApiRequ
 const webhook = new LinearWebhooks(process.env.LINEAR_APP_WEBHOOK_SECRET ?? '')
 
 async function linear(req: NextApiRequest, res: NextApiResponse) {
-  console.log('headers', req.headers)
-  console.log('query', req.query)
-  console.log('body', req.body)
   const signature = req.headers[LINEAR_WEBHOOK_SIGNATURE_HEADER] as string | undefined
   if (signature) {
-    console.log('parsing...')
     const buffer = await parsePayload(req)
-    console.log('buffer', buffer.toString())
-    console.log('buffer parsed', JSON.parse(buffer.toString()))
-    if (webhook.verify(buffer, signature, JSON.parse(buffer.toString())[LINEAR_WEBHOOK_TS_FIELD])) {
-      console.log('verified')
+    const body = JSON.parse(buffer.toString())
+    if (
+      body.type === 'Issue' &&
+      body.data &&
+      body.data.completedAt !== null &&
+      body.updatedFrom?.completedAt === null &&
+      body.data.state?.type === 'completed' &&
+      webhook.verify(buffer, signature, body[LINEAR_WEBHOOK_TS_FIELD])
+    ) {
+      const task = await getTaskForIdentifier(body.data.id)
+      if (task) {
+        const { versionID, userID, projectID, labels } = task
+        toggleVersionLabels(userID, projectID, versionID, labels)
+      }
     }
   }
   res.status(200).json({})

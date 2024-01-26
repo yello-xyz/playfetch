@@ -10,6 +10,7 @@ export async function migrateTasks(postMerge: boolean) {
     await getDatastore().save(
       toTaskData(
         taskData.userID,
+        taskData.projectID,
         taskData.versionID,
         taskData.identifier,
         taskData.createdAt,
@@ -20,25 +21,27 @@ export async function migrateTasks(postMerge: boolean) {
   }
 }
 
-export async function getTask(
+export async function getTaskForIdentifier(
   identifier: string
-): Promise<{ versionID: number; userID: number; labels: string[] } | null> {
+): Promise<{ userID: number; projectID: number; versionID: number; labels: string[] } | null> {
   const taskData = await getEntity(Entity.TASK, 'identifier', identifier)
 
   return taskData
     ? {
         userID: taskData.userID,
+        projectID: taskData.projectID,
         versionID: taskData.versionID,
         labels: JSON.parse(taskData.labels),
       }
     : null
 }
 
-export const saveTask = (userID: number, versionID: number, identifier: string, labels: string[]) =>
-  getDatastore().save(toTaskData(userID, versionID, identifier, new Date(), labels))
+export const saveTask = (userID: number, projectID: number, versionID: number, identifier: string, labels: string[]) =>
+  getDatastore().save(toTaskData(userID, projectID, versionID, identifier, new Date(), labels))
 
 const toTaskData = (
   userID: number,
+  projectID: number,
   versionID: number,
   identifier: string,
   createdAt: Date,
@@ -46,6 +49,6 @@ const toTaskData = (
   taskID?: number
 ) => ({
   key: buildKey(Entity.TASK, taskID),
-  data: { userID, versionID, identifier, createdAt, labels: JSON.stringify(labels) },
+  data: { userID, projectID, versionID, identifier, createdAt, labels: JSON.stringify(labels) },
   excludeFromIndexes: ['labels'],
 })

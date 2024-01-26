@@ -286,6 +286,19 @@ export async function updateVersionLabel(
   }
 }
 
+export async function toggleVersionLabels(
+  userID: number,
+  versionID: number,
+  projectID: number,
+  labelsToToggle: string[]
+) {
+  const versionData = await getVerifiedUserVersionData(userID, versionID)
+  let labels = JSON.parse(versionData.labels) as string[]
+  for (const label of labelsToToggle) {
+    await updateVersionLabel(userID, versionID, projectID, label, !labels.includes(label))
+  }
+}
+
 const filterOutEmptyOptionalPrompts = (prompts: Prompts) =>
   Object.fromEntries(Object.entries(prompts).filter(([key, value]) => key === 'main' || value?.trim()?.length))
 
