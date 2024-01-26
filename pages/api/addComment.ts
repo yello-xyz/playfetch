@@ -1,6 +1,7 @@
 import logUserRequest, { CreateEvent } from '@/src/server/analytics'
 import { getTrustedChain } from '@/src/server/datastore/chains'
 import { saveComment } from '@/src/server/datastore/comments'
+import { ensureProjectAccess } from '@/src/server/datastore/projects'
 import { getTrustedPrompt } from '@/src/server/datastore/prompts'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 import { withLoggedInUserRoute } from '@/src/server/session'
@@ -15,6 +16,7 @@ async function addComment(req: NextApiRequest, res: NextApiResponse<Comment>, us
   const projectID = parent.projectID
   logUserRequest(req, res, user.id, CreateEvent('comment', parentID))
 
+  await ensureProjectAccess(user.id, projectID)
   const comment = await saveComment(
     user.id,
     projectID,

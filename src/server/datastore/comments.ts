@@ -1,6 +1,5 @@
 import { Comment, CommentAction } from '@/types'
 import { Entity, buildKey, getDatastore, getID, getRecentEntities, getTimestamp } from './datastore'
-import { ensureProjectAccess } from './projects'
 
 export async function migrateComments(postMerge: boolean) {
   if (postMerge) {
@@ -42,7 +41,6 @@ export async function saveComment(
   itemIndex?: number,
   startIndex?: number
 ) {
-  await ensureProjectAccess(userID, projectID)
   const commentData = toCommentData(
     userID,
     projectID,
