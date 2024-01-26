@@ -2,6 +2,8 @@ import { withErrorRoute } from '@/src/server/session'
 import { LINEAR_WEBHOOK_SIGNATURE_HEADER, LINEAR_WEBHOOK_TS_FIELD, LinearWebhooks } from '@linear/sdk'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
+export const config = { api: { bodyParser: false } }
+
 const parsePayload: (req: NextApiRequest) => Promise<Buffer> = (req: NextApiRequest) =>
   new Promise(resolve => {
     let data = ''
@@ -17,11 +19,13 @@ async function linear(req: NextApiRequest, res: NextApiResponse) {
   console.log('body', req.body)
   const signature = req.headers[LINEAR_WEBHOOK_SIGNATURE_HEADER] as string | undefined
   if (signature) {
-    // console.log('buffer', buffer.toString())
-    // console.log('buffer parsed', JSON.parse(buffer.toString()))
-    // if (webhook.verify(buffer, signature, JSON.parse(buffer.toString())[LINEAR_WEBHOOK_TS_FIELD])) {
-    //   console.log('verified')
-    // }
+    console.log('parsing...')
+    const buffer = await parsePayload(req)
+    console.log('buffer', buffer.toString())
+    console.log('buffer parsed', JSON.parse(buffer.toString()))
+    if (webhook.verify(buffer, signature, JSON.parse(buffer.toString())[LINEAR_WEBHOOK_TS_FIELD])) {
+      console.log('verified')
+    }
   }
   res.status(200).json({})
 }
