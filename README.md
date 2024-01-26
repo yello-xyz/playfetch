@@ -79,7 +79,9 @@ In order to run the app locally, you will need to add some additional variables 
 
 `LINEAR_APP_CLIENT_ID=` *[Copy this from https://linear.app/playfetch-dev/settings/api]*
 
-`LINEAR_APP_CLIENT_SECRET=` *[Generate a new secret at https://linear.app/playfetch-dev/settings/api]*
+`LINEAR_APP_CLIENT_SECRET=` *[Copy this from https://linear.app/playfetch-dev/settings/api]*
+
+`LINEAR_APP_WEBHOOK_SECRET=` *[Copy this from https://linear.app/playfetch-dev/settings/api]*
 
 - **To use Email authentication:**
 
