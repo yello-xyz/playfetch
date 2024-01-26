@@ -33,61 +33,79 @@ export function ItemLabelPopupMenu({
   activeItem: ActivePrompt | ActiveChain
   selectedCell?: boolean
 }) {
-  return <LabelPopupMenu {...{ item, activeItem, selectedCell }} />
-}
+  const activeLabels = item.labels
+  const availableLables = activeItem.availableLabels
+  const labelColors = AvailableLabelColorsForItem(activeItem)
 
-export default function LabelPopupMenu({
-  item,
-  activeItem,
-  selectedCell = false,
-}: {
-  item: PromptVersion | ChainVersion | Run
-  activeItem: ActivePrompt | ActiveChain
-  selectedCell?: boolean
-}) {
   const refreshProject = useRefreshProject()
   const refreshActiveItem = useRefreshActiveItem()
   const refresh = () => refreshActiveItem().then(refreshProject)
 
-  const loadPopup = (): [typeof LabelsPopup, LabelsPopupProps] => [LabelsPopup, { item, activeItem, refresh }]
+  const isVersion = (versionOrRun: typeof item): versionOrRun is PromptVersion | ChainVersion => 'runs' in versionOrRun
+
+  const itemComments = isVersion(item)
+    ? item.comments
+    : activeItem.versions.flatMap(version => version.comments).filter(comment => comment.runID === item.id)
+
+  const toggleLabel = (label: string) => {
+    const checked = !item.labels.includes(label)
+    const replyTo = itemComments.findLast(
+      comment => comment.text === label && comment.action === (checked ? 'removeLabel' : 'addLabel')
+    )?.id
+    if (isVersion(item)) {
+      api.toggleVersionLabel(item.id, activeItem.projectID, label, checked, replyTo).then(refresh)
+    } else {
+      api.toggleRunLabel(item.id, activeItem.projectID, label, checked, replyTo).then(refresh)
+    }
+  }
+
+  return <LabelPopupMenu {...{ activeLabels, availableLables, labelColors, toggleLabel, selectedCell }} />
+}
+
+export default function LabelPopupMenu({
+  activeLabels,
+  availableLables,
+  labelColors,
+  toggleLabel,
+  selectedCell = false,
+}: {
+  activeLabels: string[]
+  availableLables: string[]
+  labelColors: Record<string, string>
+  toggleLabel: (label: string) => void
+  selectedCell?: boolean
+}) {
+  const loadPopup = (): [typeof LabelsPopup, LabelsPopupProps] => [
+    LabelsPopup,
+    { activeLabels, availableLables, labelColors, toggleLabel },
+  ]
 
   return <GlobalPopupMenu icon={labelIcon} loadPopup={loadPopup} selectedCell={selectedCell} />
 }
 
 export type LabelsPopupProps = {
-  item: PromptVersion | ChainVersion | Run
-  activeItem: ActivePrompt | ActiveChain
-  refresh: () => void
+  activeLabels: string[]
+  availableLables: string[]
+  labelColors: Record<string, string>
+  toggleLabel: (label: string) => void
 }
 
-const IsVersion = (item: LabelsPopupProps['item']): item is PromptVersion | ChainVersion => 'runs' in item
-
-function LabelsPopup({ item, activeItem, refresh, withDismiss }: LabelsPopupProps & WithDismiss) {
+function LabelsPopup({
+  activeLabels,
+  availableLables,
+  labelColors,
+  toggleLabel,
+  withDismiss,
+}: LabelsPopupProps & WithDismiss) {
   const [newLabel, setNewLabel] = useState('')
 
   const trimmedLabel = newLabel.trim()
 
-  const labels = activeItem.availableLabels
+  const addingNewLabel = trimmedLabel.length > 0 && !availableLables.includes(trimmedLabel)
 
-  const colors = AvailableLabelColorsForItem(activeItem)
-
-  const addingNewLabel = trimmedLabel.length > 0 && !labels.includes(trimmedLabel)
-
-  const itemComments = IsVersion(item)
-    ? item.comments
-    : activeItem.versions.flatMap(version => version.comments).filter(comment => comment.runID === item.id)
-
-  const toggleLabel = (label: string) => {
+  const toggle = (label: string) => {
     setNewLabel('')
-    const checked = !item.labels.includes(label)
-    const replyTo = itemComments.findLast(
-      comment => comment.text === label && comment.action === (checked ? 'removeLabel' : 'addLabel')
-    )?.id
-    if (IsVersion(item)) {
-      api.toggleVersionLabel(item.id, activeItem.projectID, label, checked, replyTo).then(refresh)
-    } else {
-      api.toggleRunLabel(item.id, activeItem.projectID, label, checked, replyTo).then(refresh)
-    }
+    toggleLabel(label)
   }
 
   return (
@@ -107,14 +125,14 @@ function LabelsPopup({ item, activeItem, refresh, withDismiss }: LabelsPopupProp
           Create new label <span className='font-medium'>“{trimmedLabel}”</span>
         </div>
       ) : (
-        labels.map((label, index) => (
+        availableLables.map((label, index) => (
           <div
             className='flex items-center gap-1 px-2 py-1 cursor-pointer'
             key={index}
-            onClick={withDismiss(() => toggleLabel(label))}>
-            <div className={`w-2.5 h-2.5 m-2.5 rounded-full ${colors[label]}`} />
+            onClick={withDismiss(() => toggle(label))}>
+            <div className={`w-2.5 h-2.5 m-2.5 rounded-full ${labelColors[label]}`} />
             <div className='flex-1'>{label}</div>
-            {item.labels.includes(label) && <Icon icon={checkIcon} />}
+            {activeLabels.includes(label) && <Icon icon={checkIcon} />}
           </div>
         ))
       )}
