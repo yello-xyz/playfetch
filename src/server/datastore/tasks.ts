@@ -7,24 +7,19 @@ export async function migrateTasks(postMerge: boolean) {
   const datastore = getDatastore()
   const [allTasks] = await datastore.runQuery(datastore.createQuery(Entity.TASK))
   for (const taskData of allTasks) {
-    await getDatastore().save(
-      toTaskData(
-        taskData.userID,
-        taskData.projectID,
-        taskData.versionID,
-        taskData.identifier,
-        taskData.createdAt,
-        JSON.parse(taskData.labels),
-        getID(taskData)
-      )
-    )
+    await updateTask({ ...taskData })
   }
 }
 
 export async function getTaskForIdentifier(
-  identifier: string
+  identifier: string,
+  markAsComplete = false
 ): Promise<{ userID: number; projectID: number; versionID: number; labels: string[] } | null> {
   const taskData = await getEntity(Entity.TASK, 'identifier', identifier)
+
+  if (markAsComplete && taskData) {
+    await updateTask({ ...taskData, completedAt: new Date() })
+  }
 
   return taskData
     ? {
@@ -36,19 +31,40 @@ export async function getTaskForIdentifier(
     : null
 }
 
-export const saveTask = (userID: number, projectID: number, versionID: number, identifier: string, labels: string[]) =>
-  getDatastore().save(toTaskData(userID, projectID, versionID, identifier, new Date(), labels))
+async function updateTask(taskData: any) {
+  await getDatastore().save(
+    toTaskData(
+      taskData.userID,
+      taskData.projectID,
+      taskData.versionID,
+      taskData.identifier,
+      JSON.parse(taskData.labels),
+      taskData.createdAt,
+      taskData.completedAt,
+      getID(taskData)
+    )
+  )
+}
+
+export const saveNewTask = (
+  userID: number,
+  projectID: number,
+  versionID: number,
+  identifier: string,
+  labels: string[]
+) => getDatastore().save(toTaskData(userID, projectID, versionID, identifier, labels, new Date()))
 
 const toTaskData = (
   userID: number,
   projectID: number,
   versionID: number,
   identifier: string,
-  createdAt: Date,
   labels: string[],
+  createdAt: Date,
+  completedAt?: Date,
   taskID?: number
 ) => ({
   key: buildKey(Entity.TASK, taskID),
-  data: { userID, projectID, versionID, identifier, createdAt, labels: JSON.stringify(labels) },
+  data: { userID, projectID, versionID, identifier, createdAt, completedAt, labels: JSON.stringify(labels) },
   excludeFromIndexes: ['labels'],
 })

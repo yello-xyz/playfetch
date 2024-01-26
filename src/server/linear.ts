@@ -4,7 +4,7 @@ import { ChainRoute, PromptRoute } from '../common/clientRoute'
 import { getTrustedPromptOrChainData } from './datastore/chains'
 import buildURLForRoute from './routing'
 import { getUserForID } from './datastore/users'
-import { saveTask } from './datastore/tasks'
+import { saveNewTask } from './datastore/tasks'
 import { IsRawPromptVersion, RawChainVersion, RawPromptVersion } from '@/types'
 
 type Config = [string[], string[]]
@@ -13,7 +13,7 @@ export async function createTasksOnAddingLabel(
   userID: number,
   projectID: number,
   version: RawPromptVersion | RawChainVersion,
-  label: string,
+  label: string
 ) {
   const { environment } = await getProviderCredentials([projectID], 'linear')
   if (environment) {
@@ -40,7 +40,7 @@ export async function createTasksOnAddingLabel(
             })
             const createdIssue = await issue.issue
             if (issue.success && createdIssue?.id) {
-              await saveTask(userID, projectID, version.id, createdIssue.id, toggles)
+              await saveNewTask(userID, projectID, version.id, createdIssue.id, toggles)
             }
           }
         }
