@@ -1,8 +1,7 @@
 import logUserRequest, { CreateEvent } from '@/src/server/analytics'
-import { getTrustedChain } from '@/src/server/datastore/chains'
+import { getVerifiedUserChain } from '@/src/server/datastore/chains'
 import { saveComment } from '@/src/server/datastore/comments'
-import { ensureProjectAccess } from '@/src/server/datastore/projects'
-import { getTrustedPrompt } from '@/src/server/datastore/prompts'
+import { getVerifiedUserPrompt } from '@/src/server/datastore/prompts'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 import { withLoggedInUserRoute } from '@/src/server/session'
 import { Comment, IsRawPromptVersion, User } from '@/types'
@@ -12,11 +11,12 @@ async function addComment(req: NextApiRequest, res: NextApiResponse<Comment>, us
   const versionID = req.body.versionID
   const version = await getTrustedVersion(versionID, true)
   const parentID = version.parentID
-  const parent = IsRawPromptVersion(version) ? await getTrustedPrompt(parentID) : await getTrustedChain(parentID)
+  const parent = IsRawPromptVersion(version)
+    ? await getVerifiedUserPrompt(user.id, parentID)
+    : await getVerifiedUserChain(user.id, parentID)
   const projectID = parent.projectID
   logUserRequest(req, res, user.id, CreateEvent('comment', parentID))
 
-  await ensureProjectAccess(user.id, projectID)
   const comment = await saveComment(
     user.id,
     projectID,

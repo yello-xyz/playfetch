@@ -234,8 +234,6 @@ export async function augmentPromptDataWithNewVersion(
 
 const getPromptData = (promptID: number) => getKeyedEntity(Entity.PROMPT, promptID)
 
-export const getTrustedPrompt = (promptID: number) => getPromptData(promptID).then(toPrompt)
-
 export const updatePromptLastEditedAt = (promptData: any) => updatePrompt({ ...promptData }, true)
 
 export const getTrustedProjectScopedData = async (entities: Entity[], id: number) => {
@@ -256,6 +254,9 @@ export const getVerifiedProjectScopedData = async (userID: number, entities: Ent
 
 export const getVerifiedUserPromptData = async (userID: number, promptID: number) =>
   getVerifiedProjectScopedData(userID, [Entity.PROMPT], promptID)
+
+export const getVerifiedUserPrompt = (userID: number, promptID: number) =>
+  getVerifiedUserPromptData(userID, promptID).then(toPrompt)
 
 export const ensurePromptAccess = (userID: number, promptID: number) => getVerifiedUserPromptData(userID, promptID)
 

@@ -126,6 +126,9 @@ export async function updateChain(chainData: any, updateLastEditedTimestamp: boo
 export const getVerifiedUserChainData = async (userID: number, chainID: number) =>
   getVerifiedProjectScopedData(userID, [Entity.CHAIN], chainID)
 
+export const getVerifiedUserChain = (userID: number, chainID: number) =>
+  getVerifiedUserChainData(userID, chainID).then(toChain)
+
 export const getVerifiedUserPromptOrChainData = async (userID: number, parentID: number) =>
   getVerifiedProjectScopedData(userID, [Entity.PROMPT, Entity.CHAIN], parentID)
 
@@ -151,10 +154,6 @@ export async function augmentChainDataWithNewVersion(
   references[newVersionID] = newItems.flatMap(item => ('promptID' in item ? [item.promptID, item.versionID] : []))
   await updateChain({ ...chainData, references: JSON.stringify(references) }, true)
 }
-
-const getChainData = (chainID: number) => getKeyedEntity(Entity.CHAIN, chainID)
-
-export const getTrustedChain = (chainID: number) => getChainData(chainID).then(toChain)
 
 export async function updateChainOnDeletedVersion(chainData: any, deletedVersionID: number) {
   const references = chainData.references ? JSON.parse(chainData.references) : {}
