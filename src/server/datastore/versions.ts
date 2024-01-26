@@ -29,7 +29,7 @@ import {
   updateChainOnDeletedVersion,
 } from './chains'
 import { getPresetsForUser } from './users'
-import { DefaultPrompts } from '@/src/common/defaultConfig'
+import { DefaultPrompts } from '@/src/common/defaults'
 import { deleteEntity } from './cleanup'
 
 export async function migrateVersions(postMerge: boolean) {

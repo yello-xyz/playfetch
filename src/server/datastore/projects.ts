@@ -36,6 +36,7 @@ import { getAnalyticsForProject } from './analytics'
 import { toComment } from './comments'
 import { deleteEntity } from './cleanup'
 import { toTable } from './tables'
+import { DefaultLabels } from '@/src/common/defaults'
 
 export async function migrateProjects(postMerge: boolean) {
   if (postMerge) {
@@ -138,7 +139,6 @@ export async function getActiveProject(userID: number, projectID: number): Promi
 }
 
 const DefaultProjectName = 'New Project'
-const DefaultLabels = ['Experiment', 'Integration ready', 'QA ready', 'Needs updates', 'Production ready']
 
 export async function addProjectForUser(
   userID: number,

@@ -22,7 +22,7 @@ import { getRecentEndpoints } from './endpoints'
 import { and } from '@google-cloud/datastore'
 import { getRecentProjects, getSharedProjectsForUser } from './projects'
 import { getRecentRuns } from './runs'
-import { DefaultPromptConfig, DefaultLayoutConfig } from '@/src/common/defaultConfig'
+import { DefaultPromptConfig, DefaultLayoutConfig } from '@/src/common/defaults'
 import { ValidatePromptConfig } from '@/src/common/providerMetadata'
 import { LayoutConfig, UserPresets } from '@/src/common/userPresets'
 

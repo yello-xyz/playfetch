@@ -1,4 +1,4 @@
-import { DefaultPromptConfig, DefaultPrompts } from '@/src/common/defaultConfig'
+import { DefaultPromptConfig, DefaultPrompts } from '@/src/common/defaults'
 import { deserializePromptVersion, serializePromptVersion } from '@/src/server/serialize'
 import { PromptConfig, Prompts } from '@/types'
 

@@ -1,4 +1,4 @@
-import { DefaultProvider } from '@/src/common/defaultConfig'
+import { DefaultProvider } from '@/src/common/defaults'
 import { ModelProviders, QueryProviders } from '@/src/common/providerMetadata'
 import ProviderSettings from './providerSettings'
 import { AvailableProvider, CostUsage, IsModelProvider } from '@/types'
