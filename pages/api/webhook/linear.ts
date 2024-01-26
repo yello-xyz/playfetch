@@ -17,12 +17,11 @@ async function linear(req: NextApiRequest, res: NextApiResponse) {
   console.log('body', req.body)
   const signature = req.headers[LINEAR_WEBHOOK_SIGNATURE_HEADER] as string | undefined
   if (signature) {
-    const buffer = await parsePayload(req)
-    console.log('buffer', buffer.toString())
-    console.log('buffer parsed', JSON.parse(buffer.toString()))
-    if (webhook.verify(buffer, signature, JSON.parse(buffer.toString())[LINEAR_WEBHOOK_TS_FIELD])) {
-      console.log('verified')
-    }
+    // console.log('buffer', buffer.toString())
+    // console.log('buffer parsed', JSON.parse(buffer.toString()))
+    // if (webhook.verify(buffer, signature, JSON.parse(buffer.toString())[LINEAR_WEBHOOK_TS_FIELD])) {
+    //   console.log('verified')
+    // }
   }
   res.status(200).json({})
 }
