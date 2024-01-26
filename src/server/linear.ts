@@ -4,23 +4,26 @@ import { ChainRoute, PromptRoute } from '../common/clientRoute'
 import { getTrustedPromptOrChainData } from './datastore/chains'
 import buildURLForRoute from './routing'
 import { getUserForID } from './datastore/users'
+import { saveTask } from './datastore/tasks'
+import { IsRawPromptVersion, RawChainVersion, RawPromptVersion } from '@/types'
 
 type Config = [string[], string[]]
 
 export async function createTasksOnAddingLabel(
   userID: number,
   projectID: number,
-  parentID: number,
+  version: RawPromptVersion | RawChainVersion,
   label: string,
-  isPrompt: boolean
 ) {
   const { environment } = await getProviderCredentials([projectID], 'linear')
   if (environment) {
     const configs = JSON.parse(environment) as Config[]
-    for (const [triggers] of configs) {
+    for (const [triggers, toggles] of configs) {
       if (triggers.includes(label)) {
         const { apiKey: accessToken } = await getProviderCredentials([userID], 'linear')
         if (accessToken) {
+          const parentID = version.parentID
+          const isPrompt = IsRawPromptVersion(version)
           const parentData = await getTrustedPromptOrChainData(parentID)
           const user = await getUserForID(userID)
           const url = buildURLForRoute(isPrompt ? PromptRoute(projectID, parentID) : ChainRoute(projectID, parentID))
@@ -37,7 +40,7 @@ export async function createTasksOnAddingLabel(
             })
             const createdIssue = await issue.issue
             if (issue.success && createdIssue?.id) {
-              console.log(`Created issue for ${parentID}`)
+              await saveTask(userID, version.id, createdIssue.id, toggles)
             }
           }
         }

@@ -281,7 +281,7 @@ export async function updateVersionLabel(
   if (newLabels) {
     await updateVersion({ ...versionData, labels: JSON.stringify(newLabels), didRun: true })
     if (checked) {
-      createTasksOnAddingLabel(userID, projectID, versionData.parentID, label, IsPromptVersion(versionData))
+      createTasksOnAddingLabel(userID, projectID, toVersion(versionData, []), label)
     }
   }
 }

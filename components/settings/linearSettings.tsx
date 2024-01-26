@@ -100,7 +100,7 @@ const ConfigPanes = ({
   const toggle = (labels: string[], label: string) =>
     labels.includes(label) ? labels.filter(l => l !== label) : [...labels, label]
 
-  const gridConfig = 'w-full grid grid-cols-[180px_minmax(120px,1fr)_24px] items-start gap-1'
+  const gridConfig = 'w-full grid grid-cols-[210px_minmax(120px,1fr)_24px] items-start gap-1'
 
   return (
     <>
@@ -126,7 +126,7 @@ const ConfigPanes = ({
                 />
               )}
             </GridCell>
-            <GridCell className='font-medium'>Toggle labels on closing task:</GridCell>
+            <GridCell className='font-medium'>Toggle labels on completing task:</GridCell>
             <GridCell>
               <ItemLabels labels={toggles} colors={colors} />
             </GridCell>
