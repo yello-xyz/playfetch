@@ -83,8 +83,8 @@ export default function GitHubSettings({
             </div>
           </Link>
         )}
-        projectConfiguration={(isConfigured, isUpdating, isProcessing) => (
-          <div className='flex items-center gap-2.5'>
+        projectConfiguration={(isConfigured, isUpdating, isProcessing, confirmButton) => (
+          <div className='flex items-center gap-2.5 w-full'>
             {isConfigured && <TextInput disabled value={scopedPath} />}
             {isUpdating && (
               <>
@@ -104,6 +104,7 @@ export default function GitHubSettings({
                 />
               </>
             )}
+            {confirmButton()}
           </div>
         )}
       />

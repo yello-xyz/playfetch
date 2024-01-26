@@ -27,7 +27,12 @@ export default function AppSettings({
   onRefresh: () => void
   getEnvironment: () => string
   userConfiguration: () => ReactNode
-  projectConfiguration: (isConfigured: boolean, isUpdating: boolean, isProcessing: boolean) => ReactNode
+  projectConfiguration: (
+    isConfigured: boolean,
+    isUpdating: boolean,
+    isProcessing: boolean,
+    confirmButton: () => ReactNode
+  ) => ReactNode
 }) {
   const [isUpdating, setUpdating] = useState(false)
   const [isProcessing, setProcessing] = useState(false)
@@ -60,9 +65,8 @@ export default function AppSettings({
           flexLayout={(scopedProvider && activeProject) || isUpdating ? 'flex-col' : 'justify-between'}>
           {activeProject ? (
             <div className='flex gap-2.5'>
-              {projectConfiguration(isProviderAvailable, isUpdating, isProcessing)}
-              <div className='flex justify-end cursor-pointer grow'>
-                {isUpdating ? (
+              {projectConfiguration(isProviderAvailable, isUpdating, isProcessing, () =>
+                isUpdating ? (
                   <Button type='primary' disabled={isProcessing} onClick={() => updateEnvironment(getEnvironment())}>
                     Confirm
                   </Button>
@@ -74,8 +78,8 @@ export default function AppSettings({
                   <Button type='outline' onClick={() => setUpdating(!isUpdating)}>
                     Configure
                   </Button>
-                )}
-              </div>
+                )
+              )}
             </div>
           ) : (
             userConfiguration()

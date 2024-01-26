@@ -51,7 +51,7 @@ export default function LinearSettings({
           {scopedProvider ? 'Reauthorize' : 'Authorize'}
         </Button>
       )}
-      projectConfiguration={(isConfigured, isUpdating, isProcessing) => (
+      projectConfiguration={(isConfigured, isUpdating, isProcessing, confirmButton) => (
         <>
           {isConfigured &&
             labels.map(([triggers, toggles], index) => (
@@ -60,7 +60,7 @@ export default function LinearSettings({
                 <span>Toggle labels on closing task: {toggles.join(', ')}</span>
               </div>
             ))}
-          {isUpdating && (
+          {isUpdating ? (
             <div className='flex flex-col w-full gap-2'>
               {labels.map(([triggers, toggles], index) => (
                 <div className={`px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg ${gridConfig}`} key={index}>
@@ -68,32 +68,48 @@ export default function LinearSettings({
                   <GridCell>
                     <ItemLabels labels={triggers} colors={labelColors} />
                   </GridCell>
-                  <LabelPopupMenu
-                    activeLabels={triggers}
-                    availableLabels={availableLabels}
-                    labelColors={labelColors}
-                    toggleLabel={l =>
-                      setLabels(labels.map(([t, _], i) => (i === index ? [toggle(t, l), toggles] : [t, toggles])))
-                    }
-                  />
+                  <GridCell>
+                    {!isProcessing && (
+                      <LabelPopupMenu
+                        activeLabels={triggers}
+                        availableLabels={availableLabels}
+                        labelColors={labelColors}
+                        toggleLabel={l =>
+                          setLabels(labels.map(([t, _], i) => (i === index ? [toggle(t, l), toggles] : [t, toggles])))
+                        }
+                      />
+                    )}
+                  </GridCell>
                   <GridCell className='font-medium'>Toggle labels on closing task:</GridCell>
                   <GridCell>
                     <ItemLabels labels={toggles} colors={labelColors} />
                   </GridCell>
-                  <LabelPopupMenu
-                    activeLabels={toggles}
-                    availableLabels={availableLabels}
-                    labelColors={labelColors}
-                    toggleLabel={l =>
-                      setLabels(labels.map(([_, t], i) => (i === index ? [triggers, toggle(t, l)] : [triggers, t])))
-                    }
-                  />
+                  <GridCell>
+                    {!isProcessing && (
+                      <LabelPopupMenu
+                        activeLabels={toggles}
+                        availableLabels={availableLabels}
+                        labelColors={labelColors}
+                        toggleLabel={l =>
+                          setLabels(labels.map(([_, t], i) => (i === index ? [triggers, toggle(t, l)] : [triggers, t])))
+                        }
+                      />
+                    )}
+                  </GridCell>
                 </div>
               ))}
-              <Button type='secondary' onClick={() => setLabels([...labels, defaultLabels])}>
-                Add Trigger
-              </Button>
+              <div className='flex gap-2.5 justify-end'>
+                <Button type='secondary' disabled={isProcessing} onClick={() => setLabels([...labels, defaultLabels])}>
+                  Add Trigger
+                </Button>
+                <Button type='destructive' disabled={isProcessing} onClick={() => setLabels(scopedLabels)}>
+                  Revert
+                </Button>
+                {confirmButton()}
+              </div>
             </div>
+          ) : (
+            confirmButton()
           )}
         </>
       )}
