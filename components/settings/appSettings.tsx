@@ -14,6 +14,7 @@ export default function AppSettings({
   scopeID,
   scopedProvider,
   availableProvider,
+  supportsReconfigureWithoutReset = false,
   onRefresh,
   getEnvironment,
   userConfiguration,
@@ -24,6 +25,7 @@ export default function AppSettings({
   scopeID: number
   scopedProvider?: AvailableProvider
   availableProvider?: AvailableProvider
+  supportsReconfigureWithoutReset?: boolean
   onRefresh: () => void
   getEnvironment: () => string
   userConfiguration: () => ReactNode
@@ -70,7 +72,7 @@ export default function AppSettings({
                   <Button type='primary' disabled={isProcessing} onClick={() => updateEnvironment(getEnvironment())}>
                     Confirm
                   </Button>
-                ) : scopedProvider ? (
+                ) : scopedProvider && !supportsReconfigureWithoutReset ? (
                   <Button type='destructive' disabled={isProcessing} onClick={resetEnvironment}>
                     Reset
                   </Button>

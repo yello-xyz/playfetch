@@ -42,6 +42,7 @@ export default function LinearSettings({
       scopeID={scopeID}
       scopedProvider={scopedProvider}
       availableProvider={availableProvider}
+      supportsReconfigureWithoutReset
       onRefresh={onRefresh}
       getEnvironment={() => JSON.stringify(labels)}
       userConfiguration={() => (
