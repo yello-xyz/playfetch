@@ -23,13 +23,13 @@ export default function LinearSettings({
   const router = useRouter()
   const availableProvider = useIssueTrackerProvider()
 
-  const scopedProvider = provider as AvailableIssueTrackerProvider | undefined
-  const scopedLabels: [string[], string[]][] = scopedProvider?.environment
-    ? JSON.parse(scopedProvider.environment)
-    : [[[NeedsUpdatesLabel], [NeedsUpdatesLabel]]]
-
+  const defaultLabels: [string[], string[]] = [[NeedsUpdatesLabel], [NeedsUpdatesLabel]]
   const availableLabels = activeProject ? activeProject.availableLabels : []
   const labelColors = activeProject ? AvailableLabelColorsForItem(activeProject) : {}
+
+  const scopedProvider = provider as AvailableIssueTrackerProvider | undefined
+  const previousEnvironment = scopedProvider?.environment
+  const scopedLabels: (typeof defaultLabels)[] = previousEnvironment ? JSON.parse(previousEnvironment) : [defaultLabels]
 
   const [labels, setLabels] = useState(scopedLabels)
   const toggle = (labels: string[], label: string) =>
@@ -60,37 +60,41 @@ export default function LinearSettings({
                 <span>Toggle labels on closing task: {toggles.join(', ')}</span>
               </div>
             ))}
-          {isUpdating &&
-            labels.map(([triggers, toggles], index) => (
-              <div
-                className={`px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg ${gridConfig}`}
-                key={index}>
-                <GridCell className='font-medium'>Create task on adding label:</GridCell>
-                <GridCell>
-                  <ItemLabels labels={triggers} colors={labelColors} />
-                </GridCell>
-                <LabelPopupMenu
-                  activeLabels={triggers}
-                  availableLabels={availableLabels}
-                  labelColors={labelColors}
-                  toggleLabel={l =>
-                    setLabels(labels.map(([t, _], i) => (i === index ? [toggle(t, l), toggles] : [t, toggles])))
-                  }
-                />
-                <GridCell className='font-medium'>Toggle labels on closing task:</GridCell>
-                <GridCell>
-                  <ItemLabels labels={toggles} colors={labelColors} />
-                </GridCell>
-                <LabelPopupMenu
-                  activeLabels={toggles}
-                  availableLabels={availableLabels}
-                  labelColors={labelColors}
-                  toggleLabel={l =>
-                    setLabels(labels.map(([_, t], i) => (i === index ? [triggers, toggle(t, l)] : [triggers, t])))
-                  }
-                />
-              </div>
-            ))}
+          {isUpdating && (
+            <div className='flex flex-col w-full gap-2'>
+              {labels.map(([triggers, toggles], index) => (
+                <div className={`px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg ${gridConfig}`} key={index}>
+                  <GridCell className='font-medium'>Create task on adding label:</GridCell>
+                  <GridCell>
+                    <ItemLabels labels={triggers} colors={labelColors} />
+                  </GridCell>
+                  <LabelPopupMenu
+                    activeLabels={triggers}
+                    availableLabels={availableLabels}
+                    labelColors={labelColors}
+                    toggleLabel={l =>
+                      setLabels(labels.map(([t, _], i) => (i === index ? [toggle(t, l), toggles] : [t, toggles])))
+                    }
+                  />
+                  <GridCell className='font-medium'>Toggle labels on closing task:</GridCell>
+                  <GridCell>
+                    <ItemLabels labels={toggles} colors={labelColors} />
+                  </GridCell>
+                  <LabelPopupMenu
+                    activeLabels={toggles}
+                    availableLabels={availableLabels}
+                    labelColors={labelColors}
+                    toggleLabel={l =>
+                      setLabels(labels.map(([_, t], i) => (i === index ? [triggers, toggle(t, l)] : [triggers, t])))
+                    }
+                  />
+                </div>
+              ))}
+              <Button type='secondary' onClick={() => setLabels([...labels, defaultLabels])}>
+                Add Trigger
+              </Button>
+            </div>
+          )}
         </>
       )}
     />
