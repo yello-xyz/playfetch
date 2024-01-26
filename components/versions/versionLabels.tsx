@@ -43,7 +43,7 @@ export function ItemLabels({
   labels,
   colors,
   icons = {},
-  noWrap,
+  noWrap = false,
   className = '',
 }: {
   labels: string[]

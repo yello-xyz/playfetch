@@ -15,6 +15,7 @@ import { ParseActiveSettingsTabQuery, ProjectSettingsRoute, UserSettingsRoute } 
 import { useRouter } from 'next/router'
 import GitHubSettings from './githubSettings'
 import LinearSettings from './linearSettings'
+import { AvailableLabelColorsForItem } from '../labelPopupMenu'
 
 const ProvidersPane = 'providers'
 const UsagePane = 'usage'
@@ -113,6 +114,7 @@ export default function SettingsView({
   const activeProject = useActiveProject()
   const isProjectScope = scope === 'project'
   const scopeID = isProjectScope ? activeProject.id : user.id
+  const labelColors = isProjectScope ? AvailableLabelColorsForItem(activeProject) : {}
 
   const router = useRouter()
   const activePaneFromQuery = ParseActiveSettingsTabQuery(router.query)
@@ -209,6 +211,7 @@ export default function SettingsView({
               scope={scope}
               scopeID={scopeID}
               provider={providers.find(provider => provider.provider === 'linear')}
+              labelColors={labelColors}
               onRefresh={refresh}
             />
           )}
