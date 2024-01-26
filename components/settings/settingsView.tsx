@@ -78,7 +78,7 @@ export default function SettingsView({
     ...(activeProject ? [TeamPane] : []),
     ConnectorsPane,
     SourceControlPane,
-    // IssueTrackerPane,
+    IssueTrackerPane,
   ]
 
   return !activeProject || activeProject.isOwner ? (
