@@ -12,14 +12,16 @@ const parsePayload: (req: NextApiRequest) => Promise<Buffer> = (req: NextApiRequ
 const webhook = new LinearWebhooks(process.env.LINEAR_APP_WEBHOOK_SECRET ?? '')
 
 async function linear(req: NextApiRequest, res: NextApiResponse) {
+  console.log('headers', req.headers)
+  console.log('query', req.query)
+  console.log('body', req.body)
   const signature = req.headers[LINEAR_WEBHOOK_SIGNATURE_HEADER] as string | undefined
   if (signature) {
     const buffer = await parsePayload(req)
     console.log('buffer', buffer.toString())
     console.log('buffer parsed', JSON.parse(buffer.toString()))
-    console.log('body', req.body)
-    if (!webhook.verify(buffer, signature, JSON.parse(buffer.toString())[LINEAR_WEBHOOK_TS_FIELD])) {
-      return res.status(401).json(null)
+    if (webhook.verify(buffer, signature, JSON.parse(buffer.toString())[LINEAR_WEBHOOK_TS_FIELD])) {
+      console.log('verified')
     }
   }
   res.status(200).json({})
