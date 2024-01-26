@@ -266,8 +266,8 @@ export async function addProjectFlavor(userID: number, projectID: number, flavor
   await updateProject({ ...projectData, flavors: JSON.stringify([...JSON.parse(projectData.flavors), flavor]) }, true)
 }
 
-export async function ensureProjectLabel(userID: number, projectID: number, label: string) {
-  const projectData = await getVerifiedUserProjectData(userID, projectID)
+export async function ensureProjectLabel(projectID: number, label: string) {
+  const projectData = await getTrustedProjectData(projectID)
   const labels = JSON.parse(projectData.labels)
   if (!labels.includes(label)) {
     const newLabels = [...labels, label]

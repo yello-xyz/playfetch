@@ -240,7 +240,7 @@ export async function processLabels(
   if (checked !== labels.includes(label)) {
     const newLabels = checked ? [...labels, label] : labels.filter(l => l !== label)
     if (checked) {
-      await ensureProjectLabel(userID, projectID, label)
+      await ensureProjectLabel(projectID, label)
     }
     await saveComment(
       userID,
