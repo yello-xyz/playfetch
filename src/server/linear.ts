@@ -3,6 +3,7 @@ import { LinearClient } from '@linear/sdk'
 import { ChainRoute, PromptRoute } from '../common/clientRoute'
 import { getTrustedPromptOrChainData } from './datastore/chains'
 import buildURLForRoute from './routing'
+import { getUserForID } from './datastore/users'
 
 type Config = [string[], string[]]
 
@@ -21,6 +22,8 @@ export async function createTasksOnAddingLabel(
         const { apiKey: accessToken } = await getProviderCredentials([userID], 'linear')
         if (accessToken) {
           const parentData = await getTrustedPromptOrChainData(parentID)
+          const user = await getUserForID(userID)
+          const url = buildURLForRoute(isPrompt ? PromptRoute(projectID, parentID) : ChainRoute(projectID, parentID))
           const client = new LinearClient({ accessToken })
           const teams = await client.teams()
           const team = teams.nodes[0]
@@ -28,9 +31,7 @@ export async function createTasksOnAddingLabel(
             const issue = await client.createIssue({
               teamId: team.id,
               title: `[${label}] ${parentData.name}`,
-              description: buildURLForRoute(
-                isPrompt ? PromptRoute(projectID, parentID) : ChainRoute(projectID, parentID)
-              ),
+              description: `**${user.fullName}** added label **“${label}”** to [${parentData.name}](${url}).`,
             })
             const createdIssue = await issue.issue
             if (issue.success && createdIssue?.id) {
