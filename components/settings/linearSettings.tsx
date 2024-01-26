@@ -63,7 +63,7 @@ export default function LinearSettings({
                 <ItemLabels labels={triggers} colors={labelColors} />
                 <LabelPopupMenu
                   activeLabels={triggers}
-                  availableLables={availableLabels}
+                  availableLabels={availableLabels}
                   labelColors={labelColors}
                   toggleLabel={() => {}}
                 />
@@ -71,7 +71,7 @@ export default function LinearSettings({
                 <ItemLabels labels={toggles} colors={labelColors} />
                 <LabelPopupMenu
                   activeLabels={toggles}
-                  availableLables={availableLabels}
+                  availableLabels={availableLabels}
                   labelColors={labelColors}
                   toggleLabel={() => {}}
                 />

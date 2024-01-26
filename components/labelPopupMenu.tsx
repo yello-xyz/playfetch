@@ -34,7 +34,7 @@ export function ItemLabelPopupMenu({
   selectedCell?: boolean
 }) {
   const activeLabels = item.labels
-  const availableLables = activeItem.availableLabels
+  const availableLabels = activeItem.availableLabels
   const labelColors = AvailableLabelColorsForItem(activeItem)
 
   const refreshProject = useRefreshProject()
@@ -59,25 +59,25 @@ export function ItemLabelPopupMenu({
     }
   }
 
-  return <LabelPopupMenu {...{ activeLabels, availableLables, labelColors, toggleLabel, selectedCell }} />
+  return <LabelPopupMenu {...{ activeLabels, availableLabels, labelColors, toggleLabel, selectedCell }} />
 }
 
 export default function LabelPopupMenu({
   activeLabels,
-  availableLables,
+  availableLabels,
   labelColors,
   toggleLabel,
   selectedCell = false,
 }: {
   activeLabels: string[]
-  availableLables: string[]
+  availableLabels: string[]
   labelColors: Record<string, string>
   toggleLabel: (label: string) => void
   selectedCell?: boolean
 }) {
   const loadPopup = (): [typeof LabelsPopup, LabelsPopupProps] => [
     LabelsPopup,
-    { activeLabels, availableLables, labelColors, toggleLabel },
+    { activeLabels, availableLabels, labelColors, toggleLabel },
   ]
 
   return <GlobalPopupMenu icon={labelIcon} loadPopup={loadPopup} selectedCell={selectedCell} />
@@ -85,14 +85,14 @@ export default function LabelPopupMenu({
 
 export type LabelsPopupProps = {
   activeLabels: string[]
-  availableLables: string[]
+  availableLabels: string[]
   labelColors: Record<string, string>
   toggleLabel: (label: string) => void
 }
 
 function LabelsPopup({
   activeLabels,
-  availableLables,
+  availableLabels,
   labelColors,
   toggleLabel,
   withDismiss,
@@ -101,7 +101,7 @@ function LabelsPopup({
 
   const trimmedLabel = newLabel.trim()
 
-  const addingNewLabel = trimmedLabel.length > 0 && !availableLables.includes(trimmedLabel)
+  const addingNewLabel = trimmedLabel.length > 0 && !availableLabels.includes(trimmedLabel)
 
   const toggle = (label: string) => {
     setNewLabel('')
@@ -125,7 +125,7 @@ function LabelsPopup({
           Create new label <span className='font-medium'>“{trimmedLabel}”</span>
         </div>
       ) : (
-        availableLables.map((label, index) => (
+        availableLabels.map((label, index) => (
           <div
             className='flex items-center gap-1 px-2 py-1 cursor-pointer'
             key={index}
