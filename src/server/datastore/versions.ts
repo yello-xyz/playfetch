@@ -31,7 +31,7 @@ import {
 import { getPresetsForUser } from './users'
 import { DefaultPrompts } from '@/src/common/defaults'
 import { deleteEntity } from './cleanup'
-import { createTasksOnAddingVersionLabel } from '../linear'
+import { createTasksOnAddingLabel } from '../linear'
 
 export async function migrateVersions(postMerge: boolean) {
   if (postMerge) {
@@ -281,7 +281,7 @@ export async function updateVersionLabel(
   if (newLabels) {
     await updateVersion({ ...versionData, labels: JSON.stringify(newLabels), didRun: true })
     if (checked) {
-      createTasksOnAddingVersionLabel(userID, projectID, toVersion(versionData, []), label)
+      createTasksOnAddingLabel(userID, projectID, versionData.parentID, label, IsPromptVersion(versionData))
     }
   }
 }

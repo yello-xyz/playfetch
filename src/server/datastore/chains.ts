@@ -132,7 +132,7 @@ export const getVerifiedUserChain = (userID: number, chainID: number) =>
 export const getVerifiedUserPromptOrChainData = async (userID: number, parentID: number) =>
   getVerifiedProjectScopedData(userID, [Entity.PROMPT, Entity.CHAIN], parentID)
 
-export const getTrustedUserPromptOrChainData = async (parentID: number) =>
+export const getTrustedPromptOrChainData = async (parentID: number) =>
   getTrustedProjectScopedData([Entity.PROMPT, Entity.CHAIN], parentID)
 
 export const ensureChainAccess = (userID: number, chainID: number) => getVerifiedUserChainData(userID, chainID)

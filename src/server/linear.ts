@@ -1,17 +1,16 @@
-import { IsRawPromptVersion, RawChainVersion, RawPromptVersion } from '@/types'
 import { getProviderCredentials } from './datastore/providers'
 import { LinearClient } from '@linear/sdk'
-import { getTrustedProjectScopedData } from './datastore/prompts'
-import { Entity } from './datastore/datastore'
 import { ChainRoute, PromptRoute } from '../common/clientRoute'
+import { getTrustedPromptOrChainData } from './datastore/chains'
 
 type Config = [string[], string[]]
 
-export async function createTasksOnAddingVersionLabel(
+export async function createTasksOnAddingLabel(
   userID: number,
   projectID: number,
-  version: RawPromptVersion | RawChainVersion,
-  label: string
+  parentID: number,
+  label: string,
+  isPrompt: boolean
 ) {
   const { environment } = await getProviderCredentials([projectID], 'linear')
   if (environment) {
@@ -20,11 +19,7 @@ export async function createTasksOnAddingVersionLabel(
       if (triggers.includes(label)) {
         const { apiKey: accessToken } = await getProviderCredentials([userID], 'linear')
         if (accessToken) {
-          const isPrompt = IsRawPromptVersion(version)
-          const parentData = await getTrustedProjectScopedData(
-            [isPrompt ? Entity.PROMPT : Entity.CHAIN],
-            version.parentID
-          )
+          const parentData = await getTrustedPromptOrChainData(parentID)
           const client = new LinearClient({ accessToken })
           const teams = await client.teams()
           const team = teams.nodes[0]
@@ -32,10 +27,12 @@ export async function createTasksOnAddingVersionLabel(
             const issue = await client.createIssue({
               teamId: team.id,
               title: `[${label}] ${parentData.name}`,
-              description: isPrompt
-                ? PromptRoute(projectID, version.parentID)
-                : ChainRoute(projectID, version.parentID),
+              description: isPrompt ? PromptRoute(projectID, parentID) : ChainRoute(projectID, parentID),
             })
+            const createdIssue = await issue.issue
+            if (issue.success && createdIssue?.id) {
+              console.log(`Created issue for ${parentID}`)
+            }
           }
         }
         break
