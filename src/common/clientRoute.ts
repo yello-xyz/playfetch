@@ -1,3 +1,12 @@
+import {
+  ActiveSettingsPane,
+  ConnectorsPane,
+  IssueTrackerPane,
+  ProvidersPane,
+  SourceControlPane,
+  TeamPane,
+  UsagePane,
+} from '@/components/settings/activeSettingsPane'
 import { ActiveProject } from '@/types'
 import { GetServerSidePropsResult } from 'next'
 
@@ -71,29 +80,27 @@ export const ParseActiveItemQuery = (query: any, project: ActiveProject) => {
   return { promptID, chainID, tableID, compare, endpoints, settings }
 }
 
-type ActiveSettingsTab = 'providers' | 'usage' | 'team' | 'connectors' | 'sourceControl' | 'issueTracker'
+export const UserSettingsRoute = (activeTab: ActiveSettingsPane = ProvidersPane) =>
+  `${ClientRoute.Settings}${activeTab !== ProvidersPane ? `?t=${activeTab[0]}` : ''}`
 
-export const UserSettingsRoute = (activeTab: ActiveSettingsTab = 'providers') =>
-  `${ClientRoute.Settings}${activeTab !== 'providers' ? `?t=${activeTab[0]}` : ''}`
+export const ProjectSettingsRoute = (projectID: number, activeTab: ActiveSettingsPane = ProvidersPane) =>
+  `${ProjectRoute(projectID)}?s=1${activeTab !== ProvidersPane ? `&t=${activeTab[0]}` : ''}`
 
-export const ProjectSettingsRoute = (projectID: number, activeTab: ActiveSettingsTab = 'providers') =>
-  `${ProjectRoute(projectID)}?s=1${activeTab !== 'providers' ? `&t=${activeTab[0]}` : ''}`
-
-export const ParseActiveSettingsTabQuery = (query: any) => {
+export const ParseActiveSettingsPaneQuery = (query: any): ActiveSettingsPane => {
   const { t: activeTab } = ParseQuery(query)
   switch (activeTab) {
     case 'u':
-      return 'usage'
+      return UsagePane
     case 't':
-      return 'team'
+      return TeamPane
     case 'c':
-      return 'connectors'
+      return ConnectorsPane
     case 's':
-      return 'sourceControl'
+      return SourceControlPane
     case 'i':
-      return 'issueTracker'
+      return IssueTrackerPane
     default:
-      return 'providers'
+      return ProvidersPane
   }
 }
 
