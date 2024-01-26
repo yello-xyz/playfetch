@@ -30,7 +30,7 @@ export default function LinearSettings({
   const defaultConfig: Config = [[NeedsUpdatesLabel], [NeedsUpdatesLabel]]
 
   const scopedProvider = provider as AvailableIssueTrackerProvider | undefined
-  const previousEnvironment = scopedProvider?.environment
+  const previousEnvironment = activeProject ? scopedProvider?.environment : undefined
   const scopedConfigs: Config[] = previousEnvironment ? JSON.parse(previousEnvironment) : [defaultConfig]
 
   const [configs, setConfigs] = useState(scopedConfigs)

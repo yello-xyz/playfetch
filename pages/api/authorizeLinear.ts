@@ -19,7 +19,7 @@ async function authorizeLinear(_: NextApiRequest, res: NextApiResponse<string>, 
   query.set('client_id', process.env.LINEAR_APP_CLIENT_ID ?? '')
   query.set('redirect_uri', LinearRedirectURI)
   query.set('response_type', 'code')
-  query.set('scope', 'read,issues:create')
+  query.set('scope', 'read,write,issues:create')
   query.set('state', getStateForUser(user))
   query.set('prompt', 'consent')
 

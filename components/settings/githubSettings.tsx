@@ -7,7 +7,7 @@ import TextInput from '../textInput'
 import { useSourceControlProvider } from '@/src/client/context/providerContext'
 import Link from 'next/link'
 import DropdownMenu from '../dropdownMenu'
-import { useActiveProject, useRefreshProject } from '@/src/client/context/projectContext'
+import { useRefreshProject } from '@/src/client/context/projectContext'
 import { useLoggedInUser } from '@/src/client/context/userContext'
 import AppSettings from './appSettings'
 
