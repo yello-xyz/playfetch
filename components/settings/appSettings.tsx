@@ -27,7 +27,7 @@ export default function AppSettings({
   availableProvider?: AvailableProvider
   supportsReconfigureWithoutReset?: boolean
   onRefresh: () => void
-  getEnvironment: () => string
+  getEnvironment: () => string | undefined
   userConfiguration: () => ReactNode
   projectConfiguration: (
     isConfigured: boolean,
