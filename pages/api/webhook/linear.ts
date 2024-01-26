@@ -31,13 +31,8 @@ async function linear(req: NextApiRequest, res: NextApiResponse) {
       const task = await getTaskForIdentifier(body.data.id, true)
       if (task) {
         const { versionID, userID, projectID, labels } = task
-        console.log('Toggling labels', versionID, labels)
-        toggleVersionLabels(userID, projectID, versionID, labels)
-      } else {
-        console.log('Task not found', body.data.id)
+        toggleVersionLabels(userID, versionID, projectID, labels)
       }
-    } else {
-      console.log('Invalid webhook', body)
     }
   }
   res.status(200).json({})
