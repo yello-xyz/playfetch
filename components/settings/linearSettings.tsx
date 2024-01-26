@@ -7,18 +7,17 @@ import AppSettings from './appSettings'
 import { useState } from 'react'
 import { DefaultLabels, NeedsUpdatesLabel } from '@/src/common/defaults'
 import { ItemLabels } from '../versions/versionLabels'
+import LabelPopupMenu, { AvailableLabelColorsForItem } from '../labelPopupMenu'
 
 export default function LinearSettings({
   activeProject,
   scopeID,
   provider,
-  labelColors,
   onRefresh,
 }: {
   activeProject?: ActiveProject
   scopeID: number
   provider?: AvailableProvider
-  labelColors: Record<string, string>
   onRefresh: () => void
 }) {
   const router = useRouter()
@@ -28,6 +27,9 @@ export default function LinearSettings({
   const scopedLabels: [[string[], string[]]] = scopedProvider?.environment
     ? JSON.parse(scopedProvider.environment)
     : [[DefaultLabels, [NeedsUpdatesLabel]]]
+
+  const availableLabels = activeProject ? activeProject.availableLabels : []
+  const labelColors = activeProject ? AvailableLabelColorsForItem(activeProject) : {}
 
   const [labels, setLabels] = useState(scopedLabels)
 
@@ -59,10 +61,20 @@ export default function LinearSettings({
               <div className='grid items-start gap-y-1 grid-cols-[180px_minmax(120px,1fr)_40px]' key={index}>
                 Create task on adding label:
                 <ItemLabels labels={triggers} colors={labelColors} />
-                <div className='h-full border' />
+                <LabelPopupMenu
+                  activeLabels={triggers}
+                  availableLables={availableLabels}
+                  labelColors={labelColors}
+                  toggleLabel={() => {}}
+                />
                 Toggle labels on closing task:
                 <ItemLabels labels={toggles} colors={labelColors} />
-                <div className='h-full border' />
+                <LabelPopupMenu
+                  activeLabels={toggles}
+                  availableLables={availableLabels}
+                  labelColors={labelColors}
+                  toggleLabel={() => {}}
+                />
               </div>
             ))}
         </>
