@@ -6,7 +6,7 @@ import costIcon from '@/public/cost.svg'
 import tokensIcon from '@/public/tokens.svg'
 import Icon from '../icon'
 import { StaticImageData } from 'next/image'
-import LabelPopupMenu, { AvailableLabelColorsForItem } from '../labelPopupMenu'
+import { ItemLabelPopupMenu, AvailableLabelColorsForItem } from '../labelPopupMenu'
 import { ItemLabels } from '../versions/versionLabels'
 import RunRatingButtons from './runRatingButtons'
 
@@ -36,7 +36,7 @@ export default function RunCellFooter({
             <>
               <RunRatingButtons run={run} activeItem={activeItem} isSelected={isSelected} onUpdate={onRatingUpdate} />
               <div className='self-stretch border-r border-gray-200' />
-              <LabelPopupMenu activeItem={activeItem} item={run} selectedCell />
+              <ItemLabelPopupMenu activeItem={activeItem} item={run} selectedCell />
             </>
           )}
         </div>

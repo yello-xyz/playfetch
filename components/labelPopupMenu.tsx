@@ -24,6 +24,18 @@ export const AvailableLabelColorsForItem = (item: ActivePrompt | ActiveChain | A
     item.availableLabels.map((label, index) => [label, projectLabelColors[index % projectLabelColors.length]])
   )
 
+export function ItemLabelPopupMenu({
+  item,
+  activeItem,
+  selectedCell = false,
+}: {
+  item: PromptVersion | ChainVersion | Run
+  activeItem: ActivePrompt | ActiveChain
+  selectedCell?: boolean
+}) {
+  return <LabelPopupMenu {...{ item, activeItem, selectedCell }} />
+}
+
 export default function LabelPopupMenu({
   item,
   activeItem,
