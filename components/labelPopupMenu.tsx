@@ -59,25 +59,25 @@ export function ItemLabelPopupMenu({
     }
   }
 
-  return <LabelPopupMenu {...{ activeLabels, availableLabels, labelColors, toggleLabel, selectedCell }} />
+  return <LabelPopupMenu {...{ activeLabels, availableLabels, colors: labelColors, toggleLabel, selectedCell }} />
 }
 
 export default function LabelPopupMenu({
   activeLabels,
   availableLabels,
-  labelColors,
+  colors,
   toggleLabel,
   selectedCell = false,
 }: {
   activeLabels: string[]
   availableLabels: string[]
-  labelColors: Record<string, string>
+  colors: Record<string, string>
   toggleLabel: (label: string) => void
   selectedCell?: boolean
 }) {
   const loadPopup = (): [typeof LabelsPopup, LabelsPopupProps] => [
     LabelsPopup,
-    { activeLabels, availableLabels, labelColors, toggleLabel },
+    { activeLabels, availableLabels, labelColors: colors, toggleLabel },
   ]
 
   return <GlobalPopupMenu icon={labelIcon} loadPopup={loadPopup} selectedCell={selectedCell} />

@@ -11,7 +11,7 @@ import LabelPopupMenu, { AvailableLabelColorsForItem } from '../labelPopupMenu'
 import IconButton from '../iconButton'
 import cancelIcon from '@/public/cancel.svg'
 
-type Trigger = [string[], string[]]
+type Config = [string[], string[]]
 
 export default function LinearSettings({
   activeProject,
@@ -27,13 +27,13 @@ export default function LinearSettings({
   const router = useRouter()
   const availableProvider = useIssueTrackerProvider()
 
-  const defaultLabels: Trigger = [[NeedsUpdatesLabel], [NeedsUpdatesLabel]]
+  const defaultConfig: Config = [[NeedsUpdatesLabel], [NeedsUpdatesLabel]]
 
   const scopedProvider = provider as AvailableIssueTrackerProvider | undefined
   const previousEnvironment = scopedProvider?.environment
-  const scopedLabels: Trigger[] = previousEnvironment ? JSON.parse(previousEnvironment) : [defaultLabels]
+  const scopedConfigs: Config[] = previousEnvironment ? JSON.parse(previousEnvironment) : [defaultConfig]
 
-  const [labels, setLabels] = useState(scopedLabels)
+  const [configs, setConfigs] = useState(scopedConfigs)
 
   return (
     <AppSettings
@@ -44,7 +44,7 @@ export default function LinearSettings({
       availableProvider={availableProvider}
       supportsReconfigureWithoutReset
       onRefresh={onRefresh}
-      getEnvironment={() => JSON.stringify(labels)}
+      getEnvironment={() => JSON.stringify(configs)}
       userConfiguration={() => (
         <Button type='secondary' onClick={() => api.authorizeLinear().then(router.push)}>
           {scopedProvider ? 'Reauthorize' : 'Authorize'}
@@ -54,17 +54,17 @@ export default function LinearSettings({
         <>
           {isConfigured || isUpdating ? (
             <div className='flex flex-col w-full gap-2.5'>
-              <LabelConfigurationPanes {...{ labels, setLabels, activeProject, isUpdating, isProcessing }} />
+              <ConfigPanes {...{ configs: configs, setConfigs: setConfigs, activeProject, isUpdating, isProcessing }} />
               <div className='flex gap-2.5 justify-end'>
                 {isUpdating && (
                   <>
                     <Button
                       type='secondary'
                       disabled={isProcessing}
-                      onClick={() => setLabels([...labels, defaultLabels])}>
+                      onClick={() => setConfigs([...configs, defaultConfig])}>
                       Add Trigger
                     </Button>
-                    <Button type='destructive' disabled={isProcessing} onClick={() => setLabels(scopedLabels)}>
+                    <Button type='destructive' disabled={isProcessing} onClick={() => setConfigs(scopedConfigs)}>
                       Revert
                     </Button>
                   </>
@@ -81,21 +81,21 @@ export default function LinearSettings({
   )
 }
 
-const LabelConfigurationPanes = ({
-  labels,
-  setLabels,
+const ConfigPanes = ({
+  configs,
+  setConfigs,
   activeProject,
   isUpdating,
   isProcessing,
 }: {
-  labels: Trigger[]
-  setLabels: (labels: Trigger[]) => void
+  configs: Config[]
+  setConfigs: (configs: Config[]) => void
   activeProject?: ActiveProject
   isUpdating: boolean
   isProcessing: boolean
 }) => {
-  const availableLabels = activeProject ? activeProject.availableLabels : []
-  const labelColors = activeProject ? AvailableLabelColorsForItem(activeProject) : {}
+  const labels = activeProject ? activeProject.availableLabels : []
+  const colors = activeProject ? AvailableLabelColorsForItem(activeProject) : {}
 
   const toggle = (labels: string[], label: string) =>
     labels.includes(label) ? labels.filter(l => l !== label) : [...labels, label]
@@ -104,40 +104,40 @@ const LabelConfigurationPanes = ({
 
   return (
     <>
-      {labels.map(([triggers, toggles], index) => (
+      {configs.map(([triggers, toggles], index) => (
         <div key={index} className='flex items-center gap-2'>
           {isUpdating && (
-            <IconButton icon={cancelIcon} onClick={() => setLabels(labels.filter((_, i) => i !== index))} />
+            <IconButton icon={cancelIcon} onClick={() => setConfigs(configs.filter((_, i) => i !== index))} />
           )}
           <div className={`px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg ${gridConfig}`}>
             <GridCell className='font-medium'>Create task on adding label:</GridCell>
             <GridCell>
-              <ItemLabels labels={triggers} colors={labelColors} />
+              <ItemLabels labels={triggers} colors={colors} />
             </GridCell>
             <GridCell>
               {isUpdating && !isProcessing && (
                 <LabelPopupMenu
                   activeLabels={triggers}
-                  availableLabels={availableLabels}
-                  labelColors={labelColors}
+                  availableLabels={labels}
+                  colors={colors}
                   toggleLabel={l =>
-                    setLabels(labels.map(([t, _], i) => (i === index ? [toggle(t, l), toggles] : [t, toggles])))
+                    setConfigs(configs.map(([t, _], i) => (i === index ? [toggle(t, l), toggles] : [t, toggles])))
                   }
                 />
               )}
             </GridCell>
             <GridCell className='font-medium'>Toggle labels on closing task:</GridCell>
             <GridCell>
-              <ItemLabels labels={toggles} colors={labelColors} />
+              <ItemLabels labels={toggles} colors={colors} />
             </GridCell>
             <GridCell>
               {isUpdating && !isProcessing && (
                 <LabelPopupMenu
                   activeLabels={toggles}
-                  availableLabels={availableLabels}
-                  labelColors={labelColors}
+                  availableLabels={labels}
+                  colors={colors}
                   toggleLabel={l =>
-                    setLabels(labels.map(([_, t], i) => (i === index ? [triggers, toggle(t, l)] : [triggers, t])))
+                    setConfigs(configs.map(([_, t], i) => (i === index ? [triggers, toggle(t, l)] : [triggers, t])))
                   }
                 />
               )}
