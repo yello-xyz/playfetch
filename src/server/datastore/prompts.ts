@@ -198,7 +198,7 @@ export async function getExportablePromptsFromProject(projectID: number) {
 }
 
 export async function updatePromptSourcePath(promptID: number, sourcePath: string) {
-  const promptData = await getPromptData(promptID)
+  const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
   await updatePrompt({ ...promptData, sourcePath }, false)
 }
 
@@ -231,8 +231,6 @@ export async function augmentPromptDataWithNewVersion(
 
   await updatePrompt({ ...promptData, name: newPromptName }, true)
 }
-
-const getPromptData = (promptID: number) => getKeyedEntity(Entity.PROMPT, promptID)
 
 export const updatePromptLastEditedAt = (promptData: any) => updatePrompt({ ...promptData }, true)
 
