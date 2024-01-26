@@ -2,12 +2,9 @@ import { decrypt, encrypt } from '@/src/server/datastore/datastore'
 import { withLoggedInUserRoute } from '@/src/server/session'
 import { User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import ShortUniqueId from 'short-unique-id'
-
-const idGenerator = new ShortUniqueId()
 
 const getStateForUser = (user: User) =>
-  encrypt(JSON.stringify({ userID: user.id, expiresAt: Date.now() + 10 * 60 * 1000, id: idGenerator() }))
+  encrypt(JSON.stringify({ userID: user.id, expiresAt: Date.now() + 10 * 60 * 1000 }))
 
 export const validateStateForUser = (user: User, state: string) => {
   const { userID, expiresAt } = JSON.parse(decrypt(state))
@@ -23,6 +20,7 @@ async function authorizeLinear(_: NextApiRequest, res: NextApiResponse<string>, 
   query.set('response_type', 'code')
   query.set('scope', 'read,issues:create')
   query.set('state', getStateForUser(user))
+  query.set('prompt', 'consent')
 
   res.json(`https://linear.app/oauth/authorize?${query.toString()}`)
 }
