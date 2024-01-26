@@ -23,7 +23,12 @@ async function linear(req: NextApiRequest, res: NextApiResponse, user: User) {
       body: query.toString(),
     }).then(response => response.json())
 
-    await saveProviderKey(user.id, user.id, 'linear', response.access_token, undefined)
+    const accessToken = response.access_token
+    if (accessToken) {
+      const client = new LinearClient({ accessToken })
+      const viewer = await client.viewer
+      await saveProviderKey(user.id, user.id, 'linear', accessToken, viewer.id)
+    }
   }
 
   res.redirect(UserSettingsRoute('issueTracker'))
