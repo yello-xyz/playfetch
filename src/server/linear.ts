@@ -2,6 +2,7 @@ import { getProviderCredentials } from './datastore/providers'
 import { LinearClient } from '@linear/sdk'
 import { ChainRoute, PromptRoute } from '../common/clientRoute'
 import { getTrustedPromptOrChainData } from './datastore/chains'
+import buildURLForRoute from './routing'
 
 type Config = [string[], string[]]
 
@@ -27,7 +28,9 @@ export async function createTasksOnAddingLabel(
             const issue = await client.createIssue({
               teamId: team.id,
               title: `[${label}] ${parentData.name}`,
-              description: isPrompt ? PromptRoute(projectID, parentID) : ChainRoute(projectID, parentID),
+              description: buildURLForRoute(
+                isPrompt ? PromptRoute(projectID, parentID) : ChainRoute(projectID, parentID)
+              ),
             })
             const createdIssue = await issue.issue
             if (issue.success && createdIssue?.id) {

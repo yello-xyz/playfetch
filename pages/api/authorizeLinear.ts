@@ -1,3 +1,4 @@
+import buildURLForRoute from '@/src/server/routing'
 import { decrypt, encrypt } from '@/src/server/datastore/datastore'
 import { withLoggedInUserRoute } from '@/src/server/session'
 import { User } from '@/types'
@@ -11,7 +12,7 @@ export const validateStateForUser = (user: User, state: string) => {
   return user.id === userID && expiresAt > Date.now()
 }
 
-export const LinearRedirectURI = `${process.env.NEXTAUTH_URL}/api/callback/linear`
+export const LinearRedirectURI = buildURLForRoute('/api/callback/linear')
 
 async function authorizeLinear(_: NextApiRequest, res: NextApiResponse<string>, user: User) {
   const query = new URLSearchParams()
