@@ -19,7 +19,7 @@ async function linear(req: NextApiRequest, res: NextApiResponse, user: User) {
 
     const response = await fetch('https://api.linear.app/oauth/token', {
       method: 'POST',
-      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      headers: { 'content-type': 'application/x-www-form-urlencoded', accept: 'application/json' },
       body: query.toString(),
     }).then(response => response.json())
 
