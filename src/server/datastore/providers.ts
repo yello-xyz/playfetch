@@ -13,7 +13,7 @@ import { ExtraModelsForProvider } from '../providers/integration'
 import { IssueTrackerProviders, ModelProviders, SourceControlProviders } from '@/src/common/providerMetadata'
 import { EntityFilter } from '@google-cloud/datastore/build/src/filter'
 import { SortAndFilterProviderData } from '../providers/cascade'
-import { ensureProjectOwnership } from './projects'
+import { ensureProjectLabels, ensureProjectOwnership } from './projects'
 
 const getFilteredProviderData = (filter: EntityFilter, scopeIDs: number[]) =>
   getFilteredEntities(Entity.PROVIDER, filter).then(SortAndFilterProviderData(scopeIDs))
@@ -122,6 +122,8 @@ export async function saveProviderKey(
       apiKey = (await getProviderCredentials([userID], provider)).apiKey
     } else if (provider === 'linear') {
       apiKey = '-'
+      const configs = JSON.parse(environment) as [string[], string[]][]
+      await ensureProjectLabels(scopeID, configs.flat().flat())
     }
   }
   const providerData = await getSingleProviderData([scopeID], provider)
