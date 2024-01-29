@@ -9,6 +9,25 @@ import { IsRawPromptVersion, RawChainVersion, RawPromptVersion } from '@/types'
 
 type Config = [string[], string[]]
 
+const getUserClient = async (userID: number) => {
+  const { apiKey: accessToken } = await getProviderCredentials([userID], 'linear')
+  return accessToken ? new LinearClient({ accessToken }) : null
+}
+
+export async function getActorEmailForIssueState(userID: number, issueID: string, stateID: string) {
+  const client = await getUserClient(userID)
+  if (client) {
+    const issue = await client.issue(issueID)
+    const issueHistory = await issue.history()
+    const action = issueHistory.nodes.find(state => state.toStateId === stateID)
+    if (action?.actorId) {
+      const actor = await client.user(action.actorId)
+      return actor.email
+    }
+  }
+  return null
+}
+
 export async function createTasksOnAddingLabel(
   userID: number,
   projectID: number,
@@ -20,14 +39,13 @@ export async function createTasksOnAddingLabel(
     const configs = JSON.parse(environment) as Config[]
     for (const [triggers, toggles] of configs) {
       if (triggers.includes(label)) {
-        const { apiKey: accessToken } = await getProviderCredentials([userID], 'linear')
-        if (accessToken) {
+        const client = await getUserClient(userID)
+        if (client) {
           const parentID = version.parentID
           const isPrompt = IsRawPromptVersion(version)
           const parentData = await getTrustedPromptOrChainData(parentID)
           const user = await getUserForID(userID)
           const url = buildURLForRoute(isPrompt ? PromptRoute(projectID, parentID) : ChainRoute(projectID, parentID))
-          const client = new LinearClient({ accessToken })
           const labelID = await findOrCreateLabel(client, label)
           const teams = await client.teams()
           const team = teams.nodes[0]

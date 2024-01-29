@@ -26,7 +26,7 @@ import {
   getAccessibleObjectIDs,
 } from './access'
 import { addPromptToProject, matchesDefaultName, toPrompt } from './prompts'
-import { getActiveUsers, toUser } from './users'
+import { getActiveUsers, getUserForEmail, toUser } from './users'
 import { DefaultEndpointFlavor, toEndpoint } from './endpoints'
 import { toChain } from './chains'
 import { ensureWorkspaceAccess, getPendingAccessObjects, getWorkspaceUsers } from './workspaces'
@@ -248,6 +248,11 @@ const getVerifiedUserProjectData = async (userID: number, projectID: number) => 
     await ensureWorkspaceAccess(userID, projectData.workspaceID)
   }
   return projectData
+}
+
+export const getProjectUserForEmail = async (projectID: number, email: string) => {
+  const user = await getUserForEmail(email)
+  return user && (await hasUserAccess(user.id, projectID)) ? user : undefined
 }
 
 // TODO Also call this when deleting prompts/chains or updating endpoints etc.

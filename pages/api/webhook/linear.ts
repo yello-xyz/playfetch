@@ -1,5 +1,9 @@
+import { hasUserAccess } from '@/src/server/datastore/access'
+import { getProjectUserForEmail } from '@/src/server/datastore/projects'
 import { getTaskForIdentifier } from '@/src/server/datastore/tasks'
+import { getUserForEmail } from '@/src/server/datastore/users'
 import { toggleVersionLabels } from '@/src/server/datastore/versions'
+import { getActorEmailForIssueState } from '@/src/server/linear'
 import { withErrorRoute } from '@/src/server/session'
 import { LINEAR_WEBHOOK_SIGNATURE_HEADER, LINEAR_WEBHOOK_TS_FIELD, LinearWebhooks } from '@linear/sdk'
 import type { NextApiRequest, NextApiResponse } from 'next'
@@ -32,7 +36,9 @@ async function linear(req: NextApiRequest, res: NextApiResponse) {
       const task = await getTaskForIdentifier(body.data.id, true)
       if (task) {
         const { versionID, userID, projectID, labels } = task
-        toggleVersionLabels(userID, versionID, projectID, labels)
+        const email = await getActorEmailForIssueState(userID, body.data.id, body.data.state.id)
+        const projectUser = email ? await getProjectUserForEmail(projectID, email) : undefined
+        toggleVersionLabels(projectUser?.id ?? userID, versionID, projectID, labels)
       }
     }
   }
