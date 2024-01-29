@@ -140,9 +140,7 @@ export default function CompareView({
         </div>
         {isDiffMode && leftContent && rightContent && (
           <div className='overflow-y-auto'>
-            <div className='pb-16'>
-              <DiffPane leftContent={leftContent} rightContent={rightContent} />
-            </div>
+            <DiffPane leftContent={leftContent} rightContent={rightContent} />
           </div>
         )}
       </div>

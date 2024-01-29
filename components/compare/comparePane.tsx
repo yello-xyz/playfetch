@@ -110,14 +110,9 @@ export default function ComparePane({
       {includeResponses && (activeVersion || IsEndpoint(activeItem)) && (
         <div className='min-h-0'>
           {activeVersion && !IsEndpoint(activeItem) ? (
-            <RunTimeline
-              runs={activeVersion!.runs}
-              activeItem={activeItem}
-              version={activeVersion}
-              extraPadding='pb-16'
-            />
+            <RunTimeline runs={activeVersion!.runs} activeItem={activeItem} version={activeVersion} />
           ) : (
-            <RunTimeline runs={logsAsRuns} extraPadding='pb-16' />
+            <RunTimeline runs={logsAsRuns} />
           )}
         </div>
       )}

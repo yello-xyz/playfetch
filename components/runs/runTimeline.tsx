@@ -36,7 +36,6 @@ export default function RunTimeline({
   selectInputValue = () => undefined,
   onRatingUpdate,
   isRunning,
-  extraPadding = '',
 }: {
   runs: (PartialRun | Run)[]
   version?: PromptVersion | ChainVersion
@@ -53,7 +52,6 @@ export default function RunTimeline({
   selectInputValue?: (inputKey: string) => string | undefined
   onRatingUpdate?: (run: Run) => Promise<void>
   isRunning?: boolean
-  extraPadding?: string
 }) {
   const focusRun = (focusRunID?: number) => {
     if (focusRunID !== undefined) {
@@ -115,7 +113,7 @@ export default function RunTimeline({
         />
       )}
       {runs.length > 0 ? (
-        <div className={`flex flex-col flex-1 gap-3 p-3 overflow-y-auto ${extraPadding}`}>
+        <div className='flex flex-col flex-1 gap-3 p-3 overflow-y-auto'>
           {GroupRuns(mergedRuns, sortByInputMap).map((group, index) => (
             <RunGroup
               key={index}
