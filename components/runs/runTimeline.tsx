@@ -16,14 +16,13 @@ import {
   GroupRuns,
   IdentifierForRun,
   MergeRuns,
-  FilterItemFromRun,
   SortRuns,
   BuildInputMap,
+  RunSortOption,
 } from '@/src/client/runMerging'
 import { RunGroup } from './runGroup'
-import FiltersHeader from '../filters/filtersHeader'
-import { AvailableLabelColorsForItem } from '../labelPopupMenu'
 import { Filter } from '../filters/filters'
+import RunFiltersHeader from './runFiltersHeader'
 
 export default function RunTimeline({
   runs = [],
@@ -71,13 +70,10 @@ export default function RunTimeline({
     setPreviousActiveRunID(activeRunID)
   }
 
-  type SortOption = 'Date' | 'Test Data Row'
-  const sortOptions: SortOption[] = ['Date', 'Test Data Row']
-  const [activeSortOption, setActiveSortOption] = useState(sortOptions[0])
+  const [activeSortOption, setActiveSortOption] = useState<RunSortOption>('Date')
   const [filters, setFilters] = useState<Filter[]>([])
-  const labelColors = activeItem ? AvailableLabelColorsForItem(activeItem) : {}
 
-  const sortByInputMap = activeSortOption === 'Test Data Row' ? BuildInputMap(inputs) : undefined
+  const inputMap = BuildInputMap(inputs, activeSortOption)
   const mergedRuns = MergeRuns(SortRuns(runs)).filter(BuildRunFilter(filters))
 
   const lastPartialRunID = mergedRuns.filter(run => !('inputs' in run)).slice(-1)[0]?.id
@@ -100,13 +96,11 @@ export default function RunTimeline({
   return (
     <div className='relative flex flex-col h-full'>
       {activeItem && (
-        <FiltersHeader
-          users={activeItem.users}
-          labelColors={labelColors}
-          items={mergedRuns.filter(IsProperRun).map(FilterItemFromRun)}
+        <RunFiltersHeader
+          activeItem={activeItem}
+          runs={mergedRuns}
           filters={filters}
           setFilters={setFilters}
-          sortOptions={sortOptions}
           activeSortOption={activeSortOption}
           setActiveSortOption={setActiveSortOption}
           tabSelector={children => <SingleTabHeader label='Responses'>{children}</SingleTabHeader>}
@@ -114,11 +108,11 @@ export default function RunTimeline({
       )}
       {runs.length > 0 ? (
         <div className='flex flex-col flex-1 gap-3 p-3 overflow-y-auto'>
-          {GroupRuns(mergedRuns, sortByInputMap).map((group, index) => (
+          {GroupRuns(mergedRuns, inputMap).map((group, index) => (
             <RunGroup
               key={index}
               group={group}
-              sortByInputMap={sortByInputMap}
+              sortByInputMap={inputMap}
               version={version}
               activeItem={activeItem}
               isRunSelected={isRunSelected}
