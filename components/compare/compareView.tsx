@@ -4,11 +4,11 @@ import useActiveItemCache from '@/src/client/hooks/useActiveItemCache'
 import { useCallback, useEffect, useState } from 'react'
 import { ParseNumberQuery } from '@/src/common/clientRoute'
 import { useRouter } from 'next/router'
-import SegmentedControl, { Segment } from '../segmentedControl'
 import DiffPane from './diffPane'
 import useDiffContent from '@/src/client/hooks/useDiffContent'
 import { IsEndpoint } from '@/src/common/activeItem'
 import { useActiveProject } from '@/src/client/context/projectContext'
+import TabsHeader from '../tabsHeader'
 
 export default function CompareView({
   logEntries = [],
@@ -20,7 +20,9 @@ export default function CompareView({
   const router = useRouter()
   const { i: itemID, v: versionID, p: previousVersionID } = ParseNumberQuery(router.query)
 
-  const [isDiffMode, setDiffMode] = useState(false)
+  type CompareTab = 'Diff' | 'Responses'
+  const [activeTab, setActiveTab] = useState<CompareTab>('Responses')
+
   const [rightItemID, setRightItemID] = useState(itemID)
   const [rightVersionID, setRightVersionID] = useState(versionID)
   const [leftItemID, setLeftItemID] = useState(itemID)
@@ -114,7 +116,8 @@ export default function CompareView({
   return comparableItems.length > 0 ? (
     <>
       <div className='flex flex-col h-full bg-gray-25'>
-        <div className={isDiffMode ? 'flex' : 'flex h-full'}>
+        <TabsHeader tabs={['Diff', 'Responses']} activeTab={activeTab} setActiveTab={setActiveTab} />
+        <div className={activeTab === 'Diff' ? 'flex' : 'flex min-h-0'}>
           <ComparePane
             project={activeProject}
             comparableItems={comparableItems}
@@ -124,7 +127,7 @@ export default function CompareView({
             setItemID={setLeftItemID}
             setVersionID={setLeftVersionID}
             disabled={!leftItemID}
-            includeResponses={!isDiffMode}
+            includeResponses={activeTab === 'Responses'}
           />
           <div className='h-full border-l border-gray-200' />
           <ComparePane
@@ -135,21 +138,15 @@ export default function CompareView({
             activeVersion={rightVersion}
             setItemID={updateRightItemID}
             setVersionID={updateRightVersionID}
-            includeResponses={!isDiffMode}
+            includeResponses={activeTab === 'Responses'}
           />
         </div>
-        {isDiffMode && leftContent && rightContent && (
+        {activeTab === 'Diff' && leftContent && rightContent && (
           <div className='overflow-y-auto'>
             <DiffPane leftContent={leftContent} rightContent={rightContent} />
           </div>
         )}
       </div>
-      {(IsEndpoint(leftItem) || leftVersionID) && (IsEndpoint(rightItem) || rightVersionID) && (
-        <SegmentedControl className='absolute z-30 bottom-4 right-4' selected={isDiffMode} callback={setDiffMode}>
-          <Segment title='Diff' value={true} />
-          <Segment title='Responses' value={false} />
-        </SegmentedControl>
-      )}
     </>
   ) : (
     <EmptyCompareView />
