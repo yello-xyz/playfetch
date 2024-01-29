@@ -1,8 +1,6 @@
-import { hasUserAccess } from '@/src/server/datastore/access'
 import { saveComment } from '@/src/server/datastore/comments'
 import { getProjectUserForEmail } from '@/src/server/datastore/projects'
 import { getTaskForIdentifier } from '@/src/server/datastore/tasks'
-import { getUserForEmail } from '@/src/server/datastore/users'
 import { getTrustedVersion, toggleVersionLabels } from '@/src/server/datastore/versions'
 import { getActorEmailForID, getActorEmailForIssueState } from '@/src/server/linear'
 import { withErrorRoute } from '@/src/server/session'
@@ -36,14 +34,10 @@ async function linear(req: NextApiRequest, res: NextApiResponse) {
         data.state?.type === 'completed'
       ) {
         processCompletedTask(body.data.id, body.data.state.id)
-      } else if (
-        type === 'Comment' &&
-        action === 'create' &&
-        data.issueId &&
-        data.userId &&
-        data.body
-      ) {
+      } else if (type === 'Comment' && action === 'create' && data.issueId && data.userId && data.body) {
         processComment(data.issueId, data.userId, data.body)
+      } else {
+        console.log(type, action, data.issueId, data.userId, data.body)
       }
     }
   }
@@ -63,12 +57,15 @@ async function processCompletedTask(issueID: string, stateID: string) {
 
 async function processComment(issueID: string, actorID: string, comment: string) {
   const task = await getTaskForIdentifier(issueID)
+  console.log(issueID, task)
   if (task) {
     const { versionID, userID, projectID } = task
     const email = await getActorEmailForID(userID, actorID)
     const projectUser = email ? await getProjectUserForEmail(projectID, email) : undefined
+    console.log(email, projectUser)
     if (projectUser) {
       const version = await getTrustedVersion(versionID, true)
+      console.log(comment, versionID)
       await saveComment(projectUser.id, projectID, version.parentID, versionID, comment)
     }
   }

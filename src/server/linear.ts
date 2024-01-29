@@ -23,7 +23,6 @@ export async function getActorEmailForID(userID: number, actorID: string) {
   return null
 }
 
-
 export async function getActorEmailForIssueState(userID: number, issueID: string, stateID: string) {
   const client = await getUserClient(userID)
   if (client) {
