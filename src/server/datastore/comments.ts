@@ -1,5 +1,6 @@
 import { Comment, CommentAction } from '@/types'
 import { Entity, buildKey, getDatastore, getID, getRecentEntities, getTimestamp } from './datastore'
+import { syncTaskComments } from '../linear'
 
 export async function migrateComments(postMerge: boolean) {
   if (postMerge) {
@@ -41,13 +42,14 @@ export async function saveComment(
   itemIndex?: number,
   startIndex?: number
 ) {
+  const createdAt = new Date()
   const commentData = toCommentData(
     userID,
     projectID,
     parentID,
     versionID,
     text,
-    new Date(),
+    createdAt,
     replyTo,
     action,
     quote,
@@ -56,6 +58,9 @@ export async function saveComment(
     startIndex
   )
   await getDatastore().save(commentData)
+  if (!runID && !action) {
+    syncTaskComments(userID, versionID, text, createdAt)
+  }
   return toComment({ ...commentData.data, key: commentData.key })
 }
 

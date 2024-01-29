@@ -4,7 +4,7 @@ import { ChainRoute, PromptRoute } from '../common/clientRoute'
 import { getTrustedPromptOrChainData } from './datastore/chains'
 import buildURLForRoute from './routing'
 import { getUserForID } from './datastore/users'
-import { saveNewTask } from './datastore/tasks'
+import { getPendingTaskIdentifiersForVersion, saveNewTask } from './datastore/tasks'
 import { IsRawPromptVersion, RawChainVersion, RawPromptVersion } from '@/types'
 
 type Config = [string[], string[]]
@@ -88,4 +88,21 @@ const findOrCreateLabel = async (client: LinearClient, label: string) => {
     }
   }
   return labelID
+}
+
+export async function syncTaskComments(
+  userID: number,
+  versionID: number,
+  comment: string,
+  createdAt: Date,
+) {
+  const identifiers = await getPendingTaskIdentifiersForVersion(versionID)
+  if (identifiers.length > 0) {
+    const client = await getUserClient(userID)
+    if (client) {
+      for (const identifier of identifiers) {
+        await client.createComment({ issueId: identifier, body: comment, createdAt })
+      }    
+    }
+  }
 }

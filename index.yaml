@@ -148,3 +148,8 @@ indexes:
   - name: userID
   - name: createdAt
     direction: desc
+
+- kind: task
+  properties:
+  - name: versionID
+  - name: completedAt

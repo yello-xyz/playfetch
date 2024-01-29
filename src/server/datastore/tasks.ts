@@ -1,4 +1,5 @@
-import { Entity, buildKey, getDatastore, getID, getEntity } from './datastore'
+import { and } from '@google-cloud/datastore'
+import { Entity, buildKey, getDatastore, getID, getEntity, getFilteredEntities, buildFilter } from './datastore'
 
 export async function migrateTasks(postMerge: boolean) {
   if (postMerge) {
@@ -29,6 +30,14 @@ export async function getTaskForIdentifier(
         labels: JSON.parse(taskData.labels),
       }
     : null
+}
+
+export async function getPendingTaskIdentifiersForVersion(versionID: number): Promise<string[]> {
+  const taskData = await getFilteredEntities(
+    Entity.TASK,
+    and([buildFilter('versionID', versionID), buildFilter('completedAt', null)])
+  )
+  return taskData.map(task => task.identifier)
 }
 
 async function updateTask(taskData: any) {
