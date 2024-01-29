@@ -89,6 +89,12 @@ indexes:
   - name: createdAt
     direction: desc
 
+- kind: comment
+  properties:
+  - name: versionID
+  - name: createdAt
+    direction: desc
+
 - kind: provider
   properties:
   - name: userID
