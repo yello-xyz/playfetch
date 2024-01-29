@@ -1,9 +1,10 @@
 import { hasUserAccess } from '@/src/server/datastore/access'
+import { saveComment } from '@/src/server/datastore/comments'
 import { getProjectUserForEmail } from '@/src/server/datastore/projects'
 import { getTaskForIdentifier } from '@/src/server/datastore/tasks'
 import { getUserForEmail } from '@/src/server/datastore/users'
-import { toggleVersionLabels } from '@/src/server/datastore/versions'
-import { getActorEmailForIssueState } from '@/src/server/linear'
+import { getTrustedVersion, toggleVersionLabels } from '@/src/server/datastore/versions'
+import { getActorEmailForID, getActorEmailForIssueState } from '@/src/server/linear'
 import { withErrorRoute } from '@/src/server/session'
 import { LINEAR_WEBHOOK_SIGNATURE_HEADER, LINEAR_WEBHOOK_TS_FIELD, LinearWebhooks } from '@linear/sdk'
 import type { NextApiRequest, NextApiResponse } from 'next'
@@ -25,27 +26,51 @@ async function linear(req: NextApiRequest, res: NextApiResponse) {
     const buffer = await parsePayload(req)
     const body = JSON.parse(buffer.toString())
     console.log('WEBHOOK PAYLOAD', body)
-    if (
-      body.type === 'Issue' &&
-      body.data &&
-      body.data.completedAt !== null &&
-      body.updatedFrom?.completedAt === null &&
-      body.data.state?.type === 'completed' &&
-      webhook.verify(buffer, signature, body[LINEAR_WEBHOOK_TS_FIELD])
-    ) {
-      processCompletedTask(body.data.id, body.data.state.id)
+    const { type, action, data, updatedFrom } = body
+    if (data && webhook.verify(buffer, signature, body[LINEAR_WEBHOOK_TS_FIELD])) {
+      if (
+        type === 'Issue' &&
+        action === 'update' &&
+        data.completedAt !== null &&
+        updatedFrom?.completedAt === null &&
+        data.state?.type === 'completed'
+      ) {
+        processCompletedTask(body.data.id, body.data.state.id)
+      } else if (
+        type === 'Comment' &&
+        action === 'create' &&
+        data.issueId &&
+        data.userId &&
+        data.body
+      ) {
+        processComment(data.issueId, data.userId, data.body)
+      }
     }
   }
   res.status(200).json({})
 }
 
-async function processCompletedTask(taskID: string, stateID: string) {
-  const task = await getTaskForIdentifier(taskID, true)
+async function processCompletedTask(issueID: string, stateID: string) {
+  const task = await getTaskForIdentifier(issueID, true)
   if (task) {
     const { versionID, userID, projectID, labels } = task
-    const email = await getActorEmailForIssueState(userID, taskID, stateID)
+    const email = await getActorEmailForIssueState(userID, issueID, stateID)
     const projectUser = email ? await getProjectUserForEmail(projectID, email) : undefined
-    await toggleVersionLabels(projectUser?.id ?? userID, versionID, projectID, labels)
+    const actorID = projectUser?.id ?? userID
+    await toggleVersionLabels(actorID, versionID, projectID, labels)
+  }
+}
+
+async function processComment(issueID: string, actorID: string, comment: string) {
+  const task = await getTaskForIdentifier(issueID)
+  if (task) {
+    const { versionID, userID, projectID } = task
+    const email = await getActorEmailForID(userID, actorID)
+    const projectUser = email ? await getProjectUserForEmail(projectID, email) : undefined
+    if (projectUser) {
+      const version = await getTrustedVersion(versionID, true)
+      await saveComment(projectUser.id, projectID, version.parentID, versionID, comment)
+    }
   }
 }
 

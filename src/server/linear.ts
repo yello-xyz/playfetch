@@ -14,6 +14,16 @@ const getUserClient = async (userID: number) => {
   return accessToken ? new LinearClient({ accessToken }) : null
 }
 
+export async function getActorEmailForID(userID: number, actorID: string) {
+  const client = await getUserClient(userID)
+  if (client) {
+    const actor = await client.user(actorID)
+    return actor.email
+  }
+  return null
+}
+
+
 export async function getActorEmailForIssueState(userID: number, issueID: string, stateID: string) {
   const client = await getUserClient(userID)
   if (client) {
