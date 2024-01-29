@@ -249,6 +249,7 @@ export async function processLabels(
       parentID,
       versionID,
       label,
+      null,
       replyTo,
       checked ? 'addLabel' : 'removeLabel',
       runID

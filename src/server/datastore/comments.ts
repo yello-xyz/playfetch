@@ -35,6 +35,7 @@ export async function saveComment(
   parentID: number,
   versionID: number,
   text: string,
+  timestamp: Date | null,
   replyTo?: number,
   action?: CommentAction,
   runID?: number,
@@ -42,7 +43,7 @@ export async function saveComment(
   itemIndex?: number,
   startIndex?: number
 ) {
-  const createdAt = new Date()
+  const createdAt = timestamp ?? new Date()
   const commentData = toCommentData(
     userID,
     projectID,
@@ -58,7 +59,7 @@ export async function saveComment(
     startIndex
   )
   await getDatastore().save(commentData)
-  if (!runID && !action) {
+  if (!timestamp && !runID && !action) {
     syncTaskComments(userID, versionID, text, createdAt)
   }
   return toComment({ ...commentData.data, key: commentData.key })

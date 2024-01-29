@@ -68,7 +68,8 @@ async function processComment(issueID: string, actorID: string, actorName: strin
     }
     if (projectUser) {
       const version = await getTrustedVersion(versionID, true)
-      await saveComment(projectUser.id, projectID, version.parentID, versionID, comment)
+      const timestamp = new Date()
+      await saveComment(projectUser.id, projectID, version.parentID, versionID, comment, timestamp)
     }
   }
 }
