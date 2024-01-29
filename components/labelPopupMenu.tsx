@@ -1,4 +1,4 @@
-import { ActivePrompt, Run, PromptVersion, ActiveChain, ChainVersion, ActiveProject } from '@/types'
+import { ActivePrompt, Run, PromptVersion, ActiveChain, ChainVersion } from '@/types'
 import api from '@/src/client/api'
 import { PopupContent } from './popupMenu'
 import addIcon from '@/public/add.svg'
@@ -19,7 +19,7 @@ const projectLabelColors = [
   'bg-yellow-300 text-white',
 ]
 
-export const AvailableLabelColorsForItem = (item: ActivePrompt | ActiveChain | ActiveProject) =>
+export const AvailableLabelColorsForItem = (item: { availableLabels: string[] }) =>
   Object.fromEntries(
     item.availableLabels.map((label, index) => [label, projectLabelColors[index % projectLabelColors.length]])
   )

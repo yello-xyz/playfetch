@@ -94,8 +94,11 @@ const ConfigPanes = ({
   isUpdating: boolean
   isProcessing: boolean
 }) => {
-  const labels = activeProject ? activeProject.availableLabels : []
-  const colors = activeProject ? AvailableLabelColorsForItem(activeProject) : {}
+  const projectLabels = activeProject ? activeProject.availableLabels : []
+  const configLabels = [...new Set(configs.flat().flat())]
+  const pendingLabels = configLabels.filter(l => !projectLabels.includes(l))
+  const availableLabels = [...projectLabels, ...pendingLabels]
+  const colors = AvailableLabelColorsForItem({ availableLabels })
 
   const toggle = (labels: string[], label: string) =>
     labels.includes(label) ? labels.filter(l => l !== label) : [...labels, label]
@@ -118,7 +121,7 @@ const ConfigPanes = ({
               {isUpdating && !isProcessing && (
                 <LabelPopupMenu
                   activeLabels={triggers}
-                  availableLabels={labels}
+                  availableLabels={availableLabels}
                   colors={colors}
                   toggleLabel={l =>
                     setConfigs(configs.map(([t, _], i) => (i === index ? [toggle(t, l), toggles] : [t, toggles])))
@@ -134,7 +137,7 @@ const ConfigPanes = ({
               {isUpdating && !isProcessing && (
                 <LabelPopupMenu
                   activeLabels={toggles}
-                  availableLabels={labels}
+                  availableLabels={availableLabels}
                   colors={colors}
                   toggleLabel={l =>
                     setConfigs(configs.map(([_, t], i) => (i === index ? [triggers, toggle(t, l)] : [triggers, t])))
