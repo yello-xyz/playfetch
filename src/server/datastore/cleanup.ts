@@ -1,5 +1,5 @@
 import { Key } from '@google-cloud/datastore'
-import { Entity, buildKey, getDatastore, getEntityKey, getEntityKeys, getID, getKeyedEntity } from './datastore'
+import { Entity, buildKey, getDatastore, getEntityKeys, getID, getKeyedEntity } from './datastore'
 
 export async function migrateCleanup(postMerge: boolean) {
   if (postMerge) {
@@ -53,6 +53,7 @@ export default async function cleanUpEntities() {
         await deleteBatchedEntities(Entity.COMMENT, 'parentID', entityID)
         await deleteBatchedEntities(Entity.RUN, 'parentID', entityID)
         await deleteBatchedEntities(Entity.VERSION, 'parentID', entityID)
+        await deleteBatchedEntities(Entity.TASK, 'parentID', entityID)
         break
       case Entity.TABLE:
         await deleteBatchedEntities(Entity.INPUT, 'parentID', entityID)
@@ -65,9 +66,9 @@ export default async function cleanUpEntities() {
         await deleteBatchedEntities(Entity.ENDPOINT, 'projectID', entityID)
         await deleteBatchedEntities(Entity.USAGE, 'projectID', entityID)
         await deleteBatchedEntities(Entity.LOG, 'projectID', entityID)
-        await deleteBatchedEntities(Entity.TASK, 'projectID', entityID)
         await deleteBatchedEntities(Entity.ANALYTICS, 'projectID', entityID)
         await deleteBatchedEntities(Entity.COMMENT, 'projectID', entityID)
+        await deleteBatchedEntities(Entity.TASK, 'projectID', entityID)
         await cleanUpBatchedEntities(Entity.PROMPT, 'projectID', entityID)
         await cleanUpBatchedEntities(Entity.CHAIN, 'projectID', entityID)
         await cleanUpBatchedEntities(Entity.TABLE, 'projectID', entityID)

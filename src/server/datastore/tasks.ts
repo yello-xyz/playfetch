@@ -45,6 +45,7 @@ async function updateTask(taskData: any) {
     toTaskData(
       taskData.userID,
       taskData.projectID,
+      taskData.parentID,
       taskData.versionID,
       taskData.identifier,
       JSON.parse(taskData.labels),
@@ -58,14 +59,16 @@ async function updateTask(taskData: any) {
 export const saveNewTask = (
   userID: number,
   projectID: number,
+  parentID: number,
   versionID: number,
   identifier: string,
   labels: string[]
-) => getDatastore().save(toTaskData(userID, projectID, versionID, identifier, labels, new Date(), null))
+) => getDatastore().save(toTaskData(userID, projectID, parentID, versionID, identifier, labels, new Date(), null))
 
 const toTaskData = (
   userID: number,
   projectID: number,
+  parentID: number,
   versionID: number,
   identifier: string,
   labels: string[],
@@ -74,6 +77,6 @@ const toTaskData = (
   taskID?: number
 ) => ({
   key: buildKey(Entity.TASK, taskID),
-  data: { userID, projectID, versionID, identifier, createdAt, completedAt, labels: JSON.stringify(labels) },
+  data: { userID, projectID, parentID, versionID, identifier, createdAt, completedAt, labels: JSON.stringify(labels) },
   excludeFromIndexes: ['labels'],
 })

@@ -67,7 +67,7 @@ export async function createTasksOnAddingLabel(
             })
             const createdIssue = await issue.issue
             if (issue.success && createdIssue?.id) {
-              await saveNewTask(userID, projectID, version.id, createdIssue.id, toggles)
+              await saveNewTask(userID, projectID, parentID, version.id, createdIssue.id, toggles)
             }
           }
         }
