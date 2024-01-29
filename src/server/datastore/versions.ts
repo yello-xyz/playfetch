@@ -383,11 +383,12 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
 
   const parentID = versionData.parentID
   const wasPromptVersion = IsPromptVersion(versionData)
-  const parentData = await getTrustedProjectScopedData([wasPromptVersion ? Entity.PROMPT : Entity.CHAIN], parentID)
-  const anyVersionWithSameParentKey = await getEntityKey(Entity.VERSION, 'parentID', parentID)
 
   await deleteEntity(Entity.VERSION, versionID)
 
+  const anyVersionWithSameParentKey = await getEntityKey(Entity.VERSION, 'parentID', parentID)
+  const parentData = await getTrustedProjectScopedData([wasPromptVersion ? Entity.PROMPT : Entity.CHAIN], parentID)
+  
   if (!wasPromptVersion) {
     await updateChainOnDeletedVersion(parentData, versionID)
   } else if (anyVersionWithSameParentKey) {
