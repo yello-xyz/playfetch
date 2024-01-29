@@ -52,7 +52,7 @@ export const saveNewTask = (
   versionID: number,
   identifier: string,
   labels: string[]
-) => getDatastore().save(toTaskData(userID, projectID, versionID, identifier, labels, new Date()))
+) => getDatastore().save(toTaskData(userID, projectID, versionID, identifier, labels, new Date(), null))
 
 const toTaskData = (
   userID: number,
@@ -61,7 +61,7 @@ const toTaskData = (
   identifier: string,
   labels: string[],
   createdAt: Date,
-  completedAt?: Date,
+  completedAt: Date | null,
   taskID?: number
 ) => ({
   key: buildKey(Entity.TASK, taskID),
