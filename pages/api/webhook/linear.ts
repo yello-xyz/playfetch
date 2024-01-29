@@ -35,8 +35,15 @@ async function linear(req: NextApiRequest, res: NextApiResponse) {
         data.state?.type === 'completed'
       ) {
         processCompletedTask(body.data.id, body.data.state.id)
-      } else if (type === 'Comment' && action === 'create' && data.issueId && data.userId && data.body) {
-        processComment(data.issueId, data.userId, data.user?.name, data.body)
+      } else if (
+        type === 'Comment' &&
+        action === 'create' &&
+        data.issueId &&
+        data.userId &&
+        data.body &&
+        data.createdAt
+      ) {
+        processComment(data.issueId, data.userId, data.user?.name, data.body, new Date(data.createdAt))
       }
     }
   }
@@ -54,7 +61,7 @@ async function processCompletedTask(issueID: string, stateID: string) {
   }
 }
 
-async function processComment(issueID: string, actorID: string, actorName: string, comment: string) {
+async function processComment(issueID: string, actorID: string, actorName: string, comment: string, createdAt: Date) {
   const task = await getTaskForIdentifier(issueID)
   if (task) {
     const { versionID, userID, projectID } = task
@@ -68,8 +75,7 @@ async function processComment(issueID: string, actorID: string, actorName: strin
     }
     if (projectUser) {
       const version = await getTrustedVersion(versionID, true)
-      const timestamp = new Date()
-      await saveComment(projectUser.id, projectID, version.parentID, versionID, comment, timestamp)
+      await saveComment(projectUser.id, projectID, version.parentID, versionID, comment, createdAt)
     }
   }
 }
