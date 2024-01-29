@@ -33,16 +33,20 @@ async function linear(req: NextApiRequest, res: NextApiResponse) {
       body.data.state?.type === 'completed' &&
       webhook.verify(buffer, signature, body[LINEAR_WEBHOOK_TS_FIELD])
     ) {
-      const task = await getTaskForIdentifier(body.data.id, true)
-      if (task) {
-        const { versionID, userID, projectID, labels } = task
-        const email = await getActorEmailForIssueState(userID, body.data.id, body.data.state.id)
-        const projectUser = email ? await getProjectUserForEmail(projectID, email) : undefined
-        toggleVersionLabels(projectUser?.id ?? userID, versionID, projectID, labels)
-      }
+      processCompletedTask(body.data.id, body.data.state.id)
     }
   }
   res.status(200).json({})
+}
+
+async function processCompletedTask(taskID: string, stateID: string) {
+  const task = await getTaskForIdentifier(taskID, true)
+  if (task) {
+    const { versionID, userID, projectID, labels } = task
+    const email = await getActorEmailForIssueState(userID, taskID, stateID)
+    const projectUser = email ? await getProjectUserForEmail(projectID, email) : undefined
+    await toggleVersionLabels(projectUser?.id ?? userID, versionID, projectID, labels)
+  }
 }
 
 export default withErrorRoute(linear)
