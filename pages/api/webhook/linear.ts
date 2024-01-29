@@ -1,8 +1,9 @@
 import { saveComment } from '@/src/server/datastore/comments'
+import { Entity, buildFilter } from '@/src/server/datastore/datastore'
 import { getProjectUserForEmail } from '@/src/server/datastore/projects'
 import { getTaskForIdentifier } from '@/src/server/datastore/tasks'
 import { getUserForID } from '@/src/server/datastore/users'
-import { getTrustedVersion, toggleVersionLabels } from '@/src/server/datastore/versions'
+import { getLastCommentForVersion, getTrustedVersion, toggleVersionLabels } from '@/src/server/datastore/versions'
 import { getActorEmailForID, getActorEmailForIssueState } from '@/src/server/linear'
 import { withErrorRoute } from '@/src/server/session'
 import { LINEAR_WEBHOOK_SIGNATURE_HEADER, LINEAR_WEBHOOK_TS_FIELD, LinearWebhooks } from '@linear/sdk'
@@ -75,7 +76,11 @@ async function processComment(issueID: string, actorID: string, actorName: strin
     }
     if (projectUser) {
       const version = await getTrustedVersion(versionID, true)
-      await saveComment(projectUser.id, projectID, version.parentID, versionID, comment, createdAt)
+      const lastComment = await getLastCommentForVersion(versionID)
+      console.log(createdAt, lastComment ? new Date(lastComment.timestamp) : undefined)
+      if (!lastComment || new Date(lastComment.timestamp) < createdAt) {
+        await saveComment(projectUser.id, projectID, version.parentID, versionID, comment, createdAt)
+      }
     }
   }
 }

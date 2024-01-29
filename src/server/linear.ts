@@ -90,19 +90,14 @@ const findOrCreateLabel = async (client: LinearClient, label: string) => {
   return labelID
 }
 
-export async function syncTaskComments(
-  userID: number,
-  versionID: number,
-  comment: string,
-  createdAt: Date,
-) {
+export async function syncTaskComments(userID: number, versionID: number, comment: string, createdAt: Date) {
   const identifiers = await getPendingTaskIdentifiersForVersion(versionID)
   if (identifiers.length > 0) {
     const client = await getUserClient(userID)
     if (client) {
       for (const identifier of identifiers) {
         await client.createComment({ issueId: identifier, body: comment, createdAt })
-      }    
+      }
     }
   }
 }

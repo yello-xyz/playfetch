@@ -2,12 +2,14 @@ import { ChainItemWithInputs, PromptConfig, Prompts, RawChainVersion, RawPromptV
 import {
   Entity,
   allocateID,
+  buildFilter,
   buildKey,
   getDatastore,
   getEntityKey,
   getID,
   getKeyedEntities,
   getKeyedEntity,
+  getLastEntity,
   getRecentEntities,
   getTimestamp,
 } from './datastore'
@@ -20,7 +22,7 @@ import {
   updatePromptLastEditedAt,
 } from './prompts'
 import { augmentProjectWithNewVersion, ensureProjectLabels } from './projects'
-import { saveComment } from './comments'
+import { saveComment, toComment } from './comments'
 import { ChainVersionsAreEqual, PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import {
   augmentChainDataWithNewVersion,
@@ -226,6 +228,11 @@ const updateVersionData = (versionData: any) =>
   )
 
 const updateVersion = (versionData: any) => getDatastore().save(updateVersionData(versionData))
+
+export const getLastCommentForVersion = async (versionID: number) => {
+  const commentData = getLastEntity(Entity.COMMENT, 'versionID', versionID)
+  return commentData ? toComment(commentData) : null
+}
 
 export async function processLabels(
   labels: string[],

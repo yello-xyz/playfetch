@@ -10,7 +10,7 @@ import {
   getFilteredEntity,
   getID,
   getKeyedEntity,
-  getLastEntity,
+  getLastFilteredEntity,
   getOrderedEntities,
 } from './datastore'
 import {
@@ -180,7 +180,7 @@ export async function getExportablePromptsFromProject(projectID: number) {
     and([buildFilter('projectID', projectID), new PropertyFilter('sourcePath', '!=', null)])
   )
   for (const promptData of sourcePathPrompts) {
-    const lastRunVersion = await getLastEntity(
+    const lastRunVersion = await getLastFilteredEntity(
       Entity.VERSION,
       and([buildFilter('parentID', getID(promptData)), buildFilter('didRun', true)])
     )
