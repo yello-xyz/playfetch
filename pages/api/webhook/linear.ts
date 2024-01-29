@@ -20,7 +20,7 @@ async function linear(req: NextApiRequest, res: NextApiResponse) {
   if (signature) {
     const buffer = await parsePayload(req)
     const body = JSON.parse(buffer.toString())
-    console.log('WEBHOOK DATA', body.data)
+    console.log('WEBHOOK PAYLOAD', body)
     if (
       body.type === 'Issue' &&
       body.data &&
