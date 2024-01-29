@@ -10,16 +10,16 @@ const RunFiltersHeader = ({
   runs,
   filters,
   setFilters,
-  activeSortOption,
-  setActiveSortOption,
+  sortOption,
+  setSortOption,
   tabSelector,
 }: {
   activeItem: ActivePrompt | ActiveChain | ActiveProject
   runs: (PartialRun | Run)[]
   filters: Filter[]
   setFilters: (filters: Filter[]) => void
-  activeSortOption: RunSortOption
-  setActiveSortOption: (sortOption: RunSortOption) => void
+  sortOption: RunSortOption
+  setSortOption: (sortOption: RunSortOption) => void
   tabSelector: (children?: ReactNode) => ReactNode
 }) => (
   <FiltersHeader
@@ -29,8 +29,8 @@ const RunFiltersHeader = ({
     filters={filters}
     setFilters={setFilters}
     sortOptions={['Date', 'Test Data Row']}
-    activeSortOption={activeSortOption}
-    setActiveSortOption={setActiveSortOption}
+    activeSortOption={sortOption}
+    setActiveSortOption={setSortOption}
     tabSelector={tabSelector}
   />
 )

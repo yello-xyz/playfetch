@@ -18,6 +18,8 @@ import PromptPanel from '../prompts/promptPanel'
 import { IsEndpoint } from '@/src/common/activeItem'
 import { ExtractInputKey } from '@/src/common/formatting'
 import { useState } from 'react'
+import { RunSortOption } from '@/src/client/runMerging'
+import { Filter } from '../filters/filters'
 
 export default function ComparePane({
   project,
@@ -29,6 +31,8 @@ export default function ComparePane({
   setVersionID,
   disabled,
   includeResponses,
+  runFilters,
+  runSortOption,
 }: {
   project: ActiveProject
   comparableItems: (Prompt | Chain | ResolvedEndpoint)[]
@@ -39,6 +43,8 @@ export default function ComparePane({
   setVersionID: (versionID: number) => void
   disabled?: boolean
   includeResponses?: boolean
+  runFilters: Filter[]
+  runSortOption?: RunSortOption
 }) {
   const precedesContinuation = (continuation: LogEntry) => (log: LogEntry) =>
     !!continuation.continuationID &&
@@ -110,9 +116,15 @@ export default function ComparePane({
       {includeResponses && (activeVersion || IsEndpoint(activeItem)) && (
         <div className='min-h-0'>
           {activeVersion && !IsEndpoint(activeItem) ? (
-            <RunTimeline runs={activeVersion!.runs} activeItem={activeItem} version={activeVersion} />
+            <RunTimeline
+              runs={activeVersion!.runs}
+              activeItem={activeItem}
+              version={activeVersion}
+              runFilters={runFilters}
+              runSortOption={runSortOption}
+            />
           ) : (
-            <RunTimeline runs={logsAsRuns} />
+            <RunTimeline runs={logsAsRuns} runFilters={runFilters} runSortOption={runSortOption} />
           )}
         </div>
       )}

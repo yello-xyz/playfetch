@@ -35,6 +35,8 @@ export default function RunTimeline({
   selectInputValue = () => undefined,
   onRatingUpdate,
   isRunning,
+  runFilters,
+  runSortOption,
 }: {
   runs: (PartialRun | Run)[]
   version?: PromptVersion | ChainVersion
@@ -51,6 +53,8 @@ export default function RunTimeline({
   selectInputValue?: (inputKey: string) => string | undefined
   onRatingUpdate?: (run: Run) => Promise<void>
   isRunning?: boolean
+  runFilters?: Filter[]
+  runSortOption?: RunSortOption
 }) {
   const focusRun = (focusRunID?: number) => {
     if (focusRunID !== undefined) {
@@ -70,11 +74,11 @@ export default function RunTimeline({
     setPreviousActiveRunID(activeRunID)
   }
 
-  const [activeSortOption, setActiveSortOption] = useState<RunSortOption>('Date')
+  const [sortOption, setSortOption] = useState<RunSortOption>('Date')
   const [filters, setFilters] = useState<Filter[]>([])
 
-  const inputMap = BuildInputMap(inputs, activeSortOption)
-  const mergedRuns = MergeRuns(SortRuns(runs)).filter(BuildRunFilter(filters))
+  const inputMap = BuildInputMap(inputs, runSortOption ?? sortOption)
+  const mergedRuns = MergeRuns(SortRuns(runs)).filter(BuildRunFilter(runFilters ?? filters))
 
   const lastPartialRunID = mergedRuns.filter(run => !('inputs' in run)).slice(-1)[0]?.id
   const [previousLastRunID, setPreviousLastRunID] = useState(lastPartialRunID)
@@ -95,14 +99,14 @@ export default function RunTimeline({
 
   return (
     <div className='relative flex flex-col h-full'>
-      {activeItem && (
+      {!runFilters && !runSortOption && activeItem && (
         <RunFiltersHeader
           activeItem={activeItem}
           runs={mergedRuns}
           filters={filters}
           setFilters={setFilters}
-          activeSortOption={activeSortOption}
-          setActiveSortOption={setActiveSortOption}
+          sortOption={sortOption}
+          setSortOption={setSortOption}
           tabSelector={children => <SingleTabHeader label='Responses'>{children}</SingleTabHeader>}
         />
       )}

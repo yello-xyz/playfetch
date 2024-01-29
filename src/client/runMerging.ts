@@ -80,7 +80,7 @@ export const BuildInputMap = (inputs: Inputs, sortOption: RunSortOption): InputM
   if (sortOption === 'Test Data Row') {
     const inputMap = {} as InputMap
     inputs[0].forEach((input, index) => (inputMap[HashInput(input)] = inputs[1][index]))
-    return inputMap  
+    return inputMap
   } else {
     return undefined
   }

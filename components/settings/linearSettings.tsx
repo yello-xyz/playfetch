@@ -44,7 +44,7 @@ export default function LinearSettings({
       availableProvider={availableProvider}
       supportsReconfigureWithoutReset
       onRefresh={onRefresh}
-      getEnvironment={() => configs.length > 0 ? JSON.stringify(configs) : undefined}
+      getEnvironment={() => (configs.length > 0 ? JSON.stringify(configs) : undefined)}
       userConfiguration={() => (
         <Button type='secondary' onClick={() => api.authorizeLinear().then(router.push)}>
           {scopedProvider ? 'Reauthorize' : 'Authorize'}

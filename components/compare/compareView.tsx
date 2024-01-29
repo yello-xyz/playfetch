@@ -1,7 +1,7 @@
 import { Endpoint, LogEntry } from '@/types'
 import ComparePane from './comparePane'
 import useActiveItemCache from '@/src/client/hooks/useActiveItemCache'
-import { useCallback, useEffect, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { ParseNumberQuery } from '@/src/common/clientRoute'
 import { useRouter } from 'next/router'
 import DiffPane from './diffPane'
@@ -9,6 +9,9 @@ import useDiffContent from '@/src/client/hooks/useDiffContent'
 import { IsEndpoint } from '@/src/common/activeItem'
 import { useActiveProject } from '@/src/client/context/projectContext'
 import TabsHeader from '../tabsHeader'
+import { Filter } from '../filters/filters'
+import { RunSortOption } from '@/src/client/runMerging'
+import RunFiltersHeader from '../runs/runFiltersHeader'
 
 export default function CompareView({
   logEntries = [],
@@ -22,6 +25,8 @@ export default function CompareView({
 
   type CompareTab = 'Diff' | 'Responses'
   const [activeTab, setActiveTab] = useState<CompareTab>('Responses')
+  const [runSortOption, setRunSortOption] = useState<RunSortOption>('Date')
+  const [runFilters, setRunFilters] = useState<Filter[]>([])
 
   const [rightItemID, setRightItemID] = useState(itemID)
   const [rightVersionID, setRightVersionID] = useState(versionID)
@@ -112,11 +117,28 @@ export default function CompareView({
   }, [leftItem, leftVersion, rightItem, rightVersion, updateRightVersionID])
 
   const comparableItems = [...activeProject.prompts, ...activeProject.chains, ...activeProject.endpoints]
+  const tabSelector = (children?: ReactNode) => (
+    <TabsHeader tabs={['Diff', 'Responses']} activeTab={activeTab} setActiveTab={setActiveTab}>
+      {children}
+    </TabsHeader>
+  )
 
   return comparableItems.length > 0 ? (
     <>
       <div className='flex flex-col h-full bg-gray-25'>
-        <TabsHeader tabs={['Diff', 'Responses']} activeTab={activeTab} setActiveTab={setActiveTab} />
+        {activeTab === 'Diff' ? (
+          tabSelector()
+        ) : (
+          <RunFiltersHeader
+            activeItem={activeProject}
+            runs={[...(leftVersion?.runs ?? []), ...(rightVersion?.runs ?? [])]}
+            filters={runFilters}
+            setFilters={setRunFilters}
+            sortOption={runSortOption}
+            setSortOption={setRunSortOption}
+            tabSelector={tabSelector}
+          />
+        )}
         <div className={activeTab === 'Diff' ? 'flex' : 'flex min-h-0'}>
           <ComparePane
             project={activeProject}
@@ -128,6 +150,8 @@ export default function CompareView({
             setVersionID={setLeftVersionID}
             disabled={!leftItemID}
             includeResponses={activeTab === 'Responses'}
+            runFilters={runFilters}
+            runSortOption={runSortOption}
           />
           <div className='h-full border-l border-gray-200' />
           <ComparePane
@@ -139,6 +163,8 @@ export default function CompareView({
             setItemID={updateRightItemID}
             setVersionID={updateRightVersionID}
             includeResponses={activeTab === 'Responses'}
+            runFilters={runFilters}
+            runSortOption={runSortOption}
           />
         </div>
         {activeTab === 'Diff' && leftContent && rightContent && (
