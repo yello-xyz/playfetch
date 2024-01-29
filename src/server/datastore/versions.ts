@@ -19,7 +19,7 @@ import {
   getVerifiedUserPromptData,
   updatePromptLastEditedAt,
 } from './prompts'
-import { augmentProjectWithNewVersion, ensureProjectLabel } from './projects'
+import { augmentProjectWithNewVersion, ensureProjectLabels } from './projects'
 import { saveComment } from './comments'
 import { ChainVersionsAreEqual, PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import {
@@ -241,7 +241,7 @@ export async function processLabels(
   if (checked !== labels.includes(label)) {
     const newLabels = checked ? [...labels, label] : labels.filter(l => l !== label)
     if (checked) {
-      await ensureProjectLabel(projectID, label)
+      await ensureProjectLabels(projectID, [label])
     }
     await saveComment(
       userID,
