@@ -230,7 +230,7 @@ const updateVersionData = (versionData: any) =>
 const updateVersion = (versionData: any) => getDatastore().save(updateVersionData(versionData))
 
 export const getLastCommentForVersion = async (versionID: number) => {
-  const commentData = getLastEntity(Entity.COMMENT, 'versionID', versionID)
+  const commentData = await getLastEntity(Entity.COMMENT, 'versionID', versionID)
   return commentData ? toComment(commentData) : null
 }
 
