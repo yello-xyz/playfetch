@@ -61,7 +61,7 @@ async function processCompletedTask(issueID: string, stateID: string) {
   const task = await getTaskForIdentifier(issueID, true)
   if (task) {
     const { versionID, userID, projectID, labels } = task
-    const actorID = await getActorIDForIssueState(userID, issueID, stateID)
+    const actorID = await getActorIDForIssueState(projectID, issueID, stateID)
     const projectUser = await getProjectUserForActor(userID, projectID, actorID)
     await toggleVersionLabels(projectUser?.id ?? userID, versionID, projectID, labels)
   }
@@ -74,7 +74,7 @@ async function processLabels(issueID: string, oldLabelIDs: string[], newLabelIDs
     const task = await getTaskForIdentifier(issueID)
     if (task) {
       const { versionID, userID, projectID } = task
-      const { actorID, addedLabels, removedLabels } = await getIssueLabels(userID, issueID, addedIDs, removedIDs)
+      const { actorID, addedLabels, removedLabels } = await getIssueLabels(projectID, issueID, addedIDs, removedIDs)
       const projectUser = await getProjectUserForActor(userID, projectID, actorID)
       if (projectUser) {
         const availableLabels = await getProjectLabels(projectID)
@@ -101,7 +101,7 @@ async function processComment(issueID: string, actorID: string, comment: string,
 }
 
 const getProjectUserForActor = async (userID: number, projectID: number, actorID: string | null) => {
-  const { email, name } = actorID ? await getActorForID(userID, actorID) : { email: null, name: null }
+  const { email, name } = actorID ? await getActorForID(projectID, actorID) : { email: null, name: null }
   const projectUser = email ? await getProjectUserForEmail(projectID, email) : undefined
   if (!projectUser && name) {
     const user = await getUserForID(userID)

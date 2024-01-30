@@ -22,6 +22,7 @@ async function authorizeLinear(_: NextApiRequest, res: NextApiResponse<string>, 
   query.set('scope', 'read,write,issues:create')
   query.set('state', getStateForUser(user))
   query.set('prompt', 'consent')
+  query.set('actor', 'application')
 
   res.json(`https://linear.app/oauth/authorize?${query.toString()}`)
 }

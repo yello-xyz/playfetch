@@ -288,7 +288,7 @@ export async function updateVersionLabel(
   )
   if (newLabels) {
     await updateVersion({ ...versionData, labels: JSON.stringify(newLabels), didRun: true })
-    syncTaskLabel(userID, versionID, label, checked)
+    syncTaskLabel(projectID, versionID, label, checked)
     if (checked) {
       createTasksOnAddingLabel(userID, projectID, toVersion(versionData, []), label)
     }

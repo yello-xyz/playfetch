@@ -9,13 +9,13 @@ import { IsRawPromptVersion, RawChainVersion, RawPromptVersion } from '@/types'
 
 type Config = [string[], string[]]
 
-const getUserClient = async (userID: number) => {
-  const { apiKey: accessToken } = await getProviderCredentials([userID], 'linear')
+const getClient = async (projectID: number) => {
+  const { apiKey: accessToken } = await getProviderCredentials([projectID], 'linear')
   return accessToken ? new LinearClient({ accessToken }) : null
 }
 
-export async function getActorForID(userID: number, actorID: string) {
-  const client = await getUserClient(userID)
+export async function getActorForID(projectID: number, actorID: string) {
+  const client = await getClient(projectID)
   if (client) {
     const actor = await client.user(actorID)
     return { email: actor.email, name: actor.name }
@@ -34,18 +34,18 @@ const getActorIDForIssueHistory = async (
   return action?.actorId ?? null
 }
 
-export const getActorIDForIssueState = async (userID: number, issueID: string, stateID: string) => {
-  const client = await getUserClient(userID)
+export const getActorIDForIssueState = async (projectID: number, issueID: string, stateID: string) => {
+  const client = await getClient(projectID)
   return client ? getActorIDForIssueHistory(client, issueID, state => state.id === stateID) : null
 }
 
 export const getIssueLabels = async (
-  userID: number,
+  projectID: number,
   issueID: string,
   addedLabelIDs: string[],
   removedLabelIDs: string[]
 ) => {
-  const client = await getUserClient(userID)
+  const client = await getClient(projectID)
   if (client) {
     const actorID = await getActorIDForIssueHistory(client, issueID, state =>
       addedLabelIDs.length > 0
@@ -73,7 +73,7 @@ export async function createTasksOnAddingLabel(
     const configs = JSON.parse(environment) as Config[]
     for (const [triggers, toggles] of configs) {
       if (triggers.includes(label)) {
-        const client = await getUserClient(userID)
+        const client = await getClient(projectID)
         if (client) {
           const parentID = version.parentID
           const isPrompt = IsRawPromptVersion(version)
@@ -103,10 +103,10 @@ export async function createTasksOnAddingLabel(
   }
 }
 
-export async function syncTaskComments(userID: number, versionID: number, comment: string, createdAt: Date) {
+export async function syncTaskComments(projectID: number, versionID: number, comment: string, createdAt: Date) {
   const identifiers = await getPendingTaskIdentifiersForVersion(versionID)
   if (identifiers.length > 0) {
-    const client = await getUserClient(userID)
+    const client = await getClient(projectID)
     if (client) {
       for (const identifier of identifiers) {
         await client.createComment({ issueId: identifier, body: comment, createdAt })
@@ -115,10 +115,10 @@ export async function syncTaskComments(userID: number, versionID: number, commen
   }
 }
 
-export async function syncTaskLabel(userID: number, versionID: number, label: string, checked: boolean) {
+export async function syncTaskLabel(projectID: number, versionID: number, label: string, checked: boolean) {
   const identifiers = await getPendingTaskIdentifiersForVersion(versionID)
   if (identifiers.length > 0) {
-    const client = await getUserClient(userID)
+    const client = await getClient(projectID)
     if (client) {
       const labels = await client.issueLabels()
       const labelID = labels.nodes.find(l => l.name === label)?.id

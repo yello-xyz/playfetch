@@ -60,7 +60,7 @@ export async function saveComment(
   )
   await getDatastore().save(commentData)
   if (!timestamp && !runID && !action) {
-    syncTaskComments(userID, versionID, text, createdAt)
+    syncTaskComments(projectID, versionID, text, createdAt)
   }
   return toComment({ ...commentData.data, key: commentData.key })
 }

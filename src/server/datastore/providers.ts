@@ -118,10 +118,10 @@ export async function saveProviderKey(
 ) {
   await ensureScopeOwnership(userID, scopeID)
   if (scopeID !== userID && apiKey === null && environment !== undefined) {
-    if (provider === 'github') {
+    if (provider === 'github' || provider === 'linear') {
       apiKey = (await getProviderCredentials([userID], provider)).apiKey
-    } else if (provider === 'linear') {
-      apiKey = '-'
+    }
+    if (provider === 'linear') {
       const configs = JSON.parse(environment) as [string[], string[]][]
       await ensureProjectLabels(scopeID, configs.flat().flat())
     }
