@@ -1,6 +1,6 @@
 import { saveComment } from '@/src/server/datastore/comments'
 import { Entity, buildFilter } from '@/src/server/datastore/datastore'
-import { getProjectUserForEmail } from '@/src/server/datastore/projects'
+import { getProjectLabels, getProjectUserForEmail } from '@/src/server/datastore/projects'
 import { getTaskForIdentifier } from '@/src/server/datastore/tasks'
 import { getUserForID } from '@/src/server/datastore/users'
 import { getLastCommentForVersion, getTrustedVersion, toggleVersionLabels } from '@/src/server/datastore/versions'
@@ -27,6 +27,7 @@ async function linear(req: NextApiRequest, res: NextApiResponse) {
     const body = JSON.parse(buffer.toString())
     console.log('WEBHOOK PAYLOAD', body)
     const { type, action, data, updatedFrom } = body
+    console.log('WEBHOOK LABELS', JSON.stringify(data.labels))
     if (data && webhook.verify(buffer, signature, body[LINEAR_WEBHOOK_TS_FIELD])) {
       if (
         type === 'Issue' &&
@@ -35,7 +36,16 @@ async function linear(req: NextApiRequest, res: NextApiResponse) {
         updatedFrom?.completedAt === null &&
         data.state?.type === 'completed'
       ) {
-        processCompletedTask(body.data.id, body.data.state.id)
+        processCompletedTask(data.id, data.state.id)
+      } else if (
+        type === 'Issue' &&
+        action === 'update' &&
+        data.labels &&
+        data.labelIDs &&
+        updatedFrom?.labelIDs &&
+        data.labelIDs.length !== updatedFrom.labelIDs.length
+      ) {
+        processLabels(data.id, data.labels)
       } else if (
         type === 'Comment' &&
         action === 'create' &&
@@ -62,6 +72,15 @@ async function processCompletedTask(issueID: string, stateID: string) {
   }
 }
 
+async function processLabels(issueID: string, labels: string[]) {
+  const task = await getTaskForIdentifier(issueID)
+  if (task) {
+    const { versionID, userID, projectID } = task
+    const version = await getTrustedVersion(versionID, true)
+    const availableLabels = await getProjectLabels(projectID)
+  }
+}
+
 async function processComment(issueID: string, actorID: string, actorName: string, comment: string, createdAt: Date) {
   const task = await getTaskForIdentifier(issueID)
   if (task) {
@@ -77,7 +96,6 @@ async function processComment(issueID: string, actorID: string, actorName: strin
     if (projectUser) {
       const version = await getTrustedVersion(versionID, true)
       const lastComment = await getLastCommentForVersion(versionID)
-      console.log(createdAt, lastComment ? new Date(lastComment.timestamp) : undefined)
       if (!lastComment || new Date(lastComment.timestamp) < createdAt) {
         await saveComment(projectUser.id, projectID, version.parentID, versionID, comment, createdAt)
       }

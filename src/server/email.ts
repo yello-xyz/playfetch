@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer'
 import { readFileSync } from 'fs'
 import path from 'path'
 import { getUserForID } from './datastore/users'
-import { getProjectNameForID } from './datastore/projects'
+import { getProjectName } from './datastore/projects'
 import ClientRoute, { ProjectSettingsRoute, UserSettingsRoute, WorkspaceRoute } from '../common/clientRoute'
 import { getWorkspaceNameForID } from './datastore/workspaces'
 import { User } from '@/types'
@@ -41,7 +41,7 @@ function resolveContent(fileName: string, fileType: 'txt' | 'html', variables: {
 export async function sendBudgetNotificationEmails(scopeID: number, limit: number, hardLimit: number | null = null) {
   const [ownerIDs] = await getAccessingUserIDs(scopeID, 'project')
   if (ownerIDs.length > 0) {
-    const projectName = await getProjectNameForID(scopeID)
+    const projectName = await getProjectName(scopeID)
     const settingsRoute = ProjectSettingsRoute(scopeID, 'usage')
     for (const ownerID of ownerIDs) {
       await sendBudgetNotificationEmail(ownerID, settingsRoute, projectName, limit, hardLimit)
@@ -99,7 +99,7 @@ export async function sendInviteEmail(
   kind: 'project' | 'workspace'
 ) {
   const inviter = await getUserForID(fromUserID)
-  const objectName = kind === 'project' ? await getProjectNameForID(objectID) : await getWorkspaceNameForID(objectID)
+  const objectName = kind === 'project' ? await getProjectName(objectID) : await getWorkspaceNameForID(objectID)
   const inviteRoute = kind === 'project' ? ClientRoute.SharedProjects : WorkspaceRoute(objectID, 0)
 
   const variables = {
