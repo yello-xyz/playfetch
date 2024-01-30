@@ -5,7 +5,7 @@ import { getTrustedPromptOrChainData } from './datastore/chains'
 import buildURLForRoute from './routing'
 import { getUserForID } from './datastore/users'
 import { getPendingTaskIdentifiersForVersion, saveNewTask } from './datastore/tasks'
-import { IsRawPromptVersion, RawChainVersion, RawPromptVersion } from '@/types'
+import { IsRawPromptVersion, RawChainVersion, RawPromptVersion, User } from '@/types'
 
 type Config = [string[], string[]]
 
@@ -90,6 +90,7 @@ export async function createTasksOnAddingLabel(
               title: `PlayFetch • ${parentData.name}`,
               description: `**${user.fullName}** added label **“${label}”** to [${parentData.name}](${url}).`,
               labelIds: labelID ? [labelID] : undefined,
+              ...getUserProps(user),
             })
             const createdIssue = await issue.issue
             if (issue.success && createdIssue?.id) {
@@ -103,13 +104,29 @@ export async function createTasksOnAddingLabel(
   }
 }
 
-export async function syncTaskComments(projectID: number, versionID: number, comment: string, createdAt: Date) {
+const getUserProps = async (userOrUserID: number | User) => {
+  const user = typeof userOrUserID === 'number' ? await getUserForID(userOrUserID) : userOrUserID
+  return { createAsUser: user.fullName, displayIconUrl: user.imageURL }
+}
+
+export async function syncTaskComments(
+  userID: number,
+  projectID: number,
+  versionID: number,
+  comment: string,
+  createdAt: Date
+) {
   const identifiers = await getPendingTaskIdentifiersForVersion(versionID)
   if (identifiers.length > 0) {
     const client = await getClient(projectID)
     if (client) {
       for (const identifier of identifiers) {
-        await client.createComment({ issueId: identifier, body: comment, createdAt })
+        await client.createComment({
+          issueId: identifier,
+          body: comment,
+          createdAt,
+          ...getUserProps(userID),
+        })
       }
     }
   }
