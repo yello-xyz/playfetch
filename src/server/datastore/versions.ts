@@ -33,7 +33,7 @@ import {
 import { getPresetsForUser } from './users'
 import { DefaultPrompts } from '@/src/common/defaults'
 import { deleteEntity } from './cleanup'
-import { createTasksOnAddingLabel } from '../linear'
+import { createTasksOnAddingLabel, syncTaskLabel } from '../linear'
 
 export async function migrateVersions(postMerge: boolean) {
   if (postMerge) {
@@ -288,6 +288,7 @@ export async function updateVersionLabel(
   )
   if (newLabels) {
     await updateVersion({ ...versionData, labels: JSON.stringify(newLabels), didRun: true })
+    syncTaskLabel(userID, versionID, label, checked)
     if (checked) {
       createTasksOnAddingLabel(userID, projectID, toVersion(versionData, []), label)
     }

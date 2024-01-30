@@ -101,3 +101,24 @@ export async function syncTaskComments(userID: number, versionID: number, commen
     }
   }
 }
+
+export async function syncTaskLabel(userID: number, versionID: number, label: string, checked: boolean) {
+  const identifiers = await getPendingTaskIdentifiersForVersion(versionID)
+  if (identifiers.length > 0) {
+    const client = await getUserClient(userID)
+    if (client) {
+      const labels = await client.issueLabels()
+      const labelID = labels.nodes.find(l => l.name === label)?.id
+      if (labelID) {
+        for (const identifier of identifiers) {
+          const issue = await client.issue(identifier)
+          if (issue.labelIds.includes(labelID) !== checked) {
+            await client.updateIssue(identifier, {
+              labelIds: checked ? [...issue.labelIds, labelID] : issue.labelIds.filter(id => id !== labelID),
+            })
+          }
+        }
+      }
+    }
+  }
+}

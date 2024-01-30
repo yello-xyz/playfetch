@@ -75,7 +75,7 @@ async function processCompletedTask(issueID: string, stateID: string) {
 async function processLabels(issueID: string, oldLabelIDs: string[], newLabelIDs: string[]) {
   const addedLabels = newLabelIDs.filter(id => !oldLabelIDs.includes(id))
   const removedLabels = oldLabelIDs.filter(id => !newLabelIDs.includes(id))
-  console.log(addedLabels, removedLabels)
+  console.log('PROCESSING LABELS', addedLabels, removedLabels)
   if (addedLabels.length > 0 || removedLabels.length > 0) {
     const task = await getTaskForIdentifier(issueID)
     if (task) {
@@ -85,7 +85,7 @@ async function processLabels(issueID: string, oldLabelIDs: string[], newLabelIDs
           ? await getActorIDForIssueLabelAdd(userID, issueID, addedLabels[0])
           : await getActorIDForIssueLabelRemove(userID, issueID, removedLabels[0])
       const projectUser = await getProjectUserForActor(userID, projectID, actorID)
-      console.log(actorID, projectUser)
+      console.log('ACTOR', actorID, projectUser)
       if (projectUser) {
         const availableLabels = await getProjectLabels(projectID)
         const labelsToAdd = addedLabels.filter(label => availableLabels.includes(label))
