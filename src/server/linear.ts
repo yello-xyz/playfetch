@@ -55,7 +55,8 @@ export async function createTasksOnAddingLabel(
           const parentData = await getTrustedPromptOrChainData(parentID)
           const user = await getUserForID(userID)
           const url = buildURLForRoute(isPrompt ? PromptRoute(projectID, parentID) : ChainRoute(projectID, parentID))
-          const labelID = await findOrCreateLabel(client, label)
+          const labels = await client.issueLabels()
+          const labelID = labels.nodes.find(l => l.name === label)?.id
           const teams = await client.teams()
           const team = teams.nodes[0]
           if (team?.id) {
@@ -75,19 +76,6 @@ export async function createTasksOnAddingLabel(
       }
     }
   }
-}
-
-const findOrCreateLabel = async (client: LinearClient, label: string) => {
-  const labels = await client.issueLabels()
-  let labelID = labels.nodes.find(l => l.name === label)?.id
-  if (!labelID) {
-    const newLabel = await client.createIssueLabel({ name: label })
-    const createdLabel = await newLabel.issueLabel
-    if (newLabel.success && createdLabel?.id) {
-      labelID = createdLabel.id
-    }
-  }
-  return labelID
 }
 
 export async function syncTaskComments(userID: number, versionID: number, comment: string, createdAt: Date) {
