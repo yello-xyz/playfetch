@@ -294,6 +294,23 @@ export async function updateVersionLabel(
   }
 }
 
+export async function updateVersionLabels(
+  userID: number,
+  versionID: number,
+  projectID: number,
+  labelsToAdd: string[],
+  labelsToRemove: string[]
+) {
+  const versionData = await getVerifiedUserVersionData(userID, versionID)
+  let labels = JSON.parse(versionData.labels) as string[]
+  for (const label of labelsToAdd.filter(label => !labels.includes(label))) {
+    await updateVersionLabel(userID, versionID, projectID, label, true)
+  }
+  for (const label of labelsToRemove.filter(label => labels.includes(label))) {
+    await updateVersionLabel(userID, versionID, projectID, label, false)
+  }
+}
+
 export async function toggleVersionLabels(
   userID: number,
   versionID: number,
@@ -388,7 +405,7 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
 
   const anyVersionWithSameParentKey = await getEntityKey(Entity.VERSION, 'parentID', parentID)
   const parentData = await getTrustedProjectScopedData([wasPromptVersion ? Entity.PROMPT : Entity.CHAIN], parentID)
-  
+
   if (!wasPromptVersion) {
     await updateChainOnDeletedVersion(parentData, versionID)
   } else if (anyVersionWithSameParentKey) {

@@ -2,8 +2,18 @@ import { saveComment } from '@/src/server/datastore/comments'
 import { getProjectLabels, getProjectUserForEmail } from '@/src/server/datastore/projects'
 import { getTaskForIdentifier } from '@/src/server/datastore/tasks'
 import { getUserForID } from '@/src/server/datastore/users'
-import { getLastCommentForVersion, getTrustedVersion, toggleVersionLabels } from '@/src/server/datastore/versions'
-import { getActorForID, getActorEmailForIssueState } from '@/src/server/linear'
+import {
+  getLastCommentForVersion,
+  getTrustedVersion,
+  toggleVersionLabels,
+  updateVersionLabels,
+} from '@/src/server/datastore/versions'
+import {
+  getActorForID,
+  getActorIDForIssueState,
+  getActorIDForIssueLabelAdd,
+  getActorIDForIssueLabelRemove,
+} from '@/src/server/linear'
 import { withErrorRoute } from '@/src/server/session'
 import { LINEAR_WEBHOOK_SIGNATURE_HEADER, LINEAR_WEBHOOK_TS_FIELD, LinearWebhooks } from '@linear/sdk'
 import type { NextApiRequest, NextApiResponse } from 'next'
@@ -26,7 +36,6 @@ async function linear(req: NextApiRequest, res: NextApiResponse) {
     const body = JSON.parse(buffer.toString())
     console.log('WEBHOOK PAYLOAD', body)
     const { type, action, data, updatedFrom } = body
-    console.log('WEBHOOK LABELS', JSON.stringify(data.labels))
     if (data && webhook.verify(buffer, signature, body[LINEAR_WEBHOOK_TS_FIELD])) {
       if (
         type === 'Issue' &&
@@ -36,15 +45,8 @@ async function linear(req: NextApiRequest, res: NextApiResponse) {
         data.state?.type === 'completed'
       ) {
         processCompletedTask(data.id, data.state.id)
-      } else if (
-        type === 'Issue' &&
-        action === 'update' &&
-        data.labels &&
-        data.labelIDs &&
-        updatedFrom?.labelIDs &&
-        data.labelIDs.length !== updatedFrom.labelIDs.length
-      ) {
-        processLabels(data.id, data.labels)
+      } else if (type === 'Issue' && action === 'update' && data.labelIDs && updatedFrom?.labelIDs) {
+        processLabels(data.id, updatedFrom.labelIDs, data.labelIDs)
       } else if (
         type === 'Comment' &&
         action === 'create' &&
@@ -64,19 +66,32 @@ async function processCompletedTask(issueID: string, stateID: string) {
   const task = await getTaskForIdentifier(issueID, true)
   if (task) {
     const { versionID, userID, projectID, labels } = task
-    const email = await getActorEmailForIssueState(userID, issueID, stateID)
-    const projectUser = email ? await getProjectUserForEmail(projectID, email) : undefined
-    const actorID = projectUser?.id ?? userID
-    await toggleVersionLabels(actorID, versionID, projectID, labels)
+    const actorID = await getActorIDForIssueState(userID, issueID, stateID)
+    const projectUser = await getProjectUserForActor(userID, projectID, actorID)
+    await toggleVersionLabels(projectUser?.id ?? userID, versionID, projectID, labels)
   }
 }
 
-async function processLabels(issueID: string, labels: string[]) {
-  const task = await getTaskForIdentifier(issueID)
-  if (task) {
-    const { versionID, userID, projectID } = task
-    const version = await getTrustedVersion(versionID, true)
-    const availableLabels = await getProjectLabels(projectID)
+async function processLabels(issueID: string, oldLabelIDs: string[], newLabelIDs: string[]) {
+  const addedLabels = newLabelIDs.filter(id => !oldLabelIDs.includes(id))
+  const removedLabels = oldLabelIDs.filter(id => !newLabelIDs.includes(id))
+  console.log(addedLabels, removedLabels)
+  if (addedLabels.length > 0 || removedLabels.length > 0) {
+    const task = await getTaskForIdentifier(issueID)
+    if (task) {
+      const { versionID, userID, projectID } = task
+      const actorID =
+        addedLabels.length > 0
+          ? await getActorIDForIssueLabelAdd(userID, issueID, addedLabels[0])
+          : await getActorIDForIssueLabelRemove(userID, issueID, removedLabels[0])
+      const projectUser = await getProjectUserForActor(userID, projectID, actorID)
+      console.log(actorID, projectUser)
+      if (projectUser) {
+        const availableLabels = await getProjectLabels(projectID)
+        const labelsToAdd = addedLabels.filter(label => availableLabels.includes(label))
+        await updateVersionLabels(projectUser.id, versionID, projectID, labelsToAdd, removedLabels)
+      }
+    }
   }
 }
 
@@ -95,8 +110,8 @@ async function processComment(issueID: string, actorID: string, comment: string,
   }
 }
 
-const getProjectUserForActor = async (userID: number, projectID: number, actorID: string) => {
-  const { email, name } = await getActorForID(userID, actorID)
+const getProjectUserForActor = async (userID: number, projectID: number, actorID: string | null) => {
+  const { email, name } = actorID ? await getActorForID(userID, actorID) : { email: null, name: null }
   const projectUser = email ? await getProjectUserForEmail(projectID, email) : undefined
   if (!projectUser && name) {
     const user = await getUserForID(userID)

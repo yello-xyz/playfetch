@@ -1,5 +1,5 @@
 import { getProviderCredentials } from './datastore/providers'
-import { LinearClient } from '@linear/sdk'
+import { IssueHistory, LinearClient } from '@linear/sdk'
 import { ChainRoute, PromptRoute } from '../common/clientRoute'
 import { getTrustedPromptOrChainData } from './datastore/chains'
 import buildURLForRoute from './routing'
@@ -23,19 +23,31 @@ export async function getActorForID(userID: number, actorID: string) {
   return { email: null, name: null }
 }
 
-export async function getActorEmailForIssueState(userID: number, issueID: string, stateID: string) {
+const getActorIDForIssueHistory = async (
+  userID: number,
+  issueID: string,
+  predicate: (state: IssueHistory) => boolean
+) => {
   const client = await getUserClient(userID)
   if (client) {
     const issue = await client.issue(issueID)
     const issueHistory = await issue.history()
-    const action = issueHistory.nodes.find(state => state.toStateId === stateID)
-    if (action?.actorId) {
-      const actor = await client.user(action.actorId)
-      return actor.email
+    const action = issueHistory.nodes.find(predicate)
+    if (action) {
+      return action.actorId ?? null
     }
   }
   return null
 }
+
+export const getActorIDForIssueState = (userID: number, issueID: string, stateID: string) =>
+  getActorIDForIssueHistory(userID, issueID, state => state.toStateId === stateID)
+
+export const getActorIDForIssueLabelAdd = (userID: number, issueID: string, labelID: string) =>
+  getActorIDForIssueHistory(userID, issueID, state => (state.addedLabelIds ?? []).includes(labelID))
+
+export const getActorIDForIssueLabelRemove = (userID: number, issueID: string, labelID: string) =>
+  getActorIDForIssueHistory(userID, issueID, state => (state.removedLabelIds ?? []).includes(labelID))
 
 export async function createTasksOnAddingLabel(
   userID: number,
