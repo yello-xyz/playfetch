@@ -45,8 +45,8 @@ async function linear(req: NextApiRequest, res: NextApiResponse) {
         data.state?.type === 'completed'
       ) {
         processCompletedTask(data.id, data.state.id)
-      } else if (type === 'Issue' && action === 'update' && data.labelIDs && updatedFrom?.labelIDs) {
-        processLabels(data.id, updatedFrom.labelIDs, data.labelIDs)
+      } else if (type === 'Issue' && action === 'update' && data.labelIds && updatedFrom?.labelIds) {
+        processLabels(data.id, updatedFrom.labelIds, data.labelIds)
       } else if (
         type === 'Comment' &&
         action === 'create' &&
