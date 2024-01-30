@@ -8,12 +8,7 @@ import {
   toggleVersionLabels,
   updateVersionLabels,
 } from '@/src/server/datastore/versions'
-import {
-  getActorForID,
-  getActorIDForIssueState,
-  getActorIDForIssueLabelAdd,
-  getActorIDForIssueLabelRemove,
-} from '@/src/server/linear'
+import { getActorForID, getActorIDForIssueState, getIssueLabels } from '@/src/server/linear'
 import { withErrorRoute } from '@/src/server/session'
 import { LINEAR_WEBHOOK_SIGNATURE_HEADER, LINEAR_WEBHOOK_TS_FIELD, LinearWebhooks } from '@linear/sdk'
 import type { NextApiRequest, NextApiResponse } from 'next'
@@ -73,19 +68,14 @@ async function processCompletedTask(issueID: string, stateID: string) {
 }
 
 async function processLabels(issueID: string, oldLabelIDs: string[], newLabelIDs: string[]) {
-  const addedLabels = newLabelIDs.filter(id => !oldLabelIDs.includes(id))
-  const removedLabels = oldLabelIDs.filter(id => !newLabelIDs.includes(id))
-  console.log('PROCESSING LABELS', addedLabels, removedLabels)
-  if (addedLabels.length > 0 || removedLabels.length > 0) {
+  const addedIDs = newLabelIDs.filter(id => !oldLabelIDs.includes(id))
+  const removedIDs = oldLabelIDs.filter(id => !newLabelIDs.includes(id))
+  if (addedIDs.length > 0 || removedIDs.length > 0) {
     const task = await getTaskForIdentifier(issueID)
     if (task) {
       const { versionID, userID, projectID } = task
-      const actorID =
-        addedLabels.length > 0
-          ? await getActorIDForIssueLabelAdd(userID, issueID, addedLabels[0])
-          : await getActorIDForIssueLabelRemove(userID, issueID, removedLabels[0])
+      const { actorID, addedLabels, removedLabels } = await getIssueLabels(userID, issueID, addedIDs, removedIDs)
       const projectUser = await getProjectUserForActor(userID, projectID, actorID)
-      console.log('ACTOR', actorID, projectUser)
       if (projectUser) {
         const availableLabels = await getProjectLabels(projectID)
         const labelsToAdd = addedLabels.filter(label => availableLabels.includes(label))

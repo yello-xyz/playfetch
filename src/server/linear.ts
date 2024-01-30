@@ -24,30 +24,43 @@ export async function getActorForID(userID: number, actorID: string) {
 }
 
 const getActorIDForIssueHistory = async (
-  userID: number,
+  client: LinearClient,
   issueID: string,
   predicate: (state: IssueHistory) => boolean
 ) => {
-  const client = await getUserClient(userID)
-  if (client) {
-    const issue = await client.issue(issueID)
-    const issueHistory = await issue.history()
-    const action = issueHistory.nodes.find(predicate)
-    if (action) {
-      return action.actorId ?? null
-    }
-  }
-  return null
+  const issue = await client.issue(issueID)
+  const issueHistory = await issue.history()
+  const action = issueHistory.nodes.find(predicate)
+  return action?.actorId ?? null
 }
 
-export const getActorIDForIssueState = (userID: number, issueID: string, stateID: string) =>
-  getActorIDForIssueHistory(userID, issueID, state => state.toStateId === stateID)
+export const getActorIDForIssueState = async (userID: number, issueID: string, stateID: string) => {
+  const client = await getUserClient(userID)
+  return client ? getActorIDForIssueHistory(client, issueID, state => state.id === stateID) : null
+}
 
-export const getActorIDForIssueLabelAdd = (userID: number, issueID: string, labelID: string) =>
-  getActorIDForIssueHistory(userID, issueID, state => (state.addedLabelIds ?? []).includes(labelID))
-
-export const getActorIDForIssueLabelRemove = (userID: number, issueID: string, labelID: string) =>
-  getActorIDForIssueHistory(userID, issueID, state => (state.removedLabelIds ?? []).includes(labelID))
+export const getIssueLabels = async (
+  userID: number,
+  issueID: string,
+  addedLabelIDs: string[],
+  removedLabelIDs: string[]
+) => {
+  const client = await getUserClient(userID)
+  if (client) {
+    const actorID = await getActorIDForIssueHistory(client, issueID, state =>
+      addedLabelIDs.length > 0
+        ? (state.addedLabelIds ?? []).includes(addedLabelIDs[0])
+        : (state.removedLabelIds ?? []).includes(removedLabelIDs[0])
+    )
+    const labels = await client.issueLabels()
+    const getLabelNames = (ids: string[]) =>
+      ids.map(id => labels.nodes.find(l => l.id === id)?.name).flatMap(name => (name ? [name] : []))
+    const addedLabels = getLabelNames(addedLabelIDs)
+    const removedLabels = getLabelNames(removedLabelIDs)
+    return { actorID, addedLabels, removedLabels }
+  }
+  return { actorID: null, addedLabels: [], removedLabels: [] }
+}
 
 export async function createTasksOnAddingLabel(
   userID: number,
