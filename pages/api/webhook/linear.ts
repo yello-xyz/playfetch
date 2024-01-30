@@ -1,10 +1,9 @@
 import { saveComment } from '@/src/server/datastore/comments'
-import { Entity, buildFilter } from '@/src/server/datastore/datastore'
 import { getProjectLabels, getProjectUserForEmail } from '@/src/server/datastore/projects'
 import { getTaskForIdentifier } from '@/src/server/datastore/tasks'
 import { getUserForID } from '@/src/server/datastore/users'
 import { getLastCommentForVersion, getTrustedVersion, toggleVersionLabels } from '@/src/server/datastore/versions'
-import { getActorEmailForID, getActorEmailForIssueState } from '@/src/server/linear'
+import { getActorForID, getActorEmailForIssueState } from '@/src/server/linear'
 import { withErrorRoute } from '@/src/server/session'
 import { LINEAR_WEBHOOK_SIGNATURE_HEADER, LINEAR_WEBHOOK_TS_FIELD, LinearWebhooks } from '@linear/sdk'
 import type { NextApiRequest, NextApiResponse } from 'next'
@@ -54,7 +53,7 @@ async function linear(req: NextApiRequest, res: NextApiResponse) {
         data.body &&
         data.createdAt
       ) {
-        processComment(data.issueId, data.userId, data.user?.name, data.body, new Date(data.createdAt))
+        processComment(data.issueId, data.userId, data.body, new Date(data.createdAt))
       }
     }
   }
@@ -81,18 +80,11 @@ async function processLabels(issueID: string, labels: string[]) {
   }
 }
 
-async function processComment(issueID: string, actorID: string, actorName: string, comment: string, createdAt: Date) {
+async function processComment(issueID: string, actorID: string, comment: string, createdAt: Date) {
   const task = await getTaskForIdentifier(issueID)
   if (task) {
     const { versionID, userID, projectID } = task
-    const email = await getActorEmailForID(userID, actorID)
-    let projectUser = email ? await getProjectUserForEmail(projectID, email) : undefined
-    if (!projectUser) {
-      const user = await getUserForID(userID)
-      if (user.fullName === actorName) {
-        projectUser = user
-      }
-    }
+    const projectUser = await getProjectUserForActor(userID, projectID, actorID)
     if (projectUser) {
       const version = await getTrustedVersion(versionID, true)
       const lastComment = await getLastCommentForVersion(versionID)
@@ -101,6 +93,18 @@ async function processComment(issueID: string, actorID: string, actorName: strin
       }
     }
   }
+}
+
+const getProjectUserForActor = async (userID: number, projectID: number, actorID: string) => {
+  const { email, name } = await getActorForID(userID, actorID)
+  const projectUser = email ? await getProjectUserForEmail(projectID, email) : undefined
+  if (!projectUser && name) {
+    const user = await getUserForID(userID)
+    if (user.fullName === name) {
+      return user
+    }
+  }
+  return projectUser
 }
 
 export default withErrorRoute(linear)
