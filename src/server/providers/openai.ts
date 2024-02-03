@@ -22,7 +22,7 @@ export default function predict(
     jsonMode,
     continuationInputs
   ) =>
-    tryCompleteChat(
+    complete(
       apiKey,
       userID,
       model,
@@ -63,7 +63,7 @@ const buildPromptMessages = (previousMessages: any[], prompt: string, system?: s
   ]
 }
 
-async function tryCompleteChat(
+async function complete(
   apiKey: string,
   userID: number,
   model: OpenAILanguageModel | CustomLanguageModel,
