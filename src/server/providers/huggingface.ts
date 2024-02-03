@@ -23,11 +23,14 @@ async function complete(
     const api = new HfInference(apiKey)
     const runningContext = usePreviousContext ? context.running ?? '' : ''
     const inputPrompt = `${runningContext}${prompt}`
-    const stream = api.textGenerationStream({
-      model,
-      inputs: inputPrompt,
-      parameters: { temperature, max_new_tokens: maxTokens },
-    }, { signal: abortSignal })
+    const stream = api.textGenerationStream(
+      {
+        model,
+        inputs: inputPrompt,
+        parameters: { temperature, max_new_tokens: maxTokens },
+      },
+      { signal: abortSignal }
+    )
 
     let output = ''
     for await (const message of stream) {

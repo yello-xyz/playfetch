@@ -128,6 +128,9 @@ function DefaultProviderRow({
           )}
         </div>
       </div>
+      {isUpdating && provider === 'huggingface' && (
+        <span>Models may require a Hugging Face Pro subscription to run.</span>
+      )}
       {isUpdating && <span>Your key will be encrypted using AES 256 and stored securely.</span>}
       <CustomModelSettings
         scopeID={scopeID}

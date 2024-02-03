@@ -40,9 +40,7 @@ export default function ModelInfoPane({
   const isModelAvailable = checkModelAvailable(model)
 
   const [showActionMenu, setShowActionMenu] = useState(false)
-  const gridConfig = IsSubscriptionRequiredForModel(model)
-    ? 'grid-cols-[140px_250px]'
-    : 'grid-cols-[140px_180px]'
+  const gridConfig = IsSubscriptionRequiredForModel(model) ? 'grid-cols-[140px_250px]' : 'grid-cols-[140px_180px]'
 
   return (
     <PopupContent className='relative p-3 w-[480px] ml-7 flex flex-col gap-1 shadow-sm'>
