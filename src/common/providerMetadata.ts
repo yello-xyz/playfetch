@@ -455,8 +455,45 @@ export const OutputPriceForModel = (model: LanguageModel | EmbeddingModel): numb
   }
 }
 
-export const IsModelFreeToUse = (model: LanguageModel | EmbeddingModel): boolean =>
-  InputPriceForModel(model) === 0 && OutputPriceForModel(model) === 0
+export const IsModelFreeToUse = (model: LanguageModel | EmbeddingModel): boolean => {
+  switch (model) {
+    case 'text-embedding-ada-002':
+    case 'gpt-3.5-turbo':
+    case 'gpt-3.5-turbo-16k':
+    case 'gpt-4':
+    case 'gpt-4-turbo':
+    case 'claude-instant-1':
+    case 'claude-2':
+    case 'command':
+    case 'meta-llama/Llama-2-70b-chat-hf':
+    default:
+      return false
+    case 'text-bison':
+    case 'chat-bison':
+    case 'gemini-pro':
+      return true
+  }
+}
+
+export const IsSubscriptionRequiredForModel = (model: LanguageModel | EmbeddingModel): boolean => {
+  switch (model) {
+    case 'text-embedding-ada-002':
+    case 'gpt-3.5-turbo':
+    case 'gpt-3.5-turbo-16k':
+    case 'gpt-4':
+    case 'gpt-4-turbo':
+    case 'claude-instant-1':
+    case 'claude-2':
+    case 'command':
+    case 'text-bison':
+    case 'chat-bison':
+    case 'gemini-pro':
+    default:
+      return false
+    case 'meta-llama/Llama-2-70b-chat-hf':
+      return true
+  }
+}
 
 export const ValidatePromptConfig = (config: PromptConfig): PromptConfig => ({
   ...config,
