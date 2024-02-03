@@ -1,16 +1,16 @@
-import { HuggingfaceLanguageModel } from '@/types'
+import { HuggingFaceLanguageModel } from '@/types'
 import { HfInference } from '@huggingface/inference'
 import { Predictor, PromptContext } from '../evaluationEngine/promptEngine'
 import { CostForModel } from './integration'
 
-export default function predict(apiKey: string, model: HuggingfaceLanguageModel): Predictor {
+export default function predict(apiKey: string, model: HuggingFaceLanguageModel): Predictor {
   return (prompts, temperature, maxTokens, context, useContext, streamChunks, abortSignal) =>
     complete(apiKey, model, prompts.main, temperature, maxTokens, context, useContext, abortSignal, streamChunks)
 }
 
 async function complete(
   apiKey: string,
-  model: HuggingfaceLanguageModel,
+  model: HuggingFaceLanguageModel,
   prompt: string,
   temperature: number,
   maxTokens: number,
