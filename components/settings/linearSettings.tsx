@@ -33,6 +33,14 @@ export default function LinearSettings({
 
   const [config, setConfig] = useState(scopedConfig)
 
+  const projectLabels = activeProject ? activeProject.availableLabels : []
+  const pendingLabels = config.labels.filter(l => !projectLabels.includes(l))
+  const availableLabels = [...projectLabels, ...pendingLabels]
+  const colors = AvailableLabelColorsForItem({ availableLabels })
+
+  const toggle = (labels: string[], label: string) =>
+    labels.includes(label) ? labels.filter(l => l !== label) : [...labels, label]
+
   return (
     <AppSettings
       provider='linear'
@@ -50,66 +58,42 @@ export default function LinearSettings({
       projectConfiguration={(isConfigured, isUpdating, isProcessing, confirmButton) => (
         <div className='flex items-end gap-2.5 w-full'>
           {(isConfigured || isUpdating) && (
-            <ConfigPanes {...{ config, setConfig, activeProject, isEditing: isUpdating && !isProcessing }} />
+            <div className='w-full grid grid-cols-[150px_minmax(120px,1fr)] items-start gap-1 text-gray-700'>
+              <GridCell>Sync Labels</GridCell>
+              <GridCell>
+                <Checkbox
+                  disabled={!isUpdating || isProcessing}
+                  checked={config.syncLabels}
+                  setChecked={() => setConfig({ ...config, syncLabels: !config.syncLabels })}
+                />
+              </GridCell>
+              <GridCell>Sync Comments</GridCell>
+              <GridCell>
+                <Checkbox
+                  disabled={!isUpdating || isProcessing}
+                  checked={config.syncComments}
+                  setChecked={() => setConfig({ ...config, syncComments: !config.syncComments })}
+                />
+              </GridCell>
+              <GridCell>Create task in Linear when label is added</GridCell>
+              <GridCell>
+                {isUpdating && !isProcessing ? (
+                  <LabelsPopupMenuButton
+                    activeLabels={config.labels}
+                    availableLabels={availableLabels}
+                    colors={colors}
+                    toggleLabel={l => setConfig({ ...config, labels: toggle(config.labels, l) })}
+                  />
+                ) : (
+                  <ItemLabels labels={config.labels} colors={colors} />
+                )}
+              </GridCell>
+            </div>
           )}
           <div className={isConfigured || isUpdating ? 'mb-1' : ''}>{confirmButton()}</div>
         </div>
       )}
     />
-  )
-}
-
-const ConfigPanes = ({
-  config,
-  setConfig,
-  activeProject,
-  isEditing,
-}: {
-  config: IssueTrackerConfig
-  setConfig: (config: IssueTrackerConfig) => void
-  activeProject?: ActiveProject
-  isEditing: boolean
-}) => {
-  const projectLabels = activeProject ? activeProject.availableLabels : []
-  const pendingLabels = config.labels.filter(l => !projectLabels.includes(l))
-  const availableLabels = [...projectLabels, ...pendingLabels]
-  const colors = AvailableLabelColorsForItem({ availableLabels })
-
-  const toggle = (labels: string[], label: string) =>
-    labels.includes(label) ? labels.filter(l => l !== label) : [...labels, label]
-
-  return (
-    <div className='w-full grid grid-cols-[150px_minmax(120px,1fr)] items-start gap-1 text-gray-700'>
-      <GridCell>Sync Labels</GridCell>
-      <GridCell>
-        <Checkbox
-          disabled={!isEditing}
-          checked={config.syncLabels}
-          setChecked={() => setConfig({ ...config, syncLabels: !config.syncLabels })}
-        />
-      </GridCell>
-      <GridCell>Sync Comments</GridCell>
-      <GridCell>
-        <Checkbox
-          disabled={!isEditing}
-          checked={config.syncComments}
-          setChecked={() => setConfig({ ...config, syncComments: !config.syncComments })}
-        />
-      </GridCell>
-      <GridCell>Create task in Linear when label is added</GridCell>
-      <GridCell>
-        {isEditing ? (
-          <LabelsPopupMenuButton
-            activeLabels={config.labels}
-            availableLabels={availableLabels}
-            colors={colors}
-            toggleLabel={l => setConfig({ ...config, labels: toggle(config.labels, l) })}
-          />
-        ) : (
-          <ItemLabels labels={config.labels} colors={colors} />
-        )}
-      </GridCell>
-    </div>
   )
 }
 
