@@ -9,6 +9,7 @@ import { NeedsUpdatesLabel } from '@/src/common/defaults'
 import ItemLabels from '@/components/labels/itemLabels'
 import { AvailableLabelColorsForItem } from '../labels/labelsPopup'
 import LabelsPopupMenuButton from '../labels/labelsPopupMenuButton'
+import Checkbox from '../checkbox'
 
 export default function LinearSettings({
   activeProject,
@@ -47,19 +48,12 @@ export default function LinearSettings({
         </Button>
       )}
       projectConfiguration={(isConfigured, isUpdating, isProcessing, confirmButton) => (
-        <>
-          {isConfigured || isUpdating ? (
-            <div className='flex flex-col w-full gap-2.5'>
-              <ConfigPanes {...{ config, setConfig, activeProject, isUpdating, isProcessing }} />
-              <div className='flex gap-2.5 justify-end'>
-                {isUpdating && <></>}
-                {confirmButton()}
-              </div>
-            </div>
-          ) : (
-            confirmButton()
+        <div className='flex items-end gap-2.5 w-full'>
+          {(isConfigured || isUpdating) && (
+            <ConfigPanes {...{ config, setConfig, activeProject, isEditing: isUpdating && !isProcessing }} />
           )}
-        </>
+          <div className={isConfigured || isUpdating ? 'mb-1' : ''}>{confirmButton()}</div>
+        </div>
       )}
     />
   )
@@ -69,14 +63,12 @@ const ConfigPanes = ({
   config,
   setConfig,
   activeProject,
-  isUpdating,
-  isProcessing,
+  isEditing,
 }: {
   config: IssueTrackerConfig
   setConfig: (config: IssueTrackerConfig) => void
   activeProject?: ActiveProject
-  isUpdating: boolean
-  isProcessing: boolean
+  isEditing: boolean
 }) => {
   const projectLabels = activeProject ? activeProject.availableLabels : []
   const pendingLabels = config.labels.filter(l => !projectLabels.includes(l))
@@ -86,29 +78,41 @@ const ConfigPanes = ({
   const toggle = (labels: string[], label: string) =>
     labels.includes(label) ? labels.filter(l => l !== label) : [...labels, label]
 
-  const gridConfig = 'w-full grid grid-cols-[210px_minmax(120px,1fr)] items-start gap-1'
-
   return (
-    <div className='flex items-center gap-2'>
-      <div className={`px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg ${gridConfig}`}>
-        <GridCell className='font-medium'>Create task on adding label:</GridCell>
-        <GridCell>
-          {isUpdating && !isProcessing ? (
-            <LabelsPopupMenuButton
-              activeLabels={config.labels}
-              availableLabels={availableLabels}
-              colors={colors}
-              toggleLabel={l => setConfig({ ...config, labels: toggle(config.labels, l) })}
-            />
-          ) : (
-            <ItemLabels labels={config.labels} colors={colors} />
-          )}
-        </GridCell>
-      </div>
+    <div className='w-full grid grid-cols-[150px_minmax(120px,1fr)] items-start gap-1 text-gray-700'>
+      <GridCell>Sync Labels</GridCell>
+      <GridCell>
+        <Checkbox
+          disabled={!isEditing}
+          checked={config.syncLabels}
+          setChecked={() => setConfig({ ...config, syncLabels: !config.syncLabels })}
+        />
+      </GridCell>
+      <GridCell>Sync Comments</GridCell>
+      <GridCell>
+        <Checkbox
+          disabled={!isEditing}
+          checked={config.syncComments}
+          setChecked={() => setConfig({ ...config, syncComments: !config.syncComments })}
+        />
+      </GridCell>
+      <GridCell>Create task in Linear when label is added</GridCell>
+      <GridCell>
+        {isEditing ? (
+          <LabelsPopupMenuButton
+            activeLabels={config.labels}
+            availableLabels={availableLabels}
+            colors={colors}
+            toggleLabel={l => setConfig({ ...config, labels: toggle(config.labels, l) })}
+          />
+        ) : (
+          <ItemLabels labels={config.labels} colors={colors} />
+        )}
+      </GridCell>
     </div>
   )
 }
 
 const GridCell = ({ className = '', children }: { className?: string; children: ReactNode }) => (
-  <div className={`${className} flex items-center min-h-[24px]`}>{children}</div>
+  <div className={`${className} flex items-center min-h-[34px]`}>{children}</div>
 )
