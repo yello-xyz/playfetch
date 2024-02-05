@@ -71,7 +71,7 @@ export async function createTasksOnAddingLabel(
   const { environment } = await getProviderCredentials([projectID], 'linear')
   if (environment) {
     const configs = JSON.parse(environment) as Config[]
-    for (const [triggers, toggles] of configs) {
+    for (const [triggers] of configs) {
       if (triggers.includes(label)) {
         const client = await getClient(projectID)
         if (client) {
@@ -94,7 +94,7 @@ export async function createTasksOnAddingLabel(
             })
             const createdIssue = await issue.issue
             if (issue.success && createdIssue?.id) {
-              await saveNewTask(userID, projectID, parentID, version.id, createdIssue.id, toggles)
+              await saveNewTask(userID, projectID, parentID, version.id, createdIssue.id)
             }
           }
         }

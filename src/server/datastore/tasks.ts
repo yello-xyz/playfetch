@@ -15,7 +15,7 @@ export async function migrateTasks(postMerge: boolean) {
 export async function getTaskForIdentifier(
   identifier: string,
   markAsComplete = false
-): Promise<{ userID: number; projectID: number; versionID: number; labels: string[] } | null> {
+): Promise<{ userID: number; projectID: number; versionID: number } | null> {
   const taskData = await getEntity(Entity.TASK, 'identifier', identifier)
 
   if (markAsComplete && taskData) {
@@ -27,7 +27,6 @@ export async function getTaskForIdentifier(
         userID: taskData.userID,
         projectID: taskData.projectID,
         versionID: taskData.versionID,
-        labels: JSON.parse(taskData.labels),
       }
     : null
 }
@@ -48,7 +47,6 @@ async function updateTask(taskData: any) {
       taskData.parentID,
       taskData.versionID,
       taskData.identifier,
-      JSON.parse(taskData.labels),
       taskData.createdAt,
       taskData.completedAt,
       getID(taskData)
@@ -61,9 +59,8 @@ export const saveNewTask = (
   projectID: number,
   parentID: number,
   versionID: number,
-  identifier: string,
-  labels: string[]
-) => getDatastore().save(toTaskData(userID, projectID, parentID, versionID, identifier, labels, new Date(), null))
+  identifier: string
+) => getDatastore().save(toTaskData(userID, projectID, parentID, versionID, identifier, new Date(), null))
 
 const toTaskData = (
   userID: number,
@@ -71,12 +68,11 @@ const toTaskData = (
   parentID: number,
   versionID: number,
   identifier: string,
-  labels: string[],
   createdAt: Date,
   completedAt: Date | null,
   taskID?: number
 ) => ({
   key: buildKey(Entity.TASK, taskID),
-  data: { userID, projectID, parentID, versionID, identifier, createdAt, completedAt, labels: JSON.stringify(labels) },
-  excludeFromIndexes: ['labels'],
+  data: { userID, projectID, parentID, versionID, identifier, createdAt, completedAt },
+  excludeFromIndexes: [],
 })
