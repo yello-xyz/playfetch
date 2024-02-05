@@ -65,7 +65,7 @@ export const getLinearProjectConfig = async (projectID: number) => {
   return environment ? (JSON.parse(environment) as IssueTrackerConfig) : null
 }
 
-export async function createTasksOnAddingLabel(
+export async function createTaskOnAddingLabel(
   userID: number,
   projectID: number,
   version: RawPromptVersion | RawChainVersion,
@@ -78,25 +78,41 @@ export async function createTasksOnAddingLabel(
       const parentID = version.parentID
       const isPrompt = IsRawPromptVersion(version)
       const parentData = await getTrustedPromptOrChainData(parentID)
+      const title = `PlayFetch • ${parentData.name}`
       const user = await getUserForID(userID)
       const url = buildURLForRoute(isPrompt ? PromptRoute(projectID, parentID) : ChainRoute(projectID, parentID))
+      const description = `**${user.fullName}** added label **“${label}”** to [${parentData.name}](${url}).`
       const labels = await client.issueLabels()
       const labelID = labels.nodes.find(l => l.name === label)?.id
-      const teams = await client.teams()
-      const team = teams.nodes[0]
-      if (team?.id) {
-        const issue = await client.createIssue({
-          teamId: team.id,
-          title: `PlayFetch • ${parentData.name}`,
-          description: `**${user.fullName}** added label **“${label}”** to [${parentData.name}](${url}).`,
-          labelIds: labelID ? [labelID] : undefined,
-          ...getUserProps(user),
-        })
-        const createdIssue = await issue.issue
-        if (issue.success && createdIssue?.id) {
-          await saveNewTask(userID, projectID, parentID, version.id, createdIssue.id)
-        }
-      }
+      await createTask(client, userID, projectID, parentID, version.id, title, description, labelID)
+    }
+  }
+}
+
+export async function createTask(
+  client: LinearClient,
+  userID: number,
+  projectID: number,
+  parentID: number,
+  versionID: number,
+  title: string,
+  description: string,
+  labelID?: string
+) {
+  const user = await getUserForID(userID)
+  const teams = await client.teams()
+  const team = teams.nodes[0]
+  if (team?.id) {
+    const issue = await client.createIssue({
+      teamId: team.id,
+      title,
+      description,
+      labelIds: labelID ? [labelID] : undefined,
+      ...getUserProps(user),
+    })
+    const createdIssue = await issue.issue
+    if (issue.success && createdIssue?.id) {
+      await saveNewTask(userID, projectID, parentID, versionID, createdIssue.id)
     }
   }
 }
