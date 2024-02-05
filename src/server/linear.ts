@@ -5,9 +5,7 @@ import { getTrustedPromptOrChainData } from './datastore/chains'
 import buildURLForRoute from './routing'
 import { getUserForID } from './datastore/users'
 import { getPendingTaskIdentifiersForVersion, saveNewTask } from './datastore/tasks'
-import { IsRawPromptVersion, RawChainVersion, RawPromptVersion, User } from '@/types'
-
-type Config = [string[], string[]]
+import { IsRawPromptVersion, IssueTrackerConfig, RawChainVersion, RawPromptVersion, User } from '@/types'
 
 const getClient = async (projectID: number) => {
   const { apiKey: accessToken } = await getProviderCredentials([projectID], 'linear')
@@ -70,35 +68,32 @@ export async function createTasksOnAddingLabel(
 ) {
   const { environment } = await getProviderCredentials([projectID], 'linear')
   if (environment) {
-    const configs = JSON.parse(environment) as Config[]
-    for (const [triggers] of configs) {
-      if (triggers.includes(label)) {
-        const client = await getClient(projectID)
-        if (client) {
-          const parentID = version.parentID
-          const isPrompt = IsRawPromptVersion(version)
-          const parentData = await getTrustedPromptOrChainData(parentID)
-          const user = await getUserForID(userID)
-          const url = buildURLForRoute(isPrompt ? PromptRoute(projectID, parentID) : ChainRoute(projectID, parentID))
-          const labels = await client.issueLabels()
-          const labelID = labels.nodes.find(l => l.name === label)?.id
-          const teams = await client.teams()
-          const team = teams.nodes[0]
-          if (team?.id) {
-            const issue = await client.createIssue({
-              teamId: team.id,
-              title: `PlayFetch • ${parentData.name}`,
-              description: `**${user.fullName}** added label **“${label}”** to [${parentData.name}](${url}).`,
-              labelIds: labelID ? [labelID] : undefined,
-              ...getUserProps(user),
-            })
-            const createdIssue = await issue.issue
-            if (issue.success && createdIssue?.id) {
-              await saveNewTask(userID, projectID, parentID, version.id, createdIssue.id)
-            }
+    const config = JSON.parse(environment) as IssueTrackerConfig
+    if (config.labels.includes(label)) {
+      const client = await getClient(projectID)
+      if (client) {
+        const parentID = version.parentID
+        const isPrompt = IsRawPromptVersion(version)
+        const parentData = await getTrustedPromptOrChainData(parentID)
+        const user = await getUserForID(userID)
+        const url = buildURLForRoute(isPrompt ? PromptRoute(projectID, parentID) : ChainRoute(projectID, parentID))
+        const labels = await client.issueLabels()
+        const labelID = labels.nodes.find(l => l.name === label)?.id
+        const teams = await client.teams()
+        const team = teams.nodes[0]
+        if (team?.id) {
+          const issue = await client.createIssue({
+            teamId: team.id,
+            title: `PlayFetch • ${parentData.name}`,
+            description: `**${user.fullName}** added label **“${label}”** to [${parentData.name}](${url}).`,
+            labelIds: labelID ? [labelID] : undefined,
+            ...getUserProps(user),
+          })
+          const createdIssue = await issue.issue
+          if (issue.success && createdIssue?.id) {
+            await saveNewTask(userID, projectID, parentID, version.id, createdIssue.id)
           }
         }
-        break
       }
     }
   }

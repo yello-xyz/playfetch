@@ -145,6 +145,7 @@ export type AvailableSourceControlProvider = {
   environment: string
   scopeID: number
 }
+export type IssueTrackerConfig = { labels: string[]; syncLabels: boolean; syncComments: boolean }
 export type AvailableIssueTrackerProvider = {
   provider: IssueTrackerProvider
   environment: string

@@ -2,17 +2,13 @@ import api from '@/src/client/api'
 import Button from '../button'
 import { useRouter } from 'next/router'
 import { useIssueTrackerProvider } from '@/src/client/context/providerContext'
-import { ActiveProject, AvailableIssueTrackerProvider, AvailableProvider } from '@/types'
+import { ActiveProject, AvailableIssueTrackerProvider, AvailableProvider, IssueTrackerConfig } from '@/types'
 import AppSettings from './appSettings'
 import { ReactNode, useState } from 'react'
 import { NeedsUpdatesLabel } from '@/src/common/defaults'
 import ItemLabels from '@/components/labels/itemLabels'
 import { AvailableLabelColorsForItem } from '../labels/labelsPopup'
-import IconButton from '../iconButton'
-import cancelIcon from '@/public/cancel.svg'
 import LabelsPopupMenuButton from '../labels/labelsPopupMenuButton'
-
-type Config = [string[], string[]]
 
 export default function LinearSettings({
   activeProject,
@@ -28,13 +24,13 @@ export default function LinearSettings({
   const router = useRouter()
   const availableProvider = useIssueTrackerProvider()
 
-  const defaultConfig: Config = [[NeedsUpdatesLabel], [NeedsUpdatesLabel]]
+  const defaultConfig: IssueTrackerConfig = { labels: [NeedsUpdatesLabel], syncLabels: true, syncComments: true }
 
   const scopedProvider = provider as AvailableIssueTrackerProvider | undefined
   const previousEnvironment = activeProject ? scopedProvider?.environment : undefined
-  const scopedConfigs: Config[] = previousEnvironment ? JSON.parse(previousEnvironment) : [defaultConfig]
+  const scopedConfig: IssueTrackerConfig = previousEnvironment ? JSON.parse(previousEnvironment) : defaultConfig
 
-  const [configs, setConfigs] = useState(scopedConfigs)
+  const [config, setConfig] = useState(scopedConfig)
 
   return (
     <AppSettings
@@ -43,9 +39,8 @@ export default function LinearSettings({
       scopeID={scopeID}
       scopedProvider={scopedProvider}
       availableProvider={availableProvider}
-      supportsReconfigureWithoutReset
       onRefresh={onRefresh}
-      getEnvironment={() => (configs.length > 0 ? JSON.stringify(configs) : undefined)}
+      getEnvironment={() => JSON.stringify(config)}
       userConfiguration={() => (
         <Button type='secondary' onClick={() => api.authorizeLinear().then(router.push)}>
           {scopedProvider ? 'Reauthorize' : 'Authorize'}
@@ -55,21 +50,9 @@ export default function LinearSettings({
         <>
           {isConfigured || isUpdating ? (
             <div className='flex flex-col w-full gap-2.5'>
-              <ConfigPanes {...{ configs: configs, setConfigs: setConfigs, activeProject, isUpdating, isProcessing }} />
+              <ConfigPanes {...{ config, setConfig, activeProject, isUpdating, isProcessing }} />
               <div className='flex gap-2.5 justify-end'>
-                {isUpdating && (
-                  <>
-                    <Button
-                      type='secondary'
-                      disabled={isProcessing}
-                      onClick={() => setConfigs([...configs, defaultConfig])}>
-                      Add Trigger
-                    </Button>
-                    <Button type='destructive' disabled={isProcessing} onClick={() => setConfigs(scopedConfigs)}>
-                      Revert
-                    </Button>
-                  </>
-                )}
+                {isUpdating && <></>}
                 {confirmButton()}
               </div>
             </div>
@@ -83,21 +66,20 @@ export default function LinearSettings({
 }
 
 const ConfigPanes = ({
-  configs,
-  setConfigs,
+  config,
+  setConfig,
   activeProject,
   isUpdating,
   isProcessing,
 }: {
-  configs: Config[]
-  setConfigs: (configs: Config[]) => void
+  config: IssueTrackerConfig
+  setConfig: (config: IssueTrackerConfig) => void
   activeProject?: ActiveProject
   isUpdating: boolean
   isProcessing: boolean
 }) => {
   const projectLabels = activeProject ? activeProject.availableLabels : []
-  const configLabels = [...new Set(configs.flat().flat())]
-  const pendingLabels = configLabels.filter(l => !projectLabels.includes(l))
+  const pendingLabels = config.labels.filter(l => !projectLabels.includes(l))
   const availableLabels = [...projectLabels, ...pendingLabels]
   const colors = AvailableLabelColorsForItem({ availableLabels })
 
@@ -107,47 +89,23 @@ const ConfigPanes = ({
   const gridConfig = 'w-full grid grid-cols-[210px_minmax(120px,1fr)] items-start gap-1'
 
   return (
-    <>
-      {configs.map(([triggers, toggles], index) => (
-        <div key={index} className='flex items-center gap-2'>
-          {isUpdating && (
-            <IconButton icon={cancelIcon} onClick={() => setConfigs(configs.filter((_, i) => i !== index))} />
+    <div className='flex items-center gap-2'>
+      <div className={`px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg ${gridConfig}`}>
+        <GridCell className='font-medium'>Create task on adding label:</GridCell>
+        <GridCell>
+          {isUpdating && !isProcessing ? (
+            <LabelsPopupMenuButton
+              activeLabels={config.labels}
+              availableLabels={availableLabels}
+              colors={colors}
+              toggleLabel={l => setConfig({ ...config, labels: toggle(config.labels, l) })}
+            />
+          ) : (
+            <ItemLabels labels={config.labels} colors={colors} />
           )}
-          <div className={`px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg ${gridConfig}`}>
-            <GridCell className='font-medium'>Create task on adding label:</GridCell>
-            <GridCell>
-              {isUpdating && !isProcessing ? (
-                <LabelsPopupMenuButton
-                  activeLabels={triggers}
-                  availableLabels={availableLabels}
-                  colors={colors}
-                  toggleLabel={l =>
-                    setConfigs(configs.map(([t, _], i) => (i === index ? [toggle(t, l), toggles] : [t, toggles])))
-                  }
-                />
-              ) : (
-                <ItemLabels labels={triggers} colors={colors} />
-              )}
-            </GridCell>
-            <GridCell className='font-medium'>Toggle labels on completing task:</GridCell>
-            <GridCell>
-              {isUpdating && !isProcessing ? (
-                <LabelsPopupMenuButton
-                  activeLabels={toggles}
-                  availableLabels={availableLabels}
-                  colors={colors}
-                  toggleLabel={l =>
-                    setConfigs(configs.map(([_, t], i) => (i === index ? [triggers, toggle(t, l)] : [triggers, t])))
-                  }
-                />
-              ) : (
-                <ItemLabels labels={toggles} colors={colors} />
-              )}
-            </GridCell>
-          </div>
-        </div>
-      ))}
-    </>
+        </GridCell>
+      </div>
+    </div>
   )
 }
 

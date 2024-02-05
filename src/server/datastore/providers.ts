@@ -6,6 +6,7 @@ import {
   AvailableProvider,
   CustomModel,
   DefaultLanguageModel,
+  IssueTrackerConfig,
   ModelProvider,
   SupportedProvider,
 } from '@/types'
@@ -122,8 +123,8 @@ export async function saveProviderKey(
       apiKey = (await getProviderCredentials([userID], provider)).apiKey
     }
     if (provider === 'linear') {
-      const configs = JSON.parse(environment) as [string[], string[]][]
-      await ensureProjectLabels(scopeID, configs.flat().flat())
+      const config = JSON.parse(environment) as IssueTrackerConfig
+      await ensureProjectLabels(scopeID, config.labels)
     }
   }
   const providerData = await getSingleProviderData([scopeID], provider)
