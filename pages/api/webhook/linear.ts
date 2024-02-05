@@ -3,7 +3,7 @@ import { getProjectLabels, getProjectUserForEmail } from '@/src/server/datastore
 import { getTaskForIdentifier } from '@/src/server/datastore/tasks'
 import { getUserForID } from '@/src/server/datastore/users'
 import { getLastCommentForVersion, getTrustedVersion, updateVersionLabels } from '@/src/server/datastore/versions'
-import { getActorForID, getIssueLabels } from '@/src/server/linear'
+import { getActorForID, getIssueLabels, getLinearProjectConfig } from '@/src/server/linear'
 import { withErrorRoute } from '@/src/server/session'
 import { LINEAR_WEBHOOK_SIGNATURE_HEADER, LINEAR_WEBHOOK_TS_FIELD, LinearWebhooks } from '@linear/sdk'
 import type { NextApiRequest, NextApiResponse } from 'next'
@@ -51,12 +51,15 @@ async function processLabels(issueID: string, oldLabelIDs: string[], newLabelIDs
     const task = await getTaskForIdentifier(issueID)
     if (task) {
       const { versionID, userID, projectID } = task
-      const { actorID, addedLabels, removedLabels } = await getIssueLabels(projectID, issueID, addedIDs, removedIDs)
-      const projectUser = await getProjectUserForActor(userID, projectID, actorID)
-      if (projectUser) {
-        const availableLabels = await getProjectLabels(projectID)
-        const labelsToAdd = addedLabels.filter(label => availableLabels.includes(label))
-        await updateVersionLabels(projectUser.id, versionID, projectID, labelsToAdd, removedLabels)
+      const config = await getLinearProjectConfig(projectID)
+      if (config && config.syncLabels) {
+        const { actorID, addedLabels, removedLabels } = await getIssueLabels(projectID, issueID, addedIDs, removedIDs)
+        const projectUser = await getProjectUserForActor(userID, projectID, actorID)
+        if (projectUser) {
+          const availableLabels = await getProjectLabels(projectID)
+          const labelsToAdd = addedLabels.filter(label => availableLabels.includes(label))
+          await updateVersionLabels(projectUser.id, versionID, projectID, labelsToAdd, removedLabels)
+        }
       }
     }
   }
@@ -66,12 +69,15 @@ async function processComment(issueID: string, actorID: string, comment: string,
   const task = await getTaskForIdentifier(issueID)
   if (task) {
     const { versionID, userID, projectID } = task
-    const projectUser = await getProjectUserForActor(userID, projectID, actorID)
-    if (projectUser) {
-      const version = await getTrustedVersion(versionID, true)
-      const lastComment = await getLastCommentForVersion(versionID)
-      if (!lastComment || new Date(lastComment.timestamp) < createdAt) {
-        await saveComment(projectUser.id, projectID, version.parentID, versionID, comment, createdAt)
+    const config = await getLinearProjectConfig(projectID)
+    if (config && config.syncComments) {
+      const projectUser = await getProjectUserForActor(userID, projectID, actorID)
+      if (projectUser) {
+        const version = await getTrustedVersion(versionID, true)
+        const lastComment = await getLastCommentForVersion(versionID)
+        if (!lastComment || new Date(lastComment.timestamp) < createdAt) {
+          await saveComment(projectUser.id, projectID, version.parentID, versionID, comment, createdAt)
+        }
       }
     }
   }
