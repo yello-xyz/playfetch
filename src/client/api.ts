@@ -354,6 +354,9 @@ const api = {
   exportPrompt: function (projectID: number, versionID: number, fileName: string) {
     return post(this.exportPrompts, { projectID, versionID, fileName })
   },
+  createTask: function (projectID: number, parentID: number, versionID: number, title: string, description: string) {
+    return post(this.createTask, { projectID, parentID, versionID, title, description })
+  },
   updateProviderModel: function (
     scopeID: number,
     provider: ModelProvider,
