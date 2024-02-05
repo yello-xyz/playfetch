@@ -1,6 +1,6 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { ActiveChain, ActivePrompt, ChainVersion, IsPromptVersion, PromptVersion } from '@/types'
-import { AvailableLabelColorsForItem } from '../labels/labelPopupMenu'
+import { AvailableLabelColorsForItem } from '../labels/labelsPopup'
 import FiltersHeader from '../filters/filtersHeader'
 import VersionCell from './versionCell'
 import { ActiveItemCache } from '@/src/client/hooks/useActiveItemCache'
