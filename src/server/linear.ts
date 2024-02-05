@@ -114,7 +114,7 @@ export async function createTaskForVersion(
         title,
         description,
         labelIds: labelID ? [labelID] : undefined,
-        ...getUserProps(user),
+        ...(await getUserProps(user)),
       })
       const createdIssue = await issue.issue
       if (issue.success && createdIssue?.id) {
@@ -147,7 +147,7 @@ export async function syncTaskComments(
             issueId: identifier,
             body: comment,
             createdAt,
-            ...getUserProps(userID),
+            ...(await getUserProps(userID)),
           })
         }
       }
