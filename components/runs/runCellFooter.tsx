@@ -9,7 +9,7 @@ import { StaticImageData } from 'next/image'
 import { AvailableLabelColorsForItem } from '../labels/labelsPopup'
 import ItemLabels from '@/components/labels/itemLabels'
 import RunRatingButtons from './runRatingButtons'
-import { ItemLabelPopupMenu } from '../labels/labelPopupMenu'
+import { ItemLabelsPopupMenu } from '../labels/labelsPopupMenu'
 
 export default function RunCellFooter({
   run,
@@ -37,7 +37,7 @@ export default function RunCellFooter({
             <>
               <RunRatingButtons run={run} activeItem={activeItem} isSelected={isSelected} onUpdate={onRatingUpdate} />
               <div className='self-stretch border-r border-gray-200' />
-              <ItemLabelPopupMenu activeItem={activeItem} item={run} selectedCell />
+              <ItemLabelsPopupMenu activeItem={activeItem} item={run} selectedCell />
             </>
           )}
         </div>

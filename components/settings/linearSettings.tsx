@@ -8,7 +8,7 @@ import { ReactNode, useState } from 'react'
 import { NeedsUpdatesLabel } from '@/src/common/defaults'
 import ItemLabels from '@/components/labels/itemLabels'
 import { AvailableLabelColorsForItem } from '../labels/labelsPopup'
-import LabelPopupMenu from '../labels/labelPopupMenu'
+import LabelsPopupMenu from '../labels/labelsPopupMenu'
 import IconButton from '../iconButton'
 import cancelIcon from '@/public/cancel.svg'
 
@@ -120,7 +120,7 @@ const ConfigPanes = ({
             </GridCell>
             <GridCell>
               {isUpdating && !isProcessing && (
-                <LabelPopupMenu
+                <LabelsPopupMenu
                   activeLabels={triggers}
                   availableLabels={availableLabels}
                   colors={colors}
@@ -136,7 +136,7 @@ const ConfigPanes = ({
             </GridCell>
             <GridCell>
               {isUpdating && !isProcessing && (
-                <LabelPopupMenu
+                <LabelsPopupMenu
                   activeLabels={toggles}
                   availableLabels={availableLabels}
                   colors={colors}

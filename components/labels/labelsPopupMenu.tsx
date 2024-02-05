@@ -5,7 +5,7 @@ import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/pr
 import GlobalPopupMenu from '../globalPopupMenu'
 import LabelsPopup, { AvailableLabelColorsForItem, LabelsPopupProps } from './labelsPopup'
 
-export function ItemLabelPopupMenu({
+export function ItemLabelsPopupMenu({
   item,
   activeItem,
   selectedCell = false,
@@ -40,10 +40,10 @@ export function ItemLabelPopupMenu({
     }
   }
 
-  return <LabelPopupMenu {...{ activeLabels, availableLabels, colors: labelColors, toggleLabel, selectedCell }} />
+  return <LabelsPopupMenu {...{ activeLabels, availableLabels, colors: labelColors, toggleLabel, selectedCell }} />
 }
 
-export default function LabelPopupMenu({
+export default function LabelsPopupMenu({
   activeLabels,
   availableLabels,
   colors,
