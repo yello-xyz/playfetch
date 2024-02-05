@@ -7,18 +7,17 @@ import {
   ActiveProject,
   ActivePrompt,
   ActiveChain,
-  CommentAction,
 } from '@/types'
 import { ReactNode } from 'react'
 import { Capitalize, FormatRelativeDate } from '@/src/common/formatting'
-import { ItemLabel } from './versions/versionLabels'
+import { ItemLabel } from '@/components/labels/itemLabels'
 import UserAvatar from '@/components/users/userAvatar'
 import collapseIcon from '@/public/collapse.svg'
 import IconButton from './iconButton'
 import VersionComparison from './versions/versionComparison'
 import { LabelForModel } from '@/src/common/providerMetadata'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
-import { AvailableLabelColorsForItem } from './labelPopupMenu'
+import { AvailableLabelColorsForItem } from './labels/labelPopupMenu'
 import { SingleTabHeader } from './tabsHeader'
 import useAvailableModelProviders from '@/src/client/context/providerContext'
 import { useActiveProject } from '@/src/client/context/projectContext'

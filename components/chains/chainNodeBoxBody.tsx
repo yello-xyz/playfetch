@@ -9,7 +9,7 @@ import {
 } from './chainNode'
 import { ChainItemCache } from '@/src/client/hooks/useChainItemCache'
 import { VersionLabels } from '../versions/versionLabels'
-import { AvailableLabelColorsForItem } from '../labelPopupMenu'
+import { AvailableLabelColorsForItem } from '../labels/labelPopupMenu'
 import { TaggedContent } from '../versions/versionComparison'
 import { ReactNode } from 'react'
 import { InputVariableClass } from '../prompts/promptInput'

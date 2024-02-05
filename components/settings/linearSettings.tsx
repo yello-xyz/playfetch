@@ -6,8 +6,8 @@ import { ActiveProject, AvailableIssueTrackerProvider, AvailableProvider } from 
 import AppSettings from './appSettings'
 import { ReactNode, useState } from 'react'
 import { NeedsUpdatesLabel } from '@/src/common/defaults'
-import { ItemLabels } from '../versions/versionLabels'
-import LabelPopupMenu, { AvailableLabelColorsForItem } from '../labelPopupMenu'
+import ItemLabels from '@/components/labels/itemLabels'
+import LabelPopupMenu, { AvailableLabelColorsForItem } from '../labels/labelPopupMenu'
 import IconButton from '../iconButton'
 import cancelIcon from '@/public/cancel.svg'
 

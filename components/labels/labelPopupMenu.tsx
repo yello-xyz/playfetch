@@ -1,13 +1,13 @@
 import { ActivePrompt, Run, PromptVersion, ActiveChain, ChainVersion } from '@/types'
 import api from '@/src/client/api'
-import { PopupContent } from './popupMenu'
+import { PopupContent } from '../popupMenu'
 import addIcon from '@/public/add.svg'
 import labelIcon from '@/public/label.svg'
 import checkIcon from '@/public/check.svg'
 import { useState } from 'react'
 import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/projectContext'
-import Icon from './icon'
-import GlobalPopupMenu from './globalPopupMenu'
+import Icon from '../icon'
+import GlobalPopupMenu from '../globalPopupMenu'
 import { WithDismiss } from '@/src/client/context/globalPopupContext'
 
 const projectLabelColors = [

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ActivePrompt, PromptVersion, ChainVersion, ActiveChain } from '@/types'
 import VersionPopupMenu from './versionPopupMenu'
-import { ItemLabelPopupMenu } from '../labelPopupMenu'
+import { ItemLabelPopupMenu } from '../labels/labelPopupMenu'
 import UserAvatar from '@/components/users/userAvatar'
 import CommentPopupMenu from '../commentPopupMenu'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
