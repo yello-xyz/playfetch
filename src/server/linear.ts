@@ -83,8 +83,7 @@ export async function createTaskOnAddingLabel(
       const user = await getUserForID(userID)
       const url = buildURLForRoute(isPrompt ? PromptRoute(projectID, parentID) : ChainRoute(projectID, parentID))
       const description = `**${user.fullName}** added label **“${label}”** to [${parentData.name}](${url}).`
-      const labels = await client.issueLabels()
-      const labelID = labels.nodes.find(l => l.name === label)?.id
+      const labelID = await findOrCreateLabel(client, label)
       await createTaskForVersion(userID, projectID, parentID, version.id, title, description, labelID, client)
     }
   }
@@ -162,8 +161,7 @@ export async function syncTaskLabel(projectID: number, versionID: number, label:
     if (config && config.syncLabels) {
       const client = await getClient(projectID)
       if (client) {
-        const labels = await client.issueLabels()
-        const labelID = labels.nodes.find(l => l.name === label)?.id
+        const labelID = await findOrCreateLabel(client, label, checked)
         if (labelID) {
           for (const identifier of identifiers) {
             const issue = await client.issue(identifier)
@@ -177,4 +175,17 @@ export async function syncTaskLabel(projectID: number, versionID: number, label:
       }
     }
   }
+}
+
+const findOrCreateLabel = async (client: LinearClient, label: string, allowCreate = true) => {
+  const labels = await client.issueLabels()
+  let labelID = labels.nodes.find(l => l.name === label)?.id
+  if (!labelID && allowCreate) {
+    const newLabel = await client.createIssueLabel({ name: label })
+    const createdLabel = await newLabel.issueLabel
+    if (newLabel.success && createdLabel?.id) {
+      labelID = createdLabel.id
+    }
+  }
+  return labelID
 }

@@ -1,5 +1,5 @@
 import { saveComment } from '@/src/server/datastore/comments'
-import { getProjectLabels, getProjectUserForEmail } from '@/src/server/datastore/projects'
+import { getProjectUserForEmail } from '@/src/server/datastore/projects'
 import { getTaskForIdentifier } from '@/src/server/datastore/tasks'
 import { getUserForID } from '@/src/server/datastore/users'
 import { getLastCommentForVersion, getTrustedVersion, updateVersionLabels } from '@/src/server/datastore/versions'
@@ -56,9 +56,7 @@ async function processLabels(issueID: string, oldLabelIDs: string[], newLabelIDs
         const { actorID, addedLabels, removedLabels } = await getIssueLabels(projectID, issueID, addedIDs, removedIDs)
         const projectUser = await getProjectUserForActor(userID, projectID, actorID)
         if (projectUser) {
-          const availableLabels = await getProjectLabels(projectID)
-          const labelsToAdd = addedLabels.filter(label => availableLabels.includes(label))
-          await updateVersionLabels(projectUser.id, versionID, projectID, labelsToAdd, removedLabels)
+          await updateVersionLabels(projectUser.id, versionID, projectID, addedLabels, removedLabels)
         }
       }
     }

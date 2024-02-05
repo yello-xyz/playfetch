@@ -238,9 +238,6 @@ const getTrustedProjectData = (projectID: number) => getKeyedEntity(Entity.PROJE
 
 export const getProjectName = (projectID: number) => getTrustedProjectData(projectID).then(data => data.name)
 
-export const getProjectLabels = (projectID: number) =>
-  getTrustedProjectData(projectID).then(data => JSON.parse(data.labels) as string[])
-
 const getVerifiedUserProjectData = async (userID: number, projectID: number) => {
   const projectData = await getTrustedProjectData(projectID)
   if (!projectData) {
