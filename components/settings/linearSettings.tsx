@@ -8,9 +8,9 @@ import { ReactNode, useState } from 'react'
 import { NeedsUpdatesLabel } from '@/src/common/defaults'
 import ItemLabels from '@/components/labels/itemLabels'
 import { AvailableLabelColorsForItem } from '../labels/labelsPopup'
-import LabelsPopupMenu from '../labels/labelsPopupMenu'
 import IconButton from '../iconButton'
 import cancelIcon from '@/public/cancel.svg'
+import LabelsPopupMenuButton from '../labels/labelsPopupMenuButton'
 
 type Config = [string[], string[]]
 
@@ -104,7 +104,7 @@ const ConfigPanes = ({
   const toggle = (labels: string[], label: string) =>
     labels.includes(label) ? labels.filter(l => l !== label) : [...labels, label]
 
-  const gridConfig = 'w-full grid grid-cols-[210px_minmax(120px,1fr)_24px] items-start gap-1'
+  const gridConfig = 'w-full grid grid-cols-[210px_minmax(120px,1fr)] items-start gap-1'
 
   return (
     <>
@@ -116,11 +116,8 @@ const ConfigPanes = ({
           <div className={`px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg ${gridConfig}`}>
             <GridCell className='font-medium'>Create task on adding label:</GridCell>
             <GridCell>
-              <ItemLabels labels={triggers} colors={colors} />
-            </GridCell>
-            <GridCell>
-              {isUpdating && !isProcessing && (
-                <LabelsPopupMenu
+              {isUpdating && !isProcessing ? (
+                <LabelsPopupMenuButton
                   activeLabels={triggers}
                   availableLabels={availableLabels}
                   colors={colors}
@@ -128,15 +125,14 @@ const ConfigPanes = ({
                     setConfigs(configs.map(([t, _], i) => (i === index ? [toggle(t, l), toggles] : [t, toggles])))
                   }
                 />
+              ) : (
+                <ItemLabels labels={triggers} colors={colors} />
               )}
             </GridCell>
             <GridCell className='font-medium'>Toggle labels on completing task:</GridCell>
             <GridCell>
-              <ItemLabels labels={toggles} colors={colors} />
-            </GridCell>
-            <GridCell>
-              {isUpdating && !isProcessing && (
-                <LabelsPopupMenu
+              {isUpdating && !isProcessing ? (
+                <LabelsPopupMenuButton
                   activeLabels={toggles}
                   availableLabels={availableLabels}
                   colors={colors}
@@ -144,6 +140,8 @@ const ConfigPanes = ({
                     setConfigs(configs.map(([_, t], i) => (i === index ? [triggers, toggle(t, l)] : [triggers, t])))
                   }
                 />
+              ) : (
+                <ItemLabels labels={toggles} colors={colors} />
               )}
             </GridCell>
           </div>
