@@ -10,7 +10,7 @@ import { CompareRoute, NewEndpointRoute, ParseNumberQuery } from '@/src/common/c
 import { WithDismiss } from '@/src/client/context/globalPopupContext'
 import { useState } from 'react'
 import PickNameDialog from '../pickNameDialog'
-import { useSourceControlProvider } from '@/src/client/context/providerContext'
+import { useIssueTrackerProvider, useSourceControlProvider } from '@/src/client/context/providerContext'
 
 export default function VersionPopupMenu<Version extends PromptVersion | ChainVersion>({
   version,
@@ -24,7 +24,8 @@ export default function VersionPopupMenu<Version extends PromptVersion | ChainVe
   const refreshActiveItem = useRefreshActiveItem()
 
   const setDialogPrompt = useModalDialogPrompt()
-  const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
+  const [showExportPrompt, setShowExportPrompt] = useState(false)
+  const [showTaskPrompt, setShowTaskPrompt] = useState(false)
 
   const chainReference = IsPromptVersion(version) ? version.usedInChain : null
 
@@ -57,23 +58,39 @@ export default function VersionPopupMenu<Version extends PromptVersion | ChainVe
     IsPromptVersion(version) && (activeItem as ActivePrompt).canSuggestImprovements
       ? () => api.suggestPrompt(activeItem.id, version.id, currentVersion.id).then(refreshActiveItem)
       : undefined
-  const availableProvider = useSourceControlProvider()
+  const sourceControlProvider = useSourceControlProvider()
   const exportVersion =
-    IsPromptVersion(version) && availableProvider?.scopeID === projectID ? () => setShowPickNamePrompt(true) : undefined
+    IsPromptVersion(version) && sourceControlProvider?.scopeID === projectID
+      ? () => setShowExportPrompt(true)
+      : undefined
+
+  const issueTrackerProvider = useIssueTrackerProvider()
+  const createTask = issueTrackerProvider?.scopeID === projectID ? () => setShowTaskPrompt(true) : undefined
 
   const loadPopup = (): [typeof VersionPopup, VersionPopupProps] => [
     VersionPopup,
-    { deleteVersion, createEndpoint, compareVersion, exportVersion, suggestImprovement },
+    { deleteVersion, createEndpoint, compareVersion, exportVersion, createTask, suggestImprovement },
   ]
 
-  return showPickNamePrompt ? (
+  return showExportPrompt ? (
     <PickNameDialog
       title='Pick File Name'
       confirmTitle='Export'
       label='File Name'
       initialName={(activeItem as ActivePrompt).sourcePath ?? `${activeItem.name}.yaml`}
       onConfirm={fileName => api.exportPrompt(projectID!, version.id, fileName).then(_ => refreshActiveItem())}
-      onDismiss={() => setShowPickNamePrompt(false)}
+      onDismiss={() => setShowExportPrompt(false)}
+    />
+  ) : showTaskPrompt ? (
+    <PickNameDialog
+      title='Create Task'
+      confirmTitle='Create'
+      label='Title'
+      initialName={`PlayFetch • ${activeItem.name}`}
+      onConfirm={title =>
+        api.createTask(projectID!, activeItem.id, version.id, title, '').then(_ => refreshActiveItem())
+      }
+      onDismiss={() => setShowTaskPrompt(false)}
     />
   ) : (
     <GlobalPopupMenu icon={dotsIcon} loadPopup={loadPopup} selectedCell={selectedCell} />
@@ -85,6 +102,7 @@ type VersionPopupProps = {
   createEndpoint: () => void
   compareVersion?: () => void
   exportVersion?: () => void
+  createTask?: () => void
   suggestImprovement?: () => void
 }
 
@@ -93,6 +111,7 @@ function VersionPopup({
   createEndpoint,
   compareVersion,
   exportVersion,
+  createTask,
   suggestImprovement,
   withDismiss,
 }: VersionPopupProps & WithDismiss) {
@@ -100,6 +119,7 @@ function VersionPopup({
     <PopupContent className='w-44'>
       {compareVersion && <PopupMenuItem title='Compare' callback={withDismiss(compareVersion)} first />}
       <PopupMenuItem title='Create Endpoint' callback={withDismiss(createEndpoint)} first={!compareVersion} />
+      {createTask && <PopupMenuItem title='Create Task' callback={withDismiss(createTask)} />}
       {exportVersion && <PopupMenuItem title='Export' callback={withDismiss(exportVersion)} />}
       {suggestImprovement && <PopupMenuItem title='Suggest Improvement' callback={withDismiss(suggestImprovement)} />}
       <PopupMenuItem destructive title='Delete' callback={withDismiss(deleteVersion)} last />
