@@ -52,7 +52,7 @@ export function RunGroup({
   const groupLabel = getRowLabelForGroup(group, sortByInputMap) ?? formattedDate
 
   return (
-    <div className='flex flex-col flex-1 gap-3'>
+    <div className='flex flex-col gap-3'>
       <div className='text-xs font-medium text-center text-gray-500'>{groupLabel}</div>
       {group.map(run => (
         <RunCell
