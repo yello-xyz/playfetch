@@ -169,7 +169,10 @@ export async function getPendingAccessObjects<T>(
       .map(objectData =>
         toPendingObject(toObject(objectData), pendingObjects.find(access => getAccessID(access) === getID(objectData))!)
       ),
-    objectsData.filter(objectData => ownedObjectIDs.includes(getID(objectData))).map(toObject),
+    objectsData
+      .filter(objectData => ownedObjectIDs.includes(getID(objectData)))
+      .sort(sortObjects)
+      .map(toObject),
   ]
 }
 

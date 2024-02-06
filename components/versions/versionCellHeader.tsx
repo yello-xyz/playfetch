@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ActivePrompt, PromptVersion, ChainVersion, ActiveChain } from '@/types'
 import VersionPopupMenu from './versionPopupMenu'
-import LabelPopupMenu from '../labelPopupMenu'
+import { ItemLabelsPopupMenu } from '../labels/labelsPopupMenu'
 import UserAvatar from '@/components/users/userAvatar'
 import CommentPopupMenu from '../commentPopupMenu'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
@@ -81,7 +81,7 @@ export default function VersionCellHeader<Version extends PromptVersion | ChainV
               users={activeItem.users}
               selectedCell={isActiveVersion}
             />
-            <LabelPopupMenu activeItem={activeItem} item={version} selectedCell={isActiveVersion} />
+            <ItemLabelsPopupMenu activeItem={activeItem} item={version} selectedCell={isActiveVersion} />
             <VersionPopupMenu activeItem={activeItem} version={version} selectedCell={isActiveVersion} />
           </div>
         )}

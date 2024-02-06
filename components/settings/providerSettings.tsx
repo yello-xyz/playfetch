@@ -1,6 +1,6 @@
 import Label from '../label'
 import { IconForProvider, LabelForProvider } from '@/src/common/providerMetadata'
-import { AvailableProvider, IsModelProvider, ModelProvider, QueryProvider, SourceControlProvider } from '@/types'
+import { AvailableProvider, IsModelProvider, ModelProvider, QueryProvider, SupportedProvider } from '@/types'
 import { ReactNode, useState } from 'react'
 import api from '@/src/client/api'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
@@ -128,6 +128,9 @@ function DefaultProviderRow({
           )}
         </div>
       </div>
+      {isUpdating && provider === 'huggingface' && (
+        <span>Models may require a Hugging Face Pro subscription to run.</span>
+      )}
       {isUpdating && <span>Your key will be encrypted using AES 256 and stored securely.</span>}
       <CustomModelSettings
         scopeID={scopeID}
@@ -144,7 +147,7 @@ export function ProviderRow({
   flexLayout = 'justify-between',
   children,
 }: {
-  provider: ModelProvider | QueryProvider | SourceControlProvider
+  provider: SupportedProvider
   flexLayout?: string
   children?: ReactNode
 }) {

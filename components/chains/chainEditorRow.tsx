@@ -1,9 +1,9 @@
 import { ActiveChain, ChainItem, ChainVersion, Prompt } from '@/types'
 import { ChainNode, IsBranchChainItem, IsChainItem } from './chainNode'
 import { ChainNodeBox } from './chainNodeBox'
-import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
+import { ChainItemCache } from '@/src/client/hooks/useChainItemCache'
 import { FirstBranchForBranchOfNode, ShouldBranchLoopOnCompletion } from '@/src/common/branching'
-import ChainNodeBoxConnector, { DownConnector, DownStroke } from './chainNodeBoxConnector'
+import ChainNodeBoxConnector, { DownArrow, DownStroke } from './chainNodeBoxConnector'
 
 export type InsertActions = {
   insertItem: (index: number, branch: number, item: ChainItem) => void
@@ -45,6 +45,7 @@ const shouldBranchLoopOnCompletion = (nodes: ChainNode[], branch: number) =>
 export const ConnectorRow = (props: {
   nodes: ChainNode[]
   maxBranch: number
+  maxNonLoopingBranch: number
   previousRow: ChainNode[]
   nextRow: ChainNode[]
   isDisabled: boolean
@@ -63,6 +64,7 @@ export const ConnectorRow = (props: {
 const ConnectorCell = ({
   nodes,
   branch,
+  maxNonLoopingBranch,
   previousRow,
   nextRow,
   isDisabled,
@@ -73,6 +75,7 @@ const ConnectorCell = ({
 }: {
   nodes: ChainNode[]
   branch: number
+  maxNonLoopingBranch: number
   previousRow: ChainNode[]
   nextRow: ChainNode[]
   isDisabled: boolean
@@ -104,6 +107,7 @@ const ConnectorCell = ({
       hasPrevious={!!precedingNode && !IsBranchChainItem(precedingNode)}
       hasNext={!!nextNode && IsChainItem(nextNode)}
       hasCompleted={hasCompletedBranch}
+      hasEndBranchConnector={maxNonLoopingBranch > 0}
       {...bindInsertActions(insertActions, index, branch)}
     />
   ) : didStartBranchInColumn(nodes, previousNodeIndex, branch) && !hasCompletedBranch ? (
@@ -127,7 +131,7 @@ export const NodesRow = (props: {
   savedVersion: ChainVersion | null
   setTestMode: (testMode: boolean) => void
   prompts: Prompt[]
-  promptCache: ChainPromptCache
+  itemCache: ChainItemCache
 }) => (
   <>
     {Array.from({ length: props.maxBranch + 1 }, (_, branch) => (
@@ -150,7 +154,7 @@ const NodeCell = ({
   savedVersion,
   setTestMode,
   prompts,
-  promptCache,
+  itemCache,
 }: {
   chain: ActiveChain
   nodes: ChainNode[]
@@ -165,7 +169,7 @@ const NodeCell = ({
   savedVersion: ChainVersion | null
   setTestMode: (testMode: boolean) => void
   prompts: Prompt[]
-  promptCache: ChainPromptCache
+  itemCache: ChainItemCache
 }) => {
   const firstNodeOfRowIndex = nodes.indexOf(row[0])
   const isLastRow = firstNodeOfRowIndex === nodes.length - 1
@@ -216,7 +220,7 @@ const NodeCell = ({
         savedVersion={savedVersion}
         setTestMode={setTestMode}
         prompts={prompts}
-        promptCache={promptCache}
+        itemCache={itemCache}
       />
     )
   ) : !isLastRow && !hasCompletedBranch && didStartBranchInColumn(nodes, firstNodeOfRowIndex, branch) ? (
@@ -291,7 +295,7 @@ export const EndBranchConnector = ({
     />
     <RowFiller start={maxNonLoopingBranch + 1} end={maxBranch} colSpans={colSpans} />
     <div className='flex flex-col items-center'>
-      <DownConnector height='min-h-[18px]' />
+      <DownArrow height='min-h-[18px]' />
     </div>
     <RowFiller start={1} end={maxBranch} colSpans={colSpans} />
   </>

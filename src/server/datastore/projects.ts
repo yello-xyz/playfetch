@@ -26,7 +26,7 @@ import {
   getAccessibleObjectIDs,
 } from './access'
 import { addPromptToProject, matchesDefaultName, toPrompt } from './prompts'
-import { getActiveUsers, toUser } from './users'
+import { getActiveUsers, getUserForEmail, toUser } from './users'
 import { DefaultEndpointFlavor, toEndpoint } from './endpoints'
 import { toChain } from './chains'
 import { ensureWorkspaceAccess, getPendingAccessObjects, getWorkspaceUsers } from './workspaces'
@@ -36,6 +36,7 @@ import { getAnalyticsForProject } from './analytics'
 import { toComment } from './comments'
 import { deleteEntity } from './cleanup'
 import { toTable } from './tables'
+import { DefaultLabels } from '@/src/common/defaults'
 
 export async function migrateProjects(postMerge: boolean) {
   if (postMerge) {
@@ -138,7 +139,6 @@ export async function getActiveProject(userID: number, projectID: number): Promi
 }
 
 const DefaultProjectName = 'New Project'
-const DefaultLabels = ['Experiment', 'Integration ready', 'QA ready', 'Needs updates', 'Production ready']
 
 export async function addProjectForUser(
   userID: number,
@@ -236,7 +236,7 @@ export const ensureProjectOwnership = (userID: number, projectID: number) => che
 
 const getTrustedProjectData = (projectID: number) => getKeyedEntity(Entity.PROJECT, projectID)
 
-export const getProjectNameForID = (projectID: number) => getTrustedProjectData(projectID).then(data => data.name)
+export const getProjectName = (projectID: number) => getTrustedProjectData(projectID).then(data => data.name)
 
 const getVerifiedUserProjectData = async (userID: number, projectID: number) => {
   const projectData = await getTrustedProjectData(projectID)
@@ -248,6 +248,11 @@ const getVerifiedUserProjectData = async (userID: number, projectID: number) => 
     await ensureWorkspaceAccess(userID, projectData.workspaceID)
   }
   return projectData
+}
+
+export const getProjectUserForEmail = async (projectID: number, email: string) => {
+  const user = await getUserForEmail(email)
+  return user && (await hasUserAccess(user.id, projectID)) ? user : undefined
 }
 
 // TODO Also call this when deleting prompts/chains or updating endpoints etc.
@@ -266,11 +271,12 @@ export async function addProjectFlavor(userID: number, projectID: number, flavor
   await updateProject({ ...projectData, flavors: JSON.stringify([...JSON.parse(projectData.flavors), flavor]) }, true)
 }
 
-export async function ensureProjectLabel(userID: number, projectID: number, label: string) {
-  const projectData = await getVerifiedUserProjectData(userID, projectID)
-  const labels = JSON.parse(projectData.labels)
-  if (!labels.includes(label)) {
-    const newLabels = [...labels, label]
+export async function ensureProjectLabels(projectID: number, labels: string[]) {
+  const projectData = await getTrustedProjectData(projectID)
+  const oldLabels = JSON.parse(projectData.labels) as string[]
+  const missingLabels = [...new Set(labels)].filter(label => !oldLabels.includes(label))
+  if (missingLabels.length > 0) {
+    const newLabels = [...oldLabels, ...missingLabels]
     await updateProject({ ...projectData, labels: JSON.stringify(newLabels) }, true)
   }
 }
@@ -339,7 +345,7 @@ async function getProjectAndWorkspaceUsers(
   const [workspaceUsers, pendingWorkspaceUsers] = await getWorkspaceUsers(workspaceID)
 
   return [
-    [...projectUsers, ...filterObjects(workspaceUsers, projectUsers)],
+    [...projectOwners, ...filterObjects(projectUsers, projectOwners), ...filterObjects(workspaceUsers, projectUsers)],
     [
       ...filterObjects(pendingProjectUsers, workspaceUsers),
       ...filterObjects(pendingWorkspaceUsers, [...projectUsers, ...pendingProjectUsers]),

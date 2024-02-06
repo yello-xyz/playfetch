@@ -16,14 +16,13 @@ import {
   GroupRuns,
   IdentifierForRun,
   MergeRuns,
-  FilterItemFromRun,
   SortRuns,
   BuildInputMap,
+  RunSortOption,
 } from '@/src/client/runMerging'
 import { RunGroup } from './runGroup'
-import FiltersHeader from '../filters/filtersHeader'
-import { AvailableLabelColorsForItem } from '../labelPopupMenu'
 import { Filter } from '../filters/filters'
+import RunFiltersHeader from './runFiltersHeader'
 
 export default function RunTimeline({
   runs = [],
@@ -36,7 +35,8 @@ export default function RunTimeline({
   selectInputValue = () => undefined,
   onRatingUpdate,
   isRunning,
-  skipHeader,
+  runFilters,
+  runSortOption,
 }: {
   runs: (PartialRun | Run)[]
   version?: PromptVersion | ChainVersion
@@ -53,7 +53,8 @@ export default function RunTimeline({
   selectInputValue?: (inputKey: string) => string | undefined
   onRatingUpdate?: (run: Run) => Promise<void>
   isRunning?: boolean
-  skipHeader?: boolean
+  runFilters?: Filter[]
+  runSortOption?: RunSortOption
 }) {
   const focusRun = (focusRunID?: number) => {
     if (focusRunID !== undefined) {
@@ -73,14 +74,11 @@ export default function RunTimeline({
     setPreviousActiveRunID(activeRunID)
   }
 
-  type SortOption = 'Date' | 'Test Data Row'
-  const sortOptions: SortOption[] = ['Date', 'Test Data Row']
-  const [activeSortOption, setActiveSortOption] = useState(sortOptions[0])
+  const [sortOption, setSortOption] = useState<RunSortOption>('Date')
   const [filters, setFilters] = useState<Filter[]>([])
-  const labelColors = activeItem ? AvailableLabelColorsForItem(activeItem) : {}
 
-  const sortByInputMap = activeSortOption === 'Test Data Row' ? BuildInputMap(inputs) : undefined
-  const mergedRuns = MergeRuns(SortRuns(runs)).filter(BuildRunFilter(filters))
+  const inputMap = BuildInputMap(inputs, runSortOption ?? sortOption)
+  const mergedRuns = MergeRuns(SortRuns(runs)).filter(BuildRunFilter(runFilters ?? filters))
 
   const lastPartialRunID = mergedRuns.filter(run => !('inputs' in run)).slice(-1)[0]?.id
   const [previousLastRunID, setPreviousLastRunID] = useState(lastPartialRunID)
@@ -101,26 +99,24 @@ export default function RunTimeline({
 
   return (
     <div className='relative flex flex-col h-full'>
-      {!skipHeader && activeItem && (
-        <FiltersHeader
-          users={activeItem.users}
-          labelColors={labelColors}
-          items={mergedRuns.filter(IsProperRun).map(FilterItemFromRun)}
+      {!runFilters && !runSortOption && activeItem && (
+        <RunFiltersHeader
+          activeItem={activeItem}
+          runs={mergedRuns}
           filters={filters}
           setFilters={setFilters}
-          sortOptions={sortOptions}
-          activeSortOption={activeSortOption}
-          setActiveSortOption={setActiveSortOption}
+          sortOption={sortOption}
+          setSortOption={setSortOption}
           tabSelector={children => <SingleTabHeader label='Responses'>{children}</SingleTabHeader>}
         />
       )}
       {runs.length > 0 ? (
         <div className='flex flex-col flex-1 gap-3 p-3 overflow-y-auto'>
-          {GroupRuns(mergedRuns, sortByInputMap).map((group, index) => (
+          {GroupRuns(mergedRuns, inputMap).map((group, index) => (
             <RunGroup
               key={index}
               group={group}
-              sortByInputMap={sortByInputMap}
+              sortByInputMap={inputMap}
               version={version}
               activeItem={activeItem}
               isRunSelected={isRunSelected}

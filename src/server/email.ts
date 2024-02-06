@@ -2,12 +2,13 @@ import nodemailer from 'nodemailer'
 import { readFileSync } from 'fs'
 import path from 'path'
 import { getUserForID } from './datastore/users'
-import { getProjectNameForID } from './datastore/projects'
+import { getProjectName } from './datastore/projects'
 import ClientRoute, { ProjectSettingsRoute, UserSettingsRoute, WorkspaceRoute } from '../common/clientRoute'
 import { getWorkspaceNameForID } from './datastore/workspaces'
 import { User } from '@/types'
 import { Capitalize, FormatCost, FormatDate } from '../common/formatting'
 import { getAccessingUserIDs } from './datastore/access'
+import buildURLForRoute from './routing'
 
 export const GetEmailServerConfig = () => ({
   host: 'smtp.gmail.com',
@@ -40,7 +41,7 @@ function resolveContent(fileName: string, fileType: 'txt' | 'html', variables: {
 export async function sendBudgetNotificationEmails(scopeID: number, limit: number, hardLimit: number | null = null) {
   const [ownerIDs] = await getAccessingUserIDs(scopeID, 'project')
   if (ownerIDs.length > 0) {
-    const projectName = await getProjectNameForID(scopeID)
+    const projectName = await getProjectName(scopeID)
     const settingsRoute = ProjectSettingsRoute(scopeID, 'usage')
     for (const ownerID of ownerIDs) {
       await sendBudgetNotificationEmail(ownerID, settingsRoute, projectName, limit, hardLimit)
@@ -79,7 +80,7 @@ export async function sendBudgetNotificationEmail(
     __FIRST_PARAGRAPH__: paragraphs[0],
     __SECOND_PARAGRAPH__: paragraphs[1],
     __THIRD_PARAGRAPH__: paragraphs[2],
-    __SETTINGS_LINK__: `${process.env.NEXTAUTH_URL}${settingsRoute}`,
+    __SETTINGS_LINK__: buildURLForRoute(settingsRoute),
     __CONFIGURATOR__: configurator,
   }
 
@@ -98,7 +99,7 @@ export async function sendInviteEmail(
   kind: 'project' | 'workspace'
 ) {
   const inviter = await getUserForID(fromUserID)
-  const objectName = kind === 'project' ? await getProjectNameForID(objectID) : await getWorkspaceNameForID(objectID)
+  const objectName = kind === 'project' ? await getProjectName(objectID) : await getWorkspaceNameForID(objectID)
   const inviteRoute = kind === 'project' ? ClientRoute.SharedProjects : WorkspaceRoute(objectID, 0)
 
   const variables = {
@@ -107,7 +108,7 @@ export async function sendInviteEmail(
     __INVITER_SUFFIX__: inviter.fullName !== inviter.email ? ` (${inviter.email})` : '',
     __INVITER_EMAIL__: inviter.email,
     __PROJECT_NAME__: objectName,
-    __INVITATION_LINK__: `${process.env.NEXTAUTH_URL}${inviteRoute}`,
+    __INVITATION_LINK__: buildURLForRoute(inviteRoute),
   }
 
   await sendMail(
@@ -142,7 +143,7 @@ export async function sendCommentsEmail(
         .map(({ parentName, projectName, parentRoute, comments }) =>
           resolveContent('commentBlock', type, {
             __PARENT_NAME__: parentName,
-            __PARENT_LINK__: `${process.env.NEXTAUTH_URL}${parentRoute}`,
+            __PARENT_LINK__: buildURLForRoute(parentRoute),
             __PROJECT_NAME__: projectName,
             __COMMENTS__: comments
               .map(({ commenter, timestamp, text }) =>

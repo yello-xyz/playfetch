@@ -1,5 +1,5 @@
 import { PromptConfig, ModelProvider } from '@/types'
-import { LayoutConfig, UserPresets } from './userPresets'
+import { LayoutConfig } from './userPresets'
 
 export const DefaultProvider: ModelProvider = 'google'
 
@@ -18,3 +18,6 @@ export const DefaultLayoutConfig: LayoutConfig = {
   floatingSidebar: false,
   promptTabs: [['New Prompt', 'Version History']],
 }
+
+export const NeedsUpdatesLabel = 'Needs updates'
+export const DefaultLabels = ['Experiment', 'Integration ready', 'QA ready', NeedsUpdatesLabel, 'Production ready']

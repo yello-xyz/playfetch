@@ -2,16 +2,7 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { Suspense, useState } from 'react'
-import {
-  User,
-  ActiveProject,
-  AvailableProvider,
-  Workspace,
-  PromptVersion,
-  ChainVersion,
-  Analytics,
-  PromptConfig,
-} from '@/types'
+import { User, ActiveProject, AvailableProvider, Workspace, PromptVersion, ChainVersion, Analytics } from '@/types'
 import ClientRoute, {
   CompareRoute,
   EndpointsRoute,
@@ -35,12 +26,11 @@ import useCommentSelection from '@/src/client/hooks/useCommentSelection'
 import { UserPresetsContext } from '@/src/client/context/userPresetsContext'
 import { useDocumentationCookie } from '@/components/cookieBanner'
 import { ProviderContext } from '@/src/client/context/providerContext'
-
-import dynamic from 'next/dynamic'
 import ProjectPaneWrapper from '@/components/projects/projectPaneWrapper'
 import { UserPresets } from '@/src/common/userPresets'
 import useTable from '@/src/client/hooks/useTable'
 
+import dynamic from 'next/dynamic'
 const MainProjectPane = dynamic(() => import('@/components/projects/mainProjectPane'))
 const ProjectSidebar = dynamic(() => import('@/components/projects/projectSidebar'))
 const ProjectTopBar = dynamic(() => import('@/components/projects/projectTopBar'))
@@ -123,6 +113,7 @@ export default function Home({
     updateVersion(version)
   }
 
+  const [refreshCompareItems, setRefreshCompareItems] = useState(() => () => {})
   const refreshActiveItem = (versionID?: number, allowResave?: boolean) => {
     if (activePrompt) {
       return refreshPrompt(activePrompt.id, versionID, allowResave)
@@ -130,6 +121,8 @@ export default function Home({
       return refreshChain(activeChain.id, versionID)
     } else if (activeTable) {
       return refreshTable(activeTable.id)
+    } else if (compare) {
+      return Promise.resolve(refreshCompareItems())
     } else {
       return refreshProject()
     }
@@ -289,25 +282,29 @@ export default function Home({
                       <div className='flex-1'>
                         <Suspense>
                           <MainProjectPane
-                            activeItem={activeItem}
-                            activePrompt={activePrompt}
-                            activeChain={activeChain}
-                            activeTable={activeTable}
-                            activePromptVersion={activePromptVersion}
-                            activeChainVersion={activeChainVersion}
-                            selectVersion={selectVersion}
-                            setModifiedVersion={setModifiedVersion}
-                            addPrompt={addPrompt}
-                            savePrompt={savePromptCallback}
-                            saveChain={saveChain}
-                            focusRunID={focusRunID}
-                            analytics={analytics}
-                            refreshAnalytics={refreshAnalytics}
-                            scopedProviders={scopedProviders}
-                            refreshProviders={refreshProviders}
-                            showComments={showComments}
-                            setShowComments={setShowComments}
-                            selectComment={selectComment}
+                            {...{
+                              activeProject,
+                              activeItem,
+                              activePrompt,
+                              activeChain,
+                              activeTable,
+                              activePromptVersion,
+                              activeChainVersion,
+                              selectVersion,
+                              setModifiedVersion,
+                              addPrompt,
+                              savePrompt: savePromptCallback,
+                              saveChain,
+                              focusRunID,
+                              analytics,
+                              refreshAnalytics,
+                              scopedProviders,
+                              refreshProviders,
+                              showComments,
+                              setShowComments,
+                              selectComment,
+                              setRefreshCompareItems,
+                            }}
                           />
                         </Suspense>
                       </div>

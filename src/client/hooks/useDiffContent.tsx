@@ -55,7 +55,7 @@ export default function useDiffContent(
   return [leftContent, rightContent] as const
 }
 
-const getEndpointContent = (endpoint: Endpoint, itemCache: ActiveItemCache) => {
+const getEndpointContent = (endpoint: Endpoint, itemCache: ActiveItemCache<ActivePrompt | ActiveChain>) => {
   let parentInfo = '…'
   const parent = itemCache.itemForID(endpoint.parentID)
   if (parent) {
@@ -77,11 +77,11 @@ Stream Responses: ${endpoint.useStreaming ? 'Yes' : 'No'}
 const getVersionContent = (
   version: ChainVersion | PromptVersion,
   availableProviders: AvailableModelProvider[],
-  itemCache: ActiveItemCache
+  itemCache: ActiveItemCache<ActivePrompt | ActiveChain>
 ) =>
   IsPromptVersion(version)
     ? getPromptVersionContent(version, availableProviders)
-    : getChainVersionContent(version, itemCache)
+    : getChainVersionContent(version, itemCache as ActiveItemCache<ActivePrompt>)
 
 const getPromptVersionContent = (version: PromptVersion, availableProviders: AvailableModelProvider[]) =>
   `${FormatPromptConfig(version.config, availableProviders)}\n\n` +
@@ -89,21 +89,21 @@ const getPromptVersionContent = (version: PromptVersion, availableProviders: Ava
   `Prompt:\n${version.prompts.main}\n\n` +
   `${version.prompts.functions ? `Functions:\n${version.prompts.functions}\n\n` : ''}`
 
-const getChainVersionContent = (version: ChainVersion, itemCache: ActiveItemCache) =>
+const getChainVersionContent = (version: ChainVersion, itemCache: ActiveItemCache<ActivePrompt>) =>
   version.items.map(item => getChainItemContent(item, itemCache)).join('\n')
 
-const getChainItemContent = (item: ChainItemWithInputs, itemCache: ActiveItemCache) => {
+const getChainItemContent = (item: ChainItemWithInputs, itemCache: ActiveItemCache<ActivePrompt>) => {
   const outputSuffix = item.output ? `\n→ ${item.output}` : ''
   return `${GetChainItemTitle(item, itemCache)}\n${getChainItemBody(item, itemCache)}${outputSuffix}\n`
 }
 
-const getChainItemBody = (item: ChainItemWithInputs, itemCache: ActiveItemCache) => {
+const getChainItemBody = (item: ChainItemWithInputs, itemCache: ActiveItemCache<ActivePrompt>) => {
   if (IsCodeChainItem(item) || IsBranchChainItem(item)) {
     return item.code
   } else if (IsQueryChainItem(item)) {
     return item.query
   } else {
-    const prompt = itemCache.itemForID(item.promptID) as ActivePrompt | undefined
+    const prompt = itemCache.itemForID(item.promptID)
     if (prompt) {
       const promptVersion = prompt.versions.find(version => version.id === item.versionID)
       if (promptVersion) {

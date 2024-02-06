@@ -1,28 +1,16 @@
 import { withAdminSession } from '@/src/server/session'
 import { ActiveUser, ProjectMetrics, RecentProject, User, UserMetrics, Workspace, WorkspaceMetrics } from '@/types'
 import TopBar, { TopBarAccessoryItem, TopBarBackItem } from '@/components/topBar'
-import AdminSidebar from '@/components/admin/adminSidebar'
-import Waitlist from '@/components/admin/waitlist'
 import ClientRoute, { ParseNumberQuery } from '@/src/common/clientRoute'
 import { useRouter } from 'next/router'
 import { Suspense, useState } from 'react'
-import ActiveUsers from '@/components/admin/activeUsers'
 import api from '@/src/client/admin/api'
-import RecentProjects from '@/components/admin/recentProjects'
-import {
-  ActiveUsersItem,
-  AdminItem,
-  AdminItemIsProject,
-  AdminItemIsUser,
-  RecentProjectsItem,
-  WaitlistItem,
-} from '@/src/common/admin/adminItem'
+import { ActiveUsersItem, AdminItem, RecentProjectsItem, WaitlistItem } from '@/src/common/admin/adminItem'
 import loadAdminItem from '@/src/server/admin/adminItem'
 
 import dynamic from 'next/dynamic'
-const ActiveUserMetrics = dynamic(() => import('@/components/admin/activeUserMetrics'))
-const RecentProjectMetrics = dynamic(() => import('@/components/admin/recentProjectMetrics'))
-const WorkspaceMetrics = dynamic(() => import('@/components/admin/workspaceMetrics'))
+const MainAdminPane = dynamic(() => import('@/components/admin/mainAdminPane'))
+const AdminSidebar = dynamic(() => import('@/components/admin/adminSidebar'))
 
 export const getServerSideProps = withAdminSession(async ({ query }) => ({
   props: await loadAdminItem(query),
@@ -137,57 +125,31 @@ export default function Admin({
           <TopBarAccessoryItem />
         </TopBar>
         <div className='flex items-stretch flex-1 overflow-hidden'>
-          <AdminSidebar
-            onSelectWaitlist={() => selectItem(WaitlistItem)}
-            onSelectActiveUsers={() => selectItem(ActiveUsersItem)}
-            onSelectRecentProjects={() => selectItem(RecentProjectsItem)}
-            analyticsLinks={analyticsLinks}
-            debugLinks={debugLinks}
-          />
-          <div className='flex flex-col flex-1 bg-gray-25'>
-            {adminItem === WaitlistItem && <Waitlist initialWaitlistUsers={waitlistUsers} />}
-            {adminItem === ActiveUsersItem && (
-              <ActiveUsers activeUsers={activeUsers} onFetchBefore={fetchActiveUsersBefore} onSelectUser={selectItem} />
-            )}
-            {adminItem === RecentProjectsItem && (
-              <RecentProjects
-                recentProjects={recentProjects}
-                onSelectProject={selectItem}
-                onSelectWorkspace={workspaceID => selectItem(workspaceID, true)}
-              />
-            )}
-            {userMetrics && AdminItemIsUser(adminItem) && (
-              <Suspense>
-                <ActiveUserMetrics
-                  user={adminItem}
-                  metrics={userMetrics}
-                  onDismiss={() => router.back()}
-                  onSelectProject={selectItem}
-                  onSelectWorkspace={workspaceID => selectItem(workspaceID, true)}
-                />
-              </Suspense>
-            )}
-            {projectMetrics && AdminItemIsProject(adminItem) && (
-              <Suspense>
-                <RecentProjectMetrics
-                  project={adminItem}
-                  projectMetrics={projectMetrics}
-                  onSelectUser={selectItem}
-                  onDismiss={() => router.back()}
-                />
-              </Suspense>
-            )}
-            {workspaceMetrics && (
-              <Suspense>
-                <WorkspaceMetrics
-                  workspaceMetrics={workspaceMetrics}
-                  onSelectUser={selectItem}
-                  onSelectProject={selectItem}
-                  onDismiss={() => router.back()}
-                />
-              </Suspense>
-            )}
-          </div>
+          <Suspense>
+            <AdminSidebar
+              onSelectWaitlist={() => selectItem(WaitlistItem)}
+              onSelectActiveUsers={() => selectItem(ActiveUsersItem)}
+              onSelectRecentProjects={() => selectItem(RecentProjectsItem)}
+              analyticsLinks={analyticsLinks}
+              debugLinks={debugLinks}
+            />
+          </Suspense>
+
+          <Suspense>
+            <MainAdminPane
+              {...{
+                adminItem,
+                userMetrics,
+                projectMetrics,
+                workspaceMetrics,
+                activeUsers,
+                waitlistUsers,
+                recentProjects,
+                selectItem,
+                fetchActiveUsersBefore,
+              }}
+            />
+          </Suspense>
         </div>
       </main>
     </>

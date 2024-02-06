@@ -1,22 +1,22 @@
-import { ActiveChain, ActiveProject, ActivePrompt, ItemsInProject, ProjectItemIsChain } from '@/types'
+import { ActiveChain, ActiveProject, ActivePrompt, ProjectItemIsChain } from '@/types'
 import { useCallback, useEffect, useState } from 'react'
 import api from '@/src/client/api'
 
-export type ActiveItemCache = {
+export type ActiveItemCache<ActiveItem extends ActivePrompt | ActiveChain> = {
   nameForID: (id: number) => string
-  itemForID: (id: number) => ActivePrompt | ActiveChain | undefined
+  itemForID: (id: number) => ActiveItem | undefined
   refreshItem: (itemID: number) => void
 }
 
-export default function useActiveItemCache(
+export default function useActiveItemCache<ActiveItem extends ActivePrompt | ActiveChain>(
   project: ActiveProject,
   itemIDs: number[],
-  onRefreshItem?: (item: ActivePrompt | ActiveChain) => void
-): ActiveItemCache {
-  const [activeItemCache, setActiveItemCache] = useState<Record<number, ActivePrompt | ActiveChain>>({})
+  onRefreshItem?: (item: ActiveItem) => void
+): ActiveItemCache<ActiveItem> {
+  const [activeItemCache, setActiveItemCache] = useState<Record<number, ActiveItem>>({})
 
   const findItemForID = useCallback(
-    (itemID: number) => ItemsInProject(project).find(item => item.id === itemID),
+    (itemID: number) => [...project.prompts, ...project.chains].find(item => item.id === itemID),
     [project]
   )
 
@@ -25,13 +25,13 @@ export default function useActiveItemCache(
       const item = findItemForID(itemID)
       if (ProjectItemIsChain(item)) {
         api.getChain(itemID, project).then(activeChain => {
-          setActiveItemCache(cache => ({ ...cache, [itemID]: activeChain }))
-          onRefreshItem?.(activeChain)
+          setActiveItemCache(cache => ({ ...cache, [itemID]: activeChain as ActiveItem }))
+          onRefreshItem?.(activeChain as ActiveItem)
         })
       } else {
         api.getPrompt(itemID, project).then(activePrompt => {
-          setActiveItemCache(cache => ({ ...cache, [itemID]: activePrompt }))
-          onRefreshItem?.(activePrompt)
+          setActiveItemCache(cache => ({ ...cache, [itemID]: activePrompt as ActiveItem }))
+          onRefreshItem?.(activePrompt as ActiveItem)
         })
       }
     },

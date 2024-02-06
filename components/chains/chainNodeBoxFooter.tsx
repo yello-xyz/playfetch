@@ -1,6 +1,6 @@
 import { ChainItem } from '@/types'
 import { ChainNode, IsChainItem, MappableTargetInputsForChainNode } from './chainNode'
-import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
+import { ChainItemCache } from '@/src/client/hooks/useChainItemCache'
 import Label from '../label'
 import DropdownMenu from '../dropdownMenu'
 
@@ -9,16 +9,16 @@ export default function ChainNodeBoxFooter({
   index,
   onUpdate,
   isSelected,
-  promptCache,
+  itemCache,
 }: {
   nodes: ChainNode[]
   index: number
   onUpdate: (item: ChainItem) => void
   isSelected: boolean
-  promptCache: ChainPromptCache
+  itemCache: ChainItemCache
 }) {
   const chainNode = nodes[index]
-  const inputs = MappableTargetInputsForChainNode(chainNode, nodes, promptCache)
+  const inputs = MappableTargetInputsForChainNode(chainNode, nodes, itemCache)
   const mapOutput = (output?: string) => onUpdate({ ...(chainNode as ChainItem), output })
 
   return IsChainItem(chainNode) && inputs.length > 0 ? (

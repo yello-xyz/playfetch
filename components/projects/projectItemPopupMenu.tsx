@@ -1,13 +1,12 @@
-import { Chain, Endpoint, IsProjectItem, Project, ProjectItemIsChain, Prompt, Table, Workspace } from '@/types'
+import { Chain, Endpoint, Project, ProjectItemIsChain, ProjectItemIsPrompt, Prompt, Table, Workspace } from '@/types'
 import api from '@/src/client/api'
 import PopupMenu, { PopupMenuItem } from '../popupMenu'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 import { useState } from 'react'
 import PickNameDialog from '../pickNameDialog'
-import MovePromptDialog from '../prompts/movePromptDialog'
+import PickProjectDialog from './pickProjectDialog'
 import { useLoggedInUser } from '@/src/client/context/userContext'
 import { SharedProjectsWorkspace } from '@/pages'
-import { useRefreshProject } from '@/src/client/context/projectContext'
 import useProjectItemActions from '@/src/client/hooks/useProjectItemActions'
 
 export default function ProjectItemPopupMenu({
@@ -31,11 +30,10 @@ export default function ProjectItemPopupMenu({
   const [showMovePromptDialog, setShowMovePromptDialog] = useState(false)
   const [sharedProjects, setSharedProjects] = useState<Project[]>([])
 
-  const isTable = !IsProjectItem(item)
-  const isChain = !isTable && ProjectItemIsChain(item)
-  const isPrompt = !isTable && !isChain
-  const refreshProject = useRefreshProject()
-  const [renameItem, duplicateItem, deleteItem] = useProjectItemActions(onDelete)
+  const isChain = ProjectItemIsChain(item)
+  const isPrompt = ProjectItemIsPrompt(item)
+  const isTable = !isChain && !isPrompt
+  const [renameItem, duplicateItem, deleteItem, copyItemToProject] = useProjectItemActions(onDelete)
 
   const withDismiss = (callback: () => void) => () => {
     setMenuExpanded(false)
@@ -94,10 +92,12 @@ export default function ProjectItemPopupMenu({
         />
       )}
       {isPrompt && showMovePromptDialog && (
-        <MovePromptDialog
-          item={item}
+        <PickProjectDialog
+          initialProjectID={item.projectID}
+          title={`Copy “${item.name}”`}
+          confirmTitle='Copy'
           workspaces={allWorkspaces}
-          onConfirm={projectID => api.duplicatePrompt(item.id, projectID).then(refreshProject)}
+          onConfirm={projectID => copyItemToProject(item, projectID)}
           onDismiss={() => setShowMovePromptDialog(false)}
         />
       )}

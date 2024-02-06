@@ -10,7 +10,7 @@ import {
   getFilteredEntity,
   getID,
   getKeyedEntity,
-  getLastEntity,
+  getLastFilteredEntity,
   getOrderedEntities,
 } from './datastore'
 import {
@@ -118,7 +118,7 @@ export async function addPromptToProject(
 ) {
   const createdAt = new Date()
   const promptID = await allocateID(Entity.PROMPT)
-  const versionData = await addInitialVersion(userID, promptID, false)
+  const versionData = await addInitialVersion(userID, promptID, 'prompt')
   const promptData = toPromptData(projectID, name, createdAt, createdAt, sourcePath, undefined, promptID)
   return [promptData, versionData]
 }
@@ -180,7 +180,7 @@ export async function getExportablePromptsFromProject(projectID: number) {
     and([buildFilter('projectID', projectID), new PropertyFilter('sourcePath', '!=', null)])
   )
   for (const promptData of sourcePathPrompts) {
-    const lastRunVersion = await getLastEntity(
+    const lastRunVersion = await getLastFilteredEntity(
       Entity.VERSION,
       and([buildFilter('parentID', getID(promptData)), buildFilter('didRun', true)])
     )
@@ -198,7 +198,7 @@ export async function getExportablePromptsFromProject(projectID: number) {
 }
 
 export async function updatePromptSourcePath(promptID: number, sourcePath: string) {
-  const promptData = await getPromptData(promptID)
+  const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
   await updatePrompt({ ...promptData, sourcePath }, false)
 }
 
@@ -232,15 +232,7 @@ export async function augmentPromptDataWithNewVersion(
   await updatePrompt({ ...promptData, name: newPromptName }, true)
 }
 
-const getPromptData = (promptID: number) => getKeyedEntity(Entity.PROMPT, promptID)
-
-export const getTrustedPrompt = (promptID: number) => getPromptData(promptID).then(toPrompt)
-
-export async function updatePromptOnDeletedVersion(promptID: number) {
-  // TODO update previous version references in other versions?
-  const promptData = await getPromptData(promptID)
-  await updatePrompt({ ...promptData }, true)
-}
+export const updatePromptLastEditedAt = (promptData: any) => updatePrompt({ ...promptData }, true)
 
 export const getTrustedProjectScopedData = async (entities: Entity[], id: number) => {
   for (const entity of entities) {
@@ -260,6 +252,9 @@ export const getVerifiedProjectScopedData = async (userID: number, entities: Ent
 
 export const getVerifiedUserPromptData = async (userID: number, promptID: number) =>
   getVerifiedProjectScopedData(userID, [Entity.PROMPT], promptID)
+
+export const getVerifiedUserPrompt = (userID: number, promptID: number) =>
+  getVerifiedUserPromptData(userID, promptID).then(toPrompt)
 
 export const ensurePromptAccess = (userID: number, promptID: number) => getVerifiedUserPromptData(userID, promptID)
 

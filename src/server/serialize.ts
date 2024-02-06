@@ -1,5 +1,5 @@
 import { PromptConfig, Prompts } from '@/types'
-import { DefaultPromptConfig, DefaultPrompts } from '@/src/common/defaultConfig'
+import { DefaultPromptConfig, DefaultPrompts } from '@/src/common/defaults'
 import { parse, stringify } from 'yaml'
 
 export const serializePromptVersion = ({

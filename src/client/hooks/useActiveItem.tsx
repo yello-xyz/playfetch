@@ -4,9 +4,10 @@ import {
   ActiveProject,
   ActivePrompt,
   ActiveTable,
-  IsProjectItem,
   IsPromptVersion,
   ProjectItemIsChain,
+  ProjectItemIsPrompt,
+  ProjectItemIsTable,
 } from '@/types'
 import {
   ActiveItem,
@@ -22,14 +23,10 @@ import { useState } from 'react'
 type ProjectItem = ActivePrompt | ActiveChain | ActiveTable
 const ActiveItemHasID = (item: ActiveItem | undefined): item is ProjectItem | undefined =>
   item !== CompareItem && item !== EndpointsItem && item !== SettingsItem
-const ActiveItemIsProjectItem = (item: ActiveItem): item is ActivePrompt | ActiveChain =>
-  ActiveItemHasID(item) && IsProjectItem(item)
-const ActiveItemIsChain = (item: ActiveItem): item is ActiveChain =>
-  ActiveItemIsProjectItem(item) && ProjectItemIsChain(item)
+const ActiveItemIsChain = (item: ActiveItem): item is ActiveChain => ActiveItemHasID(item) && ProjectItemIsChain(item)
 const ActiveItemIsPrompt = (item: ActiveItem): item is ActivePrompt =>
-  ActiveItemIsProjectItem(item) && !ActiveItemIsChain(item)
-const ActiveItemIsTable = (item: ActiveItem): item is ActiveTable =>
-  ActiveItemHasID(item) && !ActiveItemIsProjectItem(item)
+  ActiveItemHasID(item) && ProjectItemIsPrompt(item)
+const ActiveItemIsTable = (item: ActiveItem): item is ActiveTable => ActiveItemHasID(item) && ProjectItemIsTable(item)
 
 const sameIDs = (a: { id: number } | undefined, b: { id: number } | undefined) => a?.id === b?.id
 const sameItems = (a: ActiveItem | undefined, b: ActiveItem | undefined) =>
@@ -74,7 +71,7 @@ export default function useActiveItem(initialActiveProject: ActiveProject, initi
   const activeTable = activeItem && ActiveItemIsTable(activeItem) ? activeItem : undefined
 
   const defaultVersionForItem = (item: ActiveItem | undefined) =>
-    item && ActiveItemIsProjectItem(item) ? item.versions.slice(-1)[0] : undefined
+    item && ActiveItemHasID(item) && 'versions' in item ? item.versions.slice(-1)[0] : undefined
 
   const [activeVersion, setActiveVersion] = useState(defaultVersionForItem(activeItem))
   const activePromptVersion = activeVersion && IsPromptVersion(activeVersion) ? activeVersion : undefined

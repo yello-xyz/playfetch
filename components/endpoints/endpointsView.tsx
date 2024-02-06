@@ -2,9 +2,7 @@ import { ReactNode, useEffect, useState } from 'react'
 import {
   ActivePrompt,
   Endpoint,
-  FindItemInProject,
   ProjectItemIsChain,
-  ItemsInProject,
   ResolvedEndpoint,
   ActiveChain,
   PromptVersion,
@@ -99,8 +97,11 @@ export default function EndpointsView({
     startsEditing ? NewEndpointSettings(newParentID, newVersionID) : undefined
   )
 
+  const parents = [...activeProject.prompts, ...activeProject.chains]
+  const findParent = (itemID: number) => parents.find(item => item.id === itemID)!
+
   const addEndpoint =
-    ItemsInProject(activeProject).length > 0
+    parents.length > 0
       ? () => {
           setNewEndpoint(NewEndpointSettings())
           setActiveParentID(undefined)
@@ -145,7 +146,7 @@ export default function EndpointsView({
     }
   }
 
-  const parent = activeParentID ? FindItemInProject(activeParentID, activeProject) : undefined
+  const parent = activeParentID ? findParent(activeParentID) : undefined
   const [activeParent, setActiveParent] = useState<ActivePrompt | ActiveChain>()
   const parentCache = useActiveItemCache(activeProject, parent ? [parent.id] : [], setActiveParent)
   useEffect(() => setActiveParent(parent ? parentCache.itemForID(parent.id) : undefined), [parent, parentCache])
@@ -174,6 +175,9 @@ export default function EndpointsView({
       {activeTab === 'Endpoints' && !isEditing && (!activeEndpoint || IsSavedEndpoint(activeEndpoint)) && (
         <Allotment.Pane minSize={minWidth}>
           <EndpointsTable
+            endpoints={endpoints}
+            parents={parents}
+            findParent={findParent}
             tabSelector={tabSelector}
             activeEndpoint={activeEndpoint}
             setActiveEndpoint={updateActiveEndpoint}

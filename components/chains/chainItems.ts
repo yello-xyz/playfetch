@@ -7,13 +7,13 @@ import {
   IsQueryChainItem,
   SubtreeForChainNode,
 } from './chainNode'
-import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
+import { ChainItemCache } from '../../src/client/hooks/useChainItemCache'
 import { ExtractCodeInterrupts, ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
 
 export const GetChainItemsSaveKey = (items: ChainItem[]) => JSON.stringify(stripItemsToSave(items))
 
-export const GetItemsToSave = (items: ChainItem[], promptCache: ChainPromptCache) =>
-  augmentItemsToSave(stripItemsToSave(items), promptCache)
+export const GetItemsToSave = (items: ChainItem[], itemCache: ChainItemCache) =>
+  augmentItemsToSave(stripItemsToSave(items), itemCache)
 
 const stripItemsToSave = (items: ChainItem[]): ChainItem[] =>
   items.map(item => {
@@ -26,19 +26,19 @@ const stripItemsToSave = (items: ChainItem[]): ChainItem[] =>
         }
   })
 
-const augmentItemsToSave = (items: ChainItem[], promptCache: ChainPromptCache) =>
+const augmentItemsToSave = (items: ChainItem[], itemCache: ChainItemCache) =>
   items.map(item => {
-    const inputs = ExtractChainItemVariables(item, promptCache, false)
+    const inputs = ExtractChainItemVariables(item, itemCache, false)
     return IsCodeChainItem(item) || IsBranchChainItem(item) || IsQueryChainItem(item)
       ? { ...item, inputs }
       : {
           ...item,
           inputs,
-          dynamicInputs: ExtractChainItemVariables(item, promptCache, true).filter(input => !inputs.includes(input)),
+          dynamicInputs: ExtractChainItemVariables(item, itemCache, true).filter(input => !inputs.includes(input)),
         }
   })
 
-export const ExtractChainItemVariables = (item: ChainItem, cache: ChainPromptCache, includingDynamic: boolean) => {
+export const ExtractChainItemVariables = (item: ChainItem, cache: ChainItemCache, includingDynamic: boolean) => {
   if (IsCodeChainItem(item) || IsBranchChainItem(item)) {
     return [...ExtractVariables(item.code), ...(includingDynamic ? ExtractCodeInterrupts(item.code) : [])]
   }
@@ -56,7 +56,7 @@ const extractChainItemInputs = (item: ChainItem, includingDynamic: boolean) => [
   ...(includingDynamic && IsPromptChainItem(item) ? item.dynamicInputs ?? [] : []),
 ]
 
-export const ExtractUnboundChainVariables = (chain: ChainItem[], cache: ChainPromptCache, includingDynamic: boolean) =>
+export const ExtractUnboundChainVariables = (chain: ChainItem[], cache: ChainItemCache, includingDynamic: boolean) =>
   excludeBoundChainVariables(
     chain.map(item => ({ ...item, inputs: ExtractChainItemVariables(item, cache, includingDynamic) }))
   )

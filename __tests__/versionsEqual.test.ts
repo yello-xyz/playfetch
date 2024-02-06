@@ -1,4 +1,4 @@
-import { DefaultPromptConfig } from '@/src/common/defaultConfig'
+import { DefaultPromptConfig } from '@/src/common/defaults'
 import { ChainVersionsAreEqual, PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import { LanguageModel, PromptConfig, Prompts } from '@/types'
 

@@ -2,7 +2,7 @@ import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued'
 
 export default function DiffPane({ leftContent, rightContent }: { leftContent: string; rightContent: string }) {
   return (
-    <div className='overflow-y-auto border-b border-gray-200'>
+    <div className='border-b border-gray-200'>
       <ReactDiffViewer
         oldValue={leftContent || 'empty'}
         newValue={rightContent || 'empty'}

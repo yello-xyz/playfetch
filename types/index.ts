@@ -93,7 +93,7 @@ export type ActiveChain = Chain & {
   availableLabels: string[]
 }
 
-export type ModelProvider = 'openai' | 'anthropic' | 'google' | 'cohere'
+export type ModelProvider = 'openai' | 'anthropic' | 'google' | 'cohere' | 'huggingface'
 
 export type OpenAIEmbeddingModel = 'text-embedding-ada-002'
 export type EmbeddingModel = OpenAIEmbeddingModel
@@ -102,12 +102,14 @@ export type OpenAILanguageModel = 'gpt-3.5-turbo' | 'gpt-3.5-turbo-16k' | 'gpt-4
 export type AnthropicLanguageModel = 'claude-instant-1' | 'claude-2'
 export type GoogleLanguageModel = 'text-bison' | 'chat-bison' | 'gemini-pro'
 export type CohereLanguageModel = 'command'
+export type HuggingFaceLanguageModel = 'meta-llama/Llama-2-70b-chat-hf'
 
 export type DefaultLanguageModel =
   | OpenAILanguageModel
   | AnthropicLanguageModel
   | GoogleLanguageModel
   | CohereLanguageModel
+  | HuggingFaceLanguageModel
 
 export type CustomLanguageModel = string
 
@@ -143,12 +145,24 @@ export type AvailableSourceControlProvider = {
   environment: string
   scopeID: number
 }
-export type AvailableProvider = AvailableModelProvider | AvailableQueryProvider | AvailableSourceControlProvider
+export type IssueTrackerConfig = { labels: string[]; syncLabels: boolean; syncComments: boolean }
+export type AvailableIssueTrackerProvider = {
+  provider: IssueTrackerProvider
+  environment: string
+  scopeID: number
+}
+export type AvailableProvider =
+  | AvailableModelProvider
+  | AvailableQueryProvider
+  | AvailableSourceControlProvider
+  | AvailableIssueTrackerProvider
 export const IsModelProvider = (provider: AvailableProvider): provider is AvailableModelProvider =>
   'customModels' in provider
 
 export type QueryProvider = 'pinecone'
 export type SourceControlProvider = 'github'
+export type IssueTrackerProvider = 'linear'
+export type SupportedProvider = ModelProvider | QueryProvider | SourceControlProvider | IssueTrackerProvider
 
 type Version = {
   id: number
@@ -295,13 +309,12 @@ export type ResolvedEndpoint = Endpoint & {
   usage: Usage
 }
 
-export const ItemsInProject = (project: ActiveProject) => [...project.prompts, ...project.chains]
-export const FindItemInProject = (itemID: number | undefined, project: ActiveProject) =>
-  ItemsInProject(project).find(item => item.id === itemID)!
-export const IsProjectItem = (item: Prompt | Chain | Table): item is Prompt | Chain =>
-  'referencedItemIDs' in item || 'sourcePath' in item
-export const ProjectItemIsChain = (item: Chain | Prompt | undefined): item is Chain =>
+export const ProjectItemIsChain = (item: Chain | Prompt | Table | undefined): item is Chain =>
   !!item && 'referencedItemIDs' in item
+export const ProjectItemIsPrompt = (item: Chain | Prompt | Table | undefined): item is Prompt =>
+  !!item && 'sourcePath' in item
+export const ProjectItemIsTable = (item: Chain | Prompt | Table | undefined) =>
+  !!item && !ProjectItemIsChain(item) && !ProjectItemIsPrompt(item)
 
 export type Usage = {
   requests: number

@@ -11,6 +11,7 @@ import {
   OutputPriceForModel,
   ProviderForModel,
   WebsiteLinkForModel,
+  IsSubscriptionRequiredForModel,
 } from '@/src/common/providerMetadata'
 import Icon from '../icon'
 import { FormatCost, FormatLargeInteger } from '@/src/common/formatting'
@@ -39,6 +40,7 @@ export default function ModelInfoPane({
   const isModelAvailable = checkModelAvailable(model)
 
   const [showActionMenu, setShowActionMenu] = useState(false)
+  const gridConfig = IsSubscriptionRequiredForModel(model) ? 'grid-cols-[140px_250px]' : 'grid-cols-[140px_180px]'
 
   return (
     <PopupContent className='relative p-3 w-[480px] ml-7 flex flex-col gap-1 shadow-sm'>
@@ -53,17 +55,26 @@ export default function ModelInfoPane({
       </div>
       <HorizontalBorder />
       <div className='py-1 text-gray-500'>{DescriptionForModel(model, availableProviders)}</div>
-      <div className='grid grid-cols-[140px_180px] text-gray-500 gap-y-0.5 pb-1'>
+      <div className={`grid ${gridConfig} text-gray-500 gap-y-0.5 pb-1`}>
         <span className='font-medium'>Context</span>
         <span>{FormatLargeInteger(MaxTokensForModel(model))} tokens</span>
         <HorizontalBorder />
         <HorizontalBorder />
-        <span className='font-medium'>Input Pricing</span>
-        <ModelCost model={model} mode='input' />
-        <HorizontalBorder />
-        <HorizontalBorder />
-        <span className='font-medium'>Output Pricing</span>
-        <ModelCost model={model} mode='output' />
+        {IsSubscriptionRequiredForModel(model) ? (
+          <>
+            <span className='font-medium'>Pricing</span>
+            <span>Requires Hugging Face Pro subscription</span>
+          </>
+        ) : (
+          <>
+            <span className='font-medium'>Input Pricing</span>
+            <ModelCost model={model} mode='input' />
+            <HorizontalBorder />
+            <HorizontalBorder />
+            <span className='font-medium'>Output Pricing</span>
+            <ModelCost model={model} mode='output' />
+          </>
+        )}
         {IsModelFreeToUse(model) && <span className='mt-2'>*Fair use applies</span>}
       </div>
       {!isModelAvailable && (

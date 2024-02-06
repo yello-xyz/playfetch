@@ -2,12 +2,14 @@ import { ChainItemWithInputs, PromptConfig, Prompts, RawChainVersion, RawPromptV
 import {
   Entity,
   allocateID,
+  buildFilter,
   buildKey,
   getDatastore,
   getEntityKey,
   getID,
   getKeyedEntities,
   getKeyedEntity,
+  getLastEntity,
   getRecentEntities,
   getTimestamp,
 } from './datastore'
@@ -15,11 +17,12 @@ import { toRun } from './runs'
 import {
   augmentPromptDataWithNewVersion,
   ensurePromptAccess,
+  getTrustedProjectScopedData,
   getVerifiedUserPromptData,
-  updatePromptOnDeletedVersion,
+  updatePromptLastEditedAt,
 } from './prompts'
-import { augmentProjectWithNewVersion, ensureProjectLabel } from './projects'
-import { saveComment } from './comments'
+import { augmentProjectWithNewVersion, ensureProjectLabels } from './projects'
+import { saveComment, toComment } from './comments'
 import { ChainVersionsAreEqual, PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import {
   augmentChainDataWithNewVersion,
@@ -28,8 +31,9 @@ import {
   updateChainOnDeletedVersion,
 } from './chains'
 import { getPresetsForUser } from './users'
-import { DefaultPrompts } from '@/src/common/defaultConfig'
+import { DefaultPrompts } from '@/src/common/defaults'
 import { deleteEntity } from './cleanup'
+import { createTaskOnAddingLabel, syncTaskLabel } from '../linear'
 
 export async function migrateVersions(postMerge: boolean) {
   if (postMerge) {
@@ -105,21 +109,26 @@ export async function getTrustedVersion(versionID: number, markAsRun = false) {
   return toVersion(versionData, [])
 }
 
-export async function addInitialVersion(userID: number, parentID: number, isChainVersion: boolean) {
+type VersionType = 'prompt' | 'chain'
+
+const initialVersionAttributes = async (userID: number, type: VersionType) => {
+  const { defaultPromptConfig } = type === 'prompt' ? await getPresetsForUser(userID) : { defaultPromptConfig: null }
+  return {
+    prompts: type === 'prompt' ? DefaultPrompts : null,
+    config: defaultPromptConfig,
+    items: type === 'chain' ? [] : null,
+  }
+}
+
+export async function addInitialVersion(userID: number, parentID: number, type: VersionType) {
   const versionID = await allocateID(Entity.VERSION)
-  const { defaultPromptConfig } = isChainVersion ? { defaultPromptConfig: null } : await getPresetsForUser(userID)
-  return toVersionData(
-    userID,
-    parentID,
-    isChainVersion ? null : DefaultPrompts,
-    defaultPromptConfig,
-    isChainVersion ? [] : null,
-    [],
-    new Date(),
-    false,
-    undefined,
-    versionID
-  )
+  const { prompts, config, items } = await initialVersionAttributes(userID, type)
+  return toVersionData(userID, parentID, prompts, config, items, [], new Date(), false, undefined, versionID)
+}
+
+const saveInitialVersion = async (userID: number, parentData: any, type: VersionType) => {
+  const { prompts, config, items } = await initialVersionAttributes(userID, type)
+  return saveVersionForUser(userID, parentData, prompts, config, items)
 }
 
 export async function savePromptVersionForUser(
@@ -185,12 +194,12 @@ async function saveVersionForUser(
   await datastore.save(versionData)
   const savedVersionID = getID(versionData)
 
-  if (IsPromptVersion({ items }) && prompts !== null) {
+  if (IsPromptVersion({ items })) {
     const lastPrompt = currentVersion ? JSON.parse(currentVersion.prompts).main : ''
-    await augmentPromptDataWithNewVersion(parentData, prompts.main, lastPrompt)
-    await augmentProjectWithNewVersion(parentData.projectID, prompts.main, lastPrompt)
-  } else if (items) {
-    await augmentChainDataWithNewVersion(parentData, savedVersionID, items)
+    await augmentPromptDataWithNewVersion(parentData, prompts!.main, lastPrompt)
+    await augmentProjectWithNewVersion(parentData.projectID, prompts!.main, lastPrompt)
+  } else {
+    await augmentChainDataWithNewVersion(parentData, savedVersionID, items!)
   }
 
   return savedVersionID
@@ -220,6 +229,11 @@ const updateVersionData = (versionData: any) =>
 
 const updateVersion = (versionData: any) => getDatastore().save(updateVersionData(versionData))
 
+export const getLastCommentForVersion = async (versionID: number) => {
+  const commentData = await getLastEntity(Entity.COMMENT, 'versionID', versionID)
+  return commentData ? toComment(commentData) : null
+}
+
 export async function processLabels(
   labels: string[],
   userID: number,
@@ -234,7 +248,7 @@ export async function processLabels(
   if (checked !== labels.includes(label)) {
     const newLabels = checked ? [...labels, label] : labels.filter(l => l !== label)
     if (checked) {
-      await ensureProjectLabel(userID, projectID, label)
+      await ensureProjectLabels(projectID, [label])
     }
     await saveComment(
       userID,
@@ -242,6 +256,7 @@ export async function processLabels(
       parentID,
       versionID,
       label,
+      null,
       replyTo,
       checked ? 'addLabel' : 'removeLabel',
       runID
@@ -273,6 +288,27 @@ export async function updateVersionLabel(
   )
   if (newLabels) {
     await updateVersion({ ...versionData, labels: JSON.stringify(newLabels), didRun: true })
+    syncTaskLabel(projectID, versionID, label, checked)
+    if (checked) {
+      createTaskOnAddingLabel(userID, projectID, toVersion(versionData, []), label)
+    }
+  }
+}
+
+export async function updateVersionLabels(
+  userID: number,
+  versionID: number,
+  projectID: number,
+  labelsToAdd: string[],
+  labelsToRemove: string[]
+) {
+  const versionData = await getVerifiedUserVersionData(userID, versionID)
+  let labels = JSON.parse(versionData.labels) as string[]
+  for (const label of labelsToAdd.filter(label => !labels.includes(label))) {
+    await updateVersionLabel(userID, versionID, projectID, label, true)
+  }
+  for (const label of labelsToRemove.filter(label => labels.includes(label))) {
+    await updateVersionLabel(userID, versionID, projectID, label, false)
   }
 }
 
@@ -356,19 +392,16 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
   await deleteEntity(Entity.VERSION, versionID)
 
   const anyVersionWithSameParentKey = await getEntityKey(Entity.VERSION, 'parentID', parentID)
-  if (!anyVersionWithSameParentKey) {
-    if (wasPromptVersion) {
-      const { defaultPromptConfig } = await getPresetsForUser(userID)
-      await savePromptVersionForUser(userID, parentID, DefaultPrompts, defaultPromptConfig)
-    } else {
-      await saveChainVersionForUser(userID, parentID, [])
-    }
+  const parentData = await getTrustedProjectScopedData([wasPromptVersion ? Entity.PROMPT : Entity.CHAIN], parentID)
+
+  if (!wasPromptVersion) {
+    await updateChainOnDeletedVersion(parentData, versionID)
+  } else if (anyVersionWithSameParentKey) {
+    await updatePromptLastEditedAt(parentData)
   }
 
-  if (wasPromptVersion) {
-    await updatePromptOnDeletedVersion(parentID)
-  } else {
-    await updateChainOnDeletedVersion(parentID, versionID)
+  if (!anyVersionWithSameParentKey) {
+    await saveInitialVersion(userID, parentData, wasPromptVersion ? 'prompt' : 'chain')
   }
 }
 

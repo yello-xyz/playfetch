@@ -13,15 +13,14 @@ import {
   Prompts,
   Analytics,
   AvailableProvider,
-  QueryProvider,
   PendingWorkspace,
   PendingProject,
   OnboardingResponse,
   RunRating,
   CostUsage,
   Run,
-  SourceControlProvider,
   ActiveTable,
+  SupportedProvider,
 } from '@/types'
 import ClientRoute from '../common/clientRoute'
 import { BuildActiveChain, BuildActivePrompt, BuildActiveTable } from '../common/activeItem'
@@ -340,7 +339,7 @@ const api = {
   },
   updateProviderKey: function (
     scopeID: number,
-    provider: ModelProvider | QueryProvider | SourceControlProvider,
+    provider: SupportedProvider,
     apiKey: string | null,
     environment?: string
   ) {
@@ -354,6 +353,9 @@ const api = {
   },
   exportPrompt: function (projectID: number, versionID: number, fileName: string) {
     return post(this.exportPrompts, { projectID, versionID, fileName })
+  },
+  createTask: function (projectID: number, parentID: number, versionID: number, title: string, description: string) {
+    return post(this.createTask, { projectID, parentID, versionID, title, description })
   },
   updateProviderModel: function (
     scopeID: number,
@@ -370,6 +372,9 @@ const api = {
   },
   completeOnboarding: function (response: OnboardingResponse) {
     return post(this.completeOnboarding, { response })
+  },
+  authorizeLinear: function (): Promise<string> {
+    return post(this.authorizeLinear)
   },
 }
 

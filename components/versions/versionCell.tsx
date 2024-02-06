@@ -15,7 +15,7 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
   compareVersion,
   activeItem,
   onSelect,
-  chainItemCache,
+  itemCache,
 }: {
   identifier: string
   labelColors: Record<string, string>
@@ -26,7 +26,7 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
   compareVersion?: Version
   activeItem: ActivePrompt | ActiveChain
   onSelect: (version: Version) => void
-  chainItemCache?: ActiveItemCache
+  itemCache?: ActiveItemCache<ActivePrompt>
 }) {
   const [isExpanded, setExpanded] = useState(false)
   const [areChildrenExpanded, setChildrenExpanded] = useState<boolean>()
@@ -70,12 +70,12 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
                 isExpanded={areChildrenExpanded}
                 setExpanded={(expanded, isShiftClick) => isShiftClick && setChildrenExpanded(expanded)}
               />
-            ) : chainItemCache ? (
+            ) : itemCache ? (
               <ChainVersionCellBody
                 version={version}
                 compareVersion={compareVersion as ChainVersion | undefined}
                 isActiveVersion={isActiveVersion}
-                itemCache={chainItemCache}
+                itemCache={itemCache}
               />
             ) : null}
           </>

@@ -1,6 +1,6 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { ActiveChain, ActivePrompt, ChainVersion, IsPromptVersion, PromptVersion } from '@/types'
-import { AvailableLabelColorsForItem } from '../labelPopupMenu'
+import { AvailableLabelColorsForItem } from '../labels/labelsPopup'
 import FiltersHeader from '../filters/filtersHeader'
 import VersionCell from './versionCell'
 import { ActiveItemCache } from '@/src/client/hooks/useActiveItemCache'
@@ -11,21 +11,21 @@ import { BuildFilter, Filter, FilterItem } from '../filters/filters'
 
 const FilterItemFromVersion = <Version extends PromptVersion | ChainVersion>(
   version: Version,
-  chainItemCache: ActiveItemCache | undefined
+  itemCache: ActiveItemCache<ActivePrompt> | undefined
 ): FilterItem => ({
   userIDs: [version.userID],
   labels: version.labels,
   contents: IsPromptVersion(version)
     ? FilterContentsForPromptVersion(version)
-    : chainItemCache
-      ? ContentsForChainVersion(version, chainItemCache)
+    : itemCache
+      ? ContentsForChainVersion(version, itemCache)
       : [],
 })
 
 const BuildVersionFilter =
-  (filters: Filter[], chainItemCache: ActiveItemCache | undefined) =>
+  (filters: Filter[], itemCache: ActiveItemCache<ActivePrompt> | undefined) =>
   <Version extends PromptVersion | ChainVersion>(version: Version) =>
-    BuildFilter(filters)(FilterItemFromVersion(version, chainItemCache))
+    BuildFilter(filters)(FilterItemFromVersion(version, itemCache))
 
 export default function VersionTimeline<Version extends PromptVersion | ChainVersion>({
   activeItem,
@@ -33,14 +33,14 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
   activeVersion,
   setActiveVersion,
   tabSelector,
-  chainItemCache,
+  itemCache,
 }: {
   activeItem: ActivePrompt | ActiveChain
   versions: Version[]
   activeVersion: Version
   setActiveVersion: (version: Version) => void
   tabSelector: (children?: ReactNode) => ReactNode
-  chainItemCache?: ActiveItemCache
+  itemCache?: ActiveItemCache<ActivePrompt>
 }) {
   const [filters, setFilters] = useState<Filter[]>([])
 
@@ -67,7 +67,7 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
     }
   }, [focusedVersion, activeVersion, identifierForVersion])
 
-  const filteredVersions = versions.filter(BuildVersionFilter(filters, chainItemCache))
+  const filteredVersions = versions.filter(BuildVersionFilter(filters, itemCache))
 
   return (
     <div className='relative flex h-full'>
@@ -76,7 +76,7 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
           <FiltersHeader
             users={activeItem.users}
             labelColors={labelColors}
-            items={versions.map(version => FilterItemFromVersion(version, chainItemCache))}
+            items={versions.map(version => FilterItemFromVersion(version, itemCache))}
             filters={filters}
             setFilters={setFilters}
             tabSelector={tabSelector}
@@ -94,7 +94,7 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
                 compareVersion={versions.find(v => v.id === version.previousID)}
                 activeItem={activeItem}
                 onSelect={selectVersion}
-                chainItemCache={chainItemCache}
+                itemCache={itemCache}
               />
             ))}
           </div>

@@ -1,3 +1,12 @@
+import {
+  ActiveSettingsPane,
+  ConnectorsPane,
+  IssueTrackerPane,
+  ProvidersPane,
+  SourceControlPane,
+  TeamPane,
+  UsagePane,
+} from '@/components/settings/activeSettingsPane'
 import { ActiveProject } from '@/types'
 import { GetServerSidePropsResult } from 'next'
 
@@ -71,28 +80,26 @@ export const ParseActiveItemQuery = (query: any, project: ActiveProject) => {
   return { promptID, chainID, tableID, compare, endpoints, settings }
 }
 
-type ActiveSettingsTab = 'providers' | 'usage' | 'team' | 'connectors' | 'sourceControl'
+export const UserSettingsRoute = (activePane: ActiveSettingsPane = ProvidersPane) =>
+  `${ClientRoute.Settings}${activePane !== ProvidersPane ? `?t=${paneToShortString[activePane]}` : ''}`
 
-export const UserSettingsRoute = (activeTab: ActiveSettingsTab = 'providers') =>
-  `${ClientRoute.Settings}${activeTab !== 'providers' ? `?t=${activeTab[0]}` : ''}`
+export const ProjectSettingsRoute = (projectID: number, activePane: ActiveSettingsPane = ProvidersPane) =>
+  `${ProjectRoute(projectID)}?s=1${activePane !== ProvidersPane ? `&t=${paneToShortString[activePane]}` : ''}`
 
-export const ProjectSettingsRoute = (projectID: number, activeTab: ActiveSettingsTab = 'providers') =>
-  `${ProjectRoute(projectID)}?s=1${activeTab !== 'providers' ? `&t=${activeTab[0]}` : ''}`
-
-export const ParseActiveSettingsTabQuery = (query: any) => {
+export const ParseActiveSettingsPaneQuery = (query: any): ActiveSettingsPane => {
   const { t: activeTab } = ParseQuery(query)
-  switch (activeTab) {
-    case 'u':
-      return 'usage'
-    case 't':
-      return 'team'
-    case 'c':
-      return 'connectors'
-    case 's':
-      return 'sourceControl'
-    default:
-      return 'providers'
-  }
+  const shortStringToPane = Object.fromEntries(
+    Object.entries(paneToShortString).map(([key, value]) => [value, key])
+  ) as Record<string, ActiveSettingsPane>
+  return activeTab ? shortStringToPane[activeTab] ?? ProvidersPane : ProvidersPane
+}
+
+const paneToShortString: Omit<Record<ActiveSettingsPane, string>, typeof ProvidersPane> = {
+  [UsagePane]: 'u',
+  [TeamPane]: 't',
+  [ConnectorsPane]: 'c',
+  [SourceControlPane]: 's',
+  [IssueTrackerPane]: 'i',
 }
 
 export default ClientRoute

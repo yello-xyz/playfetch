@@ -11,17 +11,22 @@ import {
   Prompts,
   QueryProvider,
   SourceControlProvider,
+  IssueTrackerProvider,
+  SupportedProvider,
 } from '@/types'
 import openaiIcon from '@/public/openai.svg'
 import anthropicIcon from '@/public/anthropic.svg'
 import googleIcon from '@/public/google.svg'
 import cohereIcon from '@/public/cohere.svg'
+import huggingFaceIcon from '@/public/huggingface.svg'
 import pineconeIcon from '@/public/pinecone.svg'
 import githubIcon from '@/public/github.svg'
+import linearIcon from '@/public/linear.svg'
 
-export const ModelProviders: ModelProvider[] = ['anthropic', 'cohere', 'google', 'openai']
+export const ModelProviders: ModelProvider[] = ['anthropic', 'cohere', 'google', 'huggingface', 'openai']
 export const QueryProviders: QueryProvider[] = ['pinecone']
 export const SourceControlProviders: SourceControlProvider[] = ['github']
+export const IssueTrackerProviders: IssueTrackerProvider[] = ['linear']
 
 export const EmbeddingModels: EmbeddingModel[] = ['text-embedding-ada-002']
 export const PublicLanguageModels: DefaultLanguageModel[] = [
@@ -35,10 +40,11 @@ export const PublicLanguageModels: DefaultLanguageModel[] = [
   'chat-bison',
   'gemini-pro',
   'command',
+  'meta-llama/Llama-2-70b-chat-hf',
 ]
 export const GatedLanguageModels: DefaultLanguageModel[] = [] // used to contain 'gpt-4-32k'
 
-export const IconForProvider = (provider: ModelProvider | QueryProvider | SourceControlProvider) => {
+export const IconForProvider = (provider: SupportedProvider) => {
   switch (provider) {
     case 'openai':
       return openaiIcon
@@ -48,14 +54,18 @@ export const IconForProvider = (provider: ModelProvider | QueryProvider | Source
       return googleIcon
     case 'cohere':
       return cohereIcon
+    case 'huggingface':
+      return huggingFaceIcon
     case 'pinecone':
       return pineconeIcon
     case 'github':
       return githubIcon
+    case 'linear':
+      return linearIcon
   }
 }
 
-export const LabelForProvider = (provider: ModelProvider | QueryProvider | SourceControlProvider) => {
+export const LabelForProvider = (provider: SupportedProvider) => {
   switch (provider) {
     case 'openai':
       return 'OpenAI'
@@ -65,10 +75,14 @@ export const LabelForProvider = (provider: ModelProvider | QueryProvider | Sourc
       return 'Google'
     case 'cohere':
       return 'Cohere'
+    case 'huggingface':
+      return 'Hugging Face'
     case 'pinecone':
       return 'Pinecone'
     case 'github':
       return 'GitHub'
+    case 'linear':
+      return 'Linear'
   }
 }
 
@@ -91,6 +105,7 @@ export const isCustomModel = (model: LanguageModel | EmbeddingModel): model is C
     case 'chat-bison':
     case 'gemini-pro':
     case 'command':
+    case 'meta-llama/Llama-2-70b-chat-hf':
       return false
     default:
       return true
@@ -105,10 +120,8 @@ const customModelFromProviders = (model: LanguageModel, providers: AvailableMode
   return providers.flatMap(provider => provider.customModels).find(m => m.id === model) ?? null
 }
 
-export const IsProviderAvailable = (
-  provider: ModelProvider | QueryProvider | SourceControlProvider,
-  providers: AvailableProvider[]
-): boolean => !!providers.find(p => p.provider === provider)
+export const IsProviderAvailable = (provider: SupportedProvider, providers: AvailableProvider[]): boolean =>
+  !!providers.find(p => p.provider === provider)
 
 export const IsModelDisabled = (model: LanguageModel, providers: AvailableModelProvider[]): boolean => {
   const customModel = customModelFromProviders(model, providers)
@@ -136,6 +149,7 @@ export const SupportsSeed = (model: LanguageModel): boolean => {
     case 'chat-bison':
     case 'gemini-pro':
     case 'command':
+    case 'meta-llama/Llama-2-70b-chat-hf':
       return false
     default:
       return SupportsSeed(baseModelForModel(model))
@@ -155,6 +169,7 @@ export const SupportsJsonMode = (model: LanguageModel): boolean => {
     case 'chat-bison':
     case 'gemini-pro':
     case 'command':
+    case 'meta-llama/Llama-2-70b-chat-hf':
       return false
     default:
       return SupportsJsonMode(baseModelForModel(model))
@@ -174,6 +189,7 @@ export const SupportsSystemPrompt = (model: LanguageModel): boolean => {
     case 'text-bison':
     case 'gemini-pro':
     case 'command':
+    case 'meta-llama/Llama-2-70b-chat-hf':
       return false
     default:
       return SupportsSystemPrompt(baseModelForModel(model))
@@ -193,6 +209,7 @@ export const SupportsFunctionsPrompt = (model: LanguageModel): boolean => {
     case 'chat-bison':
     case 'gemini-pro':
     case 'command':
+    case 'meta-llama/Llama-2-70b-chat-hf':
       return false
     default:
       return SupportsFunctionsPrompt(baseModelForModel(model))
@@ -258,6 +275,8 @@ export const ProviderForModel = (model: LanguageModel | EmbeddingModel): ModelPr
       return 'google'
     case 'command':
       return 'cohere'
+    case 'meta-llama/Llama-2-70b-chat-hf':
+      return 'huggingface'
     default:
       return ProviderForModel(baseModelForModel(model))
   }
@@ -285,6 +304,8 @@ export const LabelForModel = (model: LanguageModel, providers: AvailableModelPro
       return 'Gemini Pro'
     case 'command':
       return 'Command'
+    case 'meta-llama/Llama-2-70b-chat-hf':
+      return 'Meta Llama 2'
     default:
       return customModelFromProviders(model, providers)?.name ?? '(unavailable)'
   }
@@ -313,6 +334,8 @@ export const WebsiteLinkForModel = (model: LanguageModel): string => {
       return 'https://cloud.google.com/vertex-ai/docs/generative-ai/model-reference/gemini'
     case 'command':
       return 'https://docs.cohere.com/docs/models'
+    case 'meta-llama/Llama-2-70b-chat-hf':
+      return 'https://huggingface.co/meta-llama/Llama-2-70b-chat-hf'
     default:
       // TODO generalise when we extend fine-tuning support beyond gpt-3.5-turbo
       return 'https://platform.openai.com/docs/guides/fine-tuning'
@@ -341,6 +364,8 @@ export const DescriptionForModel = (model: LanguageModel, providers: AvailableMo
       return 'Preview of the latest family of generative AI models developed by Google DeepMind (gemini-pro). Suitable for testing and evaluations, not recommended for production usage due to restrictive rate limits under preview.'
     case 'command':
       return 'An instruction-following conversational model by Cohere that performs language tasks with high quality and reliability while providing longer context compared to generative models.'
+    case 'meta-llama/Llama-2-70b-chat-hf':
+      return 'Llama 2 is a collection of pretrained and fine-tuned generative text models developed and publicly released by Meta. This is the the 70B fine-tuned model, optimized for dialogue use cases and converted for the Hugging Face Transformers format (meta-llama/Llama-2-70b-chat-hf).'
     default:
       return customModelFromProviders(model, providers)?.description ?? ''
   }
@@ -368,6 +393,8 @@ export const MaxTokensForModel = (model: LanguageModel): number => {
       return 16384
     case 'command':
       return 4096
+    case 'meta-llama/Llama-2-70b-chat-hf':
+      return 4096
     default:
       return MaxTokensForModel(baseModelForModel(model))
   }
@@ -394,6 +421,7 @@ export const InputPriceForModel = (model: LanguageModel | EmbeddingModel): numbe
     case 'text-bison':
     case 'chat-bison':
     case 'gemini-pro':
+    case 'meta-llama/Llama-2-70b-chat-hf':
       return 0
     default:
       // TODO generalise when we extend fine-tuning support beyond gpt-3.5-turbo
@@ -422,6 +450,7 @@ export const OutputPriceForModel = (model: LanguageModel | EmbeddingModel): numb
     case 'text-bison':
     case 'chat-bison':
     case 'gemini-pro':
+    case 'meta-llama/Llama-2-70b-chat-hf':
       return 0
     default:
       // TODO generalise when we extend fine-tuning support beyond gpt-3.5-turbo
@@ -429,8 +458,45 @@ export const OutputPriceForModel = (model: LanguageModel | EmbeddingModel): numb
   }
 }
 
-export const IsModelFreeToUse = (model: LanguageModel | EmbeddingModel): boolean =>
-  InputPriceForModel(model) === 0 && OutputPriceForModel(model) === 0
+export const IsModelFreeToUse = (model: LanguageModel | EmbeddingModel): boolean => {
+  switch (model) {
+    case 'text-embedding-ada-002':
+    case 'gpt-3.5-turbo':
+    case 'gpt-3.5-turbo-16k':
+    case 'gpt-4':
+    case 'gpt-4-turbo':
+    case 'claude-instant-1':
+    case 'claude-2':
+    case 'command':
+    case 'meta-llama/Llama-2-70b-chat-hf':
+    default:
+      return false
+    case 'text-bison':
+    case 'chat-bison':
+    case 'gemini-pro':
+      return true
+  }
+}
+
+export const IsSubscriptionRequiredForModel = (model: LanguageModel | EmbeddingModel): boolean => {
+  switch (model) {
+    case 'text-embedding-ada-002':
+    case 'gpt-3.5-turbo':
+    case 'gpt-3.5-turbo-16k':
+    case 'gpt-4':
+    case 'gpt-4-turbo':
+    case 'claude-instant-1':
+    case 'claude-2':
+    case 'command':
+    case 'text-bison':
+    case 'chat-bison':
+    case 'gemini-pro':
+    default:
+      return false
+    case 'meta-llama/Llama-2-70b-chat-hf':
+      return true
+  }
+}
 
 export const ValidatePromptConfig = (config: PromptConfig): PromptConfig => ({
   ...config,

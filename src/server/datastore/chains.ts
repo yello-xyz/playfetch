@@ -89,7 +89,7 @@ export async function addChainForUser(userID: number, projectID: number, name = 
   )
   const createdAt = new Date()
   const chainID = await allocateID(Entity.CHAIN)
-  const versionData = await addInitialVersion(userID, chainID, true)
+  const versionData = await addInitialVersion(userID, chainID, 'chain')
   const versionID = getID(versionData)
   const chainData = toChainData(projectID, uniqueName, { [versionID]: [] }, createdAt, createdAt, undefined, chainID)
   await getDatastore().save([chainData, versionData])
@@ -126,10 +126,13 @@ export async function updateChain(chainData: any, updateLastEditedTimestamp: boo
 export const getVerifiedUserChainData = async (userID: number, chainID: number) =>
   getVerifiedProjectScopedData(userID, [Entity.CHAIN], chainID)
 
+export const getVerifiedUserChain = (userID: number, chainID: number) =>
+  getVerifiedUserChainData(userID, chainID).then(toChain)
+
 export const getVerifiedUserPromptOrChainData = async (userID: number, parentID: number) =>
   getVerifiedProjectScopedData(userID, [Entity.PROMPT, Entity.CHAIN], parentID)
 
-export const getTrustedUserPromptOrChainData = async (parentID: number) =>
+export const getTrustedPromptOrChainData = async (parentID: number) =>
   getTrustedProjectScopedData([Entity.PROMPT, Entity.CHAIN], parentID)
 
 export const ensureChainAccess = (userID: number, chainID: number) => getVerifiedUserChainData(userID, chainID)
@@ -152,12 +155,7 @@ export async function augmentChainDataWithNewVersion(
   await updateChain({ ...chainData, references: JSON.stringify(references) }, true)
 }
 
-const getChainData = (chainID: number) => getKeyedEntity(Entity.CHAIN, chainID)
-
-export const getTrustedChain = (chainID: number) => getChainData(chainID).then(toChain)
-
-export async function updateChainOnDeletedVersion(chainID: number, deletedVersionID: number) {
-  const chainData = await getChainData(chainID)
+export async function updateChainOnDeletedVersion(chainData: any, deletedVersionID: number) {
   const references = chainData.references ? JSON.parse(chainData.references) : {}
   references[deletedVersionID] = undefined
   await updateChain({ ...chainData, references: JSON.stringify(references) }, true)

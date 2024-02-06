@@ -1,20 +1,20 @@
 import { PropertyFilter, and } from '@google-cloud/datastore'
 import { Entity, buildFilter, buildKey, decrypt, encrypt, getDatastore, getFilteredEntities, getID } from './datastore'
-import { DefaultProvider } from '@/src/common/defaultConfig'
+import { DefaultProvider } from '@/src/common/defaults'
 import {
   AvailableModelProvider,
   AvailableProvider,
   CustomModel,
   DefaultLanguageModel,
+  IssueTrackerConfig,
   ModelProvider,
-  QueryProvider,
-  SourceControlProvider,
+  SupportedProvider,
 } from '@/types'
 import { ExtraModelsForProvider } from '../providers/integration'
-import { ModelProviders, SourceControlProviders } from '@/src/common/providerMetadata'
+import { IssueTrackerProviders, ModelProviders, SourceControlProviders } from '@/src/common/providerMetadata'
 import { EntityFilter } from '@google-cloud/datastore/build/src/filter'
 import { SortAndFilterProviderData } from '../providers/cascade'
-import { ensureProjectOwnership } from './projects'
+import { ensureProjectLabels, ensureProjectOwnership } from './projects'
 
 const getFilteredProviderData = (filter: EntityFilter, scopeIDs: number[]) =>
   getFilteredEntities(Entity.PROVIDER, filter).then(SortAndFilterProviderData(scopeIDs))
@@ -22,7 +22,7 @@ const getFilteredProviderData = (filter: EntityFilter, scopeIDs: number[]) =>
 const buildScopeFilter = (scopeIDs: number[]) => new PropertyFilter('scopeID', 'IN', scopeIDs)
 const getMultipleProviderData = (scopeIDs: number[]) => getFilteredProviderData(buildScopeFilter(scopeIDs), scopeIDs)
 
-const getSingleProviderData = (scopeIDs: number[], provider: ModelProvider | QueryProvider | SourceControlProvider) =>
+const getSingleProviderData = (scopeIDs: number[], provider: SupportedProvider) =>
   getFilteredProviderData(and([buildScopeFilter(scopeIDs), buildFilter('provider', provider)]), scopeIDs).then(
     ([entity]) => entity
   )
@@ -55,7 +55,7 @@ export async function migrateProviders(postMerge: boolean) {
 
 export async function getProviderCredentials(
   scopeIDs: number[],
-  provider: ModelProvider | QueryProvider | SourceControlProvider,
+  provider: SupportedProvider,
   modelToCheck?: string
 ): Promise<{ scopeID: number | null; providerID: number | null; apiKey: string | null; environment: string | null }> {
   const providerData = await getSingleProviderData(scopeIDs, provider)
@@ -79,7 +79,7 @@ export async function getProviderCredentials(
 
 const toProviderData = (
   scopeID: number,
-  provider: ModelProvider | QueryProvider | SourceControlProvider,
+  provider: SupportedProvider,
   encryptedAPIKey: string | null,
   metadata: ProviderMetadata,
   createdAt = new Date(),
@@ -103,7 +103,7 @@ const toAvailableProvider = (data: any): AvailableProvider => {
     ...(ModelProviders.includes(data.provider)
       ? { customModels: metadata.customModels ?? [], gatedModels: metadata.gatedModels ?? [] }
       : { environment: metadata.environment ?? '' }),
-    ...(SourceControlProviders.includes(data.provider) ? { scopeID: data.scopeID } : {}),
+    ...([...SourceControlProviders, ...IssueTrackerProviders].includes(data.provider) ? { scopeID: data.scopeID } : {}),
   }
 }
 
@@ -113,13 +113,19 @@ export const ensureScopeOwnership = async (userID: number, scopeID: number) =>
 export async function saveProviderKey(
   userID: number,
   scopeID: number,
-  provider: ModelProvider | QueryProvider | SourceControlProvider,
+  provider: SupportedProvider,
   apiKey: string | null,
   environment: string | undefined
 ) {
   await ensureScopeOwnership(userID, scopeID)
-  if (provider === 'github' && scopeID !== userID && apiKey === null && environment !== undefined) {
-    apiKey = (await getProviderCredentials([userID], provider)).apiKey
+  if (scopeID !== userID && apiKey === null && environment !== undefined) {
+    if (provider === 'github' || provider === 'linear') {
+      apiKey = (await getProviderCredentials([userID], provider)).apiKey
+    }
+    if (provider === 'linear') {
+      const config = JSON.parse(environment) as IssueTrackerConfig
+      await ensureProjectLabels(scopeID, config.labels)
+    }
   }
   const providerData = await getSingleProviderData([scopeID], provider)
   const providerID = providerData ? getID(providerData) : undefined

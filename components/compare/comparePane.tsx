@@ -2,9 +2,11 @@ import {
   ActiveChain,
   ActiveProject,
   ActivePrompt,
+  Chain,
   ChainVersion,
   IsPromptVersion,
   LogEntry,
+  Prompt,
   PromptVersion,
   ResolvedEndpoint,
   Run,
@@ -15,9 +17,13 @@ import RunTimeline from '../runs/runTimeline'
 import PromptPanel from '../prompts/promptPanel'
 import { IsEndpoint } from '@/src/common/activeItem'
 import { ExtractInputKey } from '@/src/common/formatting'
+import { useState } from 'react'
+import { RunSortOption } from '@/src/client/runMerging'
+import { Filter } from '../filters/filters'
 
 export default function ComparePane({
   project,
+  comparableItems,
   logEntries,
   activeItem,
   activeVersion,
@@ -25,8 +31,11 @@ export default function ComparePane({
   setVersionID,
   disabled,
   includeResponses,
+  runFilters,
+  runSortOption,
 }: {
   project: ActiveProject
+  comparableItems: (Prompt | Chain | ResolvedEndpoint)[]
   logEntries: LogEntry[]
   activeItem?: ActivePrompt | ActiveChain | ResolvedEndpoint
   activeVersion?: PromptVersion | ChainVersion
@@ -34,6 +43,8 @@ export default function ComparePane({
   setVersionID: (versionID: number) => void
   disabled?: boolean
   includeResponses?: boolean
+  runFilters: Filter[]
+  runSortOption?: RunSortOption
 }) {
   const precedesContinuation = (continuation: LogEntry) => (log: LogEntry) =>
     !!continuation.continuationID &&
@@ -70,15 +81,21 @@ export default function ComparePane({
     reason: null,
   }))
 
+  const [pendingID, setPendingID] = useState<number>()
+  const selectItemID = (itemID: number) => {
+    setPendingID(itemID)
+    setItemID(itemID)
+  }
+
   return (
     <div className='flex flex-col w-1/2 h-full grow'>
       <div className='flex items-center gap-1 p-2.5 border-b border-gray-200 bg-white'>
         <ProjectItemSelector
           className='w-full max-w-[240px]'
           project={project}
-          selectedItemID={activeItem?.id}
-          onSelectItemID={setItemID}
-          includeEndpoints
+          items={comparableItems}
+          selectedItemID={activeItem?.id ?? pendingID}
+          onSelectItemID={selectItemID}
           disabled={disabled}
         />
         {!IsEndpoint(activeItem) && (
@@ -92,16 +109,22 @@ export default function ComparePane({
         )}
       </div>
       {activeVersion && IsPromptVersion(activeVersion) && (
-        <div className='border-b border-gray-200 min-h-[226px] h-[226px] bg-gray-25'>
+        <div className='border-b border-gray-200 min-h-[245px] h-[245px] bg-gray-25'>
           <PromptPanel version={activeVersion} />
         </div>
       )}
       {includeResponses && (activeVersion || IsEndpoint(activeItem)) && (
-        <div className='overflow-y-auto'>
+        <div className='min-h-0'>
           {activeVersion && !IsEndpoint(activeItem) ? (
-            <RunTimeline runs={activeVersion!.runs} activeItem={activeItem} version={activeVersion} skipHeader />
+            <RunTimeline
+              runs={activeVersion!.runs}
+              activeItem={activeItem}
+              version={activeVersion}
+              runFilters={runFilters}
+              runSortOption={runSortOption}
+            />
           ) : (
-            <RunTimeline runs={logsAsRuns} skipHeader />
+            <RunTimeline runs={logsAsRuns} runFilters={runFilters} runSortOption={runSortOption} />
           )}
         </div>
       )}

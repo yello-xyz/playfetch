@@ -37,7 +37,7 @@ export default function Settings({ user, initialProviders }: { user: User; initi
               <TopBarAccessoryItem />
             </TopBar>
             <Suspense>
-              <SettingsView scope='user' providers={scopedProviders} refresh={refresh} />
+              <SettingsView providers={scopedProviders} refresh={refresh} />
             </Suspense>
           </main>
         </ModalDialogContext.Provider>

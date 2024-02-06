@@ -7,9 +7,9 @@ import {
   IsPromptChainItem,
   IsQueryChainItem,
 } from './chainNode'
-import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
+import { ChainItemCache } from '@/src/client/hooks/useChainItemCache'
 import { VersionLabels } from '../versions/versionLabels'
-import { AvailableLabelColorsForItem } from '../labelPopupMenu'
+import { AvailableLabelColorsForItem } from '../labels/labelsPopup'
 import { TaggedContent } from '../versions/versionComparison'
 import { ReactNode } from 'react'
 import { InputVariableClass } from '../prompts/promptInput'
@@ -21,23 +21,23 @@ export default function ChainNodeBoxBody({
   items,
   chainNode,
   isSelected,
-  promptCache,
+  itemCache,
 }: {
   items: ChainItem[]
   chainNode: ChainNode
   isSelected: boolean
-  promptCache: ChainPromptCache
+  itemCache: ChainItemCache
 }) {
   return (
     <>
       {IsPromptChainItem(chainNode) && (
-        <PromptNodeBody item={chainNode} isSelected={isSelected} promptCache={promptCache} />
+        <PromptNodeBody item={chainNode} isSelected={isSelected} itemCache={itemCache} />
       )}
       {(IsCodeChainItem(chainNode) || IsBranchChainItem(chainNode)) && (
         <CodeNodeBody item={chainNode} isSelected={isSelected} />
       )}
       {IsQueryChainItem(chainNode) && <QueryNodeBody item={chainNode} isSelected={isSelected} />}
-      {chainNode === InputNode && <InputNodeBody items={items} isSelected={isSelected} promptCache={promptCache} />}
+      {chainNode === InputNode && <InputNodeBody items={items} isSelected={isSelected} itemCache={itemCache} />}
     </>
   )
 }
@@ -45,14 +45,14 @@ export default function ChainNodeBoxBody({
 function PromptNodeBody({
   item,
   isSelected,
-  promptCache,
+  itemCache,
 }: {
   item: PromptChainItem
   isSelected: boolean
-  promptCache: ChainPromptCache
+  itemCache: ChainItemCache
 }) {
-  const prompt = promptCache.promptForItem(item)
-  const version = promptCache.versionForItem(item)
+  const prompt = itemCache.promptForItem(item)
+  const version = itemCache.versionForItem(item)
   const index = prompt?.versions?.findIndex(v => v.id === version?.id) ?? 0
   return prompt && version ? (
     <div className='flex flex-col'>
@@ -101,13 +101,13 @@ function QueryNodeBody({ item, isSelected }: { item: QueryChainItem; isSelected:
 function InputNodeBody({
   items,
   isSelected,
-  promptCache,
+  itemCache,
 }: {
   items: ChainItem[]
   isSelected: boolean
-  promptCache: ChainPromptCache
+  itemCache: ChainItemCache
 }) {
-  const variables = ExtractUnboundChainVariables(items, promptCache, false)
+  const variables = ExtractUnboundChainVariables(items, itemCache, false)
 
   return variables.length > 0 ? (
     <CommonBody isSelected={isSelected}>

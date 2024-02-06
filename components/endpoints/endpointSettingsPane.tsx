@@ -173,6 +173,7 @@ export default function EndpointSettingsPane({
           fixedWidth
           disabled={disabled}
           project={activeProject}
+          items={[...activeProject.prompts, ...activeProject.chains]}
           selectedItemID={parentID}
           onSelectItemID={updateParentID}
         />

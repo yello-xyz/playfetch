@@ -14,7 +14,7 @@ import {
 import { getVerifiedProjectScopedData } from './prompts'
 import { saveUsage } from './usage'
 import { CheckValidURLPath } from '@/src/common/formatting'
-import { getTrustedUserPromptOrChainData } from './chains'
+import { getTrustedPromptOrChainData } from './chains'
 import { ensureProjectAccess } from './projects'
 import { getTrustedVersion } from './versions'
 import { deleteEntity } from './cleanup'
@@ -47,7 +47,7 @@ const getVerifiedUserEndpointData = async (userID: number, endpointID: number) =
 const ensureEndpointAccess = (userID: number, endpointID: number) => getVerifiedUserEndpointData(userID, endpointID)
 
 async function ensureValidEndpointData(projectID: number, parentID: number, versionID: number) {
-  const parentData = await getTrustedUserPromptOrChainData(parentID)
+  const parentData = await getTrustedPromptOrChainData(parentID)
   if (parentData.projectID !== projectID) {
     throw new Error(`Item with ID ${parentID} does not belong to project with ID ${projectID}`)
   }

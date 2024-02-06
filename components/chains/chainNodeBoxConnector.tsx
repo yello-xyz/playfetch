@@ -29,6 +29,7 @@ export default function ChainNodeBoxConnector({
   onInsertBranch,
   prompts,
   skipConnector,
+  hasEndBranchConnector,
 }: {
   isDisabled: boolean
   isActive: boolean
@@ -44,6 +45,7 @@ export default function ChainNodeBoxConnector({
   onInsertBranch: () => void
   prompts: Prompt[]
   skipConnector?: boolean
+  hasEndBranchConnector?: boolean
 }) {
   return (
     <div className='flex flex-col items-center'>
@@ -72,11 +74,11 @@ export default function ChainNodeBoxConnector({
         </>
       )}
       {hasNext || (isDisabled && isActive) ? (
-        <DownConnector height='min-h-[18px]' grow />
+        <DownArrow height='min-h-[18px]' grow />
       ) : hasCompleted ? (
         <div className={skipConnector ? '' : 'min-h-[18px]'} />
       ) : (
-        <DownStroke height={skipConnector ? '' : 'min-h-[18px]'} grow />
+        <DownStroke height={skipConnector || !hasEndBranchConnector ? '' : 'min-h-[18px]'} grow />
       )}
     </div>
   )
@@ -138,7 +140,7 @@ const AddButton = ({
 
   return isActive ? (
     <>
-      {hasConnector && <DownConnector height={onInsertQuery ? 'min-h-[18px]' : 'min-h-[38px]'} />}
+      {hasConnector && <DownArrow height={onInsertQuery ? 'min-h-[18px]' : 'min-h-[38px]'} />}
       <div className='relative flex flex-col items-center mb-2'>
         <SmallDot position='top' color='bg-blue-200' />
         <div ref={buttonRef} className='relative border border-blue-100 border-dashed rounded-lg w-96 bg-blue-25'>
@@ -237,7 +239,7 @@ export const DownStroke = ({
   spacer?: boolean
 }) => <div className={`${height} ${spacer ? 'mt-[7px]' : ''} w-px border-l ${color} ${grow ? 'flex-1' : ''}`} />
 
-export const DownConnector = ({ height = '', grow = false }: { height?: string; grow?: boolean }) => (
+export const DownArrow = ({ height = '', grow = false }: { height?: string; grow?: boolean }) => (
   <>
     <DownStroke height={height} grow={grow} />
     <div className='p-1 -mt-2.5 mb-[9px] rotate-45 border-b border-r border-gray-400' />

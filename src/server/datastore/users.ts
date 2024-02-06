@@ -22,15 +22,17 @@ import { getRecentEndpoints } from './endpoints'
 import { and } from '@google-cloud/datastore'
 import { getRecentProjects, getSharedProjectsForUser } from './projects'
 import { getRecentRuns } from './runs'
-import { DefaultPromptConfig, DefaultLayoutConfig } from '@/src/common/defaultConfig'
+import { DefaultPromptConfig, DefaultLayoutConfig } from '@/src/common/defaults'
 import { ValidatePromptConfig } from '@/src/common/providerMetadata'
 import { LayoutConfig, UserPresets } from '@/src/common/userPresets'
 
 export async function migrateUsers(postMerge: boolean) {
+  if (postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allUsers] = await datastore.runQuery(datastore.createQuery(Entity.USER))
   for (const userData of allUsers) {
-    const defaultPromptConfig = userData.defaultPromptConfig ? JSON.parse(userData.defaultPromptConfig) : undefined
     await getDatastore().save(
       toUserData(
         userData.email,
@@ -41,9 +43,8 @@ export async function migrateUsers(postMerge: boolean) {
         userData.isAdmin,
         userData.createdAt,
         userData.lastLoginAt,
-        userData.presets ? JSON.parse(userData.presets) : defaultPromptConfig,
-        getID(userData),
-        postMerge ? undefined : defaultPromptConfig
+        userData.presets ? JSON.parse(userData.presets) : undefined,
+        getID(userData)
       )
     )
   }
@@ -60,8 +61,7 @@ const updateUserData = (userData: any) =>
     userData.createdAt,
     userData.lastLoginAt,
     userData.presets ? JSON.parse(userData.presets) : undefined,
-    getID(userData),
-    userData.defaultPromptConfig ? JSON.parse(userData.defaultPromptConfig) : undefined
+    getID(userData)
   )
 
 const updateUser = (userData: any) => getDatastore().save(updateUserData(userData))
@@ -76,8 +76,7 @@ const toUserData = (
   createdAt: Date,
   lastLoginAt?: Date,
   presets?: any,
-  userID?: number,
-  defaultPromptConfig?: Partial<PromptConfig> // TODO delete after next push to prod (also in excludeFromIndexes)
+  userID?: number
 ) => ({
   key: buildKey(Entity.USER, userID),
   data: {
@@ -90,9 +89,8 @@ const toUserData = (
     createdAt,
     lastLoginAt,
     presets: presets ? JSON.stringify(presets) : undefined,
-    defaultPromptConfig: defaultPromptConfig ? JSON.stringify(defaultPromptConfig) : undefined,
   },
-  excludeFromIndexes: ['fullName', 'imageURL', 'presets', 'defaultPromptConfig'],
+  excludeFromIndexes: ['fullName', 'imageURL', 'presets'],
 })
 
 export const toUser = (data: any): User => ({
@@ -202,8 +200,7 @@ export async function saveUser(email: string, fullName: string, hasAccess = fals
     hasAccess ? previousUserData?.createdAt ?? new Date() : new Date(),
     previousUserData?.lastLoginAt,
     previousUserData?.presets ? JSON.parse(previousUserData.presets) : undefined,
-    previousUserData ? getID(previousUserData) : undefined,
-    previousUserData?.defaultPromptConfig ? JSON.parse(previousUserData.defaultPromptConfig) : undefined
+    previousUserData ? getID(previousUserData) : undefined
   )
   await getDatastore().save(userData)
   if (hasAccess && (!previousUserData || !previousUserData.hasAccess)) {

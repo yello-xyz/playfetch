@@ -62,6 +62,8 @@ export const FilterItemFromRun = (run: Run): FilterItem => {
 export const BuildRunFilter = (filters: Filter[]) => (run: PartialRun | Run) =>
   !IsProperRun(run) || BuildFilter(filters)(FilterItemFromRun(run))
 
+export type RunSortOption = 'Date' | 'Test Data Row'
+
 type Input = { [key: string]: string }
 type Inputs = [Input[], number[]]
 type InputMap = { [hash: number]: number }
@@ -74,10 +76,14 @@ const HashInput = (input: Input) =>
       .join(':')
   )
 
-export const BuildInputMap = (inputs: Inputs): InputMap => {
-  const inputMap = {} as InputMap
-  inputs[0].forEach((input, index) => (inputMap[HashInput(input)] = inputs[1][index]))
-  return inputMap
+export const BuildInputMap = (inputs: Inputs, sortOption: RunSortOption): InputMap | undefined => {
+  if (sortOption === 'Test Data Row') {
+    const inputMap = {} as InputMap
+    inputs[0].forEach((input, index) => (inputMap[HashInput(input)] = inputs[1][index]))
+    return inputMap
+  } else {
+    return undefined
+  }
 }
 
 export const GetMappedRowForRun = (run: PartialRun | Run, inputMap: InputMap): number => {

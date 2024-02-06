@@ -168,6 +168,7 @@ export async function updateRunRating(
     runData.parentID,
     runData.versionID,
     reason ?? '',
+    null,
     replyTo,
     rating === 'positive' ? 'thumbsUp' : 'thumbsDown',
     runID

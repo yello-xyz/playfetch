@@ -37,7 +37,7 @@ export default function Editor({
   disabled = false,
   preformatted = false,
   bordered = true,
-  focusOnLoad = true,
+  initialCursorLocation,
   onKeyDown,
   onFocus,
   onBlur,
@@ -62,7 +62,7 @@ export default function Editor({
   disabled?: boolean
   preformatted?: boolean
   bordered?: boolean
-  focusOnLoad?: boolean
+  initialCursorLocation?: { x: number; y: number }
   onKeyDown?: (event: KeyboardEvent) => void
   onFocus?: () => void
   onBlur?: () => void
@@ -127,15 +127,21 @@ export default function Editor({
     const view = new EditorView({ extensions, parent: ref?.current ?? undefined })
 
     setView(view)
-    if (focusOnLoad) {
-      setTimeout(() => view.focus())
-    }
+    setTimeout(() => {
+      view.focus()
+      if (initialCursorLocation) {
+        const anchor = view.posAtCoords(initialCursorLocation)
+        if (anchor) {
+          view.dispatch({ selection: { anchor } })
+        }
+      }
+    })
 
     return () => {
       view.destroy()
       setView(undefined)
     }
-  }, [extensions, focusOnLoad])
+  }, [extensions, initialCursorLocation])
 
   useEffect(() => {
     if (view) {

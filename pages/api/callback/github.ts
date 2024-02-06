@@ -13,9 +13,10 @@ async function github(req: NextApiRequest, res: NextApiResponse, user: User) {
   query.set('client_secret', process.env.GITHUB_APP_CLIENT_SECRET ?? '')
   query.set('code', code as string)
 
-  const response = await fetch(`https://github.com/login/oauth/access_token?${query.toString()}`, {
+  const response = await fetch('https://github.com/login/oauth/access_token', {
     method: 'POST',
-    headers: { accept: 'application/json' },
+    headers: { 'content-type': 'application/x-www-form-urlencoded', accept: 'application/json' },
+    body: query.toString(),
   }).then(response => response.json())
 
   const installationID = Number(installation_id)

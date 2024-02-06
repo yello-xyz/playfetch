@@ -1,4 +1,14 @@
-import { Dispatch, Fragment, KeyboardEvent, ReactNode, SetStateAction, useEffect, useRef, useState } from 'react'
+import {
+  Dispatch,
+  Fragment,
+  KeyboardEvent,
+  MouseEvent,
+  ReactNode,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import addIcon from '@/public/add.svg'
 import expandIcon from '@/public/expand.svg'
 import Icon from '../icon'
@@ -7,6 +17,7 @@ import TestDataHeader from './testDataHeader'
 import useTestDataValuePopup from '@/src/client/hooks/useTestDataValuePopup'
 import Editor from '../editor'
 import { GetUniqueName } from '@/src/common/formatting'
+import { InView } from 'react-intersection-observer'
 
 const DefaultVariableName = 'New Variable'
 
@@ -141,6 +152,18 @@ export default function TableEditor({
     persistInputValuesIfNeeded()
   })
 
+  const [initialCursorLocation, setInitialCursorLocation] = useState<{ x: number; y: number }>()
+  const activateCell = (event: MouseEvent, row: number, col: number) => {
+    persistInputValuesIfNeeded()
+    setActiveCell([row, col])
+    setInitialCursorLocation({ x: event.clientX, y: event.clientY })
+  }
+
+  const deactivateCell = () => {
+    persistInputValuesIfNeeded()
+    setActiveCell(undefined)
+  }
+
   const gridTemplateColumns = `${gutterColumn ? '58px ' : ''}repeat(${allVariables.length}, minmax(240px, 1fr))`
   const addRowButtonBaseClass = 'flex items-center justify-center py-1 font-regular'
   const cursor = 'cursor-pointer hover:bg-gray-50'
@@ -176,45 +199,48 @@ export default function TableEditor({
             <Icon icon={addIcon} />
           </div>
           {Array.from({ length: rowCount }, (_, row) => {
-            const border = (col: number) =>
-              isCellActive(row, col)
-                ? 'border border-blue-400'
-                : `${gutterColumn || col > 0 ? 'border-l' : ''} border-b border-gray-200`
-            const truncate = isRowActive(row) ? '' : `max-h-[46px] ${isRowEmpty(row) ? '' : 'line-clamp-2'}`
+            const border = (col: number) => `${gutterColumn || col > 0 ? 'border-l' : ''} border-b border-gray-200`
+            const truncate = isRowActive(row) ? '' : 'max-h-[46px] line-clamp-2'
             const iconPosition = (col: number) => (col === allVariables.length - 1 ? 'right-3' : 'right-0.5')
             const iconOpacity = (col: number) =>
               isCellActive(row, col) ? 'hover:opacity-100' : 'group-hover:opacity-100'
             const iconStyle = `${backgroundColor} rounded cursor-pointer opacity-0`
             return (
-              <Fragment key={row}>
-                {gutterColumn && <div className='px-2 py-1 border-b border-gray-200'>{gutterColumn(row)}</div>}
-                {allVariables.map((variable, col) => (
-                  <div className='relative group' key={`${rowCount}-${col}`}>
-                    <Editor
-                      className={`h-full ${border(col)} ${truncate}`}
-                      value={getInputValue(row, variable)}
-                      setValue={value => setInputValue(row, variable, value)}
-                      onBlur={() => {
-                        persistInputValuesIfNeeded()
-                        setActiveCell(activeCell =>
-                          activeCell?.[0] === row && activeCell?.[1] === col ? undefined : activeCell
-                        )
-                      }}
-                      onFocus={() => setActiveCell([row, col])}
-                      onKeyDown={event => checkDeleteRow(event, row)}
-                      bordered={false}
-                      focusOnLoad={false}
-                    />
-                    {!skipExpandButtons && (
-                      <Icon
-                        className={`absolute top-0.5 ${iconPosition(col)} ${iconOpacity(col)} ${iconStyle}`}
-                        icon={expandIcon}
-                        onClick={() => expandCell(row, variable)}
-                      />
-                    )}
-                  </div>
-                ))}
-              </Fragment>
+              <InView key={row}>
+                {({ inView, ref, entry }) => (
+                  <>
+                    {gutterColumn && <div className='px-2 py-1 border-b border-gray-200'>{gutterColumn(row)}</div>}
+                    {allVariables.map((variable, col) => (
+                      <div ref={ref} className='relative group min-h-[32px]' key={`${rowCount}-${col}`}>
+                        {isCellActive(row, col) ? (
+                          <Editor
+                            className={`h-full border border-blue-400`}
+                            value={getInputValue(row, variable)}
+                            setValue={value => setInputValue(row, variable, value)}
+                            onBlur={deactivateCell}
+                            onKeyDown={event => checkDeleteRow(event, row)}
+                            bordered={false}
+                            initialCursorLocation={initialCursorLocation}
+                          />
+                        ) : (
+                          <div
+                            className={`h-full px-2.5 py-1.5 whitespace-pre-wrap ${border(col)} ${truncate}`}
+                            onMouseDown={event => activateCell(event, row, col)}>
+                            {(!entry || inView) && getInputValue(row, variable)}
+                          </div>
+                        )}
+                        {!skipExpandButtons && (!entry || inView) && (
+                          <Icon
+                            className={`absolute top-0.5 ${iconPosition(col)} ${iconOpacity(col)} ${iconStyle}`}
+                            icon={expandIcon}
+                            onClick={() => expandCell(row, variable)}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </>
+                )}
+              </InView>
             )
           })}
         </div>
