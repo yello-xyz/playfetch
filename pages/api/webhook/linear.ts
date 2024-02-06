@@ -24,7 +24,6 @@ async function linear(req: NextApiRequest, res: NextApiResponse) {
   if (signature) {
     const buffer = await parsePayload(req)
     const body = JSON.parse(buffer.toString())
-    console.log('WEBHOOK PAYLOAD', body)
     const { type, action, data, updatedFrom } = body
     if (data && webhook.verify(buffer, signature, body[LINEAR_WEBHOOK_TS_FIELD])) {
       if (type === 'Issue' && action === 'update' && data.labelIds && updatedFrom?.labelIds) {
