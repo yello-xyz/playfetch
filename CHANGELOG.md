@@ -1,5 +1,9 @@
 ## PlayFetch Changelog
 
+### v0.24 - 2024-02-06
+- Linear integration
+- Support for Meta Llama 2 through Hugging Face
+
 ### v0.23 - 2024-01-23
 - Reusable test data
 - Cancel long running LLM requests
