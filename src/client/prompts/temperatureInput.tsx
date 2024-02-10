@@ -1,4 +1,4 @@
-import useGlobalPopup, { GlobalPopupLocation } from '@/src/client/context/globalPopupContext'
+import useGlobalPopup, { GlobalPopupLocation } from '@/src/client/components/globalPopupContext'
 import { PromptConfig } from '@/types'
 import { PopupContent } from '../components/popupMenu'
 import { CustomPopupButton } from '../components/popupButton'

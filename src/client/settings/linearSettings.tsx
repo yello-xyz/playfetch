@@ -1,7 +1,7 @@
 import api from '@/src/client/api'
 import Button from '../components/button'
 import { useRouter } from 'next/router'
-import { useIssueTrackerProvider } from '@/src/client/context/providerContext'
+import { useIssueTrackerProvider } from '@/src/client/settings/providerContext'
 import { ActiveProject, AvailableIssueTrackerProvider, AvailableProvider, IssueTrackerConfig } from '@/types'
 import AppSettings from './appSettings'
 import { ReactNode, useState } from 'react'

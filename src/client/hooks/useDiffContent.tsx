@@ -14,7 +14,7 @@ import {
   PromptVersion,
 } from '@/types'
 import useActiveItemCache, { ActiveItemCache } from './useActiveItemCache'
-import useAvailableModelProviders from '@/src/client/context/providerContext'
+import useAvailableModelProviders from '@/src/client/settings/providerContext'
 import { FormatPromptConfig } from '@/src/client/prompts/promptVersionCellBody'
 import { GetChainItemTitle } from '@/src/client/chains/chainVersionCellBody'
 

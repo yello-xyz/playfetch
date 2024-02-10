@@ -5,7 +5,7 @@ import { PendingUser, User } from '@/types'
 import TextInput from '../components/textInput'
 import UserBadge from './userBadge'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
-import { useLoggedInUser } from '@/src/client/context/userContext'
+import { useLoggedInUser } from '@/src/client/users/userContext'
 import RolePopupButton from './rolePopupButton'
 
 export default function MembersPane({

@@ -19,11 +19,11 @@ import ClientRoute, {
   WorkspaceRoute,
 } from '@/src/common/clientRoute'
 import ModalDialog, { DialogPrompt } from '@/src/client/components/modalDialog'
-import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
-import { UserContext } from '@/src/client/context/userContext'
+import { ModalDialogContext } from '@/src/client/components/modalDialogContext'
+import { UserContext } from '@/src/client/users/userContext'
 import { getActiveWorkspace, getWorkspacesForUser } from '@/src/server/datastore/workspaces'
 import { getSharedProjectsForUser } from '@/src/server/datastore/projects'
-import { GlobalPopupContext, useGlobalPopupProvider } from '@/src/client/context/globalPopupContext'
+import { GlobalPopupContext, useGlobalPopupProvider } from '@/src/client/components/globalPopupContext'
 import GlobalPopup from '@/src/client/components/globalPopup'
 import { useDocumentationCookie } from '@/src/client/cookies/cookieBanner'
 

@@ -1,5 +1,5 @@
 import { PromptConfig } from '@/types'
-import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/context/globalPopupContext'
+import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/components/globalPopupContext'
 import { PopupContent, PopupLabelItem } from '../components/popupMenu'
 import { PopupButton } from '../components/popupButton'
 

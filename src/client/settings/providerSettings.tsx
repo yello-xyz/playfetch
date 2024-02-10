@@ -3,7 +3,7 @@ import { IconForProvider, LabelForProvider } from '@/src/common/providerMetadata
 import { AvailableProvider, IsModelProvider, ModelProvider, QueryProvider, SupportedProvider } from '@/types'
 import { ReactNode, useState } from 'react'
 import api from '@/src/client/api'
-import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
+import useModalDialogPrompt from '@/src/client/components/modalDialogContext'
 import Icon from '../components/icon'
 import Button from '../components/button'
 import TextInput from '../components/textInput'

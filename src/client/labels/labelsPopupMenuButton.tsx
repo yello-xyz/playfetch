@@ -1,7 +1,7 @@
 import LabelsPopup, { LabelsPopupProps } from './labelsPopup'
 import { PopupButton } from '../components/popupButton'
 import ItemLabels from './itemLabels'
-import useGlobalPopup, { GlobalPopupLocation } from '@/src/client/context/globalPopupContext'
+import useGlobalPopup, { GlobalPopupLocation } from '@/src/client/components/globalPopupContext'
 
 export default function LabelsPopupMenuButton({
   activeLabels,

@@ -3,8 +3,8 @@ import { ModelProviders, ProviderForModel } from '@/src/common/providerMetadata'
 import { ReactNode } from 'react'
 import { useRouter } from 'next/router'
 import { ProjectSettingsRoute, UserSettingsRoute } from '@/src/common/clientRoute'
-import { useCheckModelDisabled } from '@/src/client/context/providerContext'
-import { useActiveProject } from '@/src/client/context/projectContext'
+import { useCheckModelDisabled } from '@/src/client/settings/providerContext'
+import { useActiveProject } from '@/src/client/projects/projectContext'
 
 export function ModelUnavailableWarning({
   model,

@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
-import { WithDismiss } from '@/src/client/context/globalPopupContext'
+import { WithDismiss } from '@/src/client/components/globalPopupContext'
 import { PopupContent } from '../components/popupMenu'
 import TestDataPane from '@/src/client/testData/testDataPane'
 import { Chain, InputValues, Prompt, TestConfig } from '@/types'

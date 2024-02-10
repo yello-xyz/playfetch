@@ -9,7 +9,7 @@ import { UserAvatars } from '@/src/client/users/userAvatars'
 import TopBar, { TopBarAccessoryItem, TopBarBackItem } from '../components/topBar'
 
 import InviteButton from '../users/inviteButton'
-import { useActiveProject, useRefreshProject } from '@/src/client/context/projectContext'
+import { useActiveProject, useRefreshProject } from '@/src/client/projects/projectContext'
 import ProjectPopupMenu from './projectPopupMenu'
 
 export default function ProjectTopBar({

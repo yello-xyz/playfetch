@@ -1,7 +1,7 @@
 import api, { StreamReader } from '@/src/client/api'
 import { useState } from 'react'
 import { PartialRun, PromptInputs } from '@/types'
-import { useRefreshActiveItem } from '../context/projectContext'
+import { useRefreshActiveItem } from '../projects/projectContext'
 import ShortUniqueId from 'short-unique-id'
 
 export const ConsumeStream = async (

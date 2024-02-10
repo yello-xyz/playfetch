@@ -19,8 +19,8 @@ import { LabelForModel } from '@/src/common/providerMetadata'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 import { AvailableLabelColorsForItem } from '../labels/labelsPopup'
 import { SingleTabHeader } from '../components/tabsHeader'
-import useAvailableModelProviders from '@/src/client/context/providerContext'
-import { useActiveProject } from '@/src/client/context/projectContext'
+import useAvailableModelProviders from '@/src/client/settings/providerContext'
+import { useActiveProject } from '@/src/client/projects/projectContext'
 
 export default function CommentsPane({
   activeItem,

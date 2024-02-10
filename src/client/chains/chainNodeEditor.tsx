@@ -10,7 +10,7 @@ import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import QueryNodeEditor from './queryNodeEditor'
 import BranchNodeEditor from './branchNodeEditor'
-import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
+import useModalDialogPrompt from '@/src/client/components/modalDialogContext'
 import { GetChainItemsSaveKey } from './chainItems'
 
 export default function ChainNodeEditor({

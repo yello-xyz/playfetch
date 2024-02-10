@@ -5,7 +5,7 @@ import chainIcon from '@/public/chain.svg'
 import historyIcon from '@/public/history.svg'
 import { StaticImageData } from 'next/image'
 import { useState } from 'react'
-import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/projectContext'
+import { useRefreshActiveItem, useRefreshProject } from '@/src/client/projects/projectContext'
 import api from '@/src/client/api'
 import { EditableHeaderItem } from '../components/headerItem'
 

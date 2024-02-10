@@ -1,4 +1,4 @@
-import useGlobalPopup, { GlobalPopupRender } from '@/src/client/context/globalPopupContext'
+import useGlobalPopup, { GlobalPopupRender } from '@/src/client/components/globalPopupContext'
 import { StaticImageData } from 'next/image'
 import { useRef } from 'react'
 import IconButton from './iconButton'

@@ -1,5 +1,5 @@
 import { KeyboardEvent, useState } from 'react'
-import useGlobalPopup, { WithDismiss } from '@/src/client/context/globalPopupContext'
+import useGlobalPopup, { WithDismiss } from '@/src/client/components/globalPopupContext'
 import { PopupContent } from '../components/popupMenu'
 import Button from '../components/button'
 import TestDataHeader from '../testData/testDataHeader'

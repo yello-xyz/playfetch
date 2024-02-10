@@ -6,7 +6,7 @@ import TextInput from '../components/textInput'
 import Label from '../components/label'
 import DropdownMenu from '../components/dropdownMenu'
 import { EmbeddingModels, QueryProviders, LabelForProvider, ProviderForModel } from '@/src/common/providerMetadata'
-import { useCheckProviderAvailable } from '@/src/client/context/providerContext'
+import { useCheckProviderAvailable } from '@/src/client/settings/providerContext'
 import RangeInput from '../components/rangeInput'
 import { ProviderWarning } from '../prompts/modelUnavailableWarning'
 

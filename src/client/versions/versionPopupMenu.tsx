@@ -1,16 +1,16 @@
 import { ActiveChain, ActivePrompt, ChainVersion, IsPromptVersion, PromptVersion } from '@/types'
 import api from '@/src/client/api'
 import { PopupContent, PopupMenuItem } from '../components/popupMenu'
-import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
+import useModalDialogPrompt from '@/src/client/components/modalDialogContext'
 import dotsIcon from '@/public/dots.svg'
-import { useRefreshActiveItem } from '@/src/client/context/projectContext'
+import { useRefreshActiveItem } from '@/src/client/projects/projectContext'
 import GlobalPopupMenu from '../components/globalPopupMenu'
 import { useRouter } from 'next/router'
 import { CompareRoute, NewEndpointRoute, ParseNumberQuery } from '@/src/common/clientRoute'
-import { WithDismiss } from '@/src/client/context/globalPopupContext'
+import { WithDismiss } from '@/src/client/components/globalPopupContext'
 import { useState } from 'react'
 import PickNameDialog from '../components/pickNameDialog'
-import { useIssueTrackerProvider, useSourceControlProvider } from '@/src/client/context/providerContext'
+import { useIssueTrackerProvider, useSourceControlProvider } from '@/src/client/settings/providerContext'
 
 export default function VersionPopupMenu<Version extends PromptVersion | ChainVersion>({
   version,

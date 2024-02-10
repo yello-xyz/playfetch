@@ -1,7 +1,7 @@
 import { AvailableModelProvider, PromptConfig, PromptVersion } from '@/types'
 import VersionComparison, { ContentComparison } from '../versions/versionComparison'
 import { LabelForModel, SupportsFunctionsPrompt, SupportsSystemPrompt } from '@/src/common/providerMetadata'
-import useAvailableModelProviders from '@/src/client/context/providerContext'
+import useAvailableModelProviders from '@/src/client/settings/providerContext'
 import { ExtractFunction, ExtractFunctionNames } from '@/src/common/formatting'
 import Collapsible from '../components/collapsible'
 import { LabelForChatMode, LabelForJsonMode } from './promptConfigSettings'

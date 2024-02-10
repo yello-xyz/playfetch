@@ -10,7 +10,7 @@ import Icon from '../components/icon'
 import addIcon from '@/public/addSmall.svg'
 import addActiveIcon from '@/public/addWhiteSmall.svg'
 import { StaticImageData } from 'next/image'
-import useGlobalPopup from '@/src/client/context/globalPopupContext'
+import useGlobalPopup from '@/src/client/components/globalPopupContext'
 import PromptSelectorPopup, { PromptSelectorPopupProps } from './promptSelectorPopupMenu'
 import { SmallDot } from './chainNodeBox'
 

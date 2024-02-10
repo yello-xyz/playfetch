@@ -4,7 +4,7 @@ import Icon from '@/src/client/components/icon'
 import menuIcon from '@/public/menu.svg'
 import collapseMenuIcon from '@/public/collapseMenu.svg'
 import expandMenuIcon from '@/public/expandMenu.svg'
-import { useFloatingSidebar } from '@/src/client/context/userPresetsContext'
+import { useFloatingSidebar } from '@/src/client/users/userPresetsContext'
 
 export default function ProjectPaneWrapper({
   topBar,

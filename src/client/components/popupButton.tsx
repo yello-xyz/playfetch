@@ -1,4 +1,4 @@
-import { GlobalPopupLocation } from '@/src/client/context/globalPopupContext'
+import { GlobalPopupLocation } from '@/src/client/components/globalPopupContext'
 import { ReactNode, useRef } from 'react'
 import Icon from './icon'
 import chevronIcon from '@/public/chevron.svg'

@@ -1,7 +1,7 @@
 import { ActiveProject, AvailableProvider, IssueTrackerProvider, SourceControlProvider } from '@/types'
 import { ReactNode, useState } from 'react'
 import api from '@/src/client/api'
-import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
+import useModalDialogPrompt from '@/src/client/components/modalDialogContext'
 import Button from '../components/button'
 import { ProviderRow } from './providerSettings'
 import Link from 'next/link'

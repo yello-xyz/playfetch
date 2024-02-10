@@ -1,6 +1,6 @@
 import { Chain, ProjectItemIsChain, ProjectItemIsPrompt, ProjectItemIsTable, Prompt, Table } from '@/types'
 import api from '@/src/client/api'
-import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/projectContext'
+import { useRefreshActiveItem, useRefreshProject } from '@/src/client/projects/projectContext'
 
 export default function useProjectItemActions(onDelete?: () => void) {
   const refreshActiveItem = useRefreshActiveItem()

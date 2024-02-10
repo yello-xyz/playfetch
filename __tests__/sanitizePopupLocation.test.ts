@@ -1,4 +1,4 @@
-import { GlobalPopupLocation } from '@/src/client/context/globalPopupContext'
+import { GlobalPopupLocation } from '@/src/client/components/globalPopupContext'
 import { SanitizePopupLocation } from '@/src/client/components/globalPopup'
 
 test(`Test unmounted`, () =>

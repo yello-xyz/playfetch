@@ -1,14 +1,14 @@
 import { ActiveProject, AvailableProvider, AvailableSourceControlProvider } from '@/types'
 import { useState } from 'react'
 import api from '@/src/client/api'
-import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
+import useModalDialogPrompt from '@/src/client/components/modalDialogContext'
 import Button from '../components/button'
 import TextInput from '../components/textInput'
-import { useSourceControlProvider } from '@/src/client/context/providerContext'
+import { useSourceControlProvider } from '@/src/client/settings/providerContext'
 import Link from 'next/link'
 import DropdownMenu from '../components/dropdownMenu'
-import { useRefreshProject } from '@/src/client/context/projectContext'
-import { useLoggedInUser } from '@/src/client/context/userContext'
+import { useRefreshProject } from '@/src/client/projects/projectContext'
+import { useLoggedInUser } from '@/src/client/users/userContext'
 import AppSettings from './appSettings'
 
 export default function GitHubSettings({

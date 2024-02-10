@@ -1,5 +1,5 @@
 import MembersPane from '../users/membersPane'
-import { useActiveProject, useRefreshProject } from '@/src/client/context/projectContext'
+import { useActiveProject, useRefreshProject } from '@/src/client/projects/projectContext'
 import api from '@/src/client/api'
 import { useState } from 'react'
 import ModalDialog, { DialogPrompt } from '../components/modalDialog'

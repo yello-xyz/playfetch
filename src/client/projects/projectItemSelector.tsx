@@ -1,4 +1,4 @@
-import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/context/globalPopupContext'
+import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/components/globalPopupContext'
 import { ActiveProject, Chain, Prompt, ResolvedEndpoint } from '@/types'
 import { PopupContent, PopupLabelItem, PopupSectionTitle } from '../components/popupMenu'
 import promptIcon from '@/public/prompt.svg'

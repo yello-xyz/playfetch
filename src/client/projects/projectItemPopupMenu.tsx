@@ -1,11 +1,11 @@
 import { Chain, Endpoint, Project, ProjectItemIsChain, ProjectItemIsPrompt, Prompt, Table, Workspace } from '@/types'
 import api from '@/src/client/api'
 import PopupMenu, { PopupMenuItem } from '../components/popupMenu'
-import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
+import useModalDialogPrompt from '@/src/client/components/modalDialogContext'
 import { useState } from 'react'
 import PickNameDialog from '../components/pickNameDialog'
 import PickProjectDialog from './pickProjectDialog'
-import { useLoggedInUser } from '@/src/client/context/userContext'
+import { useLoggedInUser } from '@/src/client/users/userContext'
 import { SharedProjectsWorkspace } from '@/pages'
 import useProjectItemActions from '@/src/client/hooks/useProjectItemActions'
 

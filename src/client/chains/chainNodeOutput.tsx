@@ -8,7 +8,7 @@ import { ChainNode, InputNode, IsChainItem, IsPromptChainItem, IsQueryChainItem,
 import { SingleTabHeader } from '../components/tabsHeader'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
 import { ChainItemCache } from '../hooks/useChainItemCache'
-import { useCheckProviders } from '@/src/client/context/providerContext'
+import { useCheckProviders } from '@/src/client/settings/providerContext'
 import { ProviderForModel } from '@/src/common/providerMetadata'
 import { SelectAnyInputValue } from '@/src/client/testData/inputRows'
 import useInitialState from '@/src/client/hooks/useInitialState'

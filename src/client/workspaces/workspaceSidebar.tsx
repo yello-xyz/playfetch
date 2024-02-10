@@ -6,7 +6,7 @@ import fileIcon from '@/public/file.svg'
 import addIcon from '@/public/add.svg'
 import UserSidebarItem from '../users/userSidebarItem'
 import PickNameDialog from '../components/pickNameDialog'
-import { useLoggedInUser } from '@/src/client/context/userContext'
+import { useLoggedInUser } from '@/src/client/users/userContext'
 import { FeedbackSection, SidebarButton, SidebarSection } from '../components/sidebar'
 import useWorkspaceActions from '@/src/client/hooks/useWorkspaceActions'
 

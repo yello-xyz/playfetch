@@ -5,7 +5,7 @@ import ChainNodeBoxHeader from './chainNodeBoxHeader'
 import ChainNodeBoxBody from './chainNodeBoxBody'
 import ChainNodeBoxFooter from './chainNodeBoxFooter'
 import { PruneBranchAndShiftLeft, PruneNodeAndShiftUp } from '@/src/common/branching'
-import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
+import useModalDialogPrompt from '@/src/client/components/modalDialogContext'
 import { DownStroke } from './chainNodeBoxConnector'
 
 export function ChainNodeBox({

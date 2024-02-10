@@ -3,9 +3,9 @@ import { ActiveChain, ActivePrompt, ChainVersion, IsProperRun, PartialRun, Promp
 import { MouseEvent, useCallback } from 'react'
 import { CommentsPopup, CommentsPopupProps } from '../comments/commentPopupMenu'
 import { AvailableLabelColorsForItem } from '../labels/labelsPopup'
-import useGlobalPopup from '@/src/client/context/globalPopupContext'
+import useGlobalPopup from '@/src/client/components/globalPopupContext'
 import CommentInputPopup, { CommentInputProps, CommentSelection, useExtractCommentSelection } from './commentInputPopup'
-import { useLoggedInUser } from '@/src/client/context/userContext'
+import { useLoggedInUser } from '@/src/client/users/userContext'
 import { IdentifierForRun } from '@/src/client/runs/runMerging'
 
 export default function RunCellBody({

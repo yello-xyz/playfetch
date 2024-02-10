@@ -7,7 +7,7 @@ import {
 } from '@/src/common/providerMetadata'
 import PromptInput from './promptInput'
 import { ReactNode, useState } from 'react'
-import { useCheckModelProviders } from '@/src/client/context/providerContext'
+import { useCheckModelProviders } from '@/src/client/settings/providerContext'
 import PromptConfigSettings from './promptConfigSettings'
 import { ModelUnavailableWarning } from './modelUnavailableWarning'
 import Collapsible from '../components/collapsible'

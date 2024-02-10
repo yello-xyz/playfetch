@@ -11,7 +11,7 @@ import Sidebar, { SidebarButton, SidebarSection } from '../components/sidebar'
 import { useState } from 'react'
 import IconButton from '../components/iconButton'
 import { ActiveItem, CompareItem, EndpointsItem, SettingsItem } from '@/src/common/activeItem'
-import { useActiveProject } from '@/src/client/context/projectContext'
+import { useActiveProject } from '@/src/client/projects/projectContext'
 import useProjectItemActions from '@/src/client/hooks/useProjectItemActions'
 import ProjectItemPopupMenu from './projectItemPopupMenu'
 

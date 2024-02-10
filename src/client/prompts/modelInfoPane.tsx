@@ -15,11 +15,11 @@ import {
 } from '@/src/common/providerMetadata'
 import Icon from '../components/icon'
 import { FormatCost, FormatLargeInteger } from '@/src/common/formatting'
-import { useModelProviders } from '@/src/client/context/providerContext'
+import { useModelProviders } from '@/src/client/settings/providerContext'
 import { useState } from 'react'
 import IconButton from '../components/iconButton'
 import dotsIcon from '@/public/dots.svg'
-import { useDefaultPromptConfig } from '@/src/client/context/userPresetsContext'
+import { useDefaultPromptConfig } from '@/src/client/users/userPresetsContext'
 import { PromptConfigsAreEqual } from '@/src/common/versionsEqual'
 import { ModelUnavailableWarning } from './modelUnavailableWarning'
 

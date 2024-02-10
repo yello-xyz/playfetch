@@ -1,11 +1,11 @@
 import { Project, Workspace } from '@/types'
 import api from '@/src/client/api'
 import PopupMenu, { PopupMenuItem } from '../components/popupMenu'
-import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
+import useModalDialogPrompt from '@/src/client/components/modalDialogContext'
 import { useState } from 'react'
 import PickNameDialog from '../components/pickNameDialog'
 import MoveProjectPopup, { MoveProjectPopupProps } from './moveProjectPopup'
-import useGlobalPopup from '@/src/client/context/globalPopupContext'
+import useGlobalPopup from '@/src/client/components/globalPopupContext'
 import { useRouter } from 'next/router'
 
 export default function ProjectPopupMenu({

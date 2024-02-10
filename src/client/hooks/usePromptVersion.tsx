@@ -3,7 +3,7 @@ import useInitialState from './useInitialState'
 import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import { SupportedPromptKeysForModel, ValidatePromptConfig } from '@/src/common/providerMetadata'
 import { useEffect, useState } from 'react'
-import { useLoggedInUser } from '../context/userContext'
+import { useLoggedInUser } from '../users/userContext'
 
 export default function usePromptVersion(
   prompt: ActivePrompt,

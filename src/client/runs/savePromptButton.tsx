@@ -1,4 +1,4 @@
-import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/context/globalPopupContext'
+import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/components/globalPopupContext'
 import { PopupContent, PopupMenuItem } from '../components/popupMenu'
 import { CustomPopupButton } from '../components/popupButton'
 import chevronIcon from '@/public/chevronWhite.svg'

@@ -1,5 +1,5 @@
 import { AvailableModelProvider, LanguageModel, PromptConfig } from '@/types'
-import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/context/globalPopupContext'
+import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/components/globalPopupContext'
 import Icon from '../components/icon'
 import { PopupButton } from '../components/popupButton'
 import { PopupContent, PopupLabelItem } from '../components/popupMenu'
@@ -12,7 +12,7 @@ import {
   IconForProvider,
   ProviderForModel,
 } from '@/src/common/providerMetadata'
-import { useModelProviders } from '@/src/client/context/providerContext'
+import { useModelProviders } from '@/src/client/settings/providerContext'
 
 export default function ModelSelector({
   config,

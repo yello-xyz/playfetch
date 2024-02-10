@@ -8,11 +8,11 @@ import DropdownMenu from '../components/dropdownMenu'
 import PickNameDialog from '../components/pickNameDialog'
 import VersionSelector from '../versions/versionSelector'
 import useInitialState from '@/src/client/hooks/useInitialState'
-import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
+import useModalDialogPrompt from '@/src/client/components/modalDialogContext'
 import TextInput from '../components/textInput'
 import Button, { PendingButton } from '../components/button'
 import ProjectItemSelector from '../projects/projectItemSelector'
-import { useActiveProject } from '@/src/client/context/projectContext'
+import { useActiveProject } from '@/src/client/projects/projectContext'
 
 export type EndpointSettings = {
   id: number | undefined

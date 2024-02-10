@@ -1,4 +1,4 @@
-import { GlobalPopupLocation, GlobalPopupProps } from '@/src/client/context/globalPopupContext'
+import { GlobalPopupLocation, GlobalPopupProps } from '@/src/client/components/globalPopupContext'
 
 export default function GlobalPopup<T>(props: GlobalPopupProps & T) {
   const { render, location, onDismissGlobalPopup, parentRef, parentRect, childRect, childRef, ...other } = props

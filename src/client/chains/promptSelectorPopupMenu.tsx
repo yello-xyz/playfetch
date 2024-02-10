@@ -2,7 +2,7 @@ import { PopupContent, PopupLabelItem, PopupSectionDivider } from '../components
 import { Prompt } from '@/types'
 import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'
-import { WithDismiss } from '@/src/client/context/globalPopupContext'
+import { WithDismiss } from '@/src/client/components/globalPopupContext'
 
 export type PromptSelectorPopupProps = {
   prompts: Prompt[]

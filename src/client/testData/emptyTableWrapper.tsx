@@ -2,7 +2,7 @@ import { ReactNode, useCallback, useEffect, useState } from 'react'
 import Button from '../components/button'
 import { useDropzone } from 'react-dropzone'
 import { parse } from 'csv-parse/sync'
-import { useRefreshActiveItem } from '@/src/client/context/projectContext'
+import { useRefreshActiveItem } from '@/src/client/projects/projectContext'
 
 export default function EmptyTableWrapper({
   isTableEmpty,

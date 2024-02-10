@@ -8,7 +8,7 @@ import dotsIcon from '@/public/dots.svg'
 import { PopupContent, PopupMenuItem } from '../components/popupMenu'
 import { exportTableData } from './useTestDataActionButtons'
 import GlobalPopupMenu from '../components/globalPopupMenu'
-import { WithDismiss } from '@/src/client/context/globalPopupContext'
+import { WithDismiss } from '@/src/client/components/globalPopupContext'
 
 export default function TestDataView({ table }: { table: ActiveTable }) {
   const [renameItem] = useProjectItemActions()

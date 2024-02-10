@@ -26,7 +26,7 @@ import { useRouter } from 'next/router'
 import Icon from '../components/icon'
 import chevronIcon from '@/public/chevron.svg'
 import useActiveItemCache from '@/src/client/hooks/useActiveItemCache'
-import { useActiveProject, useRefreshProject } from '@/src/client/context/projectContext'
+import { useActiveProject, useRefreshProject } from '@/src/client/projects/projectContext'
 import { HeaderItem } from '../components/headerItem'
 import { ExtractUnboundChainInputs } from '../chains/chainItems'
 
