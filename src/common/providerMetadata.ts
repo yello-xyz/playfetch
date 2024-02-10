@@ -347,7 +347,7 @@ export const DescriptionForModel = (model: LanguageModel, providers: AvailableMo
     case 'gpt-3.5-turbo':
       return 'OpenAI’s most capable and cost effective model in the GPT-3.5 family optimized for chat purposes, but also works well for traditional completions tasks (gpt-3.5-turbo-0613).'
     case 'gpt-3.5-turbo-16k':
-      return 'This is the updated version of GPT-3.5 Turbo with 4 times the context window and lower pricing (gpt-3.5-turbo-1106).'
+      return 'This is the updated version of GPT-3.5 Turbo with 4 times the context window and lower pricing (gpt-3.5-turbo-0125).'
     case 'gpt-4':
       return 'GPT-4 from OpenAI has broad general knowledge and domain expertise allowing it to follow complex instructions in natural language and solve difficult problems accurately (gpt-4-0613).'
     case 'gpt-4-turbo':
@@ -407,7 +407,7 @@ export const InputPriceForModel = (model: LanguageModel | EmbeddingModel): numbe
     case 'gpt-3.5-turbo':
       return 1.5
     case 'gpt-3.5-turbo-16k':
-      return 1
+      return 0.5
     case 'gpt-4':
       return 30
     case 'gpt-4-turbo':
@@ -436,7 +436,7 @@ export const OutputPriceForModel = (model: LanguageModel | EmbeddingModel): numb
     case 'gpt-3.5-turbo':
       return 2
     case 'gpt-3.5-turbo-16k':
-      return 2
+      return 1.5
     case 'gpt-4':
       return 60
     case 'gpt-4-turbo':

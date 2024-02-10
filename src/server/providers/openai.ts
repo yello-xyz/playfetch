@@ -102,8 +102,8 @@ async function complete(
     const newFunctions = functions.filter(f => !serializedPreviousFunctions.has(JSON.stringify(f)))
     const inputFunctions = [...previousFunctions, ...newFunctions]
     if (model === 'gpt-3.5-turbo-16k') {
-      // TODO remove this when the former points to the latter (was initially going to be Dec 11th but is not)
-      model = 'gpt-3.5-turbo-1106'
+      // TODO remove this when the former points to the latter (should be February 16 2024)
+      model = 'gpt-3.5-turbo-0125'
     } else if (model === 'gpt-3.5-turbo') {
       // TODO starting February 16 2024, both aliases will point to the latest model (cheaper 16k).
       // There is probably not much point in keeping gpt-3.5-turbo around after that (or using it),
