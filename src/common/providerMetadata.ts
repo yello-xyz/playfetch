@@ -28,7 +28,11 @@ export const QueryProviders: QueryProvider[] = ['pinecone']
 export const SourceControlProviders: SourceControlProvider[] = ['github']
 export const IssueTrackerProviders: IssueTrackerProvider[] = ['linear']
 
-export const EmbeddingModels: EmbeddingModel[] = ['text-embedding-ada-002']
+export const EmbeddingModels: EmbeddingModel[] = [
+  'text-embedding-ada-002',
+  'text-embedding-3-small',
+  'text-embedding-3-large',
+]
 export const PublicLanguageModels: DefaultLanguageModel[] = [
   'gpt-4',
   'gpt-4-turbo',
@@ -99,6 +103,8 @@ export const isCustomModel = (model: LanguageModel | EmbeddingModel): model is C
     case 'gpt-4':
     case 'gpt-4-turbo':
     case 'text-embedding-ada-002':
+    case 'text-embedding-3-small':
+    case 'text-embedding-3-large':
     case 'claude-instant-1':
     case 'claude-2':
     case 'text-bison':
@@ -265,6 +271,8 @@ export const ProviderForModel = (model: LanguageModel | EmbeddingModel): ModelPr
     case 'gpt-4':
     case 'gpt-4-turbo':
     case 'text-embedding-ada-002':
+    case 'text-embedding-3-small':
+    case 'text-embedding-3-large':
       return 'openai'
     case 'claude-instant-1':
     case 'claude-2':
@@ -404,6 +412,10 @@ export const InputPriceForModel = (model: LanguageModel | EmbeddingModel): numbe
   switch (model) {
     case 'text-embedding-ada-002':
       return 0.1
+    case 'text-embedding-3-small':
+      return 0.02
+    case 'text-embedding-3-large':
+      return 0.13
     case 'gpt-3.5-turbo':
       return 1.5
     case 'gpt-3.5-turbo-16k':
@@ -433,6 +445,10 @@ export const OutputPriceForModel = (model: LanguageModel | EmbeddingModel): numb
   switch (model) {
     case 'text-embedding-ada-002':
       return 0.1
+    case 'text-embedding-3-small':
+      return 0.02
+    case 'text-embedding-3-large':
+      return 0.13
     case 'gpt-3.5-turbo':
       return 2
     case 'gpt-3.5-turbo-16k':
@@ -461,6 +477,8 @@ export const OutputPriceForModel = (model: LanguageModel | EmbeddingModel): numb
 export const IsModelFreeToUse = (model: LanguageModel | EmbeddingModel): boolean => {
   switch (model) {
     case 'text-embedding-ada-002':
+    case 'text-embedding-3-small':
+    case 'text-embedding-3-large':
     case 'gpt-3.5-turbo':
     case 'gpt-3.5-turbo-16k':
     case 'gpt-4':
@@ -481,6 +499,8 @@ export const IsModelFreeToUse = (model: LanguageModel | EmbeddingModel): boolean
 export const IsSubscriptionRequiredForModel = (model: LanguageModel | EmbeddingModel): boolean => {
   switch (model) {
     case 'text-embedding-ada-002':
+    case 'text-embedding-3-small':
+    case 'text-embedding-3-large':
     case 'gpt-3.5-turbo':
     case 'gpt-3.5-turbo-16k':
     case 'gpt-4':

@@ -1,4 +1,10 @@
-import { CustomLanguageModel, DefaultLanguageModel, OpenAIEmbeddingModel, OpenAILanguageModel, PromptInputs } from '@/types'
+import {
+  CustomLanguageModel,
+  DefaultLanguageModel,
+  OpenAIEmbeddingModel,
+  OpenAILanguageModel,
+  PromptInputs,
+} from '@/types'
 import OpenAI from 'openai'
 import { Predictor, PromptContext } from '../evaluationEngine/promptEngine'
 import { CostForModel } from './integration'

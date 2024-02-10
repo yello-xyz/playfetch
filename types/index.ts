@@ -95,7 +95,7 @@ export type ActiveChain = Chain & {
 
 export type ModelProvider = 'openai' | 'anthropic' | 'google' | 'cohere' | 'huggingface'
 
-export type OpenAIEmbeddingModel = 'text-embedding-ada-002'
+export type OpenAIEmbeddingModel = 'text-embedding-ada-002' | 'text-embedding-3-small' | 'text-embedding-3-large'
 export type EmbeddingModel = OpenAIEmbeddingModel
 
 export type OpenAILanguageModel = 'gpt-3.5-turbo' | 'gpt-3.5-turbo-16k' | 'gpt-4' | 'gpt-4-turbo'
