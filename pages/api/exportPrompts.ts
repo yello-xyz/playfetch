@@ -1,4 +1,4 @@
-import { exportPromptsFromProject } from '@/src/server/github'
+import { exportPromptsFromProject } from '@/src/server/providers/github'
 import { withLoggedInUserRoute } from '@/src/server/session'
 import { User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'

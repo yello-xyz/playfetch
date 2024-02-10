@@ -1,10 +1,10 @@
 import { App } from 'octokit'
-import { deserializePromptVersion, serializePromptVersion } from './serialize'
-import { getProviderCredentials } from './datastore/providers'
-import { getExportablePromptsFromProject, importPromptToProject, updatePromptSourcePath } from './datastore/prompts'
-import { ensureProjectAccess } from './datastore/projects'
+import { deserializePromptVersion, serializePromptVersion } from '../serialize'
+import { getProviderCredentials } from '../datastore/providers'
+import { getExportablePromptsFromProject, importPromptToProject, updatePromptSourcePath } from '../datastore/prompts'
+import { ensureProjectAccess } from '../datastore/projects'
 import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
-import { getTrustedVersion } from './datastore/versions'
+import { getTrustedVersion } from '../datastore/versions'
 import { RawPromptVersion } from '@/types'
 
 const isYamlFile = (file: any) => file.type === 'file' && (file.name.endsWith('.yaml') || file.name.endsWith('.yml'))

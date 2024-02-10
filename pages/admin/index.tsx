@@ -6,7 +6,7 @@ import { useRouter } from 'next/router'
 import { Suspense, useState } from 'react'
 import api from '@/src/client/admin/api'
 import { ActiveUsersItem, AdminItem, RecentProjectsItem, WaitlistItem } from '@/src/common/adminItem'
-import loadAdminItem from '@/src/server/admin/adminItem'
+import loadAdminItem from '@/src/server/adminItem'
 
 import dynamic from 'next/dynamic'
 const MainAdminPane = dynamic(() => import('@/src/client/admin/mainAdminPane'))
