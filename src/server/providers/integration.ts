@@ -13,14 +13,14 @@ import {
   OpenAILanguageModel,
 } from '@/types'
 import { encode } from 'gpt-3-encoder'
-import { getProviderCredentials } from '../datastore/providers'
+import { getProviderCredentials } from '@/src/server/datastore/providers'
 import openai, { createEmbedding, loadExtraModels } from './openai'
 import anthropic from './anthropic'
 import vertexai from './vertexai'
 import cohere from './cohere'
 import huggingface from './huggingface'
-import { updateScopedModelCost } from '../datastore/costs'
-import { checkBudgetForScope, incrementCostForScope } from '../datastore/budgets'
+import { updateScopedModelCost } from '@/src/server/datastore/costs'
+import { checkBudgetForScope, incrementCostForScope } from '@/src/server/datastore/budgets'
 
 const costForTokens = (content: string, pricePerMillionTokens: number) => {
   const tokens = encode(content).length

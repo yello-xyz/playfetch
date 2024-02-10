@@ -2,7 +2,7 @@ import api from '@/src/client/api'
 import { ActiveProject, ActivePrompt, PromptVersion } from '@/types'
 import useSavePrompt from './useSavePrompt'
 import { useRouter } from 'next/router'
-import { PromptRoute } from '../../common/clientRoute'
+import { PromptRoute } from '@/src/common/clientRoute'
 
 export default function usePrompt(
   activeProject: ActiveProject,

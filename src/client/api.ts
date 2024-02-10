@@ -22,10 +22,10 @@ import {
   ActiveTable,
   SupportedProvider,
 } from '@/types'
-import ClientRoute from '../common/clientRoute'
-import { BuildActiveChain, BuildActivePrompt, BuildActiveTable } from '../common/activeItem'
+import ClientRoute from '@/src/common/clientRoute'
+import { BuildActiveChain, BuildActivePrompt, BuildActiveTable } from '@/src/common/activeItem'
 import Progress from 'nprogress'
-import { LayoutConfig } from '../common/userPresets'
+import { LayoutConfig } from '@/src/common/userPresets'
 
 export type StreamReader = ReadableStreamDefaultReader<Uint8Array>
 

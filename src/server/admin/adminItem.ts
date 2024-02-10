@@ -1,7 +1,7 @@
 import { ParsedUrlQuery } from 'querystring'
-import { getActiveUsers, getMetricsForUser, getUsersWithoutAccess } from '../datastore/users'
-import { getMetricsForProject, getRecentProjects } from '../datastore/projects'
-import { getMetricsForWorkspace } from '../datastore/workspaces'
+import { getActiveUsers, getMetricsForUser, getUsersWithoutAccess } from '@/src/server/datastore/users'
+import { getMetricsForProject, getRecentProjects } from '@/src/server/datastore/projects'
+import { getMetricsForWorkspace } from '@/src/server/datastore/workspaces'
 import { ParseNumberQuery } from '@/src/common/clientRoute'
 import { ActiveUsersItem, AdminItem, RecentProjectsItem, WaitlistItem } from '@/src/common/adminItem'
 

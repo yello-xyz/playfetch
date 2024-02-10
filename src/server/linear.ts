@@ -1,6 +1,6 @@
 import { getProviderCredentials } from './datastore/providers'
 import { IssueHistory, LinearClient } from '@linear/sdk'
-import { ChainRoute, PromptRoute } from '../common/clientRoute'
+import { ChainRoute, PromptRoute } from '@/src/common/clientRoute'
 import { getTrustedPromptOrChainData } from './datastore/chains'
 import buildURLForRoute from './routing'
 import { getUserForID } from './datastore/users'

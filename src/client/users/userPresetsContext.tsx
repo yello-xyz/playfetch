@@ -1,7 +1,7 @@
 import { createContext, useContext, useState } from 'react'
 import { LanguageModel, PromptConfig } from '@/types'
 import { LayoutConfig, PromptTab, UserPresets } from '@/src/common/userPresets'
-import api from '../api'
+import api from '@/src/client/api'
 
 type UserPresetsContextType = {
   currentUserPresets?: UserPresets

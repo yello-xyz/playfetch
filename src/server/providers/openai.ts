@@ -6,7 +6,7 @@ import {
   PromptInputs,
 } from '@/types'
 import OpenAI from 'openai'
-import { Predictor, PromptContext } from '../evaluationEngine/promptEngine'
+import { Predictor, PromptContext } from '@/src/server/evaluationEngine/promptEngine'
 import { CostForModel } from './integration'
 import { ChatCompletionCreateParams } from 'openai/resources/chat'
 import { SupportsJsonMode } from '@/src/common/providerMetadata'

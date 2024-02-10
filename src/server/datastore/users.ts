@@ -15,7 +15,7 @@ import {
   getTimestamp,
 } from './datastore'
 import { addWorkspaceForUser, getWorkspacesForUser } from './workspaces'
-import { uploadImageURLToStorage } from '../storage'
+import { uploadImageURLToStorage } from '@/src/server/storage'
 import { getRecentVersions } from './versions'
 import { getRecentComments } from './comments'
 import { getRecentEndpoints } from './endpoints'

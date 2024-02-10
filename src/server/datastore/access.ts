@@ -10,7 +10,7 @@ import {
   getTimestamp,
 } from './datastore'
 import { getUserForEmail } from './users'
-import { sendInviteEmail } from '../email'
+import { sendInviteEmail } from '@/src/server/email'
 
 type Kind = 'project' | 'workspace'
 type State = 'owner' | 'default' | 'pending'

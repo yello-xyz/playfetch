@@ -33,7 +33,7 @@ import {
 import { getPresetsForUser } from './users'
 import { DefaultPrompts } from '@/src/common/defaults'
 import { deleteEntity } from './cleanup'
-import { createTaskOnAddingLabel, syncTaskLabel } from '../linear'
+import { createTaskOnAddingLabel, syncTaskLabel } from '@/src/server/linear'
 
 export async function migrateVersions(postMerge: boolean) {
   if (postMerge) {
