@@ -1,4 +1,4 @@
-import MembersPane from '../users/membersPane'
+import MembersPane from '@/src/client/users/membersPane'
 import { useActiveProject, useRefreshProject } from '@/src/client/projects/projectContext'
 import api from '@/src/client/api'
 import { useState } from 'react'

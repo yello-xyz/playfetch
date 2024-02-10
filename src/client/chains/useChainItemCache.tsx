@@ -1,7 +1,7 @@
 import { ActiveProject, ActivePrompt, PromptChainItem, PromptVersion } from '@/types'
 import { Dispatch, SetStateAction, useCallback } from 'react'
 import { ChainNode, IsPromptChainItem } from './chainNode'
-import useActiveItemCache, { ActiveItemCache } from '../projects/useActiveItemCache'
+import useActiveItemCache, { ActiveItemCache } from '@/src/client/projects/useActiveItemCache'
 
 export type ChainItemCache = ActiveItemCache<ActivePrompt> & {
   promptForItem: (item: Omit<PromptChainItem, 'branch'>) => ActivePrompt | undefined

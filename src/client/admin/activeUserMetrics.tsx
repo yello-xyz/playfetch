@@ -8,7 +8,7 @@ import { LabelForProvider } from '@/src/common/providerMetadata'
 import useFormattedDate from '@/src/client/components/useFormattedDate'
 import RecentProjects from './recentProjects'
 import Workspaces from './workspaces'
-import DashboardContainer from '../endpoints/dashboardContainer'
+import DashboardContainer from '@/src/client/endpoints/dashboardContainer'
 import { Legend, Line, LineChart, Tooltip, XAxis } from 'recharts'
 import { Suspense } from 'react'
 

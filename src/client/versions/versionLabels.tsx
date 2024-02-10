@@ -1,7 +1,7 @@
 import { PromptVersion, ChainVersion } from '@/types'
 import chainIcon from '@/public/chainSmall.svg'
 import endpointIcon from '@/public/endpointSmall.svg'
-import ItemLabels from '../labels/itemLabels'
+import ItemLabels from '@/src/client/labels/itemLabels'
 
 export function VersionLabels<Version extends PromptVersion | ChainVersion>({
   version,

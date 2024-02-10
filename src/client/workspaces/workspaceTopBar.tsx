@@ -9,7 +9,7 @@ import Icon from '@/src/client/components/icon'
 import { useState } from 'react'
 import WorkspacePopupMenu from './workspacePopupMenu'
 import spinnerIcon from '@/public/spinner.svg'
-import InviteButton from '../users/inviteButton'
+import InviteButton from '@/src/client/users/inviteButton'
 
 export default function WorkspaceTopBar({
   activeWorkspace,

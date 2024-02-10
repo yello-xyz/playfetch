@@ -1,7 +1,7 @@
 import { PopupContent, PopupMenuItem } from '@/src/client/components/popupMenu'
 import { Chain, ProjectItemIsChain, Prompt } from '@/types'
 import api from '../api'
-import { useRefreshActiveItem, useRefreshProject } from '../projects/projectContext'
+import { useRefreshActiveItem, useRefreshProject } from '@/src/client/projects/projectContext'
 import { useRouter } from 'next/router'
 import { TableRoute } from '@/src/common/clientRoute'
 import { WithDismiss } from '@/src/client/components/globalPopupContext'

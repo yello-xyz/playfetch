@@ -11,15 +11,15 @@ import {
   ResolvedEndpoint,
   Run,
 } from '@/types'
-import ProjectItemSelector from '../projects/projectItemSelector'
-import VersionSelector from '../versions/versionSelector'
-import RunTimeline from '../runs/runTimeline'
-import PromptPanel from '../prompts/promptPanel'
+import ProjectItemSelector from '@/src/client/projects/projectItemSelector'
+import VersionSelector from '@/src/client/versions/versionSelector'
+import RunTimeline from '@/src/client/runs/runTimeline'
+import PromptPanel from '@/src/client/prompts/promptPanel'
 import { IsEndpoint } from '@/src/common/activeItem'
 import { ExtractInputKey } from '@/src/common/formatting'
 import { useState } from 'react'
 import { RunSortOption } from '@/src/client/runs/runMerging'
-import { Filter } from '../filters/filters'
+import { Filter } from '@/src/client/filters/filters'
 
 export default function ComparePane({
   project,

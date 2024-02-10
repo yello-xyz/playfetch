@@ -4,7 +4,7 @@ import { PromptTab } from '@/src/common/userPresets'
 import { ReactNode, useState } from 'react'
 import TabsHeader, { SingleTabHeader } from '@/src/client/components/tabsHeader'
 import PromptPanel from './promptPanel'
-import VersionTimeline from '../versions/versionTimeline'
+import VersionTimeline from '@/src/client/versions/versionTimeline'
 import {
   DndContext,
   DragEndEvent,

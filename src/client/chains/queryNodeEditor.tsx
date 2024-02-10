@@ -1,4 +1,4 @@
-import PromptInput from '../prompts/promptInput'
+import PromptInput from '@/src/client/prompts/promptInput'
 import { SingleTabHeader } from '@/src/client/components/tabsHeader'
 import queryIcon from '@/public/query.svg'
 import { EmbeddingModel, QueryChainItem, QueryProvider } from '@/types'
@@ -8,7 +8,7 @@ import DropdownMenu from '@/src/client/components/dropdownMenu'
 import { EmbeddingModels, QueryProviders, LabelForProvider, ProviderForModel } from '@/src/common/providerMetadata'
 import { useCheckProviderAvailable } from '@/src/client/settings/providerContext'
 import RangeInput from '@/src/client/components/rangeInput'
-import { ProviderWarning } from '../prompts/modelUnavailableWarning'
+import { ProviderWarning } from '@/src/client/prompts/modelUnavailableWarning'
 
 export default function QueryNodeEditor({
   item,

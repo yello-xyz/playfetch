@@ -21,7 +21,7 @@ import {
   RunSortOption,
 } from '@/src/client/runs/runMerging'
 import { RunGroup } from './runGroup'
-import { Filter } from '../filters/filters'
+import { Filter } from '@/src/client/filters/filters'
 import RunFiltersHeader from './runFiltersHeader'
 
 export default function RunTimeline({

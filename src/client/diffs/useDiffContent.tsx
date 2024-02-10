@@ -13,7 +13,7 @@ import {
   ProjectItemIsChain,
   PromptVersion,
 } from '@/types'
-import useActiveItemCache, { ActiveItemCache } from '../projects/useActiveItemCache'
+import useActiveItemCache, { ActiveItemCache } from '@/src/client/projects/useActiveItemCache'
 import useAvailableModelProviders from '@/src/client/settings/providerContext'
 import { FormatPromptConfig } from '@/src/client/prompts/promptVersionCellBody'
 import { GetChainItemTitle } from '@/src/client/chains/chainVersionCellBody'

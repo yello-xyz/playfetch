@@ -8,12 +8,12 @@ import {
   IsQueryChainItem,
 } from './chainNode'
 import { ChainItemCache } from '@/src/client/chains/useChainItemCache'
-import { VersionLabels } from '../versions/versionLabels'
-import { AvailableLabelColorsForItem } from '../labels/labelsPopup'
-import { TaggedContent } from '../versions/versionComparison'
+import { VersionLabels } from '@/src/client/versions/versionLabels'
+import { AvailableLabelColorsForItem } from '@/src/client/labels/labelsPopup'
+import { TaggedContent } from '@/src/client/versions/versionComparison'
 import { ReactNode } from 'react'
-import { InputVariableClass } from '../prompts/promptInput'
-import { VersionDescription } from '../comments/commentsPane'
+import { InputVariableClass } from '@/src/client/prompts/promptInput'
+import { VersionDescription } from '@/src/client/comments/commentsPane'
 import { Highlight, themes } from 'prism-react-renderer'
 import { ExtractUnboundChainVariables } from './chainItems'
 

@@ -1,7 +1,7 @@
 import { User } from '@/types'
 import { FormatRelativeDate } from '@/src/common/formatting'
 import Button from '@/src/client/components/button'
-import UserAvatar from '../users/userAvatar'
+import UserAvatar from '@/src/client/users/userAvatar'
 import useFormattedDate from '@/src/client/components/useFormattedDate'
 import ModalDialog, { DialogPrompt } from '@/src/client/components/modalDialog'
 import { useState } from 'react'

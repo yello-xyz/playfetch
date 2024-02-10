@@ -16,7 +16,7 @@ import queryIcon from '@/public/query.svg'
 import branchIcon from '@/public/branch.svg'
 import Icon from '@/src/client/components/icon'
 import ChainNodePopupMenu from './chainNodePopupMenu'
-import CommentPopupMenu from '../comments/commentPopupMenu'
+import CommentPopupMenu from '@/src/client/comments/commentPopupMenu'
 import { ReactNode, useState } from 'react'
 import { EditableHeaderItem, HeaderItem } from '@/src/client/components/headerItem'
 

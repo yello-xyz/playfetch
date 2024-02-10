@@ -9,9 +9,9 @@ import useDiffContent from '@/src/client/diffs/useDiffContent'
 import { IsEndpoint } from '@/src/common/activeItem'
 import { useActiveProject } from '@/src/client/projects/projectContext'
 import TabsHeader from '@/src/client/components/tabsHeader'
-import { Filter } from '../filters/filters'
+import { Filter } from '@/src/client/filters/filters'
 import { RunSortOption } from '@/src/client/runs/runMerging'
-import RunFiltersHeader from '../runs/runFiltersHeader'
+import RunFiltersHeader from '@/src/client/runs/runFiltersHeader'
 
 export default function CompareView({
   logEntries = [],

@@ -3,7 +3,7 @@ import { VersionLabels } from './versionLabels'
 import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/components/globalPopupContext'
 import { PopupContent, PopupItem } from '@/src/client/components/popupMenu'
 import { PopupButton } from '@/src/client/components/popupButton'
-import { AvailableLabelColorsForItem } from '../labels/labelsPopup'
+import { AvailableLabelColorsForItem } from '@/src/client/labels/labelsPopup'
 
 export default function VersionSelector({
   projectItem,

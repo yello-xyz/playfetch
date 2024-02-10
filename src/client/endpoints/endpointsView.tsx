@@ -28,7 +28,7 @@ import chevronIcon from '@/public/chevron.svg'
 import useActiveItemCache from '@/src/client/projects/useActiveItemCache'
 import { useActiveProject, useRefreshProject } from '@/src/client/projects/projectContext'
 import { HeaderItem } from '@/src/client/components/headerItem'
-import { ExtractUnboundChainInputs } from '../chains/chainItems'
+import { ExtractUnboundChainInputs } from '@/src/client/chains/chainItems'
 
 const NewEndpointSettings = (parentID?: number, versionID?: number): EndpointSettings => ({
   id: undefined,

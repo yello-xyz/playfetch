@@ -1,7 +1,7 @@
 import { ActivePrompt, PromptChainItem, PromptVersion } from '@/types'
 import usePromptVersion from '@/src/client/versions/usePromptVersion'
 import { ChainItemCache } from './useChainItemCache'
-import PromptTabs from '../prompts/promptTabs'
+import PromptTabs from '@/src/client/prompts/promptTabs'
 import { usePromptTabs } from '@/src/client/users/userPresetsContext'
 
 export default function PromptNodeEditor({

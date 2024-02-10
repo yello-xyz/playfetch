@@ -1,8 +1,8 @@
 import { ReactNode, useState } from 'react'
 import { ActivePrompt, PromptVersion, ChainVersion, ActiveChain, IsPromptVersion } from '@/types'
 import VersionCellHeader from './versionCellHeader'
-import PromptVersionCellBody from '../prompts/promptVersionCellBody'
-import ChainVersionCellBody from '../chains/chainVersionCellBody'
+import PromptVersionCellBody from '@/src/client/prompts/promptVersionCellBody'
+import ChainVersionCellBody from '@/src/client/chains/chainVersionCellBody'
 import { ActiveItemCache } from '@/src/client/projects/useActiveItemCache'
 
 export default function VersionCell<Version extends PromptVersion | ChainVersion>({

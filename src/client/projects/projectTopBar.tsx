@@ -8,7 +8,7 @@ import { TopBarButton } from '@/src/client/components/topBarButton'
 import { UserAvatars } from '@/src/client/users/userAvatars'
 import TopBar, { TopBarAccessoryItem, TopBarBackItem } from '@/src/client/components/topBar'
 
-import InviteButton from '../users/inviteButton'
+import InviteButton from '@/src/client/users/inviteButton'
 import { useActiveProject, useRefreshProject } from '@/src/client/projects/projectContext'
 import ProjectPopupMenu from './projectPopupMenu'
 

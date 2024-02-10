@@ -1,5 +1,5 @@
 import { AvailableModelProvider, PromptConfig, PromptVersion } from '@/types'
-import VersionComparison, { ContentComparison } from '../versions/versionComparison'
+import VersionComparison, { ContentComparison } from '@/src/client/versions/versionComparison'
 import { LabelForModel, SupportsFunctionsPrompt, SupportsSystemPrompt } from '@/src/common/providerMetadata'
 import useAvailableModelProviders from '@/src/client/settings/providerContext'
 import { ExtractFunction, ExtractFunctionNames } from '@/src/common/formatting'

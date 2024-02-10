@@ -7,8 +7,8 @@ import AppSettings from './appSettings'
 import { ReactNode, useState } from 'react'
 import { NeedsUpdatesLabel } from '@/src/common/defaults'
 import ItemLabels from '@/src/client/labels/itemLabels'
-import { AvailableLabelColorsForItem } from '../labels/labelsPopup'
-import LabelsPopupMenuButton from '../labels/labelsPopupMenuButton'
+import { AvailableLabelColorsForItem } from '@/src/client/labels/labelsPopup'
+import LabelsPopupMenuButton from '@/src/client/labels/labelsPopupMenuButton'
 import Checkbox from '@/src/client/components/checkbox'
 
 export default function LinearSettings({

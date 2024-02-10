@@ -1,4 +1,4 @@
-import PromptInput from '../prompts/promptInput'
+import PromptInput from '@/src/client/prompts/promptInput'
 import { SingleTabHeader } from '@/src/client/components/tabsHeader'
 import branchIcon from '@/public/branch.svg'
 import { BranchChainItem, ChainItem } from '@/types'

@@ -1,5 +1,5 @@
 import { ActivePrompt, ChainItemWithInputs, ChainVersion } from '@/types'
-import { ContentComparison } from '../versions/versionComparison'
+import { ContentComparison } from '@/src/client/versions/versionComparison'
 import { LabelForProvider } from '@/src/common/providerMetadata'
 import { IsBranchChainItem, IsCodeChainItem, IsQueryChainItem } from './chainNode'
 import { ActiveItemCache } from '@/src/client/projects/useActiveItemCache'

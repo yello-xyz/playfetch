@@ -12,14 +12,14 @@ import {
 import { EmptyProjectView } from '@/src/client/projects/emptyProjectView'
 import { ActiveItem, CompareItem, EndpointsItem, SettingsItem } from '@/src/common/activeItem'
 import { Allotment } from 'allotment'
-import PromptView from '../prompts/promptView'
-import ChainView from '../chains/chainView'
-import CompareView from '../diffs/compareView'
-import EndpointsView from '../endpoints/endpointsView'
-import CommentsPane from '../comments/commentsPane'
-import SettingsView from '../settings/settingsView'
+import PromptView from '@/src/client/prompts/promptView'
+import ChainView from '@/src/client/chains/chainView'
+import CompareView from '@/src/client/diffs/compareView'
+import EndpointsView from '@/src/client/endpoints/endpointsView'
+import CommentsPane from '@/src/client/comments/commentsPane'
+import SettingsView from '@/src/client/settings/settingsView'
 import { OnSavedChain } from '@/src/client/chains/useSaveChain'
-import TestDataView from '../tables/testDataView'
+import TestDataView from '@/src/client/tables/testDataView'
 
 export default function MainProjectPane({
   activeProject,

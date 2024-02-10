@@ -1,6 +1,6 @@
 import { PromptVersion } from '@/types'
 import simplediff from 'simplediff'
-import { InputVariableClass } from '../prompts/promptInput'
+import { InputVariableClass } from '@/src/client/prompts/promptInput'
 import MemoryCache from '@/src/client/cache'
 import HashValue from '@/src/common/hashing'
 

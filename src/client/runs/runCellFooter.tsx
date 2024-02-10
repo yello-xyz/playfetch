@@ -6,10 +6,10 @@ import costIcon from '@/public/cost.svg'
 import tokensIcon from '@/public/tokens.svg'
 import Icon from '@/src/client/components/icon'
 import { StaticImageData } from 'next/image'
-import { AvailableLabelColorsForItem } from '../labels/labelsPopup'
+import { AvailableLabelColorsForItem } from '@/src/client/labels/labelsPopup'
 import ItemLabels from '@/src/client/labels/itemLabels'
 import RunRatingButtons from './runRatingButtons'
-import { ItemLabelsPopupMenu } from '../labels/labelsPopupMenu'
+import { ItemLabelsPopupMenu } from '@/src/client/labels/labelsPopupMenu'
 
 export default function RunCellFooter({
   run,

@@ -1,13 +1,13 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { ActiveChain, ActivePrompt, ChainVersion, IsPromptVersion, PromptVersion } from '@/types'
-import { AvailableLabelColorsForItem } from '../labels/labelsPopup'
-import FiltersHeader from '../filters/filtersHeader'
+import { AvailableLabelColorsForItem } from '@/src/client/labels/labelsPopup'
+import FiltersHeader from '@/src/client/filters/filtersHeader'
 import VersionCell from './versionCell'
 import { ActiveItemCache } from '@/src/client/projects/useActiveItemCache'
 import { IsDummyVersion } from '@/src/client/versions/usePromptVersion'
 import { FilterContentsForPromptVersion } from '@/src/common/versionsEqual'
-import { ContentsForChainVersion } from '../chains/chainVersionCellBody'
-import { BuildFilter, Filter, FilterItem } from '../filters/filters'
+import { ContentsForChainVersion } from '@/src/client/chains/chainVersionCellBody'
+import { BuildFilter, Filter, FilterItem } from '@/src/client/filters/filters'
 
 const FilterItemFromVersion = <Version extends PromptVersion | ChainVersion>(
   version: Version,

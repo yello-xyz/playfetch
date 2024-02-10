@@ -1,7 +1,7 @@
 import { DaysAgo, FormatCost, FormatDate } from '@/src/common/formatting'
 import { AvailableModelProvider, CostUsage } from '@/types'
 import { Bar, BarChart, Tooltip, XAxis } from 'recharts'
-import DashboardContainer from '../endpoints/dashboardContainer'
+import DashboardContainer from '@/src/client/endpoints/dashboardContainer'
 import { LabelForModel } from '@/src/common/providerMetadata'
 
 const colors = ['#9ACEB2', '#FAE3A8', '#8BBBF3', '#F9D093', '#BEA4F6', '#EC9987']

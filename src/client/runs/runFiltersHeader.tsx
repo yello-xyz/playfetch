@@ -1,8 +1,8 @@
 import { ActiveChain, ActiveProject, ActivePrompt, IsProperRun, PartialRun, Run } from '@/types'
 import { ReactNode } from 'react'
-import FiltersHeader from '../filters/filtersHeader'
-import { Filter } from '../filters/filters'
-import { AvailableLabelColorsForItem } from '../labels/labelsPopup'
+import FiltersHeader from '@/src/client/filters/filtersHeader'
+import { Filter } from '@/src/client/filters/filters'
+import { AvailableLabelColorsForItem } from '@/src/client/labels/labelsPopup'
 import { FilterItemFromRun, RunSortOption } from '@/src/client/runs/runMerging'
 
 const RunFiltersHeader = ({

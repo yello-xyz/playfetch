@@ -1,4 +1,4 @@
-import PromptInput from '../prompts/promptInput'
+import PromptInput from '@/src/client/prompts/promptInput'
 import { NameForCodeChainItem } from './chainNode'
 import { SingleTabHeader } from '@/src/client/components/tabsHeader'
 import codeIcon from '@/public/code.svg'
