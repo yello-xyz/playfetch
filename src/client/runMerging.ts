@@ -1,6 +1,6 @@
 import { IsProperRun, PartialRun, Run } from '@/types'
 import HashValue from '../common/hashing'
-import { BuildFilter, Filter, FilterItem } from '@/components/filters/filters'
+import { BuildFilter, Filter, FilterItem } from '@/src/client/filters/filters'
 
 export const IdentifierForRun = (runID: number) => `r${runID}`
 

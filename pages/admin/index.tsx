@@ -1,6 +1,6 @@
 import { withAdminSession } from '@/src/server/session'
 import { ActiveUser, ProjectMetrics, RecentProject, User, UserMetrics, Workspace, WorkspaceMetrics } from '@/types'
-import TopBar, { TopBarAccessoryItem, TopBarBackItem } from '@/components/topBar'
+import TopBar, { TopBarAccessoryItem, TopBarBackItem } from '@/src/client/components/topBar'
 import ClientRoute, { ParseNumberQuery } from '@/src/common/clientRoute'
 import { useRouter } from 'next/router'
 import { Suspense, useState } from 'react'
@@ -9,8 +9,8 @@ import { ActiveUsersItem, AdminItem, RecentProjectsItem, WaitlistItem } from '@/
 import loadAdminItem from '@/src/server/admin/adminItem'
 
 import dynamic from 'next/dynamic'
-const MainAdminPane = dynamic(() => import('@/components/admin/mainAdminPane'))
-const AdminSidebar = dynamic(() => import('@/components/admin/adminSidebar'))
+const MainAdminPane = dynamic(() => import('@/src/client/admin/mainAdminPane'))
+const AdminSidebar = dynamic(() => import('@/src/client/admin/adminSidebar'))
 
 export const getServerSideProps = withAdminSession(async ({ query }) => ({
   props: await loadAdminItem(query),

@@ -6,7 +6,7 @@ import {
   SourceControlPane,
   TeamPane,
   UsagePane,
-} from '@/components/settings/activeSettingsPane'
+} from '@/src/client/settings/activeSettingsPane'
 import { ActiveProject } from '@/types'
 import { GetServerSidePropsResult } from 'next'
 

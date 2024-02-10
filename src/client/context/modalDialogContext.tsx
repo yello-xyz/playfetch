@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react'
-import { DialogPrompt } from '../../../components/modalDialog'
+import { DialogPrompt } from '../components/modalDialog'
 
 type ModalDialogContextType = {
   setDialogPrompt: (prompt: DialogPrompt) => void

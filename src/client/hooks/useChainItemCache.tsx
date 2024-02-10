@@ -1,6 +1,6 @@
 import { ActiveProject, ActivePrompt, PromptChainItem, PromptVersion } from '@/types'
 import { Dispatch, SetStateAction, useCallback } from 'react'
-import { ChainNode, IsPromptChainItem } from '../../../components/chains/chainNode'
+import { ChainNode, IsPromptChainItem } from '../chains/chainNode'
 import useActiveItemCache, { ActiveItemCache } from './useActiveItemCache'
 
 export type ChainItemCache = ActiveItemCache<ActivePrompt> & {

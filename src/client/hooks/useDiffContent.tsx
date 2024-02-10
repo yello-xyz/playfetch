@@ -1,4 +1,4 @@
-import { IsBranchChainItem, IsCodeChainItem, IsPromptChainItem, IsQueryChainItem } from '@/components/chains/chainNode'
+import { IsBranchChainItem, IsCodeChainItem, IsPromptChainItem, IsQueryChainItem } from '@/src/client/chains/chainNode'
 import { IsEndpoint } from '@/src/common/activeItem'
 import {
   ActiveChain,
@@ -15,8 +15,8 @@ import {
 } from '@/types'
 import useActiveItemCache, { ActiveItemCache } from './useActiveItemCache'
 import useAvailableModelProviders from '@/src/client/context/providerContext'
-import { FormatPromptConfig } from '@/components/prompts/promptVersionCellBody'
-import { GetChainItemTitle } from '@/components/chains/chainVersionCellBody'
+import { FormatPromptConfig } from '@/src/client/prompts/promptVersionCellBody'
+import { GetChainItemTitle } from '@/src/client/chains/chainVersionCellBody'
 
 type ItemType = ActivePrompt | ActiveChain | Endpoint
 type VersionType = PromptVersion | ChainVersion

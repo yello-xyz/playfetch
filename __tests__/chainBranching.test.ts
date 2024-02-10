@@ -2,7 +2,7 @@ import {
   CanChainNodeIncludeContext,
   MappableTargetInputsForChainNode,
   SubtreeForChainNode,
-} from '@/components/chains/chainNode'
+} from '@/src/client/chains/chainNode'
 import {
   FirstBranchForBranchOfNode,
   IsSiblingNode,

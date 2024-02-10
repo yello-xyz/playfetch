@@ -9,10 +9,10 @@ import { ErrorBoundary } from 'react-error-boundary'
 import ClientRoute from '@/src/common/clientRoute'
 import TagManager from 'react-gtm-module'
 import { useEffect } from 'react'
-import CookieBanner from '@/components/cookieBanner'
+import CookieBanner from '@/src/client/components/cookieBanner'
 
 import dynamic from 'next/dynamic'
-const ProgressBar = dynamic(() => import('@/components/progressBar'), { ssr: false })
+const ProgressBar = dynamic(() => import('@/src/client/components/progressBar'), { ssr: false })
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 

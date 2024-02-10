@@ -1,9 +1,9 @@
 import { KeyboardEvent, useState } from 'react'
 import useGlobalPopup, { WithDismiss } from '@/src/client/context/globalPopupContext'
-import { PopupContent } from '../../../components/popupMenu'
-import Button from '../../../components/button'
-import TestDataHeader from '../../../components/testData/testDataHeader'
-import Editor from '@/components/editor'
+import { PopupContent } from '../components/popupMenu'
+import Button from '../components/button'
+import TestDataHeader from '../testData/testDataHeader'
+import Editor from '@/src/client/components/editor'
 
 export default function useTestDataValuePopup(
   variables: string[],

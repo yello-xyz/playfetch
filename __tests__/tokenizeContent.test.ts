@@ -1,4 +1,4 @@
-import { TokenizeContent } from '@/components/versions/versionComparison'
+import { TokenizeContent } from '@/src/client/versions/versionComparison'
 
 type Token = { state: '=' | '-' | '+'; content: string; tagged: boolean }
 
