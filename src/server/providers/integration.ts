@@ -4,10 +4,12 @@ import {
   CohereLanguageModel,
   CustomLanguageModel,
   DefaultLanguageModel,
+  EmbeddingModel,
   GoogleLanguageModel,
   HuggingFaceLanguageModel,
   LanguageModel,
   ModelProvider,
+  OpenAIEmbeddingModel,
   OpenAILanguageModel,
 } from '@/types'
 import { encode } from 'gpt-3-encoder'
@@ -84,7 +86,13 @@ export const ExtraModelsForProvider = (
   }
 }
 
-export const CreateEmbedding = (provider: ModelProvider, apiKey: string, userID: number, input: string) => {
+export const CreateEmbedding = (
+  provider: ModelProvider,
+  apiKey: string,
+  userID: number,
+  model: EmbeddingModel,
+  input: string
+) => {
   switch (provider) {
     case 'google':
     case 'anthropic':
@@ -92,7 +100,7 @@ export const CreateEmbedding = (provider: ModelProvider, apiKey: string, userID:
     case 'huggingface':
       throw new Error('Provider does not support embeddings yet')
     case 'openai':
-      return createEmbedding(apiKey, userID, 'text-embedding-ada-002', input)
+      return createEmbedding(apiKey, userID, model as OpenAIEmbeddingModel, input)
   }
 }
 

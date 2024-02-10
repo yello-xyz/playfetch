@@ -35,7 +35,13 @@ export const runQuery = async (
       throw new Error('Monthly usage limit exceeded')
     }
 
-    const { embedding, cost, inputTokens } = await CreateEmbedding(embeddingProvider, embeddingAPIKey, userID, query)
+    const { embedding, cost, inputTokens } = await CreateEmbedding(
+      embeddingProvider,
+      embeddingAPIKey,
+      userID,
+      model,
+      query
+    )
     IncrementProviderCost(scopeID, providerID, model, cost)
 
     const result = await runVectorQuery(apiKey, environment, indexName, embedding, topK)

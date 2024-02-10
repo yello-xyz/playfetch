@@ -1,4 +1,4 @@
-import { CustomLanguageModel, DefaultLanguageModel, OpenAILanguageModel, PromptInputs } from '@/types'
+import { CustomLanguageModel, DefaultLanguageModel, OpenAIEmbeddingModel, OpenAILanguageModel, PromptInputs } from '@/types'
 import OpenAI from 'openai'
 import { Predictor, PromptContext } from '../evaluationEngine/promptEngine'
 import { CostForModel } from './integration'
@@ -200,7 +200,7 @@ export async function loadExtraModels(
 export async function createEmbedding(
   apiKey: string,
   userID: number,
-  model: 'text-embedding-ada-002',
+  model: OpenAIEmbeddingModel,
   input: string
 ): Promise<{ embedding: number[]; cost: number; inputTokens: number }> {
   const api = new OpenAI({ apiKey })
