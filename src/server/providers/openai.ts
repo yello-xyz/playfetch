@@ -104,6 +104,11 @@ async function complete(
     if (model === 'gpt-3.5-turbo-16k') {
       // TODO remove this when the former points to the latter (was initially going to be Dec 11th but is not)
       model = 'gpt-3.5-turbo-1106'
+    } else if (model === 'gpt-3.5-turbo') {
+      // TODO starting February 16 2024, both aliases will point to the latest model (cheaper 16k).
+      // There is probably not much point in keeping gpt-3.5-turbo around after that (or using it),
+      // but for now we keep it pointing to the same model as before (to be discontinued in June).
+      model = 'gpt-3.5-turbo-0613'
     } else if (model === 'gpt-4-turbo') {
       // TODO remove this once the model is generally available (also update model description)
       model = 'gpt-4-1106-preview'
