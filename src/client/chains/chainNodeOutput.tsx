@@ -1,8 +1,8 @@
 import { ActiveChain, ChainItem, ChainVersion, PromptInputs, Run, TestConfig } from '@/types'
 import { useEffect, useRef, useState } from 'react'
-import useInputValues from '@/src/client/testData/useInputValues'
+import useInputValues from '@/src/client/tables/useInputValues'
 import RunTimeline from '../runs/runTimeline'
-import TestDataPane from '../testData/testDataPane'
+import TestDataPane from '../tables/testDataPane'
 import RunButtons from '../runs/runButtons'
 import { ChainNode, InputNode, IsChainItem, IsPromptChainItem, IsQueryChainItem, OutputNode } from './chainNode'
 import { SingleTabHeader } from '../components/tabsHeader'
@@ -10,10 +10,10 @@ import useRunVersion from '@/src/client/versions/useRunVersion'
 import { ChainItemCache } from './useChainItemCache'
 import { useCheckProviders } from '@/src/client/settings/providerContext'
 import { ProviderForModel } from '@/src/common/providerMetadata'
-import { SelectAnyInputValue } from '@/src/client/testData/inputRows'
+import { SelectAnyInputValue } from '@/src/client/tables/inputRows'
 import useInitialState from '@/src/client/components/useInitialState'
 import api from '@/src/client/api'
-import useTestDataActionButtons from '@/src/client/testData/useTestDataActionButtons'
+import useTestDataActionButtons from '@/src/client/tables/useTestDataActionButtons'
 
 export default function ChainNodeOutput({
   chain,

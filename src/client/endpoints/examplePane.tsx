@@ -6,7 +6,7 @@ import Icon from '../components/icon'
 import clipboardIcon from '@/public/clipboard.svg'
 import checkIcon from '@/public/check.svg'
 import CodeBlock, { CodeWithMarkup } from '../components/codeBlock'
-import { SelectAnyInputRow } from '@/src/client/testData/inputRows'
+import { SelectAnyInputRow } from '@/src/client/tables/inputRows'
 
 const buildCurlCommand = (
   endpoint: ResolvedEndpoint,

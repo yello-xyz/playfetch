@@ -1,22 +1,22 @@
 import { ActivePrompt, PromptInputs, PromptVersion, TestConfig } from '@/types'
 
-import useInputValues from '@/src/client/testData/useInputValues'
+import useInputValues from '@/src/client/tables/useInputValues'
 import RunTimeline from '../runs/runTimeline'
 import { useEffect, useState } from 'react'
 import { ExtractPromptVariables, GetEditorVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
 import useRunVersion from '@/src/client/versions/useRunVersion'
-import TestDataPane from '../testData/testDataPane'
+import TestDataPane from '../tables/testDataPane'
 import usePromptVersion from '@/src/client/versions/usePromptVersion'
-import { SelectAnyInputValue, SelectInputRows } from '@/src/client/testData/inputRows'
+import { SelectAnyInputValue, SelectInputRows } from '@/src/client/tables/inputRows'
 import RunButtons from '../runs/runButtons'
 import { VersionHasNonEmptyPrompts } from '@/src/common/versionsEqual'
 import { useCheckModelAvailable } from '@/src/client/settings/providerContext'
 import Collapsible from '../components/collapsible'
 import PromptTabs from './promptTabs'
 import { usePromptTabs } from '@/src/client/users/userPresetsContext'
-import { GetTableRowCount, HasTableData } from '../testData/tableEditor'
-import useTestDataActionButtons from '@/src/client/testData/useTestDataActionButtons'
+import { GetTableRowCount, HasTableData } from '../tables/tableEditor'
+import useTestDataActionButtons from '@/src/client/tables/useTestDataActionButtons'
 
 export default function PromptView({
   prompt,

@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { WithDismiss } from '@/src/client/components/globalPopupContext'
 import { PopupContent } from '../components/popupMenu'
-import TestDataPane from '@/src/client/testData/testDataPane'
+import TestDataPane from '@/src/client/tables/testDataPane'
 import { Chain, InputValues, Prompt, TestConfig } from '@/types'
 import Label from '@/src/client/components/label'
 import IconButton from '@/src/client/components/iconButton'

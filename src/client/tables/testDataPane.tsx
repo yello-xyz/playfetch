@@ -1,6 +1,6 @@
 import { Dispatch, ReactNode, SetStateAction } from 'react'
 import { InputValues, TestConfig } from '@/types'
-import { SelectInputRows } from '@/src/client/testData/inputRows'
+import { SelectInputRows } from '@/src/client/tables/inputRows'
 import DropdownMenu from '../components/dropdownMenu'
 import Label from '../components/label'
 import RangeInput from '../components/rangeInput'

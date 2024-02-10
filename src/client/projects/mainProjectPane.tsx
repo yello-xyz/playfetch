@@ -14,12 +14,12 @@ import { ActiveItem, CompareItem, EndpointsItem, SettingsItem } from '@/src/comm
 import { Allotment } from 'allotment'
 import PromptView from '../prompts/promptView'
 import ChainView from '../chains/chainView'
-import CompareView from '../compare/compareView'
+import CompareView from '../diffs/compareView'
 import EndpointsView from '../endpoints/endpointsView'
 import CommentsPane from '../comments/commentsPane'
 import SettingsView from '../settings/settingsView'
 import { OnSavedChain } from '@/src/client/chains/useSaveChain'
-import TestDataView from '../testData/testDataView'
+import TestDataView from '../tables/testDataView'
 
 export default function MainProjectPane({
   activeProject,

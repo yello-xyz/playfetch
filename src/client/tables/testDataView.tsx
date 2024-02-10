@@ -1,5 +1,5 @@
 import { ActiveTable } from '@/types'
-import useInputValues from '@/src/client/testData/useInputValues'
+import useInputValues from '@/src/client/tables/useInputValues'
 import TableEditor, { HasTableData } from './tableEditor'
 import { SingleTabHeader } from '../components/tabsHeader'
 import useProjectItemActions from '@/src/client/projects/useProjectItemActions'

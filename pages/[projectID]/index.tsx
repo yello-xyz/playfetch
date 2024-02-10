@@ -28,7 +28,7 @@ import { useDocumentationCookie } from '@/src/client/cookies/cookieBanner'
 import { ProviderContext } from '@/src/client/settings/providerContext'
 import ProjectPaneWrapper from '@/src/client/projects/projectPaneWrapper'
 import { UserPresets } from '@/src/common/userPresets'
-import useTable from '@/src/client/testData/useTable'
+import useTable from '@/src/client/tables/useTable'
 
 import dynamic from 'next/dynamic'
 const MainProjectPane = dynamic(() => import('@/src/client/projects/mainProjectPane'))
