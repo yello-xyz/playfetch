@@ -10,7 +10,7 @@ import {
   AdminItemIsUser,
   RecentProjectsItem,
   WaitlistItem,
-} from '@/src/common/admin/adminItem'
+} from '@/src/common/adminItem'
 import ActiveUserMetrics from '@/src/client/admin/activeUserMetrics'
 import RecentProjectMetrics from './recentProjectMetrics'
 import RecentWorkspaceMetrics from './workspaceMetrics'

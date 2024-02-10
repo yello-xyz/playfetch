@@ -1,4 +1,4 @@
-import { SelectInputRows } from '@/src/client/inputRows'
+import { SelectInputRows } from '@/src/client/testData/inputRows'
 import { InputValues, TestConfig } from '@/types'
 
 test('No inputs yields single empty prompt input', () =>

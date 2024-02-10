@@ -18,7 +18,7 @@ import PromptPanel from '../prompts/promptPanel'
 import { IsEndpoint } from '@/src/common/activeItem'
 import { ExtractInputKey } from '@/src/common/formatting'
 import { useState } from 'react'
-import { RunSortOption } from '@/src/client/runMerging'
+import { RunSortOption } from '@/src/client/runs/runMerging'
 import { Filter } from '../filters/filters'
 
 export default function ComparePane({

@@ -9,7 +9,7 @@ import { Capitalize, CheckValidEmail } from '@/src/common/formatting'
 import { useRouter } from 'next/router'
 import logo from '@/public/logo.svg'
 import Image from 'next/image'
-import { useDocumentationCookie } from '@/src/client/components/cookieBanner'
+import { useDocumentationCookie } from '@/src/client/cookies/cookieBanner'
 
 export const getServerSideProps = withLoggedOutSession(async context => {
   const tokenCSRF = (await getCsrfToken(context)) ?? null

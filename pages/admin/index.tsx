@@ -5,7 +5,7 @@ import ClientRoute, { ParseNumberQuery } from '@/src/common/clientRoute'
 import { useRouter } from 'next/router'
 import { Suspense, useState } from 'react'
 import api from '@/src/client/admin/api'
-import { ActiveUsersItem, AdminItem, RecentProjectsItem, WaitlistItem } from '@/src/common/admin/adminItem'
+import { ActiveUsersItem, AdminItem, RecentProjectsItem, WaitlistItem } from '@/src/common/adminItem'
 import loadAdminItem from '@/src/server/admin/adminItem'
 
 import dynamic from 'next/dynamic'

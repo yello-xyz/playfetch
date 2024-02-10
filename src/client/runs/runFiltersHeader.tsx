@@ -3,7 +3,7 @@ import { ReactNode } from 'react'
 import FiltersHeader from '../filters/filtersHeader'
 import { Filter } from '../filters/filters'
 import { AvailableLabelColorsForItem } from '../labels/labelsPopup'
-import { FilterItemFromRun, RunSortOption } from '@/src/client/runMerging'
+import { FilterItemFromRun, RunSortOption } from '@/src/client/runs/runMerging'
 
 const RunFiltersHeader = ({
   activeItem,

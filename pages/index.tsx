@@ -25,7 +25,7 @@ import { getActiveWorkspace, getWorkspacesForUser } from '@/src/server/datastore
 import { getSharedProjectsForUser } from '@/src/server/datastore/projects'
 import { GlobalPopupContext, useGlobalPopupProvider } from '@/src/client/context/globalPopupContext'
 import GlobalPopup from '@/src/client/components/globalPopup'
-import { useDocumentationCookie } from '@/src/client/components/cookieBanner'
+import { useDocumentationCookie } from '@/src/client/cookies/cookieBanner'
 
 import dynamic from 'next/dynamic'
 const WorkspaceSidebar = dynamic(() => import('@/src/client/workspaces/workspaceSidebar'))

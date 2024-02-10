@@ -3,7 +3,7 @@ import { getActiveUsers, getMetricsForUser, getUsersWithoutAccess } from '../dat
 import { getMetricsForProject, getRecentProjects } from '../datastore/projects'
 import { getMetricsForWorkspace } from '../datastore/workspaces'
 import { ParseNumberQuery } from '@/src/common/clientRoute'
-import { ActiveUsersItem, AdminItem, RecentProjectsItem, WaitlistItem } from '@/src/common/admin/adminItem'
+import { ActiveUsersItem, AdminItem, RecentProjectsItem, WaitlistItem } from '@/src/common/adminItem'
 
 export default async function loadAdminItem(query: ParsedUrlQuery) {
   const { w: waitlist, p: projects, i: itemID, s: isWorkspace } = ParseNumberQuery(query)

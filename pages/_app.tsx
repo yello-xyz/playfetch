@@ -9,7 +9,7 @@ import { ErrorBoundary } from 'react-error-boundary'
 import ClientRoute from '@/src/common/clientRoute'
 import TagManager from 'react-gtm-module'
 import { useEffect } from 'react'
-import CookieBanner from '@/src/client/components/cookieBanner'
+import CookieBanner from '@/src/client/cookies/cookieBanner'
 
 import dynamic from 'next/dynamic'
 const ProgressBar = dynamic(() => import('@/src/client/components/progressBar'), { ssr: false })

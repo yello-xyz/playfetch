@@ -19,7 +19,7 @@ import {
   SortRuns,
   BuildInputMap,
   RunSortOption,
-} from '@/src/client/runMerging'
+} from '@/src/client/runs/runMerging'
 import { RunGroup } from './runGroup'
 import { Filter } from '../filters/filters'
 import RunFiltersHeader from './runFiltersHeader'

@@ -1,7 +1,7 @@
 import { ReactNode, startTransition, useCallback, useEffect } from 'react'
 import { PendingButton } from '../components/button'
 import { InputValues, PromptInputs, TestConfig } from '@/types'
-import { SelectInputRows } from '@/src/client/inputRows'
+import { SelectInputRows } from '@/src/client/testData/inputRows'
 import SavePromptButton from './savePromptButton'
 
 export default function RunButtons({

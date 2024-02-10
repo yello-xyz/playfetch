@@ -1,12 +1,12 @@
 import { BorderedSection, RoleHeader } from './runCellContinuation'
 import { ActiveChain, ActivePrompt, ChainVersion, IsProperRun, PartialRun, PromptVersion, Run } from '@/types'
 import { MouseEvent, useCallback } from 'react'
-import { CommentsPopup, CommentsPopupProps } from '../components/commentPopupMenu'
+import { CommentsPopup, CommentsPopupProps } from '../comments/commentPopupMenu'
 import { AvailableLabelColorsForItem } from '../labels/labelsPopup'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
 import CommentInputPopup, { CommentInputProps, CommentSelection, useExtractCommentSelection } from './commentInputPopup'
 import { useLoggedInUser } from '@/src/client/context/userContext'
-import { IdentifierForRun } from '@/src/client/runMerging'
+import { IdentifierForRun } from '@/src/client/runs/runMerging'
 
 export default function RunCellBody({
   run,

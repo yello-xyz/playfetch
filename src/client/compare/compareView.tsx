@@ -10,7 +10,7 @@ import { IsEndpoint } from '@/src/common/activeItem'
 import { useActiveProject } from '@/src/client/context/projectContext'
 import TabsHeader from '../components/tabsHeader'
 import { Filter } from '../filters/filters'
-import { RunSortOption } from '@/src/client/runMerging'
+import { RunSortOption } from '@/src/client/runs/runMerging'
 import RunFiltersHeader from '../runs/runFiltersHeader'
 
 export default function CompareView({

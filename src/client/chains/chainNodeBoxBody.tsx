@@ -13,7 +13,7 @@ import { AvailableLabelColorsForItem } from '../labels/labelsPopup'
 import { TaggedContent } from '../versions/versionComparison'
 import { ReactNode } from 'react'
 import { InputVariableClass } from '../prompts/promptInput'
-import { VersionDescription } from '../components/commentsPane'
+import { VersionDescription } from '../comments/commentsPane'
 import { Highlight, themes } from 'prism-react-renderer'
 import { ExtractUnboundChainVariables } from './chainItems'
 
