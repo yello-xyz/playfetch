@@ -4,7 +4,7 @@ import {
   PlaceholderForPromptKey,
   PromptKeyNeedsPreformatted,
   SupportedPromptKeysForModel,
-} from '@/src/common/providerMetadata'
+} from './promptKeys'
 import PromptInput from './promptInput'
 import { ReactNode, useState } from 'react'
 import { useCheckModelProviders } from '@/src/client/settings/providerContext'

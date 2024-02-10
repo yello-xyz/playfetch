@@ -1,9 +1,10 @@
 import { ActivePrompt, ChainVersion, PromptConfig, PromptVersion, Prompts } from '@/types'
 import useInitialState from '@/src/client/components/useInitialState'
 import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
-import { SupportedPromptKeysForModel, ValidatePromptConfig } from '@/src/common/providerMetadata'
+import { ValidatePromptConfig } from '@/src/common/providerMetadata'
 import { useEffect, useState } from 'react'
 import { useLoggedInUser } from '@/src/client/users/userContext'
+import { SupportedPromptKeysForModel } from '@/src/client/prompts/promptKeys'
 
 export default function usePromptVersion(
   prompt: ActivePrompt,

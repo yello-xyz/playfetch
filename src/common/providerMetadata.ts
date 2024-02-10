@@ -8,7 +8,6 @@ import {
   LanguageModel,
   ModelProvider,
   PromptConfig,
-  Prompts,
   QueryProvider,
   SourceControlProvider,
   IssueTrackerProvider,
@@ -90,12 +89,6 @@ export const LabelForProvider = (provider: SupportedProvider) => {
   }
 }
 
-export const SupportedPromptKeysForModel = (model: LanguageModel): (keyof Prompts)[] => [
-  ...(SupportsSystemPrompt(model) ? ['system' as keyof Prompts] : []),
-  'main',
-  ...(SupportsFunctionsPrompt(model) ? ['functions' as keyof Prompts] : []),
-]
-
 export const isCustomModel = (model: LanguageModel | EmbeddingModel): model is CustomLanguageModel => {
   switch (model) {
     case 'gpt-3.5-turbo':
@@ -134,10 +127,7 @@ export const IsModelDisabled = (model: LanguageModel, providers: AvailableModelP
   return !!customModel && !customModel.enabled
 }
 
-export const IsModelAvailable = (
-  model: LanguageModel | EmbeddingModel,
-  providers: AvailableModelProvider[]
-): boolean =>
+export const IsModelAvailable = (model: LanguageModel | EmbeddingModel, providers: AvailableModelProvider[]): boolean =>
   isCustomModel(model)
     ? customModelFromProviders(model, providers)?.enabled ?? false
     : IsProviderAvailable(ProviderForModel(model), providers)
@@ -219,48 +209,6 @@ export const SupportsFunctionsPrompt = (model: LanguageModel): boolean => {
       return false
     default:
       return SupportsFunctionsPrompt(baseModelForModel(model))
-  }
-}
-
-export const IsMainPromptKey = (promptKey: keyof Prompts) => {
-  switch (promptKey) {
-    case 'main':
-      return true
-    case 'system':
-    case 'functions':
-      return false
-  }
-}
-
-export const LabelForPromptKey = (promptKey: keyof Prompts) => {
-  switch (promptKey) {
-    case 'main':
-      return 'Prompt'
-    case 'system':
-      return 'System'
-    case 'functions':
-      return 'Functions'
-  }
-}
-
-export const PlaceholderForPromptKey = (promptKey: keyof Prompts) => {
-  switch (promptKey) {
-    case 'main':
-      return 'Enter prompt here. Use {{variable}} to insert dynamic values.'
-    case 'system':
-      return 'Enter system prompt here. This is optional and will be ignored by models that do not support it.'
-    case 'functions':
-      return 'Enter functions as a JSON array. This will be ignored by models that do not support it.'
-  }
-}
-
-export const PromptKeyNeedsPreformatted = (promptKey: keyof Prompts) => {
-  switch (promptKey) {
-    case 'main':
-    case 'system':
-      return false
-    case 'functions':
-      return true
   }
 }
 
