@@ -1,7 +1,7 @@
 import { ActiveChain, ChainItem, ChainVersion, Prompt } from '@/types'
 import { ChainNode, IsBranchChainItem, IsChainItem } from './chainNode'
 import { ChainNodeBox } from './chainNodeBox'
-import { ChainItemCache } from '@/src/client/hooks/useChainItemCache'
+import { ChainItemCache } from '@/src/client/chains/useChainItemCache'
 import { FirstBranchForBranchOfNode, ShouldBranchLoopOnCompletion } from '@/src/common/branching'
 import ChainNodeBoxConnector, { DownArrow, DownStroke } from './chainNodeBoxConnector'
 

@@ -5,7 +5,7 @@ import Icon from '../components/icon'
 import fileIcon from '@/public/file.svg'
 import folderIcon from '@/public/folder.svg'
 import userIcon from '@/public/user.svg'
-import useFormattedDate from '@/src/client/hooks/useFormattedDate'
+import useFormattedDate from '@/src/client/components/useFormattedDate'
 import TableRow, { TableCell, TruncatedSpan } from './tableRow'
 import { MouseEvent } from 'react'
 

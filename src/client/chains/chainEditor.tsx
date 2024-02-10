@@ -11,7 +11,7 @@ import {
 import { ChainNode, IsBranchChainItem } from './chainNode'
 import ChainEditorHeader from './chainEditorHeader'
 import SegmentedControl, { Segment } from '../components/segmentedControl'
-import { ChainItemCache } from '@/src/client/hooks/useChainItemCache'
+import { ChainItemCache } from '@/src/client/chains/useChainItemCache'
 import { Fragment, useState } from 'react'
 import { useCheckProviders } from '@/src/client/settings/providerContext'
 import { EmbeddingModels, QueryProviders } from '@/src/common/providerMetadata'

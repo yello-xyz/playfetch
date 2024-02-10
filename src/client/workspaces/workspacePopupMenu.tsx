@@ -3,7 +3,7 @@ import PopupMenu, { PopupMenuItem } from '../components/popupMenu'
 import useModalDialogPrompt from '@/src/client/components/modalDialogContext'
 import { useState } from 'react'
 import PickNameDialog from '../components/pickNameDialog'
-import useWorkspaceActions from '@/src/client/hooks/useWorkspaceActions'
+import useWorkspaceActions from '@/src/client/workspaces/useWorkspaceActions'
 
 export default function WorkspacePopupMenu({
   workspace,

@@ -17,7 +17,7 @@ import {
   EndpointsItem,
   SettingsItem,
 } from '@/src/common/activeItem'
-import useInitialState from './useInitialState'
+import useInitialState from '../components/useInitialState'
 import { useState } from 'react'
 
 type ProjectItem = ActivePrompt | ActiveChain | ActiveTable

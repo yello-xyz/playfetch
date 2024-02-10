@@ -12,7 +12,7 @@ import useModalDialogPrompt from '@/src/client/components/modalDialogContext'
 import Icon from '../components/icon'
 import Button from '../components/button'
 import TextInput from '../components/textInput'
-import useInitialState from '@/src/client/hooks/useInitialState'
+import useInitialState from '@/src/client/components/useInitialState'
 import { useState } from 'react'
 import chevronIcon from '@/public/chevron.svg'
 

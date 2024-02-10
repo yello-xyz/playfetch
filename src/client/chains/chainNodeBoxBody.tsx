@@ -7,7 +7,7 @@ import {
   IsPromptChainItem,
   IsQueryChainItem,
 } from './chainNode'
-import { ChainItemCache } from '@/src/client/hooks/useChainItemCache'
+import { ChainItemCache } from '@/src/client/chains/useChainItemCache'
 import { VersionLabels } from '../versions/versionLabels'
 import { AvailableLabelColorsForItem } from '../labels/labelsPopup'
 import { TaggedContent } from '../versions/versionComparison'

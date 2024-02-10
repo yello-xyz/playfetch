@@ -7,7 +7,7 @@ import {
   IsQueryChainItem,
   SubtreeForChainNode,
 } from './chainNode'
-import { ChainItemCache } from '../hooks/useChainItemCache'
+import { ChainItemCache } from './useChainItemCache'
 import { ExtractCodeInterrupts, ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
 
 export const GetChainItemsSaveKey = (items: ChainItem[]) => JSON.stringify(stripItemsToSave(items))

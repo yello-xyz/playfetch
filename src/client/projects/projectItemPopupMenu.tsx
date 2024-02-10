@@ -7,7 +7,7 @@ import PickNameDialog from '../components/pickNameDialog'
 import PickProjectDialog from './pickProjectDialog'
 import { useLoggedInUser } from '@/src/client/users/userContext'
 import { SharedProjectsWorkspace } from '@/pages'
-import useProjectItemActions from '@/src/client/hooks/useProjectItemActions'
+import useProjectItemActions from '@/src/client/projects/useProjectItemActions'
 
 export default function ProjectItemPopupMenu({
   item,

@@ -8,7 +8,7 @@ import UserSidebarItem from '../users/userSidebarItem'
 import PickNameDialog from '../components/pickNameDialog'
 import { useLoggedInUser } from '@/src/client/users/userContext'
 import { FeedbackSection, SidebarButton, SidebarSection } from '../components/sidebar'
-import useWorkspaceActions from '@/src/client/hooks/useWorkspaceActions'
+import useWorkspaceActions from '@/src/client/workspaces/useWorkspaceActions'
 
 export default function WorkspaceSidebar({
   workspaces,

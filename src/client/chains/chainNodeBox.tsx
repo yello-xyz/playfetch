@@ -1,6 +1,6 @@
 import { ActiveChain, BranchChainItem, ChainItem, ChainVersion, Prompt } from '@/types'
 import { ChainNode, InputNode, IsBranchChainItem, IsChainItem, OutputNode } from './chainNode'
-import { ChainItemCache } from '@/src/client/hooks/useChainItemCache'
+import { ChainItemCache } from '@/src/client/chains/useChainItemCache'
 import ChainNodeBoxHeader from './chainNodeBoxHeader'
 import ChainNodeBoxBody from './chainNodeBoxBody'
 import ChainNodeBoxFooter from './chainNodeBoxFooter'

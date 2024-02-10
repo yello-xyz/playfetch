@@ -1,5 +1,5 @@
 import { ReactNode, RefCallback, createContext, useContext, useState } from 'react'
-import { useContainerRect } from '../hooks/useContainerRect'
+import { useContainerRect } from './useContainerRect'
 
 export type GlobalPopupLocation = { top?: number; left?: number; bottom?: number; right?: number }
 export type GlobalPopupRender<PropsType> = (props: PropsType & WithDismiss) => ReactNode

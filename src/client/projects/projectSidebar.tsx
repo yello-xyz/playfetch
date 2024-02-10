@@ -12,7 +12,7 @@ import { useState } from 'react'
 import IconButton from '../components/iconButton'
 import { ActiveItem, CompareItem, EndpointsItem, SettingsItem } from '@/src/common/activeItem'
 import { useActiveProject } from '@/src/client/projects/projectContext'
-import useProjectItemActions from '@/src/client/hooks/useProjectItemActions'
+import useProjectItemActions from '@/src/client/projects/useProjectItemActions'
 import ProjectItemPopupMenu from './projectItemPopupMenu'
 
 export default function ProjectSidebar({

@@ -1,7 +1,7 @@
 import { MouseEvent, ReactNode } from 'react'
 import chevronIcon from '@/public/chevron.svg'
 import Icon from './icon'
-import useInitialState from '@/src/client/hooks/useInitialState'
+import useInitialState from '@/src/client/components/useInitialState'
 
 export default function Collapsible({
   title,

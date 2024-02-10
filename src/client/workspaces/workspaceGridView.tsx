@@ -8,7 +8,7 @@ import dotsIcon from '@/public/dots.svg'
 import { FormatRelativeDate } from '@/src/common/formatting'
 import ProjectPopupMenu from '../projects/projectPopupMenu'
 import WorkspaceTopBar, { AddProjectButton } from './workspaceTopBar'
-import useFormattedDate from '@/src/client/hooks/useFormattedDate'
+import useFormattedDate from '@/src/client/components/useFormattedDate'
 import { InviteCell } from './inviteCell'
 
 export default function WorkspaceGridView({

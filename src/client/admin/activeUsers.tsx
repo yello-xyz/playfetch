@@ -2,7 +2,7 @@ import { ActiveUser } from '@/types'
 import Label from '@/src/client/components/label'
 import UserAvatar from '@/src/client/users/userAvatar'
 import { FormatDate } from '@/src/common/formatting'
-import useFormattedDate from '@/src/client/hooks/useFormattedDate'
+import useFormattedDate from '@/src/client/components/useFormattedDate'
 import TableRow, { TableCell, TruncatedSpan } from './tableRow'
 
 export default function ActiveUsers({

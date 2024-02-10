@@ -1,6 +1,6 @@
 import { ActivePrompt, PromptChainItem, PromptVersion } from '@/types'
-import usePromptVersion from '@/src/client/hooks/usePromptVersion'
-import { ChainItemCache } from '../hooks/useChainItemCache'
+import usePromptVersion from '@/src/client/versions/usePromptVersion'
+import { ChainItemCache } from './useChainItemCache'
 import PromptTabs from '../prompts/promptTabs'
 import { usePromptTabs } from '@/src/client/users/userPresetsContext'
 

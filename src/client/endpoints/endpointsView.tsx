@@ -25,7 +25,7 @@ import { EndpointsRoute, LogsRoute, ParseNumberQuery } from '@/src/common/client
 import { useRouter } from 'next/router'
 import Icon from '../components/icon'
 import chevronIcon from '@/public/chevron.svg'
-import useActiveItemCache from '@/src/client/hooks/useActiveItemCache'
+import useActiveItemCache from '@/src/client/projects/useActiveItemCache'
 import { useActiveProject, useRefreshProject } from '@/src/client/projects/projectContext'
 import { HeaderItem } from '../components/headerItem'
 import { ExtractUnboundChainInputs } from '../chains/chainItems'

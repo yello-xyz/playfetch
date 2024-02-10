@@ -1,6 +1,6 @@
 import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptInputs, PromptVersion, Run } from '@/types'
 import RunCell from './runCell'
-import useFormattedDate from '@/src/client/hooks/useFormattedDate'
+import useFormattedDate from '@/src/client/components/useFormattedDate'
 import { BuildInputMap, GetMappedRowForRun } from '@/src/client/runs/runMerging'
 
 type InputMap = ReturnType<typeof BuildInputMap>

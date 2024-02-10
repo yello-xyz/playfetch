@@ -4,7 +4,7 @@ import Button from '../components/button'
 import { PendingUser, User } from '@/types'
 import TextInput from '../components/textInput'
 import UserBadge from './userBadge'
-import useFormattedDate from '@/src/client/hooks/useFormattedDate'
+import useFormattedDate from '@/src/client/components/useFormattedDate'
 import { useLoggedInUser } from '@/src/client/users/userContext'
 import RolePopupButton from './rolePopupButton'
 

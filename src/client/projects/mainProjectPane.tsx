@@ -18,7 +18,7 @@ import CompareView from '../compare/compareView'
 import EndpointsView from '../endpoints/endpointsView'
 import CommentsPane from '../comments/commentsPane'
 import SettingsView from '../settings/settingsView'
-import { OnSavedChain } from '@/src/client/hooks/useSaveChain'
+import { OnSavedChain } from '@/src/client/chains/useSaveChain'
 import TestDataView from '../testData/testDataView'
 
 export default function MainProjectPane({

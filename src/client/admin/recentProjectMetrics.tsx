@@ -7,7 +7,7 @@ import { FormatDate } from '@/src/common/formatting'
 import ActiveUsers from './activeUsers'
 import fileIcon from '@/public/file.svg'
 import folderIcon from '@/public/folder.svg'
-import useFormattedDate from '@/src/client/hooks/useFormattedDate'
+import useFormattedDate from '@/src/client/components/useFormattedDate'
 import { useState } from 'react'
 import api from '@/src/client/admin/api'
 

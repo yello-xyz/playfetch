@@ -5,7 +5,7 @@ import chainIcon from '@/public/chain.svg'
 import Icon from '../components/icon'
 import TableCell, { TableHeader } from '../components/tableCell'
 import { FormatDate } from '@/src/common/formatting'
-import useFormattedDate from '@/src/client/hooks/useFormattedDate'
+import useFormattedDate from '@/src/client/components/useFormattedDate'
 import LogStatus from './logStatus'
 
 const sameSequence = (a: LogEntry) => (b: LogEntry) => !!a.continuationID && a.continuationID === b.continuationID

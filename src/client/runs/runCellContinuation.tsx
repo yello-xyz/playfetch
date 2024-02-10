@@ -7,7 +7,7 @@ import UserAvatar from '../users/userAvatar'
 import { useLoggedInUser } from '@/src/client/users/userContext'
 import RunCellBody from './runCellBody'
 import { ExtractInputKey, FormatCost } from '@/src/common/formatting'
-import useInitialState from '@/src/client/hooks/useInitialState'
+import useInitialState from '@/src/client/components/useInitialState'
 import Icon from '../components/icon'
 import cancelIcon from '@/public/cancel.svg'
 

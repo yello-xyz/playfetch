@@ -1,6 +1,6 @@
 import { ChainItem } from '@/types'
 import { ChainNode, IsChainItem, MappableTargetInputsForChainNode } from './chainNode'
-import { ChainItemCache } from '@/src/client/hooks/useChainItemCache'
+import { ChainItemCache } from '@/src/client/chains/useChainItemCache'
 import Label from '../components/label'
 import DropdownMenu from '../components/dropdownMenu'
 

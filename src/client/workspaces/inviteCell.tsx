@@ -2,7 +2,7 @@ import { User } from '@/types'
 import { FormatRelativeDate } from '@/src/common/formatting'
 import Button from '../components/button'
 import UserAvatar from '../users/userAvatar'
-import useFormattedDate from '@/src/client/hooks/useFormattedDate'
+import useFormattedDate from '@/src/client/components/useFormattedDate'
 import ModalDialog, { DialogPrompt } from '../components/modalDialog'
 import { useState } from 'react'
 

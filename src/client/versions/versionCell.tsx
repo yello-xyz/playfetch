@@ -3,7 +3,7 @@ import { ActivePrompt, PromptVersion, ChainVersion, ActiveChain, IsPromptVersion
 import VersionCellHeader from './versionCellHeader'
 import PromptVersionCellBody from '../prompts/promptVersionCellBody'
 import ChainVersionCellBody from '../chains/chainVersionCellBody'
-import { ActiveItemCache } from '@/src/client/hooks/useActiveItemCache'
+import { ActiveItemCache } from '@/src/client/projects/useActiveItemCache'
 
 export default function VersionCell<Version extends PromptVersion | ChainVersion>({
   identifier,

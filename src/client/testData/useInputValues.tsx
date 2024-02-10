@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, useState } from 'react'
 import { ActiveChain, ActivePrompt, ActiveTable, InputValues } from '@/types'
 import api from '@/src/client/api'
-import useInitialState from './useInitialState'
+import useInitialState from '../components/useInitialState'
 
 const sameValues = (a: string[] | undefined, b: string[] | undefined) =>
   (a ?? []).length === (b ?? []).length && (a ?? []).join(',') === (b ?? []).join(',')

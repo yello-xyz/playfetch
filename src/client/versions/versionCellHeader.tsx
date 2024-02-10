@@ -4,12 +4,12 @@ import VersionPopupMenu from './versionPopupMenu'
 import { ItemLabelsPopupMenu } from '../labels/labelsPopupMenu'
 import UserAvatar from '@/src/client/users/userAvatar'
 import CommentPopupMenu from '../comments/commentPopupMenu'
-import useFormattedDate from '@/src/client/hooks/useFormattedDate'
+import useFormattedDate from '@/src/client/components/useFormattedDate'
 import { FormatRelativeDate } from '@/src/common/formatting'
 import { VersionLabels } from './versionLabels'
 import Icon from '../components/icon'
 import chevronIcon from '@/public/chevron.svg'
-import { IsDummyVersion } from '@/src/client/hooks/usePromptVersion'
+import { IsDummyVersion } from '@/src/client/versions/usePromptVersion'
 
 const extractSelection = (identifier: string) => {
   const selection = document.getSelection()

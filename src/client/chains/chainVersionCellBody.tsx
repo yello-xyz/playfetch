@@ -2,7 +2,7 @@ import { ActivePrompt, ChainItemWithInputs, ChainVersion } from '@/types'
 import { ContentComparison } from '../versions/versionComparison'
 import { LabelForProvider } from '@/src/common/providerMetadata'
 import { IsBranchChainItem, IsCodeChainItem, IsQueryChainItem } from './chainNode'
-import { ActiveItemCache } from '@/src/client/hooks/useActiveItemCache'
+import { ActiveItemCache } from '@/src/client/projects/useActiveItemCache'
 
 export default function ChainVersionCellBody({
   version,

@@ -10,7 +10,7 @@ import {
 } from '@/types'
 import { useState } from 'react'
 import { SingleTabHeader } from '../components/tabsHeader'
-import useInitialState from '@/src/client/hooks/useInitialState'
+import useInitialState from '@/src/client/components/useInitialState'
 import {
   BuildRunFilter,
   GroupRuns,

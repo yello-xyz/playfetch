@@ -11,7 +11,7 @@ import { useRefreshProject } from '@/src/client/projects/projectContext'
 import UserAvatar from '@/src/client/users/userAvatar'
 import { useLoggedInUser } from '@/src/client/users/userContext'
 import { CommentCell, CommentQuote } from './commentsPane'
-import useInitialState from '@/src/client/hooks/useInitialState'
+import useInitialState from '@/src/client/components/useInitialState'
 import GlobalPopupMenu from '../components/globalPopupMenu'
 
 export default function CommentPopupMenu({

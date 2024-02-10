@@ -1,5 +1,5 @@
 import { ActivePrompt, ChainVersion, PromptConfig, PromptVersion, Prompts } from '@/types'
-import useInitialState from './useInitialState'
+import useInitialState from '../components/useInitialState'
 import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import { SupportedPromptKeysForModel, ValidatePromptConfig } from '@/src/common/providerMetadata'
 import { useEffect, useState } from 'react'
