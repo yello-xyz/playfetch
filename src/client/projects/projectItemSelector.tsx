@@ -1,11 +1,11 @@
 import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/components/globalPopupContext'
 import { ActiveProject, Chain, Prompt, ResolvedEndpoint } from '@/types'
-import { PopupContent, PopupLabelItem, PopupSectionTitle } from '../components/popupMenu'
+import { PopupContent, PopupLabelItem, PopupSectionTitle } from '@/src/client/components/popupMenu'
 import promptIcon from '@/public/prompt.svg'
 import chainIcon from '@/public/chain.svg'
 import endpointIcon from '@/public/endpoint.svg'
-import Icon from '../components/icon'
-import { PopupButton } from '../components/popupButton'
+import Icon from '@/src/client/components/icon'
+import { PopupButton } from '@/src/client/components/popupButton'
 
 export default function ProjectItemSelector<T extends Prompt | Chain | ResolvedEndpoint>({
   project,

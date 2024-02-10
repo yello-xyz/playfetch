@@ -1,4 +1,4 @@
-import Icon from '../components/icon'
+import Icon from '@/src/client/components/icon'
 
 export default function ItemLabels({
   labels,

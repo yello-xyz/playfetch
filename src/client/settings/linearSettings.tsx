@@ -1,5 +1,5 @@
 import api from '@/src/client/api'
-import Button from '../components/button'
+import Button from '@/src/client/components/button'
 import { useRouter } from 'next/router'
 import { useIssueTrackerProvider } from '@/src/client/settings/providerContext'
 import { ActiveProject, AvailableIssueTrackerProvider, AvailableProvider, IssueTrackerConfig } from '@/types'
@@ -9,7 +9,7 @@ import { NeedsUpdatesLabel } from '@/src/common/defaults'
 import ItemLabels from '@/src/client/labels/itemLabels'
 import { AvailableLabelColorsForItem } from '../labels/labelsPopup'
 import LabelsPopupMenuButton from '../labels/labelsPopupMenuButton'
-import Checkbox from '../components/checkbox'
+import Checkbox from '@/src/client/components/checkbox'
 
 export default function LinearSettings({
   activeProject,

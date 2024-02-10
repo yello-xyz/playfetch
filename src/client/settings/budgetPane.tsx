@@ -1,5 +1,5 @@
 import { CostUsage } from '@/types'
-import Label from '../components/label'
+import Label from '@/src/client/components/label'
 import PercentagePieChart from '../endpoints/percentagePieChart'
 import { Capitalize, FormatCost } from '@/src/common/formatting'
 import { ReactNode, RefObject, useRef, useState } from 'react'

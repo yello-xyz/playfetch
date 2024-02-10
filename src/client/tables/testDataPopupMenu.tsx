@@ -1,11 +1,11 @@
-import { PopupContent, PopupMenuItem } from '../components/popupMenu'
+import { PopupContent, PopupMenuItem } from '@/src/client/components/popupMenu'
 import { Chain, ProjectItemIsChain, Prompt } from '@/types'
 import api from '../api'
 import { useRefreshActiveItem, useRefreshProject } from '../projects/projectContext'
 import { useRouter } from 'next/router'
 import { TableRoute } from '@/src/common/clientRoute'
 import { WithDismiss } from '@/src/client/components/globalPopupContext'
-import { DialogPrompt } from '../components/modalDialog'
+import { DialogPrompt } from '@/src/client/components/modalDialog'
 
 export type TestDataPopupMenuProps = {
   parentItem: Prompt | Chain

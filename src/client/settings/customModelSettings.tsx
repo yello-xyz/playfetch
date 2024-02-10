@@ -1,4 +1,4 @@
-import Label from '../components/label'
+import Label from '@/src/client/components/label'
 import {
   AvailableProvider,
   CustomModel,
@@ -9,9 +9,9 @@ import {
 } from '@/types'
 import api from '@/src/client/api'
 import useModalDialogPrompt from '@/src/client/components/modalDialogContext'
-import Icon from '../components/icon'
-import Button from '../components/button'
-import TextInput from '../components/textInput'
+import Icon from '@/src/client/components/icon'
+import Button from '@/src/client/components/button'
+import TextInput from '@/src/client/components/textInput'
 import useInitialState from '@/src/client/components/useInitialState'
 import { useState } from 'react'
 import chevronIcon from '@/public/chevron.svg'

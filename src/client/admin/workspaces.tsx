@@ -1,6 +1,6 @@
 import { Workspace } from '@/types'
 import Label from '@/src/client/components/label'
-import Icon from '../components/icon'
+import Icon from '@/src/client/components/icon'
 import folderIcon from '@/public/folder.svg'
 import TableRow, { TableCell, TruncatedSpan } from './tableRow'
 

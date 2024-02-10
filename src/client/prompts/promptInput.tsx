@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import Editor from '../components/editor'
+import Editor from '@/src/client/components/editor'
 import useGlobalPopup from '@/src/client/components/globalPopupContext'
 import { StringStream } from '@codemirror/language'
 import { tags, Tag } from '@lezer/highlight'

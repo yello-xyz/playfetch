@@ -1,7 +1,7 @@
 import { ActiveWorkspace, IsPendingProject, PendingProject, Project, Workspace } from '@/types'
 import { useState } from 'react'
 import api from '@/src/client/api'
-import IconButton from '../components/iconButton'
+import IconButton from '@/src/client/components/iconButton'
 import starIcon from '@/public/star.svg'
 import filledStarIcon from '@/public/filledStar.svg'
 import dotsIcon from '@/public/dots.svg'

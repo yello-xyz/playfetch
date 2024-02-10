@@ -14,11 +14,11 @@ import promptIcon from '@/public/prompt.svg'
 import codeIcon from '@/public/code.svg'
 import queryIcon from '@/public/query.svg'
 import branchIcon from '@/public/branch.svg'
-import Icon from '../components/icon'
+import Icon from '@/src/client/components/icon'
 import ChainNodePopupMenu from './chainNodePopupMenu'
 import CommentPopupMenu from '../comments/commentPopupMenu'
 import { ReactNode, useState } from 'react'
-import { EditableHeaderItem, HeaderItem } from '../components/headerItem'
+import { EditableHeaderItem, HeaderItem } from '@/src/client/components/headerItem'
 
 export default function ChainNodeBoxHeader({
   nodes,

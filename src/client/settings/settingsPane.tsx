@@ -1,4 +1,4 @@
-import Label from '../components/label'
+import Label from '@/src/client/components/label'
 import { ReactNode } from 'react'
 
 export default function SettingsPane({

@@ -1,5 +1,5 @@
 import { PartialRun, Run } from '@/types'
-import Collapsible from '../components/collapsible'
+import Collapsible from '@/src/client/components/collapsible'
 import { useState } from 'react'
 import { CancelButton } from './runCellContinuation'
 

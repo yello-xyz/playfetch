@@ -1,13 +1,13 @@
 import { ActiveTable } from '@/types'
 import useInputValues from '@/src/client/tables/useInputValues'
 import TableEditor, { HasTableData } from './tableEditor'
-import { SingleTabHeader } from '../components/tabsHeader'
+import { SingleTabHeader } from '@/src/client/components/tabsHeader'
 import useProjectItemActions from '@/src/client/projects/useProjectItemActions'
 import EmptyTableWrapper from './emptyTableWrapper'
 import dotsIcon from '@/public/dots.svg'
-import { PopupContent, PopupMenuItem } from '../components/popupMenu'
+import { PopupContent, PopupMenuItem } from '@/src/client/components/popupMenu'
 import { exportTableData } from './useTestDataActionButtons'
-import GlobalPopupMenu from '../components/globalPopupMenu'
+import GlobalPopupMenu from '@/src/client/components/globalPopupMenu'
 import { WithDismiss } from '@/src/client/components/globalPopupContext'
 
 export default function TestDataView({ table }: { table: ActiveTable }) {

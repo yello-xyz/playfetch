@@ -1,6 +1,6 @@
-import { PopupContent, PopupMenuItem } from '../components/popupMenu'
+import { PopupContent, PopupMenuItem } from '@/src/client/components/popupMenu'
 import dotsIcon from '@/public/dots.svg'
-import GlobalPopupMenu from '../components/globalPopupMenu'
+import GlobalPopupMenu from '@/src/client/components/globalPopupMenu'
 import { WithDismiss } from '@/src/client/components/globalPopupContext'
 
 export default function ChainNodePopupMenu({

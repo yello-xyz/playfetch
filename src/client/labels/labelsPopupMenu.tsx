@@ -2,7 +2,7 @@ import { ActivePrompt, Run, PromptVersion, ActiveChain, ChainVersion } from '@/t
 import api from '@/src/client/api'
 import labelIcon from '@/public/label.svg'
 import { useRefreshActiveItem, useRefreshProject } from '@/src/client/projects/projectContext'
-import GlobalPopupMenu from '../components/globalPopupMenu'
+import GlobalPopupMenu from '@/src/client/components/globalPopupMenu'
 import LabelsPopup, { AvailableLabelColorsForItem, LabelsPopupProps } from './labelsPopup'
 
 export function ItemLabelsPopupMenu({

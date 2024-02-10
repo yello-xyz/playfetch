@@ -1,4 +1,4 @@
-import { PopupContent, PopupLabelItem, PopupSectionDivider } from '../components/popupMenu'
+import { PopupContent, PopupLabelItem, PopupSectionDivider } from '@/src/client/components/popupMenu'
 import { Prompt } from '@/types'
 import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'

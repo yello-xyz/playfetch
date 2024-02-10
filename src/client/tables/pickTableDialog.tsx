@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import ModalDialog, { DialogPrompt } from '../components/modalDialog'
+import ModalDialog, { DialogPrompt } from '@/src/client/components/modalDialog'
 import { Table } from '@/types'
-import Icon from '../components/icon'
+import Icon from '@/src/client/components/icon'
 import tableIcon from '@/public/table.svg'
 import checkIcon from '@/public/check.svg'
 

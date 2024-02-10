@@ -3,7 +3,7 @@ import VersionComparison, { ContentComparison } from '../versions/versionCompari
 import { LabelForModel, SupportsFunctionsPrompt, SupportsSystemPrompt } from '@/src/common/providerMetadata'
 import useAvailableModelProviders from '@/src/client/settings/providerContext'
 import { ExtractFunction, ExtractFunctionNames } from '@/src/common/formatting'
-import Collapsible from '../components/collapsible'
+import Collapsible from '@/src/client/components/collapsible'
 import { LabelForChatMode, LabelForJsonMode } from './promptConfigSettings'
 
 export default function PromptVersionCellBody({

@@ -1,14 +1,14 @@
 import { ActiveChain, ActivePrompt, ChainVersion, IsProperRun, PartialRun, PromptVersion, Run, User } from '@/types'
 import { Fragment, KeyboardEvent, ReactNode, useState } from 'react'
 import RunCellFooter from './runCellFooter'
-import TextInput from '../components/textInput'
-import { PendingButton } from '../components/button'
+import TextInput from '@/src/client/components/textInput'
+import { PendingButton } from '@/src/client/components/button'
 import UserAvatar from '../users/userAvatar'
 import { useLoggedInUser } from '@/src/client/users/userContext'
 import RunCellBody from './runCellBody'
 import { ExtractInputKey, FormatCost } from '@/src/common/formatting'
 import useInitialState from '@/src/client/components/useInitialState'
-import Icon from '../components/icon'
+import Icon from '@/src/client/components/icon'
 import cancelIcon from '@/public/cancel.svg'
 
 export default function RunCellContinuation({

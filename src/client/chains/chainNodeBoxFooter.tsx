@@ -1,8 +1,8 @@
 import { ChainItem } from '@/types'
 import { ChainNode, IsChainItem, MappableTargetInputsForChainNode } from './chainNode'
 import { ChainItemCache } from '@/src/client/chains/useChainItemCache'
-import Label from '../components/label'
-import DropdownMenu from '../components/dropdownMenu'
+import Label from '@/src/client/components/label'
+import DropdownMenu from '@/src/client/components/dropdownMenu'
 
 export default function ChainNodeBoxFooter({
   nodes,

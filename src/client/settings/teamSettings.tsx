@@ -2,7 +2,7 @@ import MembersPane from '../users/membersPane'
 import { useActiveProject, useRefreshProject } from '@/src/client/projects/projectContext'
 import api from '@/src/client/api'
 import { useState } from 'react'
-import ModalDialog, { DialogPrompt } from '../components/modalDialog'
+import ModalDialog, { DialogPrompt } from '@/src/client/components/modalDialog'
 
 export default function TeamSettings() {
   const activeProject = useActiveProject()

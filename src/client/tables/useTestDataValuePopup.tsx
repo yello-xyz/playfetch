@@ -1,7 +1,7 @@
 import { KeyboardEvent, useState } from 'react'
 import useGlobalPopup, { WithDismiss } from '@/src/client/components/globalPopupContext'
-import { PopupContent } from '../components/popupMenu'
-import Button from '../components/button'
+import { PopupContent } from '@/src/client/components/popupMenu'
+import Button from '@/src/client/components/button'
 import TestDataHeader from './testDataHeader'
 import Editor from '@/src/client/components/editor'
 

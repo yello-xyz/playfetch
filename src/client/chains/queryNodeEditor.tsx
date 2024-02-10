@@ -1,13 +1,13 @@
 import PromptInput from '../prompts/promptInput'
-import { SingleTabHeader } from '../components/tabsHeader'
+import { SingleTabHeader } from '@/src/client/components/tabsHeader'
 import queryIcon from '@/public/query.svg'
 import { EmbeddingModel, QueryChainItem, QueryProvider } from '@/types'
-import TextInput from '../components/textInput'
-import Label from '../components/label'
-import DropdownMenu from '../components/dropdownMenu'
+import TextInput from '@/src/client/components/textInput'
+import Label from '@/src/client/components/label'
+import DropdownMenu from '@/src/client/components/dropdownMenu'
 import { EmbeddingModels, QueryProviders, LabelForProvider, ProviderForModel } from '@/src/common/providerMetadata'
 import { useCheckProviderAvailable } from '@/src/client/settings/providerContext'
-import RangeInput from '../components/rangeInput'
+import RangeInput from '@/src/client/components/rangeInput'
 import { ProviderWarning } from '../prompts/modelUnavailableWarning'
 
 export default function QueryNodeEditor({

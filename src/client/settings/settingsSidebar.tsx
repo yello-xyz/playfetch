@@ -1,4 +1,4 @@
-import { SidebarButton } from '../components/sidebar'
+import { SidebarButton } from '@/src/client/components/sidebar'
 
 export default function SettingsSidebar<T>({
   panes,

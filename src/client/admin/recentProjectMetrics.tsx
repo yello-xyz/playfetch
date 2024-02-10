@@ -1,6 +1,6 @@
 import { ProjectMetrics, RecentProject } from '@/types'
 import Label from '@/src/client/components/label'
-import Icon from '../components/icon'
+import Icon from '@/src/client/components/icon'
 import backIcon from '@/public/back.svg'
 import AnalyticsDashboards from '../endpoints/analyticsDashboards'
 import { FormatDate } from '@/src/common/formatting'

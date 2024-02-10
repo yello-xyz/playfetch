@@ -1,13 +1,13 @@
 import { ActiveChain, ChainVersion } from '@/types'
-import { CustomHeader } from '../components/tabsHeader'
-import Icon from '../components/icon'
+import { CustomHeader } from '@/src/client/components/tabsHeader'
+import Icon from '@/src/client/components/icon'
 import chainIcon from '@/public/chain.svg'
 import historyIcon from '@/public/history.svg'
 import { StaticImageData } from 'next/image'
 import { useState } from 'react'
 import { useRefreshActiveItem, useRefreshProject } from '@/src/client/projects/projectContext'
 import api from '@/src/client/api'
-import { EditableHeaderItem } from '../components/headerItem'
+import { EditableHeaderItem } from '@/src/client/components/headerItem'
 
 export default function ChainEditorHeader({
   chain,

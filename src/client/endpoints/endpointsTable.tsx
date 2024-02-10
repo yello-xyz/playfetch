@@ -1,15 +1,15 @@
 import { Chain, ProjectItemIsChain, Prompt, ResolvedEndpoint, Analytics } from '@/types'
 import { ReactNode } from 'react'
-import Checkbox from '../components/checkbox'
+import Checkbox from '@/src/client/components/checkbox'
 import addIcon from '@/public/add.svg'
 import addIconWhite from '@/public/addWhite.svg'
 import promptIcon from '@/public/prompt.svg'
 import chainIcon from '@/public/chain.svg'
-import Icon from '../components/icon'
-import TableCell, { TableHeader } from '../components/tableCell'
+import Icon from '@/src/client/components/icon'
+import TableCell, { TableHeader } from '@/src/client/components/tableCell'
 
 import dynamic from 'next/dynamic'
-import { TopBarButton } from '../components/topBarButton'
+import { TopBarButton } from '@/src/client/components/topBarButton'
 const AnalyticsDashboards = dynamic(() => import('./analyticsDashboards'), { ssr: false })
 
 export default function EndpointsTable({

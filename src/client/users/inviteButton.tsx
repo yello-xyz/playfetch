@@ -1,8 +1,8 @@
 import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/components/globalPopupContext'
-import { PopupContent } from '../components/popupMenu'
-import { CustomPopupButton } from '../components/popupButton'
+import { PopupContent } from '@/src/client/components/popupMenu'
+import { CustomPopupButton } from '@/src/client/components/popupButton'
 import { PendingUser, User } from '@/types'
-import { TopBarButton } from '../components/topBarButton'
+import { TopBarButton } from '@/src/client/components/topBarButton'
 import MembersPane from './membersPane'
 
 export default function InviteButton({

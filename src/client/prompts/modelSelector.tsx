@@ -1,8 +1,8 @@
 import { AvailableModelProvider, LanguageModel, PromptConfig } from '@/types'
 import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/components/globalPopupContext'
-import Icon from '../components/icon'
-import { PopupButton } from '../components/popupButton'
-import { PopupContent, PopupLabelItem } from '../components/popupMenu'
+import Icon from '@/src/client/components/icon'
+import { PopupButton } from '@/src/client/components/popupButton'
+import { PopupContent, PopupLabelItem } from '@/src/client/components/popupMenu'
 import ModelInfoPane, { ModelLabel } from './modelInfoPane'
 import {
   PublicLanguageModels,

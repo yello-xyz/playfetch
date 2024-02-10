@@ -1,5 +1,5 @@
 import { ResolvedEndpoint } from '@/types'
-import Label from '../components/label'
+import Label from '@/src/client/components/label'
 import { FormatCost, FormatDuration } from '@/src/common/formatting'
 
 export default function UsagePane({ endpoint }: { endpoint: ResolvedEndpoint }) {

@@ -1,7 +1,7 @@
 import { RecentProject } from '@/types'
 import Label from '@/src/client/components/label'
 import { FormatDate } from '@/src/common/formatting'
-import Icon from '../components/icon'
+import Icon from '@/src/client/components/icon'
 import fileIcon from '@/public/file.svg'
 import folderIcon from '@/public/folder.svg'
 import userIcon from '@/public/user.svg'

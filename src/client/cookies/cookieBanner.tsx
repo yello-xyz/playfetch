@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import Button from '../components/button'
+import Button from '@/src/client/components/button'
 import TagManager from 'react-gtm-module'
 import ClientRoute from '@/src/common/clientRoute'
-import Checkbox from '../components/checkbox'
+import Checkbox from '@/src/client/components/checkbox'
 import { useCookies } from 'react-cookie'
 import { CookieSetOptions } from 'universal-cookie'
 

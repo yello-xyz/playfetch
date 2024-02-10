@@ -1,8 +1,8 @@
 import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/components/globalPopupContext'
-import { PopupContent, PopupMenuItem } from '../components/popupMenu'
-import { CustomPopupButton } from '../components/popupButton'
+import { PopupContent, PopupMenuItem } from '@/src/client/components/popupMenu'
+import { CustomPopupButton } from '@/src/client/components/popupButton'
 import chevronIcon from '@/public/chevronWhite.svg'
-import Icon from '../components/icon'
+import Icon from '@/src/client/components/icon'
 
 export default function SavePromptButton({ onSave }: { onSave: () => void }) {
   const setPopup = useGlobalPopup<SaveButtonPopupProps>()

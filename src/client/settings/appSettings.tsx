@@ -2,7 +2,7 @@ import { ActiveProject, AvailableProvider, IssueTrackerProvider, SourceControlPr
 import { ReactNode, useState } from 'react'
 import api from '@/src/client/api'
 import useModalDialogPrompt from '@/src/client/components/modalDialogContext'
-import Button from '../components/button'
+import Button from '@/src/client/components/button'
 import { ProviderRow } from './providerSettings'
 import Link from 'next/link'
 import { UserSettingsRoute } from '@/src/common/clientRoute'

@@ -7,10 +7,10 @@ import thumbsDownFilledIcon from '@/public/thumbsDownFilled.svg'
 import { useRefreshActiveItem, useRefreshProject } from '@/src/client/projects/projectContext'
 import { KeyboardEvent, useCallback, useState } from 'react'
 import { WithDismiss } from '@/src/client/components/globalPopupContext'
-import { PopupContent } from '../components/popupMenu'
-import TextInput from '../components/textInput'
-import Button from '../components/button'
-import GlobalPopupMenu from '../components/globalPopupMenu'
+import { PopupContent } from '@/src/client/components/popupMenu'
+import TextInput from '@/src/client/components/textInput'
+import Button from '@/src/client/components/button'
+import GlobalPopupMenu from '@/src/client/components/globalPopupMenu'
 
 export default function RunRatingButtons({
   run,

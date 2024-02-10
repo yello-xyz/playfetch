@@ -1,5 +1,5 @@
 import LabelsPopup, { LabelsPopupProps } from './labelsPopup'
-import { PopupButton } from '../components/popupButton'
+import { PopupButton } from '@/src/client/components/popupButton'
 import ItemLabels from './itemLabels'
 import useGlobalPopup, { GlobalPopupLocation } from '@/src/client/components/globalPopupContext'
 

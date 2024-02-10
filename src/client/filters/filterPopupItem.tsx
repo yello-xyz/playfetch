@@ -1,7 +1,7 @@
 import chevronIcon from '@/public/chevron.svg'
 import checkIcon from '@/public/check.svg'
 import { ReactNode } from 'react'
-import Icon from '../components/icon'
+import Icon from '@/src/client/components/icon'
 import { StaticImageData } from 'next/image'
 
 export const FilterCategoryItem = ({

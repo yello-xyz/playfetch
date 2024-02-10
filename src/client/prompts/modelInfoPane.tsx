@@ -1,5 +1,5 @@
 import { LanguageModel, PromptConfig } from '@/types'
-import { PopupContent, PopupMenuItem } from '../components/popupMenu'
+import { PopupContent, PopupMenuItem } from '@/src/client/components/popupMenu'
 import {
   DescriptionForModel,
   LabelForModel,
@@ -13,11 +13,11 @@ import {
   WebsiteLinkForModel,
   IsSubscriptionRequiredForModel,
 } from '@/src/common/providerMetadata'
-import Icon from '../components/icon'
+import Icon from '@/src/client/components/icon'
 import { FormatCost, FormatLargeInteger } from '@/src/common/formatting'
 import { useModelProviders } from '@/src/client/settings/providerContext'
 import { useState } from 'react'
-import IconButton from '../components/iconButton'
+import IconButton from '@/src/client/components/iconButton'
 import dotsIcon from '@/public/dots.svg'
 import { useDefaultPromptConfig } from '@/src/client/users/userPresetsContext'
 import { PromptConfigsAreEqual } from '@/src/common/versionsEqual'

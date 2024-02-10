@@ -12,7 +12,7 @@ import { SelectAnyInputValue, SelectInputRows } from '@/src/client/tables/inputR
 import RunButtons from '../runs/runButtons'
 import { VersionHasNonEmptyPrompts } from '@/src/common/versionsEqual'
 import { useCheckModelAvailable } from '@/src/client/settings/providerContext'
-import Collapsible from '../components/collapsible'
+import Collapsible from '@/src/client/components/collapsible'
 import PromptTabs from './promptTabs'
 import { usePromptTabs } from '@/src/client/users/userPresetsContext'
 import { GetTableRowCount, HasTableData } from '../tables/tableEditor'

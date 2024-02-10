@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { EditableItem } from '../components/headerItem'
+import { EditableItem } from '@/src/client/components/headerItem'
 import chevronIcon from '@/public/chevron.svg'
-import GlobalPopupMenu from '../components/globalPopupMenu'
-import PopupMenu, { PopupContent, PopupMenuItem } from '../components/popupMenu'
+import GlobalPopupMenu from '@/src/client/components/globalPopupMenu'
+import PopupMenu, { PopupContent, PopupMenuItem } from '@/src/client/components/popupMenu'
 import { WithDismiss } from '@/src/client/components/globalPopupContext'
-import PickNameDialog from '../components/pickNameDialog'
-import IconButton from '../components/iconButton'
-import ModalDialog, { DialogPrompt } from '../components/modalDialog'
+import PickNameDialog from '@/src/client/components/pickNameDialog'
+import IconButton from '@/src/client/components/iconButton'
+import ModalDialog, { DialogPrompt } from '@/src/client/components/modalDialog'
 
 export default function TestDataHeader({
   variable,

@@ -11,11 +11,11 @@ import {
 } from 'react'
 import addIcon from '@/public/add.svg'
 import expandIcon from '@/public/expand.svg'
-import Icon from '../components/icon'
+import Icon from '@/src/client/components/icon'
 import { InputValues } from '@/types'
 import TestDataHeader from './testDataHeader'
 import useTestDataValuePopup from '@/src/client/tables/useTestDataValuePopup'
-import Editor from '../components/editor'
+import Editor from '@/src/client/components/editor'
 import { GetUniqueName } from '@/src/common/formatting'
 import { InView } from 'react-intersection-observer'
 

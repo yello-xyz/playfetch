@@ -2,7 +2,7 @@ import { ActivePrompt, PromptVersion, Prompts } from '@/types'
 
 import { PromptTab } from '@/src/common/userPresets'
 import { ReactNode, useState } from 'react'
-import TabsHeader, { SingleTabHeader } from '../components/tabsHeader'
+import TabsHeader, { SingleTabHeader } from '@/src/client/components/tabsHeader'
 import PromptPanel from './promptPanel'
 import VersionTimeline from '../versions/versionTimeline'
 import {

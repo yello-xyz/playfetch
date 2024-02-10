@@ -7,7 +7,7 @@ import CommentPopupMenu from '../comments/commentPopupMenu'
 import useFormattedDate from '@/src/client/components/useFormattedDate'
 import { FormatRelativeDate } from '@/src/common/formatting'
 import { VersionLabels } from './versionLabels'
-import Icon from '../components/icon'
+import Icon from '@/src/client/components/icon'
 import chevronIcon from '@/public/chevron.svg'
 import { IsDummyVersion } from '@/src/client/versions/usePromptVersion'
 

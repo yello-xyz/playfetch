@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import ModalDialog, { DialogPrompt } from '../components/modalDialog'
+import ModalDialog, { DialogPrompt } from '@/src/client/components/modalDialog'
 import { ActiveWorkspace, Project, Workspace } from '@/types'
-import DropdownMenu from '../components/dropdownMenu'
+import DropdownMenu from '@/src/client/components/dropdownMenu'
 import api from '@/src/client/api'
 
 export default function PickProjectDialog({

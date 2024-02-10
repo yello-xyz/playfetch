@@ -1,4 +1,4 @@
-import Icon from '../components/icon'
+import Icon from '@/src/client/components/icon'
 import commentIcon from '@/public/comment.svg'
 import { useCallback, useEffect, useState } from 'react'
 

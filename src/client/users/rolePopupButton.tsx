@@ -1,5 +1,5 @@
-import { PopupContent, PopupItem, PopupLabelItem } from '../components/popupMenu'
-import { PopupButton } from '../components/popupButton'
+import { PopupContent, PopupItem, PopupLabelItem } from '@/src/client/components/popupMenu'
+import { PopupButton } from '@/src/client/components/popupButton'
 import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/components/globalPopupContext'
 
 export default function RolePopupButton({

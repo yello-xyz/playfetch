@@ -1,8 +1,8 @@
-import { PopupContent } from '../components/popupMenu'
+import { PopupContent } from '@/src/client/components/popupMenu'
 import addIcon from '@/public/add.svg'
 import checkIcon from '@/public/check.svg'
 import { useState } from 'react'
-import Icon from '../components/icon'
+import Icon from '@/src/client/components/icon'
 import { WithDismiss } from '@/src/client/components/globalPopupContext'
 
 const projectLabelColors = [

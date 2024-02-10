@@ -1,7 +1,7 @@
 import { User } from '@/types'
 import clearIcon from '@/public/clear.svg'
 import UserAvatar from '@/src/client/users/userAvatar'
-import Icon from '../components/icon'
+import Icon from '@/src/client/components/icon'
 import { Filter, IsLabelFilter, IsTextFilter, IsUserFilter, LabelFilter, TextFilter, UserFilter } from './filters'
 
 export default function FilterCells<SortOption extends string>({

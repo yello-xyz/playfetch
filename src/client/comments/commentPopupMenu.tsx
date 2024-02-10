@@ -1,7 +1,7 @@
 import { Comment, User } from '@/types'
 import api from '@/src/client/api'
-import { PopupContent } from '../components/popupMenu'
-import IconButton from '../components/iconButton'
+import { PopupContent } from '@/src/client/components/popupMenu'
+import IconButton from '@/src/client/components/iconButton'
 import commentIcon from '@/public/comment.svg'
 import commentBadgeIcon from '@/public/commentBadge.svg'
 import enterIcon from '@/public/enter.svg'
@@ -12,7 +12,7 @@ import UserAvatar from '@/src/client/users/userAvatar'
 import { useLoggedInUser } from '@/src/client/users/userContext'
 import { CommentCell, CommentQuote } from './commentsPane'
 import useInitialState from '@/src/client/components/useInitialState'
-import GlobalPopupMenu from '../components/globalPopupMenu'
+import GlobalPopupMenu from '@/src/client/components/globalPopupMenu'
 
 export default function CommentPopupMenu({
   comments,

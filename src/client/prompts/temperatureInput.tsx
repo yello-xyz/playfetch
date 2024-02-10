@@ -1,8 +1,8 @@
 import useGlobalPopup, { GlobalPopupLocation } from '@/src/client/components/globalPopupContext'
 import { PromptConfig } from '@/types'
-import { PopupContent } from '../components/popupMenu'
-import { CustomPopupButton } from '../components/popupButton'
-import RangeInput from '../components/rangeInput'
+import { PopupContent } from '@/src/client/components/popupMenu'
+import { CustomPopupButton } from '@/src/client/components/popupButton'
+import RangeInput from '@/src/client/components/rangeInput'
 import { useState } from 'react'
 
 export default function TemperatureInput({

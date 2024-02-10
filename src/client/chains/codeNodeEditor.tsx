@@ -1,9 +1,9 @@
 import PromptInput from '../prompts/promptInput'
 import { NameForCodeChainItem } from './chainNode'
-import { SingleTabHeader } from '../components/tabsHeader'
+import { SingleTabHeader } from '@/src/client/components/tabsHeader'
 import codeIcon from '@/public/code.svg'
 import { CodeChainItem } from '@/types'
-import TextInput from '../components/textInput'
+import TextInput from '@/src/client/components/textInput'
 import { InterruptPrefix } from '@/src/common/formatting'
 
 export default function CodeNodeEditor({

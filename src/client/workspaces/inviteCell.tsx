@@ -1,9 +1,9 @@
 import { User } from '@/types'
 import { FormatRelativeDate } from '@/src/common/formatting'
-import Button from '../components/button'
+import Button from '@/src/client/components/button'
 import UserAvatar from '../users/userAvatar'
 import useFormattedDate from '@/src/client/components/useFormattedDate'
-import ModalDialog, { DialogPrompt } from '../components/modalDialog'
+import ModalDialog, { DialogPrompt } from '@/src/client/components/modalDialog'
 import { useState } from 'react'
 
 export function InviteCell({

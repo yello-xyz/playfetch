@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { InputValues, ResolvedEndpoint } from '@/types'
-import Label from '../components/label'
+import Label from '@/src/client/components/label'
 import { ToCamelCase } from '@/src/common/formatting'
-import Icon from '../components/icon'
+import Icon from '@/src/client/components/icon'
 import clipboardIcon from '@/public/clipboard.svg'
 import checkIcon from '@/public/check.svg'
-import CodeBlock, { CodeWithMarkup } from '../components/codeBlock'
+import CodeBlock, { CodeWithMarkup } from '@/src/client/components/codeBlock'
 import { SelectAnyInputRow } from '@/src/client/tables/inputRows'
 
 const buildCurlCommand = (

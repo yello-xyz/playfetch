@@ -5,9 +5,9 @@ import folderIcon from '@/public/folder.svg'
 import fileIcon from '@/public/file.svg'
 import addIcon from '@/public/add.svg'
 import UserSidebarItem from '../users/userSidebarItem'
-import PickNameDialog from '../components/pickNameDialog'
+import PickNameDialog from '@/src/client/components/pickNameDialog'
 import { useLoggedInUser } from '@/src/client/users/userContext'
-import { FeedbackSection, SidebarButton, SidebarSection } from '../components/sidebar'
+import { FeedbackSection, SidebarButton, SidebarSection } from '@/src/client/components/sidebar'
 import useWorkspaceActions from '@/src/client/workspaces/useWorkspaceActions'
 
 export default function WorkspaceSidebar({

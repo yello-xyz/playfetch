@@ -1,6 +1,6 @@
 import { WorkspaceMetrics } from '@/types'
 import Label from '@/src/client/components/label'
-import Icon from '../components/icon'
+import Icon from '@/src/client/components/icon'
 import backIcon from '@/public/back.svg'
 import ActiveUsers from './activeUsers'
 import folderIcon from '@/public/folder.svg'

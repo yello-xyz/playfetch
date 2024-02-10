@@ -1,17 +1,17 @@
 import { Chain, ChainVersion, ProjectItemIsChain, LogEntry, Prompt, PromptVersion } from '@/types'
 import { FormatCost, FormatDate, FormatDuration } from '@/src/common/formatting'
 import collapseIcon from '@/public/collapse.svg'
-import IconButton from '../components/iconButton'
-import Icon from '../components/icon'
+import IconButton from '@/src/client/components/iconButton'
+import Icon from '@/src/client/components/icon'
 import promptIcon from '@/public/prompt.svg'
 import chainIcon from '@/public/chain.svg'
-import Label from '../components/label'
+import Label from '@/src/client/components/label'
 import useFormattedDate from '@/src/client/components/useFormattedDate'
-import { SingleTabHeader } from '../components/tabsHeader'
-import CodeBlock from '../components/codeBlock'
+import { SingleTabHeader } from '@/src/client/components/tabsHeader'
+import CodeBlock from '@/src/client/components/codeBlock'
 import LogStatus from './logStatus'
 import { ReactNode, useState } from 'react'
-import Collapsible from '../components/collapsible'
+import Collapsible from '@/src/client/components/collapsible'
 
 export default function LogEntryDetailsPane({
   logEntries,

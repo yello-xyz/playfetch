@@ -10,7 +10,7 @@ import { ReactNode, useState } from 'react'
 import { useCheckModelProviders } from '@/src/client/settings/providerContext'
 import PromptConfigSettings from './promptConfigSettings'
 import { ModelUnavailableWarning } from './modelUnavailableWarning'
-import Collapsible from '../components/collapsible'
+import Collapsible from '@/src/client/components/collapsible'
 
 export default function PromptPanel({
   version,

@@ -1,12 +1,12 @@
 import { useCallback, useState } from 'react'
 import { Project, Workspace } from '@/types'
-import { PopupContent, PopupLabelItem, PopupSectionDivider, PopupSectionTitle } from '../components/popupMenu'
+import { PopupContent, PopupLabelItem, PopupSectionDivider, PopupSectionTitle } from '@/src/client/components/popupMenu'
 import addIcon from '@/public/add.svg'
 import folderIcon from '@/public/folder.svg'
 import { WithDismiss } from '@/src/client/components/globalPopupContext'
 import { useLoggedInUser } from '@/src/client/users/userContext'
-import TextInput from '../components/textInput'
-import Button from '../components/button'
+import TextInput from '@/src/client/components/textInput'
+import Button from '@/src/client/components/button'
 
 export type MoveProjectPopupProps = {
   workspaces: Workspace[]

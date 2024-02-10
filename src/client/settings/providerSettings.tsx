@@ -1,12 +1,12 @@
-import Label from '../components/label'
+import Label from '@/src/client/components/label'
 import { IconForProvider, LabelForProvider } from '@/src/common/providerMetadata'
 import { AvailableProvider, IsModelProvider, ModelProvider, QueryProvider, SupportedProvider } from '@/types'
 import { ReactNode, useState } from 'react'
 import api from '@/src/client/api'
 import useModalDialogPrompt from '@/src/client/components/modalDialogContext'
-import Icon from '../components/icon'
-import Button from '../components/button'
-import TextInput from '../components/textInput'
+import Icon from '@/src/client/components/icon'
+import Button from '@/src/client/components/button'
+import TextInput from '@/src/client/components/textInput'
 import CustomModelSettings from './customModelSettings'
 
 export default function ProviderSettings({

@@ -1,4 +1,4 @@
-import { SidebarButton, SidebarSection } from '../components/sidebar'
+import { SidebarButton, SidebarSection } from '@/src/client/components/sidebar'
 import linkIcon from '@/public/chain.svg'
 import userIcon from '@/public/user.svg'
 import fileIcon from '@/public/file.svg'
