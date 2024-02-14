@@ -29,7 +29,7 @@ export const PlaceholderForPromptKey = (promptKey: keyof Prompts) => {
   }
 }
 
-export const PromptKeyNeedsPreformatted = (promptKey: keyof Prompts) => {
+export const PromptKeyNeedsPreformatting = (promptKey: keyof Prompts) => {
   switch (promptKey) {
     case 'main':
     case 'system':

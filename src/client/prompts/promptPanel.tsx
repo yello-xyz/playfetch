@@ -2,7 +2,7 @@ import { PromptConfig, PromptVersion, Prompts } from '@/types'
 import {
   LabelForPromptKey,
   PlaceholderForPromptKey,
-  PromptKeyNeedsPreformatted,
+  PromptKeyNeedsPreformatting,
   SupportedPromptKeysForModel,
 } from './promptKeys'
 import PromptInput from './promptInput'
@@ -102,7 +102,7 @@ const PromptInputSection = ({
         value={version.prompts[promptKey] ?? ''}
         setValue={prompt => updatePrompt?.(promptKey, prompt)}
         placeholder={updatePrompt ? PlaceholderForPromptKey(promptKey) : undefined}
-        preformatted={PromptKeyNeedsPreformatted(promptKey)}
+        preformatted={PromptKeyNeedsPreformatting(promptKey)}
         disabled={!updatePrompt}
         variables={variables}
       />
