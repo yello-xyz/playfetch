@@ -76,10 +76,19 @@ const buildQuery = (
     selectKeys
   )
 
+const defaultLimitForType = (type: EntityType) => {
+  switch (type) {
+    case Entity.PROMPT:
+      return 250
+    default:
+      return 100
+  }
+}
+
 const getInternalFilteredEntities = (
   type: EntityType,
   filter?: EntityFilter,
-  limit = 100,
+  limit = defaultLimitForType(type),
   sortKeys = [] as string[],
   selectKeys = [] as string[],
   transaction?: Transaction
