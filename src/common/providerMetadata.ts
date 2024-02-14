@@ -310,7 +310,7 @@ export const DescriptionForModel = (model: LanguageModel, providers: AvailableMo
     case 'gpt-4':
       return 'GPT-4 from OpenAI has broad general knowledge and domain expertise allowing it to follow complex instructions in natural language and solve difficult problems accurately (gpt-4-0613).'
     case 'gpt-4-turbo':
-      return 'Preview of OpenAI’s most advanced model, offering a 128K context window and knowledge of world events up to April 2023 (gpt-4-1106-preview). Suitable for testing and evaluations, not recommended for production usage due to restrictive rate limits under preview.'
+      return 'Preview of OpenAI’s most advanced model, offering a 128K context window and knowledge of world events up to April 2023 (gpt-4-0125-preview). Suitable for testing and evaluations, not recommended for production usage due to restrictive rate limits under preview.'
     case 'claude-instant-1':
       return 'A faster, cheaper yet still very capable version of Claude, which can handle a range of tasks including casual dialogue, text analysis, summarization, and document comprehension (claude-instant-1).'
     case 'claude-2':

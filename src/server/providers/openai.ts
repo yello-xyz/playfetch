@@ -117,7 +117,7 @@ async function complete(
       model = 'gpt-3.5-turbo-0613'
     } else if (model === 'gpt-4-turbo') {
       // TODO remove this once the model is generally available (also update model description)
-      model = 'gpt-4-1106-preview'
+      model = 'gpt-4-0125-preview'
     }
     const response = await api.chat.completions.create(
       {
