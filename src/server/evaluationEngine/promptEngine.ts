@@ -4,9 +4,9 @@ import {
   CredentialsForProvider,
   GetPredictor,
   IncrementProviderCost,
-} from '../providers/integration'
-import { DefaultProvider } from '../../common/defaults'
-import { PublicLanguageModels, ProviderForModel } from '../../common/providerMetadata'
+} from '@/src/server/providers/integration'
+import { DefaultProvider } from '@/src/common/defaults'
+import { PublicLanguageModels, ProviderForModel } from '@/src/common/providerMetadata'
 import { EmptyRunResponse, ErrorRunResponse, RunResponse, TryParseOutput } from './runResponse'
 import { DefaultChatContinuationInputKey } from '@/src/common/formatting'
 

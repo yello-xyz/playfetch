@@ -1,5 +1,5 @@
 import { ChainItem } from '@/types'
-import { IsBranchChainItem } from '@/components/chains/chainNode'
+import { IsBranchChainItem } from '@/src/client/chains/chainNode'
 
 export const IsSiblingNode = (nodes: ChainItem[], index: number): boolean => {
   if (index <= 0 || index > nodes.length - 1) {

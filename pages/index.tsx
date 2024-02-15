@@ -18,19 +18,19 @@ import ClientRoute, {
   SharedProjectsWorkspaceID,
   WorkspaceRoute,
 } from '@/src/common/clientRoute'
-import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
-import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
-import { UserContext } from '@/src/client/context/userContext'
+import ModalDialog, { DialogPrompt } from '@/src/client/components/modalDialog'
+import { ModalDialogContext } from '@/src/client/components/modalDialogContext'
+import { UserContext } from '@/src/client/users/userContext'
 import { getActiveWorkspace, getWorkspacesForUser } from '@/src/server/datastore/workspaces'
 import { getSharedProjectsForUser } from '@/src/server/datastore/projects'
-import { GlobalPopupContext, useGlobalPopupProvider } from '@/src/client/context/globalPopupContext'
-import GlobalPopup from '@/components/globalPopup'
-import { useDocumentationCookie } from '@/components/cookieBanner'
+import { GlobalPopupContext, useGlobalPopupProvider } from '@/src/client/components/globalPopupContext'
+import GlobalPopup from '@/src/client/components/globalPopup'
+import { useDocumentationCookie } from '@/src/client/cookies/cookieBanner'
 
 import dynamic from 'next/dynamic'
-const WorkspaceSidebar = dynamic(() => import('@/components/workspaces/workspaceSidebar'))
-const WorkspaceInvite = dynamic(() => import('@/components/workspaces/workspaceInvite'))
-const WorkspaceGridView = dynamic(() => import('@/components/workspaces/workspaceGridView'))
+const WorkspaceSidebar = dynamic(() => import('@/src/client/workspaces/workspaceSidebar'))
+const WorkspaceInvite = dynamic(() => import('@/src/client/workspaces/workspaceInvite'))
+const WorkspaceGridView = dynamic(() => import('@/src/client/workspaces/workspaceGridView'))
 
 const IsSharedProjects = (workspace: ActiveWorkspace) => workspace.id === SharedProjectsWorkspaceID
 export const SharedProjectsWorkspace = (

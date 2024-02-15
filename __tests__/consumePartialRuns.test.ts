@@ -1,4 +1,4 @@
-import { ConsumeStream } from '@/src/client/hooks/useRunVersion'
+import { ConsumeStream } from '@/src/client/versions/useRunVersion'
 import { PartialRun, PromptInputs } from '@/types'
 import { ReadableStream } from 'stream/web'
 import 'isomorphic-fetch'

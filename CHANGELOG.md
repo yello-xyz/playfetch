@@ -1,5 +1,10 @@
 ## PlayFetch Changelog
 
+### v0.25 - 2024-02-15
+- Support for latest GPT-3.5 Turbo and GPT-4 Turbo Preview models (0125)
+- Support for new OpenAI embedding models (text-embedding-3-small, text-embedding-3-large)
+- Increased prompts per project limit from 100 to 250
+
 ### v0.24 - 2024-02-06
 - Linear integration
 - Support for Meta Llama 2 through Hugging Face

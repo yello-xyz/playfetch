@@ -1,4 +1,4 @@
-import { createTaskForVersion } from '@/src/server/linear'
+import { createTaskForVersion } from '@/src/server/providers/linear'
 import { withLoggedInUserRoute } from '@/src/server/session'
 import { User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'

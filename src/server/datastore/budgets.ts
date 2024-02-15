@@ -1,4 +1,4 @@
-import { sendBudgetNotificationEmails } from '../email'
+import { sendBudgetNotificationEmails } from '@/src/server/email'
 import {
   Entity,
   runTransactionWithExponentialBackoff,

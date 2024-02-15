@@ -4,21 +4,23 @@ import {
   CohereLanguageModel,
   CustomLanguageModel,
   DefaultLanguageModel,
+  EmbeddingModel,
   GoogleLanguageModel,
   HuggingFaceLanguageModel,
   LanguageModel,
   ModelProvider,
+  OpenAIEmbeddingModel,
   OpenAILanguageModel,
 } from '@/types'
 import { encode } from 'gpt-3-encoder'
-import { getProviderCredentials } from '../datastore/providers'
+import { getProviderCredentials } from '@/src/server/datastore/providers'
 import openai, { createEmbedding, loadExtraModels } from './openai'
 import anthropic from './anthropic'
 import vertexai from './vertexai'
 import cohere from './cohere'
 import huggingface from './huggingface'
-import { updateScopedModelCost } from '../datastore/costs'
-import { checkBudgetForScope, incrementCostForScope } from '../datastore/budgets'
+import { updateScopedModelCost } from '@/src/server/datastore/costs'
+import { checkBudgetForScope, incrementCostForScope } from '@/src/server/datastore/budgets'
 
 const costForTokens = (content: string, pricePerMillionTokens: number) => {
   const tokens = encode(content).length
@@ -84,7 +86,13 @@ export const ExtraModelsForProvider = (
   }
 }
 
-export const CreateEmbedding = (provider: ModelProvider, apiKey: string, userID: number, input: string) => {
+export const CreateEmbedding = (
+  provider: ModelProvider,
+  apiKey: string,
+  userID: number,
+  model: EmbeddingModel,
+  input: string
+) => {
   switch (provider) {
     case 'google':
     case 'anthropic':
@@ -92,7 +100,7 @@ export const CreateEmbedding = (provider: ModelProvider, apiKey: string, userID:
     case 'huggingface':
       throw new Error('Provider does not support embeddings yet')
     case 'openai':
-      return createEmbedding(apiKey, userID, 'text-embedding-ada-002', input)
+      return createEmbedding(apiKey, userID, model as OpenAIEmbeddingModel, input)
   }
 }
 

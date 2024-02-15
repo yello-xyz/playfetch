@@ -11,29 +11,29 @@ import ClientRoute, {
   ProjectSettingsRoute,
   WorkspaceRoute,
 } from '@/src/common/clientRoute'
-import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
-import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
-import { ProjectContext } from '@/src/client/context/projectContext'
-import { UserContext } from '@/src/client/context/userContext'
-import { GlobalPopupContext, useGlobalPopupProvider } from '@/src/client/context/globalPopupContext'
-import GlobalPopup from '@/components/globalPopup'
-import usePrompt from '@/src/client/hooks/usePrompt'
-import useChain from '@/src/client/hooks/useChain'
+import ModalDialog, { DialogPrompt } from '@/src/client/components/modalDialog'
+import { ModalDialogContext } from '@/src/client/components/modalDialogContext'
+import { ProjectContext } from '@/src/client/projects/projectContext'
+import { UserContext } from '@/src/client/users/userContext'
+import { GlobalPopupContext, useGlobalPopupProvider } from '@/src/client/components/globalPopupContext'
+import GlobalPopup from '@/src/client/components/globalPopup'
+import usePrompt from '@/src/client/prompts/usePrompt'
+import useChain from '@/src/client/chains/useChain'
 import { ActiveItem, CompareItem, EndpointsItem, SettingsItem } from '@/src/common/activeItem'
 import loadActiveItem from '@/src/server/activeItem'
-import useActiveItem from '@/src/client/hooks/useActiveItem'
-import useCommentSelection from '@/src/client/hooks/useCommentSelection'
-import { UserPresetsContext } from '@/src/client/context/userPresetsContext'
-import { useDocumentationCookie } from '@/components/cookieBanner'
-import { ProviderContext } from '@/src/client/context/providerContext'
-import ProjectPaneWrapper from '@/components/projects/projectPaneWrapper'
+import useActiveItem from '@/src/client/projects/useActiveItem'
+import useCommentSelection from '@/src/client/comments/useCommentSelection'
+import { UserPresetsContext } from '@/src/client/users/userPresetsContext'
+import { useDocumentationCookie } from '@/src/client/cookies/cookieBanner'
+import { ProviderContext } from '@/src/client/settings/providerContext'
+import ProjectPaneWrapper from '@/src/client/projects/projectPaneWrapper'
 import { UserPresets } from '@/src/common/userPresets'
-import useTable from '@/src/client/hooks/useTable'
+import useTable from '@/src/client/tables/useTable'
 
 import dynamic from 'next/dynamic'
-const MainProjectPane = dynamic(() => import('@/components/projects/mainProjectPane'))
-const ProjectSidebar = dynamic(() => import('@/components/projects/projectSidebar'))
-const ProjectTopBar = dynamic(() => import('@/components/projects/projectTopBar'))
+const MainProjectPane = dynamic(() => import('@/src/client/projects/mainProjectPane'))
+const ProjectSidebar = dynamic(() => import('@/src/client/projects/projectSidebar'))
+const ProjectTopBar = dynamic(() => import('@/src/client/projects/projectTopBar'))
 
 export const getServerSideProps = withLoggedInSession(async ({ user, query }) => ({
   props: await loadActiveItem(user, query),

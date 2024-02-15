@@ -1,8 +1,8 @@
 import { PromptInputs, RawPromptVersion } from '@/types'
-import { getRecentRatingsForParent } from '../datastore/ratings'
-import { savePredictedRunRating } from '../datastore/runs'
-import { ensurePromptAccess } from '../datastore/prompts'
-import { getTrustedVersion, savePromptVersionForUser } from '../datastore/versions'
+import { getRecentRatingsForParent } from '@/src/server/datastore/ratings'
+import { savePredictedRunRating } from '@/src/server/datastore/runs'
+import { ensurePromptAccess } from '@/src/server/datastore/prompts'
+import { getTrustedVersion, savePromptVersionForUser } from '@/src/server/datastore/versions'
 
 enum Endpoint {
   Respond = '/respond',

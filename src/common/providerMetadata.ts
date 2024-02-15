@@ -8,7 +8,6 @@ import {
   LanguageModel,
   ModelProvider,
   PromptConfig,
-  Prompts,
   QueryProvider,
   SourceControlProvider,
   IssueTrackerProvider,
@@ -28,7 +27,11 @@ export const QueryProviders: QueryProvider[] = ['pinecone']
 export const SourceControlProviders: SourceControlProvider[] = ['github']
 export const IssueTrackerProviders: IssueTrackerProvider[] = ['linear']
 
-export const EmbeddingModels: EmbeddingModel[] = ['text-embedding-ada-002']
+export const EmbeddingModels: EmbeddingModel[] = [
+  'text-embedding-ada-002',
+  'text-embedding-3-small',
+  'text-embedding-3-large',
+]
 export const PublicLanguageModels: DefaultLanguageModel[] = [
   'gpt-4',
   'gpt-4-turbo',
@@ -86,12 +89,6 @@ export const LabelForProvider = (provider: SupportedProvider) => {
   }
 }
 
-export const SupportedPromptKeysForModel = (model: LanguageModel): (keyof Prompts)[] => [
-  ...(SupportsSystemPrompt(model) ? ['system' as keyof Prompts] : []),
-  'main',
-  ...(SupportsFunctionsPrompt(model) ? ['functions' as keyof Prompts] : []),
-]
-
 export const isCustomModel = (model: LanguageModel | EmbeddingModel): model is CustomLanguageModel => {
   switch (model) {
     case 'gpt-3.5-turbo':
@@ -99,6 +96,8 @@ export const isCustomModel = (model: LanguageModel | EmbeddingModel): model is C
     case 'gpt-4':
     case 'gpt-4-turbo':
     case 'text-embedding-ada-002':
+    case 'text-embedding-3-small':
+    case 'text-embedding-3-large':
     case 'claude-instant-1':
     case 'claude-2':
     case 'text-bison':
@@ -216,48 +215,6 @@ export const SupportsFunctionsPrompt = (model: LanguageModel): boolean => {
   }
 }
 
-export const IsMainPromptKey = (promptKey: keyof Prompts) => {
-  switch (promptKey) {
-    case 'main':
-      return true
-    case 'system':
-    case 'functions':
-      return false
-  }
-}
-
-export const LabelForPromptKey = (promptKey: keyof Prompts) => {
-  switch (promptKey) {
-    case 'main':
-      return 'Prompt'
-    case 'system':
-      return 'System'
-    case 'functions':
-      return 'Functions'
-  }
-}
-
-export const PlaceholderForPromptKey = (promptKey: keyof Prompts) => {
-  switch (promptKey) {
-    case 'main':
-      return 'Enter prompt here. Use {{variable}} to insert dynamic values.'
-    case 'system':
-      return 'Enter system prompt here. This is optional and will be ignored by models that do not support it.'
-    case 'functions':
-      return 'Enter functions as a JSON array. This will be ignored by models that do not support it.'
-  }
-}
-
-export const PromptKeyNeedsPreformatted = (promptKey: keyof Prompts) => {
-  switch (promptKey) {
-    case 'main':
-    case 'system':
-      return false
-    case 'functions':
-      return true
-  }
-}
-
 export const ProviderForModel = (model: LanguageModel | EmbeddingModel): ModelProvider => {
   switch (model) {
     case 'gpt-3.5-turbo':
@@ -265,6 +222,8 @@ export const ProviderForModel = (model: LanguageModel | EmbeddingModel): ModelPr
     case 'gpt-4':
     case 'gpt-4-turbo':
     case 'text-embedding-ada-002':
+    case 'text-embedding-3-small':
+    case 'text-embedding-3-large':
       return 'openai'
     case 'claude-instant-1':
     case 'claude-2':
@@ -347,11 +306,11 @@ export const DescriptionForModel = (model: LanguageModel, providers: AvailableMo
     case 'gpt-3.5-turbo':
       return 'OpenAI’s most capable and cost effective model in the GPT-3.5 family optimized for chat purposes, but also works well for traditional completions tasks (gpt-3.5-turbo-0613).'
     case 'gpt-3.5-turbo-16k':
-      return 'This is the updated version of GPT-3.5 Turbo with 4 times the context window and lower pricing (gpt-3.5-turbo-1106).'
+      return 'This is the updated version of GPT-3.5 Turbo with 4 times the context window and lower pricing (gpt-3.5-turbo-0125).'
     case 'gpt-4':
       return 'GPT-4 from OpenAI has broad general knowledge and domain expertise allowing it to follow complex instructions in natural language and solve difficult problems accurately (gpt-4-0613).'
     case 'gpt-4-turbo':
-      return 'Preview of OpenAI’s most advanced model, offering a 128K context window and knowledge of world events up to April 2023 (gpt-4-1106-preview). Suitable for testing and evaluations, not recommended for production usage due to restrictive rate limits under preview.'
+      return 'Preview of OpenAI’s most advanced model, offering a 128K context window and knowledge of world events up to April 2023 (gpt-4-0125-preview). Suitable for testing and evaluations, not recommended for production usage due to restrictive rate limits under preview.'
     case 'claude-instant-1':
       return 'A faster, cheaper yet still very capable version of Claude, which can handle a range of tasks including casual dialogue, text analysis, summarization, and document comprehension (claude-instant-1).'
     case 'claude-2':
@@ -404,10 +363,14 @@ export const InputPriceForModel = (model: LanguageModel | EmbeddingModel): numbe
   switch (model) {
     case 'text-embedding-ada-002':
       return 0.1
+    case 'text-embedding-3-small':
+      return 0.02
+    case 'text-embedding-3-large':
+      return 0.13
     case 'gpt-3.5-turbo':
       return 1.5
     case 'gpt-3.5-turbo-16k':
-      return 1
+      return 0.5
     case 'gpt-4':
       return 30
     case 'gpt-4-turbo':
@@ -433,10 +396,14 @@ export const OutputPriceForModel = (model: LanguageModel | EmbeddingModel): numb
   switch (model) {
     case 'text-embedding-ada-002':
       return 0.1
+    case 'text-embedding-3-small':
+      return 0.02
+    case 'text-embedding-3-large':
+      return 0.13
     case 'gpt-3.5-turbo':
       return 2
     case 'gpt-3.5-turbo-16k':
-      return 2
+      return 1.5
     case 'gpt-4':
       return 60
     case 'gpt-4-turbo':
@@ -461,6 +428,8 @@ export const OutputPriceForModel = (model: LanguageModel | EmbeddingModel): numb
 export const IsModelFreeToUse = (model: LanguageModel | EmbeddingModel): boolean => {
   switch (model) {
     case 'text-embedding-ada-002':
+    case 'text-embedding-3-small':
+    case 'text-embedding-3-large':
     case 'gpt-3.5-turbo':
     case 'gpt-3.5-turbo-16k':
     case 'gpt-4':
@@ -481,6 +450,8 @@ export const IsModelFreeToUse = (model: LanguageModel | EmbeddingModel): boolean
 export const IsSubscriptionRequiredForModel = (model: LanguageModel | EmbeddingModel): boolean => {
   switch (model) {
     case 'text-embedding-ada-002':
+    case 'text-embedding-3-small':
+    case 'text-embedding-3-large':
     case 'gpt-3.5-turbo':
     case 'gpt-3.5-turbo-16k':
     case 'gpt-4':

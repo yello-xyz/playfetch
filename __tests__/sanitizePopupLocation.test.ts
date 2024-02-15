@@ -1,5 +1,5 @@
-import { GlobalPopupLocation } from '@/src/client/context/globalPopupContext'
-import { SanitizePopupLocation } from '@/components/globalPopup'
+import { GlobalPopupLocation } from '@/src/client/components/globalPopupContext'
+import { SanitizePopupLocation } from '@/src/client/components/globalPopup'
 
 test(`Test unmounted`, () =>
   expect(SanitizePopupLocation({ left: 100, right: 100 })[0]).toStrictEqual({ left: 100, right: undefined }))

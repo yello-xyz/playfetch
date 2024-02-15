@@ -1,6 +1,6 @@
 import { Comment, CommentAction } from '@/types'
 import { Entity, buildKey, getDatastore, getID, getRecentEntities, getTimestamp } from './datastore'
-import { syncTaskComments } from '../linear'
+import { syncTaskComments } from '@/src/server/providers/linear'
 
 export async function migrateComments(postMerge: boolean) {
   if (postMerge) {

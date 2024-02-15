@@ -1,13 +1,13 @@
 import { EmbeddingModel, QueryProvider } from '@/types'
-import { getProviderCredentials } from '../datastore/providers'
+import { getProviderCredentials } from '@/src/server/datastore/providers'
 import {
   CredentialsForProvider,
   CreateEmbedding,
   IncrementProviderCost,
   CheckBudgetForProvider,
-} from '../providers/integration'
-import runVectorQuery from '../providers/pinecone'
-import { ProviderForModel } from '../../common/providerMetadata'
+} from '@/src/server/providers/integration'
+import runVectorQuery from '@/src/server/providers/pinecone'
+import { ProviderForModel } from '@/src/common/providerMetadata'
 import { EmptyRunResponse, ErrorRunResponse, RunResponse } from './runResponse'
 
 export const runQuery = async (
@@ -35,7 +35,13 @@ export const runQuery = async (
       throw new Error('Monthly usage limit exceeded')
     }
 
-    const { embedding, cost, inputTokens } = await CreateEmbedding(embeddingProvider, embeddingAPIKey, userID, query)
+    const { embedding, cost, inputTokens } = await CreateEmbedding(
+      embeddingProvider,
+      embeddingAPIKey,
+      userID,
+      model,
+      query
+    )
     IncrementProviderCost(scopeID, providerID, model, cost)
 
     const result = await runVectorQuery(apiKey, environment, indexName, embedding, topK)

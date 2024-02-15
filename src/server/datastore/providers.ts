@@ -10,10 +10,10 @@ import {
   ModelProvider,
   SupportedProvider,
 } from '@/types'
-import { ExtraModelsForProvider } from '../providers/integration'
+import { ExtraModelsForProvider } from '@/src/server/providers/integration'
 import { IssueTrackerProviders, ModelProviders, SourceControlProviders } from '@/src/common/providerMetadata'
 import { EntityFilter } from '@google-cloud/datastore/build/src/filter'
-import { SortAndFilterProviderData } from '../providers/cascade'
+import { SortAndFilterProviderData } from '@/src/server/providers/cascade'
 import { ensureProjectLabels, ensureProjectOwnership } from './projects'
 
 const getFilteredProviderData = (filter: EntityFilter, scopeIDs: number[]) =>

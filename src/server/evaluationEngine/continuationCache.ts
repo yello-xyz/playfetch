@@ -1,6 +1,6 @@
 import { PromptInputs, RawPromptVersion, RawChainVersion } from '@/types'
 import { PromptContext } from '@/src/server/evaluationEngine/promptEngine'
-import { cacheExpiringValue, cacheValue, getCachedValue, getExpiringCachedValue } from '../datastore/cache'
+import { cacheExpiringValue, cacheValue, getCachedValue, getExpiringCachedValue } from '@/src/server/datastore/cache'
 
 const getCachedContinuation = (continuationID: number, isEndpointEvaluation: boolean) =>
   isEndpointEvaluation ? getExpiringCachedValue(continuationID) : getCachedValue(continuationID)

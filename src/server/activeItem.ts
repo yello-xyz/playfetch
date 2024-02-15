@@ -9,12 +9,12 @@ import {
   CompareItem,
   EndpointsItem,
   SettingsItem,
-} from '../common/activeItem'
+} from '@/src/common/activeItem'
 import { getPromptForUser } from './datastore/prompts'
 import { getChainForUser } from './datastore/chains'
 import { loadAvailableProviders, loadScopedProviders } from './datastore/providers'
 import { ParsedUrlQuery } from 'querystring'
-import { ParseActiveItemQuery, ParseNumberQuery, ParseQuery } from '../common/clientRoute'
+import { ParseActiveItemQuery, ParseNumberQuery, ParseQuery } from '@/src/common/clientRoute'
 import { getAnalyticsForProject } from './datastore/analytics'
 import { getPresetsForUser } from './datastore/users'
 import { getTableForUser } from './datastore/tables'

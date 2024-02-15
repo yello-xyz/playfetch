@@ -1,8 +1,8 @@
 import { VertexAI, Content, GenerateContentResponse, GenerateContentRequest } from '@google-cloud/vertexai'
 import { GoogleLanguageModel } from '@/types'
-import { Predictor, PromptContext } from '../evaluationEngine/promptEngine'
+import { Predictor, PromptContext } from '@/src/server/evaluationEngine/promptEngine'
 import { CostForModel } from './integration'
-import { getProjectID } from '../storage'
+import { getProjectID } from '@/src/server/storage'
 
 import aiplatform from '@google-cloud/aiplatform'
 const { PredictionServiceClient } = aiplatform.v1
