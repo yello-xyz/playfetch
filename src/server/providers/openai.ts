@@ -187,16 +187,20 @@ async function complete(
 export async function loadExtraModels(
   apiKey: string
 ): Promise<{ customModels: string[]; gatedModels: DefaultLanguageModel[] }> {
-  const api = new OpenAI({ apiKey })
-  const response = await api.models.list()
+  const models: OpenAI.Models.Model[] = []
+  try {
+    const api = new OpenAI({ apiKey })
+    const response = await api.models.list()
+    models.push(...response.data)
+  } catch (error: any) {
+    console.error('Failed to load OpenAI models:', error.message)
+  }
 
   const supportedRootModel: OpenAILanguageModel = 'gpt-3.5-turbo'
-  const customModels = response.data
-    .filter(model => model.id.startsWith(`ft:${supportedRootModel}`))
-    .map(model => model.id)
+  const customModels = models.filter(model => model.id.startsWith(`ft:${supportedRootModel}`)).map(model => model.id)
 
   const supportedGatedModels: OpenAILanguageModel[] = [] // used to contain 'gpt-4-32k'
-  const gatedModels = response.data
+  const gatedModels = models
     .filter(model => (supportedGatedModels as string[]).includes(model.id))
     .map(model => model.id) as DefaultLanguageModel[]
 
