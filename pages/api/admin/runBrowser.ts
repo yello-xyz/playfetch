@@ -4,18 +4,15 @@ import puppeteer from 'puppeteer'
 
 async function runBrowser(req: NextApiRequest, res: NextApiResponse<string>) {
   const url = req.query.url as string
-  console.log('[puppeteer] launching', url)
   const browser = await puppeteer.launch({
     headless: true,
     timeout: 0,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   })
 
-  console.log('[puppeteer] loading', url)
   const page = await browser.newPage()
-  await page.goto(url)
 
-  console.log('[puppeteer] loaded', url)
+  await page.goto(url)
   await page.setViewport({ width: 1080, height: 1024 })
   await page.type('.devsite-search-field', 'automate beyond recorder')
 
