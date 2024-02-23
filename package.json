@@ -15,7 +15,7 @@
     "test": "jest",
     "clean": "npx next telemetry disable && rm -rf ./build",
     "build": "next build && npx puppeteer browsers install chrome",
-    "gcp-build": "node node_modules/puppeteer/install.mjs",
+    "gcp-build": "node node_modules/puppeteer/install.js",
     "create-env": "printenv > .env.local",
     "start": "next start --keepAliveTimeout 700000",
     "dev": "next dev",
