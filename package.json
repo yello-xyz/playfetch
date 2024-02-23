@@ -14,7 +14,7 @@
   "scripts": {
     "test": "jest",
     "clean": "npx next telemetry disable && rm -rf ./build",
-    "build": "next build && npx puppeteer browsers install chrome",
+    "build": "next build",
     "create-env": "printenv > .env.local",
     "start": "next start --keepAliveTimeout 700000",
     "dev": "next dev",

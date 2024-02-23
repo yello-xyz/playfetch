@@ -6,7 +6,7 @@ async function runBrowser(req: NextApiRequest, res: NextApiResponse<string>) {
   const url = req.query.url as string
   const browser = await puppeteer.launch({
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    args: ['--no-sandbox'],
   })
 
   const page = await browser.newPage()

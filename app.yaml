@@ -1,5 +1,4 @@
 runtime: nodejs
-instance_class: F4
 env: flex
 
 runtime_config:
