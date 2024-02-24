@@ -6,7 +6,7 @@ import crypto from 'crypto'
 let datastore: Datastore
 export const getDatastore = () => {
   if (!datastore) {
-    datastore = new Datastore()
+    datastore = new Datastore({ fallback: 'rest' })
   }
   return datastore
 }
