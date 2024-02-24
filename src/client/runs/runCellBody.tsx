@@ -105,12 +105,16 @@ export default function RunCellBody({
       continue
     }
     if (startIndex > index) {
-      spans.push(<span key={index}>{run.output.substring(index, startIndex)}</span>)
+      spans.push(
+        <span className='break-words' key={index}>
+          {run.output.substring(index, startIndex)}
+        </span>
+      )
     }
     spans.push(
       <span
         key={startIndex}
-        className='underline cursor-pointer bg-blue-50 decoration-blue-100 decoration-2 underline-offset-2'
+        className='underline break-words cursor-pointer bg-blue-50 decoration-blue-100 decoration-2 underline-offset-2'
         onClick={event => selectComment(event, startIndex)}>
         {run.output.substring(startIndex, endIndex)}
       </span>
@@ -118,7 +122,11 @@ export default function RunCellBody({
     index = endIndex
   }
   if (index < run.output.length) {
-    spans.push(<span key={index}>{run.output.substring(index)}</span>)
+    spans.push(
+      <span className='break-words' key={index}>
+        {run.output.substring(index)}
+      </span>
+    )
   }
 
   const user = useLoggedInUser()
