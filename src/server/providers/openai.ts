@@ -54,27 +54,27 @@ export const buildPromptMessages = (
   prompt: string,
   system?: string,
   inputs?: PromptInputs,
-  buildFunctionMessage?: (lastMessage?: any, inputs?: PromptInputs) => Message | undefined
+  functionRole?: string
 ): Message[] => {
   const dropSystemPrompt =
     !system || previousMessages.some(message => message.role === 'system' && message.content === system)
   const lastMessage = previousMessages.slice(-1)[0]
   return [
     ...(dropSystemPrompt ? [] : [{ role: 'system', content: system }]),
-    buildFunctionMessage?.(lastMessage, inputs) ?? { role: 'user', content: prompt },
+    buildFunctionMessage(functionRole, lastMessage, inputs) ?? { role: 'user', content: prompt },
   ]
 }
 
 export const exportMessageContent = (message: Message) =>
   typeof message.content === 'string' ? message.content : JSON.stringify(message)
 
-const getFunctionResponseMessage = (lastMessage?: any, inputs?: PromptInputs): Message | undefined => {
+const buildFunctionMessage = (role = 'function', lastMessage?: any, inputs?: PromptInputs): Message | undefined => {
   if (lastMessage && inputs && lastMessage.role === 'assistant' && lastMessage.function_call?.name) {
     const name = lastMessage.function_call.name
     const response = inputs[name]
     if (response) {
       const content = typeof response === 'string' ? response : JSON.stringify(response)
-      return { role: 'function', name, content }
+      return { role, name, content }
     }
   }
   return undefined
@@ -112,13 +112,7 @@ async function complete(
   try {
     const api = new OpenAI({ apiKey })
     const previousMessages = useContext ? context?.messages ?? [] : []
-    const promptMessages = buildPromptMessages(
-      previousMessages,
-      prompt,
-      system,
-      continuationInputs,
-      getFunctionResponseMessage
-    )
+    const promptMessages = buildPromptMessages(previousMessages, prompt, system, continuationInputs)
     const inputMessages = [...previousMessages, ...promptMessages]
     const previousFunctions: any[] = useContext ? context?.functions ?? [] : []
     const serializedPreviousFunctions = new Set(previousFunctions.map(f => JSON.stringify(f)))
