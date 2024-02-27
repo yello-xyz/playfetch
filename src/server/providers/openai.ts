@@ -57,7 +57,7 @@ export const buildPromptInputs = (
   useContext: boolean,
   continuationInputs: PromptInputs | undefined,
   functionRole: string,
-  extractFunctionName: (message: any) => string | undefined
+  extractFunction: (message: any) => any | undefined
 ) => {
   let functions = [] as ChatCompletionCreateParams.Function[]
   if (functionsPrompt) {
@@ -78,7 +78,7 @@ export const buildPromptInputs = (
     system,
     continuationInputs,
     functionRole,
-    extractFunctionName
+    extractFunction
   )
   const inputMessages = [...previousMessages, ...promptMessages]
   const previousFunctions: any[] = useContext ? context?.functions ?? [] : []
@@ -98,14 +98,14 @@ const buildPromptMessages = (
   system: string | undefined,
   inputs: PromptInputs | undefined,
   functionRole: string,
-  extractFunctionName: (message?: any) => string | undefined
+  extractFunction: (message?: any) => any | undefined
 ): Message[] => {
   const dropSystemPrompt =
     !system || previousMessages.some(message => message.role === 'system' && message.content === system)
   const lastMessage = previousMessages.slice(-1)[0]
   return [
     ...(dropSystemPrompt ? [] : [{ role: 'system', content: system }]),
-    buildFunctionMessage(lastMessage, inputs, functionRole, extractFunctionName) ?? { role: 'user', content: prompt },
+    buildFunctionMessage(lastMessage, inputs, functionRole, extractFunction) ?? { role: 'user', content: prompt },
   ]
 }
 
@@ -113,9 +113,9 @@ const buildFunctionMessage = (
   lastMessage: any | undefined,
   inputs: PromptInputs | undefined,
   role: string,
-  extractName: (message?: any) => string | undefined
+  extractFunction: (message?: any) => any | undefined
 ): Message | undefined => {
-  const name = extractName(lastMessage)
+  const name = extractFunction(lastMessage)?.name
   if (lastMessage && inputs && lastMessage.role === 'assistant' && name) {
     const response = inputs[name]
     if (response) {
@@ -126,7 +126,7 @@ const buildFunctionMessage = (
   return undefined
 }
 
-const extractFunctionName = (message?: any) => message?.function_call?.name
+const extractFunction = (message?: any) => message?.function_call
 
 async function complete(
   apiKey: string,
@@ -155,7 +155,7 @@ async function complete(
       useContext,
       continuationInputs,
       'function',
-      extractFunctionName
+      extractFunction
     )
     if (!inputMessages || !inputFunctions) {
       return { error }
@@ -193,7 +193,7 @@ async function complete(
       let text = ''
 
       const choice = message.choices[0]
-      const functionCall = choice.delta?.function_call
+      const functionCall = extractFunction(choice.delta)
 
       if (functionCall) {
         isFunctionCall = true
@@ -230,7 +230,7 @@ async function complete(
     context.messages = [...inputMessages, functionMessage ?? { role: 'assistant', content: output }]
     context.functions = inputFunctions
 
-    return { output, cost, inputTokens, outputTokens, functionCall: extractFunctionName(functionMessage) ?? null }
+    return { output, cost, inputTokens, outputTokens, functionCall: extractFunction(functionMessage)?.name ?? null }
   } catch (error: any) {
     return { error: error?.message ?? 'Unknown error' }
   }

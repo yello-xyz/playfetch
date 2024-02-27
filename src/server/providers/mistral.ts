@@ -23,7 +23,7 @@ export default function predict(apiKey: string, model: MistralLanguageModel): Pr
     )
 }
 
-const extractFunctionName = (message?: any) => message?.tool_calls?.[0]?.function?.name
+const extractFunction = (message?: any) => message?.tool_calls?.[0]?.function
 
 async function complete(
   apiKey: string,
@@ -50,12 +50,12 @@ async function complete(
       useContext,
       continuationInputs,
       'tool',
-      extractFunctionName
+      extractFunction
     )
     if (!inputMessages || !inputFunctions) {
       return { error }
     }
-    const stream = api.chatStream({
+    const response = api.chatStream({
       model,
       messages: inputMessages,
       temperature,
@@ -67,11 +67,11 @@ async function complete(
 
     let output = ''
     let isFunctionCall = false
-    for await (const message of stream) {
+    for await (const message of response) {
       let text = ''
 
       const choice = message.choices[0]
-      const functionCall = choice.delta?.tool_calls?.find((c: ToolCalls) => c.type === 'function')?.function
+      const functionCall = extractFunction(choice.delta)
 
       if (functionCall) {
         isFunctionCall = true
@@ -119,7 +119,7 @@ async function complete(
       cost,
       inputTokens,
       outputTokens,
-      functionCall: extractFunctionName(functionMessage) ?? null,
+      functionCall: extractFunction(functionMessage)?.name ?? null,
     }
   } catch (error: any) {
     return { error: error?.message ?? 'Unknown error' }
