@@ -17,12 +17,13 @@ import openaiIcon from '@/public/openai.svg'
 import anthropicIcon from '@/public/anthropic.svg'
 import googleIcon from '@/public/google.svg'
 import cohereIcon from '@/public/cohere.svg'
+import mistralIcon from '@/public/mistral.svg'
 import huggingFaceIcon from '@/public/huggingface.svg'
 import pineconeIcon from '@/public/pinecone.svg'
 import githubIcon from '@/public/github.svg'
 import linearIcon from '@/public/linear.svg'
 
-export const ModelProviders: ModelProvider[] = ['anthropic', 'cohere', 'google', 'huggingface', 'openai']
+export const ModelProviders: ModelProvider[] = ['anthropic', 'cohere', 'google', 'huggingface', 'mistral', 'openai']
 export const QueryProviders: QueryProvider[] = ['pinecone']
 export const SourceControlProviders: SourceControlProvider[] = ['github']
 export const IssueTrackerProviders: IssueTrackerProvider[] = ['linear']
@@ -43,6 +44,8 @@ export const PublicLanguageModels: DefaultLanguageModel[] = [
   'chat-bison',
   'gemini-pro',
   'command',
+  'mistral-small-latest',
+  'mistral-large-latest',
   'meta-llama/Llama-2-70b-chat-hf',
 ]
 export const GatedLanguageModels: DefaultLanguageModel[] = [] // used to contain 'gpt-4-32k'
@@ -57,6 +60,8 @@ export const IconForProvider = (provider: SupportedProvider) => {
       return googleIcon
     case 'cohere':
       return cohereIcon
+    case 'mistral':
+      return mistralIcon
     case 'huggingface':
       return huggingFaceIcon
     case 'pinecone':
@@ -78,6 +83,8 @@ export const LabelForProvider = (provider: SupportedProvider) => {
       return 'Google'
     case 'cohere':
       return 'Cohere'
+    case 'mistral':
+      return 'Mistral AI'
     case 'huggingface':
       return 'Hugging Face'
     case 'pinecone':
@@ -104,6 +111,8 @@ export const isCustomModel = (model: LanguageModel | EmbeddingModel): model is C
     case 'chat-bison':
     case 'gemini-pro':
     case 'command':
+    case 'mistral-small-latest':
+    case 'mistral-large-latest':
     case 'meta-llama/Llama-2-70b-chat-hf':
       return false
     default:
@@ -141,7 +150,9 @@ export const SupportsSeed = (model: LanguageModel): boolean => {
     case 'gpt-3.5-turbo-16k':
     case 'gpt-4':
     case 'gpt-4-turbo':
-      return true
+    case 'mistral-small-latest':
+    case 'mistral-large-latest': // TODO Support seed for Mistral
+      return false
     case 'claude-instant-1':
     case 'claude-2':
     case 'text-bison':
@@ -168,6 +179,8 @@ export const SupportsJsonMode = (model: LanguageModel): boolean => {
     case 'chat-bison':
     case 'gemini-pro':
     case 'command':
+    case 'mistral-small-latest':
+    case 'mistral-large-latest': // TODO Support JSON mode for Mistral
     case 'meta-llama/Llama-2-70b-chat-hf':
       return false
     default:
@@ -188,6 +201,8 @@ export const SupportsSystemPrompt = (model: LanguageModel): boolean => {
     case 'text-bison':
     case 'gemini-pro':
     case 'command':
+    case 'mistral-small-latest':
+    case 'mistral-large-latest': // TODO Support system prompt for Mistral
     case 'meta-llama/Llama-2-70b-chat-hf':
       return false
     default:
@@ -208,6 +223,8 @@ export const SupportsFunctionsPrompt = (model: LanguageModel): boolean => {
     case 'chat-bison':
     case 'gemini-pro':
     case 'command':
+    case 'mistral-small-latest':
+    case 'mistral-large-latest': // TODO Support functions prompt for Mistral
     case 'meta-llama/Llama-2-70b-chat-hf':
       return false
     default:
@@ -234,6 +251,9 @@ export const ProviderForModel = (model: LanguageModel | EmbeddingModel): ModelPr
       return 'google'
     case 'command':
       return 'cohere'
+    case 'mistral-small-latest':
+    case 'mistral-large-latest':
+      return 'mistral'
     case 'meta-llama/Llama-2-70b-chat-hf':
       return 'huggingface'
     default:
@@ -263,6 +283,10 @@ export const LabelForModel = (model: LanguageModel, providers: AvailableModelPro
       return 'Gemini Pro'
     case 'command':
       return 'Command'
+    case 'mistral-small-latest':
+      return 'Mistral Small'
+    case 'mistral-large-latest':
+      return 'Mistral Large'
     case 'meta-llama/Llama-2-70b-chat-hf':
       return 'Meta Llama 2'
     default:
@@ -293,6 +317,10 @@ export const WebsiteLinkForModel = (model: LanguageModel): string => {
       return 'https://cloud.google.com/vertex-ai/docs/generative-ai/model-reference/gemini'
     case 'command':
       return 'https://docs.cohere.com/docs/models'
+    case 'mistral-small-latest':
+      return 'https://docs.mistral.ai/guides/model-selection/#mistral-small-simple-tasks-that-one-can-do-in-bulk'
+    case 'mistral-large-latest':
+      return 'https://docs.mistral.ai/guides/model-selection/#mistral-large-complex-tasks-that-require-large-reasoning-capabilities-or-are-highly-specialized'
     case 'meta-llama/Llama-2-70b-chat-hf':
       return 'https://huggingface.co/meta-llama/Llama-2-70b-chat-hf'
     default:
@@ -323,6 +351,10 @@ export const DescriptionForModel = (model: LanguageModel, providers: AvailableMo
       return 'Preview of the latest family of generative AI models developed by Google DeepMind (gemini-pro). Suitable for testing and evaluations, not recommended for production usage due to restrictive rate limits under preview.'
     case 'command':
       return 'An instruction-following conversational model by Cohere that performs language tasks with high quality and reliability while providing longer context compared to generative models.'
+    case 'mistral-small-latest':
+      return 'Mistral Small is optimized for simpe tasks that one can do in bulk, like classification, customer support, or text generation. It offers excellent performance at an affordable price point.'
+    case 'mistral-large-latest':
+      return 'Mistral Large is optimized for complex tasks that require large reasoning capabilities or are highly specialized, like synthetic text generation, code generation, or agents.'
     case 'meta-llama/Llama-2-70b-chat-hf':
       return 'Llama 2 is a collection of pretrained and fine-tuned generative text models developed and publicly released by Meta. This is the the 70B fine-tuned model, optimized for dialogue use cases and converted for the Hugging Face Transformers format (meta-llama/Llama-2-70b-chat-hf).'
     default:
@@ -352,6 +384,9 @@ export const MaxTokensForModel = (model: LanguageModel): number => {
       return 16384
     case 'command':
       return 4096
+    case 'mistral-small-latest':
+    case 'mistral-large-latest':
+      return 32000
     case 'meta-llama/Llama-2-70b-chat-hf':
       return 4096
     default:
@@ -381,6 +416,10 @@ export const InputPriceForModel = (model: LanguageModel | EmbeddingModel): numbe
       return 11.02
     case 'command':
       return 15
+    case 'mistral-small-latest':
+      return 2
+    case 'mistral-large-latest':
+      return 8
     case 'text-bison':
     case 'chat-bison':
     case 'gemini-pro':
@@ -414,6 +453,10 @@ export const OutputPriceForModel = (model: LanguageModel | EmbeddingModel): numb
       return 32.68
     case 'command':
       return 15
+    case 'mistral-small-latest':
+      return 6
+    case 'mistral-large-latest':
+      return 24
     case 'text-bison':
     case 'chat-bison':
     case 'gemini-pro':
@@ -437,6 +480,8 @@ export const IsModelFreeToUse = (model: LanguageModel | EmbeddingModel): boolean
     case 'claude-instant-1':
     case 'claude-2':
     case 'command':
+    case 'mistral-small-latest':
+    case 'mistral-large-latest':
     case 'meta-llama/Llama-2-70b-chat-hf':
     default:
       return false
@@ -459,6 +504,8 @@ export const IsSubscriptionRequiredForModel = (model: LanguageModel | EmbeddingM
     case 'claude-instant-1':
     case 'claude-2':
     case 'command':
+    case 'mistral-small-latest':
+    case 'mistral-large-latest':
     case 'text-bison':
     case 'chat-bison':
     case 'gemini-pro':

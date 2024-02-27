@@ -93,7 +93,7 @@ export type ActiveChain = Chain & {
   availableLabels: string[]
 }
 
-export type ModelProvider = 'openai' | 'anthropic' | 'google' | 'cohere' | 'huggingface'
+export type ModelProvider = 'openai' | 'anthropic' | 'google' | 'cohere' | 'mistral' | 'huggingface'
 
 export type OpenAIEmbeddingModel = 'text-embedding-ada-002' | 'text-embedding-3-small' | 'text-embedding-3-large'
 export type EmbeddingModel = OpenAIEmbeddingModel
@@ -102,6 +102,7 @@ export type OpenAILanguageModel = 'gpt-3.5-turbo' | 'gpt-3.5-turbo-16k' | 'gpt-4
 export type AnthropicLanguageModel = 'claude-instant-1' | 'claude-2'
 export type GoogleLanguageModel = 'text-bison' | 'chat-bison' | 'gemini-pro'
 export type CohereLanguageModel = 'command'
+export type MistralLanguageModel = 'mistral-small-latest' | 'mistral-large-latest'
 export type HuggingFaceLanguageModel = 'meta-llama/Llama-2-70b-chat-hf'
 
 export type DefaultLanguageModel =
@@ -109,6 +110,7 @@ export type DefaultLanguageModel =
   | AnthropicLanguageModel
   | GoogleLanguageModel
   | CohereLanguageModel
+  | MistralLanguageModel
   | HuggingFaceLanguageModel
 
 export type CustomLanguageModel = string
