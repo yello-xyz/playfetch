@@ -55,7 +55,8 @@ export const buildPromptInputs = (
   functionsPrompt: string | undefined,
   context: PromptContext,
   useContext: boolean,
-  continuationInputs?: PromptInputs
+  continuationInputs?: PromptInputs,
+  functionRole?: string
 ) => {
   let functions = [] as ChatCompletionCreateParams.Function[]
   if (functionsPrompt) {
@@ -70,7 +71,7 @@ export const buildPromptInputs = (
   }
 
   const previousMessages = useContext ? context?.messages ?? [] : []
-  const promptMessages = buildPromptMessages(previousMessages, prompt, system, continuationInputs)
+  const promptMessages = buildPromptMessages(previousMessages, prompt, system, continuationInputs, functionRole)
   const inputMessages = [...previousMessages, ...promptMessages]
   const previousFunctions: any[] = useContext ? context?.functions ?? [] : []
   const serializedPreviousFunctions = new Set(previousFunctions.map(f => JSON.stringify(f)))
@@ -100,8 +101,8 @@ const buildPromptMessages = (
 }
 
 const buildFunctionMessage = (role = 'function', lastMessage?: any, inputs?: PromptInputs): Message | undefined => {
-  if (lastMessage && inputs && lastMessage.role === 'assistant' && lastMessage.function_call?.name) {
-    const name = lastMessage.function_call.name
+  const name = lastMessage?.function_call?.name ?? lastMessage?.tool_calls?.[0]?.function?.name
+  if (lastMessage && inputs && lastMessage.role === 'assistant' && name) {
     const response = inputs[name]
     if (response) {
       const content = typeof response === 'string' ? response : JSON.stringify(response)

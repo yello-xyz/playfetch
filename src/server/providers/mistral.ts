@@ -1,23 +1,25 @@
-import { MistralLanguageModel } from '@/types'
-import MistralClient, { ResponseFormat } from '@mistralai/mistralai'
+import { MistralLanguageModel, PromptInputs } from '@/types'
+import MistralClient, { ResponseFormat, ToolCalls } from '@mistralai/mistralai'
 import { Predictor, PromptContext } from '@/src/server/evaluationEngine/promptEngine'
 import { CostForModel } from './integration'
-import { buildPromptMessages, exportMessageContent } from './openai'
+import { buildPromptInputs, exportMessageContent } from './openai'
 
 export default function predict(apiKey: string, model: MistralLanguageModel): Predictor {
-  return (prompts, temperature, maxTokens, context, useContext, streamChunks, _, seed, jsonMode) =>
+  return (prompts, temperature, maxTokens, context, useContext, streamChunks, _, seed, jsonMode, continuationInputs) =>
     complete(
       apiKey,
       model,
       prompts.main,
       prompts.system,
+      prompts.functions,
       temperature,
       maxTokens,
       seed,
       jsonMode,
       context,
       useContext,
-      streamChunks
+      streamChunks,
+      continuationInputs
     )
 }
 
@@ -26,19 +28,30 @@ async function complete(
   model: MistralLanguageModel,
   prompt: string,
   system: string | undefined,
+  functionsPrompt: string | undefined,
   temperature: number,
   maxTokens: number,
   randomSeed: number | undefined,
   jsonMode: boolean | undefined,
   context: PromptContext,
-  usePreviousContext: boolean,
-  streamChunks?: (text: string) => void
+  useContext: boolean,
+  streamChunks?: (text: string) => void,
+  continuationInputs?: PromptInputs
 ) {
   try {
     const api = new MistralClient(apiKey)
-    const previousMessages = usePreviousContext ? context?.messages ?? [] : []
-    const promptMessages = buildPromptMessages(previousMessages, prompt, system)
-    const inputMessages = [...previousMessages, ...promptMessages]
+    const { inputMessages, inputFunctions, error } = buildPromptInputs(
+      prompt,
+      system,
+      functionsPrompt,
+      context,
+      useContext,
+      continuationInputs,
+      'tool'
+    )
+    if (!inputMessages || !inputFunctions) {
+      return { error }
+    }
     const stream = api.chatStream({
       model,
       messages: inputMessages,
@@ -46,14 +59,47 @@ async function complete(
       maxTokens,
       randomSeed,
       responseFormat: { type: jsonMode ? 'json_object' : 'text' } as ResponseFormat,
+      tools: inputFunctions.map(f => ({ type: 'function', function: f })),
     })
 
     let output = ''
+    let isFunctionCall = false
     for await (const message of stream) {
-      const text = message.choices[0].delta.content
-      if (text) {
-        output += text
-        streamChunks?.(text)
+      let text = ''
+
+      const choice = message.choices[0]
+      const functionCall = choice.delta?.tool_calls?.find((c: ToolCalls) => c.type === 'function')?.function
+
+      if (functionCall) {
+        isFunctionCall = true
+        if (functionCall.name) {
+          text = `{\n  "function": {\n    "name": "${functionCall.name}",\n    "arguments": `
+        }
+        text += functionCall.arguments?.replaceAll('\n', '\n    ')
+      } else {
+        text = choice.delta?.content ?? ''
+      }
+
+      output += text
+      streamChunks?.(text)
+    }
+
+    let functionMessage = undefined
+    if (isFunctionCall) {
+      const suffix = '\n  }\n}\n'
+      output += suffix
+      streamChunks?.(suffix)
+      const functionCall = JSON.parse(output).function
+      functionMessage = {
+        role: 'assistant',
+        content: '',
+        tool_calls: [
+          {
+            id: 'null',
+            type: 'function',
+            function: { name: functionCall.name, arguments: JSON.stringify(functionCall.arguments) },
+          },
+        ],
       }
     }
 
@@ -62,9 +108,16 @@ async function complete(
       inputMessages.map(exportMessageContent).join('\n'),
       output
     )
-    context.messages = [...inputMessages, { role: 'assistant', content: output }]
+    context.messages = [...inputMessages, functionMessage ?? { role: 'assistant', content: output }]
+    context.functions = inputFunctions
 
-    return { output, cost, inputTokens, outputTokens, functionCall: null }
+    return {
+      output,
+      cost,
+      inputTokens,
+      outputTokens,
+      functionCall: functionMessage?.tool_calls?.[0]?.function?.name ?? null,
+    }
   } catch (error: any) {
     return { error: error?.message ?? 'Unknown error' }
   }
