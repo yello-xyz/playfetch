@@ -32,6 +32,7 @@ export const EmbeddingModels: EmbeddingModel[] = [
   'text-embedding-ada-002',
   'text-embedding-3-small',
   'text-embedding-3-large',
+  'mistral-embed',
 ]
 export const PublicLanguageModels: DefaultLanguageModel[] = [
   'gpt-4',
@@ -113,6 +114,7 @@ export const isCustomModel = (model: LanguageModel | EmbeddingModel): model is C
     case 'command':
     case 'mistral-small-latest':
     case 'mistral-large-latest':
+    case 'mistral-embed':
     case 'meta-llama/Llama-2-70b-chat-hf':
       return false
     default:
@@ -253,6 +255,7 @@ export const ProviderForModel = (model: LanguageModel | EmbeddingModel): ModelPr
       return 'cohere'
     case 'mistral-small-latest':
     case 'mistral-large-latest':
+    case 'mistral-embed':
       return 'mistral'
     case 'meta-llama/Llama-2-70b-chat-hf':
       return 'huggingface'
@@ -420,6 +423,8 @@ export const InputPriceForModel = (model: LanguageModel | EmbeddingModel): numbe
       return 2
     case 'mistral-large-latest':
       return 8
+    case 'mistral-embed':
+      return 0.1
     case 'text-bison':
     case 'chat-bison':
     case 'gemini-pro':
@@ -457,6 +462,8 @@ export const OutputPriceForModel = (model: LanguageModel | EmbeddingModel): numb
       return 6
     case 'mistral-large-latest':
       return 24
+    case 'mistral-embed':
+      return 0.1
     case 'text-bison':
     case 'chat-bison':
     case 'gemini-pro':

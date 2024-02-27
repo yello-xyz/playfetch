@@ -96,7 +96,8 @@ export type ActiveChain = Chain & {
 export type ModelProvider = 'openai' | 'anthropic' | 'google' | 'cohere' | 'mistral' | 'huggingface'
 
 export type OpenAIEmbeddingModel = 'text-embedding-ada-002' | 'text-embedding-3-small' | 'text-embedding-3-large'
-export type EmbeddingModel = OpenAIEmbeddingModel
+export type MistralEmbeddingModel = 'mistral-embed'
+export type EmbeddingModel = OpenAIEmbeddingModel | MistralEmbeddingModel
 
 export type OpenAILanguageModel = 'gpt-3.5-turbo' | 'gpt-3.5-turbo-16k' | 'gpt-4' | 'gpt-4-turbo'
 export type AnthropicLanguageModel = 'claude-instant-1' | 'claude-2'

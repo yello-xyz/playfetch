@@ -1,4 +1,4 @@
-import { MistralLanguageModel, PromptInputs } from '@/types'
+import { MistralEmbeddingModel, MistralLanguageModel, PromptInputs } from '@/types'
 import MistralClient, { ResponseFormat } from '@mistralai/mistralai'
 import { Predictor, PromptContext } from '@/src/server/evaluationEngine/promptEngine'
 import { CostForModel } from './integration'
@@ -101,4 +101,19 @@ async function complete(
   } catch (error: any) {
     return { error: error?.message ?? 'Unknown error' }
   }
+}
+
+export async function createEmbedding(
+  apiKey: string,
+  model: MistralEmbeddingModel,
+  input: string
+): Promise<{ embedding: number[]; cost: number; inputTokens: number }> {
+  const api = new MistralClient(apiKey)
+
+  const response = await api.embeddings({ input, model })
+
+  const embedding = response.data[0].embedding
+  const [cost, inputTokens] = CostForModel(model, input)
+
+  return { embedding, cost, inputTokens }
 }

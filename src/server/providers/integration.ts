@@ -8,6 +8,7 @@ import {
   GoogleLanguageModel,
   HuggingFaceLanguageModel,
   LanguageModel,
+  MistralEmbeddingModel,
   MistralLanguageModel,
   ModelProvider,
   OpenAIEmbeddingModel,
@@ -15,11 +16,11 @@ import {
 } from '@/types'
 import { encode } from 'gpt-3-encoder'
 import { getProviderCredentials } from '@/src/server/datastore/providers'
-import openai, { createEmbedding, loadExtraModels } from './openai'
+import openai, { createEmbedding as openaiEmbed, loadExtraModels } from './openai'
 import anthropic from './anthropic'
 import vertexai from './vertexai'
 import cohere from './cohere'
-import mistral from './mistral'
+import mistral, { createEmbedding as mistralEmbed } from './mistral'
 import huggingface from './huggingface'
 import { updateScopedModelCost } from '@/src/server/datastore/costs'
 import { checkBudgetForScope, incrementCostForScope } from '@/src/server/datastore/budgets'
@@ -102,12 +103,12 @@ export const CreateEmbedding = (
     case 'google':
     case 'anthropic':
     case 'cohere':
-    case 'mistral':
-    // TODO add support for Mistral embeddings?
     case 'huggingface':
       throw new Error('Provider does not support embeddings yet')
+    case 'mistral':
+      return mistralEmbed(apiKey, model as MistralEmbeddingModel, input)
     case 'openai':
-      return createEmbedding(apiKey, userID, model as OpenAIEmbeddingModel, input)
+      return openaiEmbed(apiKey, userID, model as OpenAIEmbeddingModel, input)
   }
 }
 
