@@ -47,7 +47,25 @@ export default function predict(
     )
 }
 
-const getFunctionResponseMessage = (lastMessage?: any, inputs?: PromptInputs) => {
+type Message = { role: string; content: string; name?: string }
+
+export const buildPromptMessages = (
+  previousMessages: any[],
+  prompt: string,
+  system?: string,
+  inputs?: PromptInputs,
+  buildFunctionMessage?: (lastMessage?: any, inputs?: PromptInputs) => Message | undefined
+): Message[] => {
+  const dropSystemPrompt =
+    !system || previousMessages.some(message => message.role === 'system' && message.content === system)
+  const lastMessage = previousMessages.slice(-1)[0]
+  return [
+    ...(dropSystemPrompt ? [] : [{ role: 'system', content: system }]),
+    buildFunctionMessage?.(lastMessage, inputs) ?? { role: 'user', content: prompt },
+  ]
+}
+
+const getFunctionResponseMessage = (lastMessage?: any, inputs?: PromptInputs): Message | undefined => {
   if (lastMessage && inputs && lastMessage.role === 'assistant' && lastMessage.function_call?.name) {
     const name = lastMessage.function_call.name
     const response = inputs[name]
@@ -57,16 +75,6 @@ const getFunctionResponseMessage = (lastMessage?: any, inputs?: PromptInputs) =>
     }
   }
   return undefined
-}
-
-const buildPromptMessages = (previousMessages: any[], prompt: string, system?: string, inputs?: PromptInputs) => {
-  const dropSystemPrompt =
-    !system || previousMessages.some(message => message.role === 'system' && message.content === system)
-  const lastMessage = previousMessages.slice(-1)[0]
-  return [
-    ...(dropSystemPrompt ? [] : [{ role: 'system', content: system }]),
-    getFunctionResponseMessage(lastMessage, inputs) ?? { role: 'user', content: prompt },
-  ]
 }
 
 async function complete(
@@ -101,7 +109,13 @@ async function complete(
   try {
     const api = new OpenAI({ apiKey })
     const previousMessages = useContext ? context?.messages ?? [] : []
-    const promptMessages = buildPromptMessages(previousMessages, prompt, system, continuationInputs)
+    const promptMessages = buildPromptMessages(
+      previousMessages,
+      prompt,
+      system,
+      continuationInputs,
+      getFunctionResponseMessage
+    )
     const inputMessages = [...previousMessages, ...promptMessages]
     const previousFunctions: any[] = useContext ? context?.functions ?? [] : []
     const serializedPreviousFunctions = new Set(previousFunctions.map(f => JSON.stringify(f)))
