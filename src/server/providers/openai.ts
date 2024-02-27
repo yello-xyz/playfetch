@@ -47,7 +47,7 @@ export default function predict(
     )
 }
 
-type Message = { role: string; content: string; name?: string }
+type Message = { role: string; content: any; name?: string }
 
 export const buildPromptMessages = (
   previousMessages: any[],
@@ -64,6 +64,9 @@ export const buildPromptMessages = (
     buildFunctionMessage?.(lastMessage, inputs) ?? { role: 'user', content: prompt },
   ]
 }
+
+export const exportMessageContent = (message: Message) =>
+  typeof message.content === 'string' ? message.content : JSON.stringify(message)
 
 const getFunctionResponseMessage = (lastMessage?: any, inputs?: PromptInputs): Message | undefined => {
   if (lastMessage && inputs && lastMessage.role === 'assistant' && lastMessage.function_call?.name) {
@@ -183,10 +186,9 @@ async function complete(
       }
     }
 
-    const extractContent = (obj: any) => (typeof obj.content === 'string' ? obj.content : JSON.stringify(obj))
     const [cost, inputTokens, outputTokens] = CostForModel(
       model,
-      [...inputMessages, ...inputFunctions].map(extractContent).join('\n'),
+      [...inputMessages, ...inputFunctions].map(exportMessageContent).join('\n'),
       output
     )
     context.messages = [...inputMessages, functionMessage ?? { role: 'assistant', content: output }]
