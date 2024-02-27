@@ -49,7 +49,41 @@ export default function predict(
 
 type Message = { role: string; content: any; name?: string }
 
-export const buildPromptMessages = (
+export const buildPromptInputs = (
+  prompt: string,
+  system: string | undefined,
+  functionsPrompt: string | undefined,
+  context: PromptContext,
+  useContext: boolean,
+  continuationInputs?: PromptInputs
+) => {
+  let functions = [] as ChatCompletionCreateParams.Function[]
+  if (functionsPrompt) {
+    try {
+      functions = JSON.parse(functionsPrompt)
+      if (!Array.isArray(functions)) {
+        functions = [functions]
+      }
+    } catch (error: any) {
+      return { error: `Failed to parse functions as JSON array.\n${error?.message ?? ''}` }
+    }
+  }
+
+  const previousMessages = useContext ? context?.messages ?? [] : []
+  const promptMessages = buildPromptMessages(previousMessages, prompt, system, continuationInputs)
+  const inputMessages = [...previousMessages, ...promptMessages]
+  const previousFunctions: any[] = useContext ? context?.functions ?? [] : []
+  const serializedPreviousFunctions = new Set(previousFunctions.map(f => JSON.stringify(f)))
+  const newFunctions = functions.filter(f => !serializedPreviousFunctions.has(JSON.stringify(f)))
+  const inputFunctions = [...previousFunctions, ...newFunctions]
+
+  return { inputMessages, inputFunctions }
+}
+
+export const exportMessageContent = (message: Message) =>
+  typeof message.content === 'string' ? message.content : JSON.stringify(message)
+
+const buildPromptMessages = (
   previousMessages: any[],
   prompt: string,
   system?: string,
@@ -64,9 +98,6 @@ export const buildPromptMessages = (
     buildFunctionMessage(functionRole, lastMessage, inputs) ?? { role: 'user', content: prompt },
   ]
 }
-
-export const exportMessageContent = (message: Message) =>
-  typeof message.content === 'string' ? message.content : JSON.stringify(message)
 
 const buildFunctionMessage = (role = 'function', lastMessage?: any, inputs?: PromptInputs): Message | undefined => {
   if (lastMessage && inputs && lastMessage.role === 'assistant' && lastMessage.function_call?.name) {
@@ -97,27 +128,19 @@ async function complete(
   streamChunks?: (chunk: string) => void,
   continuationInputs?: PromptInputs
 ) {
-  let functions = [] as ChatCompletionCreateParams.Function[]
-  if (functionsPrompt) {
-    try {
-      functions = JSON.parse(functionsPrompt)
-      if (!Array.isArray(functions)) {
-        functions = [functions]
-      }
-    } catch (error: any) {
-      return { error: `Failed to parse functions as JSON array.\n${error?.message ?? ''}` }
-    }
-  }
-
   try {
     const api = new OpenAI({ apiKey })
-    const previousMessages = useContext ? context?.messages ?? [] : []
-    const promptMessages = buildPromptMessages(previousMessages, prompt, system, continuationInputs)
-    const inputMessages = [...previousMessages, ...promptMessages]
-    const previousFunctions: any[] = useContext ? context?.functions ?? [] : []
-    const serializedPreviousFunctions = new Set(previousFunctions.map(f => JSON.stringify(f)))
-    const newFunctions = functions.filter(f => !serializedPreviousFunctions.has(JSON.stringify(f)))
-    const inputFunctions = [...previousFunctions, ...newFunctions]
+    const { inputMessages, inputFunctions, error } = buildPromptInputs(
+      prompt,
+      system,
+      functionsPrompt,
+      context,
+      useContext,
+      continuationInputs
+    )
+    if (!inputMessages || !inputFunctions) {
+      return { error }
+    }
     if (model === 'gpt-3.5-turbo-16k') {
       // TODO remove this when the former points to the latter (should be February 16 2024)
       model = 'gpt-3.5-turbo-0125'
