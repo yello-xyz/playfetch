@@ -6,6 +6,7 @@ import {
   PromptInputs,
 } from '@/types'
 import OpenAI from 'openai'
+import { ChatCompletionResponseChunk } from '@mistralai/mistralai'
 import { Predictor, PromptContext } from '@/src/server/evaluationEngine/promptEngine'
 import { CostForModel } from './integration'
 import { ChatCompletionCreateParams } from 'openai/resources/chat'
@@ -91,7 +92,9 @@ export const buildPromptInputs = (
 }
 
 export const processStreamedResponses = async (
-  response: Stream<OpenAI.Chat.Completions.ChatCompletionChunk>,
+  response:
+    | Stream<OpenAI.Chat.Completions.ChatCompletionChunk>
+    | AsyncGenerator<ChatCompletionResponseChunk>,
   wrapFunctionMessage: (name: string, args: string) => any,
   streamChunks?: (chunk: string) => void
 ) => {
