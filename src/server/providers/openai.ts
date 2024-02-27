@@ -55,8 +55,9 @@ export const buildPromptInputs = (
   functionsPrompt: string | undefined,
   context: PromptContext,
   useContext: boolean,
-  continuationInputs?: PromptInputs,
-  functionRole?: string
+  continuationInputs: PromptInputs | undefined,
+  functionRole: string,
+  extractFunctionName: (message: any) => string | undefined
 ) => {
   let functions = [] as ChatCompletionCreateParams.Function[]
   if (functionsPrompt) {
@@ -71,7 +72,14 @@ export const buildPromptInputs = (
   }
 
   const previousMessages = useContext ? context?.messages ?? [] : []
-  const promptMessages = buildPromptMessages(previousMessages, prompt, system, continuationInputs, functionRole)
+  const promptMessages = buildPromptMessages(
+    previousMessages,
+    prompt,
+    system,
+    continuationInputs,
+    functionRole,
+    extractFunctionName
+  )
   const inputMessages = [...previousMessages, ...promptMessages]
   const previousFunctions: any[] = useContext ? context?.functions ?? [] : []
   const serializedPreviousFunctions = new Set(previousFunctions.map(f => JSON.stringify(f)))
@@ -87,21 +95,27 @@ export const exportMessageContent = (message: Message) =>
 const buildPromptMessages = (
   previousMessages: any[],
   prompt: string,
-  system?: string,
-  inputs?: PromptInputs,
-  functionRole?: string
+  system: string | undefined,
+  inputs: PromptInputs | undefined,
+  functionRole: string,
+  extractFunctionName: (message?: any) => string | undefined
 ): Message[] => {
   const dropSystemPrompt =
     !system || previousMessages.some(message => message.role === 'system' && message.content === system)
   const lastMessage = previousMessages.slice(-1)[0]
   return [
     ...(dropSystemPrompt ? [] : [{ role: 'system', content: system }]),
-    buildFunctionMessage(functionRole, lastMessage, inputs) ?? { role: 'user', content: prompt },
+    buildFunctionMessage(lastMessage, inputs, functionRole, extractFunctionName) ?? { role: 'user', content: prompt },
   ]
 }
 
-const buildFunctionMessage = (role = 'function', lastMessage?: any, inputs?: PromptInputs): Message | undefined => {
-  const name = lastMessage?.function_call?.name ?? lastMessage?.tool_calls?.[0]?.function?.name
+const buildFunctionMessage = (
+  lastMessage: any | undefined,
+  inputs: PromptInputs | undefined,
+  role: string,
+  extractName: (message?: any) => string | undefined
+): Message | undefined => {
+  const name = extractName(lastMessage)
   if (lastMessage && inputs && lastMessage.role === 'assistant' && name) {
     const response = inputs[name]
     if (response) {
@@ -111,6 +125,8 @@ const buildFunctionMessage = (role = 'function', lastMessage?: any, inputs?: Pro
   }
   return undefined
 }
+
+const extractFunctionName = (message?: any) => message?.function_call?.name
 
 async function complete(
   apiKey: string,
@@ -137,7 +153,9 @@ async function complete(
       functionsPrompt,
       context,
       useContext,
-      continuationInputs
+      continuationInputs,
+      'function',
+      extractFunctionName
     )
     if (!inputMessages || !inputFunctions) {
       return { error }
@@ -212,7 +230,7 @@ async function complete(
     context.messages = [...inputMessages, functionMessage ?? { role: 'assistant', content: output }]
     context.functions = inputFunctions
 
-    return { output, cost, inputTokens, outputTokens, functionCall: functionMessage?.function_call?.name ?? null }
+    return { output, cost, inputTokens, outputTokens, functionCall: extractFunctionName(functionMessage) ?? null }
   } catch (error: any) {
     return { error: error?.message ?? 'Unknown error' }
   }

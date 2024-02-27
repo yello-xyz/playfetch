@@ -23,6 +23,8 @@ export default function predict(apiKey: string, model: MistralLanguageModel): Pr
     )
 }
 
+const extractFunctionName = (message?: any) => message?.tool_calls?.[0]?.function?.name
+
 async function complete(
   apiKey: string,
   model: MistralLanguageModel,
@@ -47,7 +49,8 @@ async function complete(
       context,
       useContext,
       continuationInputs,
-      'tool'
+      'tool',
+      extractFunctionName
     )
     if (!inputMessages || !inputFunctions) {
       return { error }
@@ -105,7 +108,7 @@ async function complete(
 
     const [cost, inputTokens, outputTokens] = CostForModel(
       model,
-      inputMessages.map(exportMessageContent).join('\n'),
+      [...inputMessages, ...inputFunctions].map(exportMessageContent).join('\n'),
       output
     )
     context.messages = [...inputMessages, functionMessage ?? { role: 'assistant', content: output }]
@@ -116,7 +119,7 @@ async function complete(
       cost,
       inputTokens,
       outputTokens,
-      functionCall: functionMessage?.tool_calls?.[0]?.function?.name ?? null,
+      functionCall: extractFunctionName(functionMessage) ?? null,
     }
   } catch (error: any) {
     return { error: error?.message ?? 'Unknown error' }
