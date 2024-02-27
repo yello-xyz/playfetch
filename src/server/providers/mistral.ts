@@ -6,13 +6,26 @@ import { buildPromptMessages, exportMessageContent } from './openai'
 
 export default function predict(apiKey: string, model: MistralLanguageModel): Predictor {
   return (prompts, temperature, maxTokens, context, useContext, streamChunks, _, seed, jsonMode) =>
-    complete(apiKey, model, prompts.main, temperature, maxTokens, seed, jsonMode, context, useContext, streamChunks)
+    complete(
+      apiKey,
+      model,
+      prompts.main,
+      prompts.system,
+      temperature,
+      maxTokens,
+      seed,
+      jsonMode,
+      context,
+      useContext,
+      streamChunks
+    )
 }
 
 async function complete(
   apiKey: string,
   model: MistralLanguageModel,
   prompt: string,
+  system: string | undefined,
   temperature: number,
   maxTokens: number,
   randomSeed: number | undefined,
@@ -24,7 +37,7 @@ async function complete(
   try {
     const api = new MistralClient(apiKey)
     const previousMessages = usePreviousContext ? context?.messages ?? [] : []
-    const promptMessages = buildPromptMessages(previousMessages, prompt)
+    const promptMessages = buildPromptMessages(previousMessages, prompt, system)
     const inputMessages = [...previousMessages, ...promptMessages]
     const stream = api.chatStream({
       model,
@@ -32,7 +45,7 @@ async function complete(
       temperature,
       maxTokens,
       randomSeed,
-      responseFormat: { type: (jsonMode ? 'json_object' : 'text') } as ResponseFormat,
+      responseFormat: { type: jsonMode ? 'json_object' : 'text' } as ResponseFormat,
     })
 
     let output = ''

@@ -195,14 +195,14 @@ export const SupportsSystemPrompt = (model: LanguageModel): boolean => {
     case 'gpt-4':
     case 'gpt-4-turbo':
     case 'chat-bison':
+    case 'mistral-small-latest':
+    case 'mistral-large-latest':
       return true
     case 'claude-instant-1':
     case 'claude-2':
     case 'text-bison':
     case 'gemini-pro':
     case 'command':
-    case 'mistral-small-latest':
-    case 'mistral-large-latest': // TODO Support system prompt for Mistral
     case 'meta-llama/Llama-2-70b-chat-hf':
       return false
     default:
