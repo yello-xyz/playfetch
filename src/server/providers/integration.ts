@@ -8,6 +8,7 @@ import {
   GoogleLanguageModel,
   HuggingFaceLanguageModel,
   LanguageModel,
+  MistralLanguageModel,
   ModelProvider,
   OpenAIEmbeddingModel,
   OpenAILanguageModel,
@@ -18,6 +19,7 @@ import openai, { createEmbedding, loadExtraModels } from './openai'
 import anthropic from './anthropic'
 import vertexai from './vertexai'
 import cohere from './cohere'
+import mistral from './mistral'
 import huggingface from './huggingface'
 import { updateScopedModelCost } from '@/src/server/datastore/costs'
 import { checkBudgetForScope, incrementCostForScope } from '@/src/server/datastore/budgets'
@@ -41,6 +43,7 @@ export const CredentialsForProvider = async (scopeIDs: number[], provider: Model
     case 'openai':
     case 'anthropic':
     case 'cohere':
+    case 'mistral':
     case 'huggingface':
       const { scopeID, providerID, apiKey } = await getProviderCredentials(scopeIDs, provider, modelToCheck)
       return { scopeID, providerID, apiKey }
@@ -54,6 +57,7 @@ export const CheckBudgetForProvider = async (scopeID: number | null, provider: M
     case 'openai':
     case 'anthropic':
     case 'cohere':
+    case 'mistral':
     case 'huggingface':
       return !!scopeID && checkBudgetForScope(scopeID)
   }
@@ -79,6 +83,7 @@ export const ExtraModelsForProvider = (
     case 'google':
     case 'anthropic':
     case 'cohere':
+    case 'mistral':
     case 'huggingface':
       return Promise.resolve({ customModels: [], gatedModels: [] })
     case 'openai':
@@ -97,6 +102,8 @@ export const CreateEmbedding = (
     case 'google':
     case 'anthropic':
     case 'cohere':
+    case 'mistral':
+    // TODO add support for Mistral embeddings?
     case 'huggingface':
       throw new Error('Provider does not support embeddings yet')
     case 'openai':
@@ -114,6 +121,8 @@ export const GetPredictor = (provider: ModelProvider, apiKey: string, userID: nu
       return anthropic(apiKey, model as AnthropicLanguageModel)
     case 'cohere':
       return cohere(apiKey, model as CohereLanguageModel)
+    case 'mistral':
+      return mistral(apiKey, model as MistralLanguageModel)
     case 'huggingface':
       return huggingface(apiKey, model as HuggingFaceLanguageModel)
   }
