@@ -1,12 +1,12 @@
 import { MistralLanguageModel } from '@/types'
-import MistralClient from '@mistralai/mistralai'
+import MistralClient, { ResponseFormat } from '@mistralai/mistralai'
 import { Predictor, PromptContext } from '@/src/server/evaluationEngine/promptEngine'
 import { CostForModel } from './integration'
 import { buildPromptMessages, exportMessageContent } from './openai'
 
 export default function predict(apiKey: string, model: MistralLanguageModel): Predictor {
-  return (prompts, temperature, maxTokens, context, useContext, streamChunks, _, seed) =>
-    complete(apiKey, model, prompts.main, temperature, maxTokens, seed, context, useContext, streamChunks)
+  return (prompts, temperature, maxTokens, context, useContext, streamChunks, _, seed, jsonMode) =>
+    complete(apiKey, model, prompts.main, temperature, maxTokens, seed, jsonMode, context, useContext, streamChunks)
 }
 
 async function complete(
@@ -16,6 +16,7 @@ async function complete(
   temperature: number,
   maxTokens: number,
   randomSeed: number | undefined,
+  jsonMode: boolean | undefined,
   context: PromptContext,
   usePreviousContext: boolean,
   streamChunks?: (text: string) => void
@@ -30,7 +31,8 @@ async function complete(
       messages: inputMessages,
       temperature,
       maxTokens,
-      randomSeed
+      randomSeed,
+      responseFormat: { type: (jsonMode ? 'json_object' : 'text') } as ResponseFormat,
     })
 
     let output = ''

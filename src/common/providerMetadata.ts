@@ -170,7 +170,9 @@ export const SupportsJsonMode = (model: LanguageModel): boolean => {
   switch (model) {
     case 'gpt-3.5-turbo-16k':
     case 'gpt-4-turbo':
-      return true
+    case 'mistral-small-latest':
+    case 'mistral-large-latest':
+          return true
     case 'gpt-3.5-turbo':
     case 'gpt-4':
     case 'claude-instant-1':
@@ -179,8 +181,6 @@ export const SupportsJsonMode = (model: LanguageModel): boolean => {
     case 'chat-bison':
     case 'gemini-pro':
     case 'command':
-    case 'mistral-small-latest':
-    case 'mistral-large-latest': // TODO Support JSON mode for Mistral
     case 'meta-llama/Llama-2-70b-chat-hf':
       return false
     default:
