@@ -151,8 +151,8 @@ export const SupportsSeed = (model: LanguageModel): boolean => {
     case 'gpt-4':
     case 'gpt-4-turbo':
     case 'mistral-small-latest':
-    case 'mistral-large-latest': // TODO Support seed for Mistral
-      return false
+    case 'mistral-large-latest':
+      return true
     case 'claude-instant-1':
     case 'claude-2':
     case 'text-bison':

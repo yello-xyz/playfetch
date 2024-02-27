@@ -5,8 +5,8 @@ import { CostForModel } from './integration'
 import { buildPromptMessages, exportMessageContent } from './openai'
 
 export default function predict(apiKey: string, model: MistralLanguageModel): Predictor {
-  return (prompts, temperature, maxTokens, context, useContext, streamChunks) =>
-    complete(apiKey, model, prompts.main, temperature, maxTokens, context, useContext, streamChunks)
+  return (prompts, temperature, maxTokens, context, useContext, streamChunks, _, seed) =>
+    complete(apiKey, model, prompts.main, temperature, maxTokens, seed, context, useContext, streamChunks)
 }
 
 async function complete(
@@ -15,6 +15,7 @@ async function complete(
   prompt: string,
   temperature: number,
   maxTokens: number,
+  randomSeed: number | undefined,
   context: PromptContext,
   usePreviousContext: boolean,
   streamChunks?: (text: string) => void
@@ -29,6 +30,7 @@ async function complete(
       messages: inputMessages,
       temperature,
       maxTokens,
+      randomSeed
     })
 
     let output = ''
