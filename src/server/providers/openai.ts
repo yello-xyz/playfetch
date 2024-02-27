@@ -10,6 +10,7 @@ import { Predictor, PromptContext } from '@/src/server/evaluationEngine/promptEn
 import { CostForModel } from './integration'
 import { ChatCompletionCreateParams } from 'openai/resources/chat'
 import { SupportsJsonMode } from '@/src/common/providerMetadata'
+import { Stream } from 'openai/streaming'
 
 export default function predict(
   apiKey: string,
@@ -87,6 +88,48 @@ export const buildPromptInputs = (
   const inputFunctions = [...previousFunctions, ...newFunctions]
 
   return { inputMessages, inputFunctions }
+}
+
+export const processStreamedResponses = async (
+  response: Stream<OpenAI.Chat.Completions.ChatCompletionChunk>,
+  streamChunks?: (chunk: string) => void
+) => {
+  let output = ''
+  let isFunctionCall = false
+  for await (const message of response) {
+    let text = ''
+
+    const choice = message.choices[0]
+    const functionCall = extractFunction(choice.delta)
+
+    if (functionCall) {
+      isFunctionCall = true
+      if (functionCall.name) {
+        text = `{\n  "function": {\n    "name": "${functionCall.name}",\n    "arguments": `
+      }
+      text += functionCall.arguments?.replaceAll('\n', '\n    ')
+    } else {
+      text = choice.delta?.content ?? ''
+    }
+
+    output += text
+    streamChunks?.(text)
+  }
+
+  let functionMessage = undefined
+  if (isFunctionCall) {
+    const suffix = '\n  }\n}\n'
+    output += suffix
+    streamChunks?.(suffix)
+    const functionCall = JSON.parse(output).function
+    functionMessage = {
+      role: 'assistant',
+      content: null,
+      function_call: { name: functionCall.name, arguments: JSON.stringify(functionCall.arguments) },
+    }
+  }
+
+  return { output, functionMessage }
 }
 
 export const exportMessageContent = (message: Message) =>
@@ -187,40 +230,7 @@ async function complete(
       { timeout: 30 * 1000, signal: abortSignal }
     )
 
-    let output = ''
-    let isFunctionCall = false
-    for await (const message of response) {
-      let text = ''
-
-      const choice = message.choices[0]
-      const functionCall = extractFunction(choice.delta)
-
-      if (functionCall) {
-        isFunctionCall = true
-        if (functionCall.name) {
-          text = `{\n  "function": {\n    "name": "${functionCall.name}",\n    "arguments": `
-        }
-        text += functionCall.arguments?.replaceAll('\n', '\n    ')
-      } else {
-        text = choice.delta?.content ?? ''
-      }
-
-      output += text
-      streamChunks?.(text)
-    }
-
-    let functionMessage = undefined
-    if (isFunctionCall) {
-      const suffix = '\n  }\n}\n'
-      output += suffix
-      streamChunks?.(suffix)
-      const functionCall = JSON.parse(output).function
-      functionMessage = {
-        role: 'assistant',
-        content: null,
-        function_call: { name: functionCall.name, arguments: JSON.stringify(functionCall.arguments) },
-      }
-    }
+    const { output, functionMessage } = await processStreamedResponses(response, streamChunks)
 
     const [cost, inputTokens, outputTokens] = CostForModel(
       model,
