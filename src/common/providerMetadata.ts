@@ -172,7 +172,7 @@ export const SupportsJsonMode = (model: LanguageModel): boolean => {
     case 'gpt-4-turbo':
     case 'mistral-small-latest':
     case 'mistral-large-latest':
-          return true
+      return true
     case 'gpt-3.5-turbo':
     case 'gpt-4':
     case 'claude-instant-1':

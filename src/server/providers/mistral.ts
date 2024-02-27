@@ -2,7 +2,7 @@ import { MistralLanguageModel, PromptInputs } from '@/types'
 import MistralClient, { ResponseFormat } from '@mistralai/mistralai'
 import { Predictor, PromptContext } from '@/src/server/evaluationEngine/promptEngine'
 import { CostForModel } from './integration'
-import { buildPromptInputs, exportMessageContent, processStreamedResponses } from './openai'
+import { buildPromptInputs, postProcessContext, processStreamedResponses } from './openai'
 
 export default function predict(apiKey: string, model: MistralLanguageModel): Predictor {
   return (prompts, temperature, maxTokens, context, useContext, streamChunks, _, seed, jsonMode, continuationInputs) =>
@@ -24,7 +24,7 @@ export default function predict(apiKey: string, model: MistralLanguageModel): Pr
 }
 
 const extractFunction = (message?: any) => message?.tool_calls?.[0]?.function
-const wrapFunctionMessage = (name: string, args: string) => ({
+const wrapFunction = (name: string, args: string) => ({
   role: 'assistant',
   content: '',
   tool_calls: [
@@ -76,15 +76,14 @@ async function complete(
       tools: inputFunctions.map(f => ({ type: 'function', function: f })),
     })
 
-    const { output, functionMessage } = await processStreamedResponses(response, wrapFunctionMessage, streamChunks)
-
-    const [cost, inputTokens, outputTokens] = CostForModel(
-      model,
-      [...inputMessages, ...inputFunctions].map(exportMessageContent).join('\n'),
-      output
+    const { output, functionMessage } = await processStreamedResponses(
+      response,
+      extractFunction,
+      wrapFunction,
+      streamChunks
     )
-    context.messages = [...inputMessages, functionMessage ?? { role: 'assistant', content: output }]
-    context.functions = inputFunctions
+    const inputForCostCalculation = postProcessContext(inputMessages, inputFunctions, output, functionMessage, context)
+    const [cost, inputTokens, outputTokens] = CostForModel(model, inputForCostCalculation, output)
 
     return {
       output,

@@ -93,7 +93,8 @@ export const buildPromptInputs = (
 
 export const processStreamedResponses = async (
   response: Stream<OpenAI.Chat.Completions.ChatCompletionChunk> | AsyncGenerator<ChatCompletionResponseChunk>,
-  wrapFunctionMessage: (name: string, args: string) => any,
+  extractFunction: (message: any) => any | undefined,
+  wrapFunction: (name: string, args: string) => any,
   streamChunks?: (chunk: string) => void
 ) => {
   let output = ''
@@ -124,7 +125,7 @@ export const processStreamedResponses = async (
     output += suffix
     streamChunks?.(suffix)
     const functionCall = JSON.parse(output).function
-    functionMessage = wrapFunctionMessage(functionCall.name, JSON.stringify(functionCall.arguments))
+    functionMessage = wrapFunction(functionCall.name, JSON.stringify(functionCall.arguments))
   }
 
   return { output, functionMessage }
@@ -181,7 +182,7 @@ const buildFunctionMessage = (
 }
 
 const extractFunction = (message?: any) => message?.function_call
-const wrapFunctionMessage = (name: string, args: string) => ({
+const wrapFunction = (name: string, args: string) => ({
   role: 'assistant',
   content: null,
   function_call: { name, arguments: args },
@@ -246,7 +247,12 @@ async function complete(
       { timeout: 30 * 1000, signal: abortSignal }
     )
 
-    const { output, functionMessage } = await processStreamedResponses(response, wrapFunctionMessage, streamChunks)
+    const { output, functionMessage } = await processStreamedResponses(
+      response,
+      extractFunction,
+      wrapFunction,
+      streamChunks
+    )
     const inputForCostCalculation = postProcessContext(inputMessages, inputFunctions, output, functionMessage, context)
     const [cost, inputTokens, outputTokens] = CostForModel(model, inputForCostCalculation, output)
 
