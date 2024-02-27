@@ -51,7 +51,7 @@ export default function QueryNodeEditor({
             <DropdownMenu value={item.model} onChange={value => updateModel(value as EmbeddingModel)}>
               {EmbeddingModels.map(model => (
                 <option key={model} value={model} disabled={!checkProviderAvailable(ProviderForModel(model))}>
-                  {model}
+                  {LabelForProvider(ProviderForModel(model))} - {model}
                 </option>
               ))}
             </DropdownMenu>
