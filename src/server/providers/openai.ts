@@ -92,9 +92,7 @@ export const buildPromptInputs = (
 }
 
 export const processStreamedResponses = async (
-  response:
-    | Stream<OpenAI.Chat.Completions.ChatCompletionChunk>
-    | AsyncGenerator<ChatCompletionResponseChunk>,
+  response: Stream<OpenAI.Chat.Completions.ChatCompletionChunk> | AsyncGenerator<ChatCompletionResponseChunk>,
   wrapFunctionMessage: (name: string, args: string) => any,
   streamChunks?: (chunk: string) => void
 ) => {
@@ -132,8 +130,21 @@ export const processStreamedResponses = async (
   return { output, functionMessage }
 }
 
-export const exportMessageContent = (message: Message) =>
-  typeof message.content === 'string' ? message.content : JSON.stringify(message)
+export const postProcessContext = (
+  inputMessages: any[],
+  inputFunctions: any[],
+  output: string,
+  functionMessage: any | undefined,
+  context: PromptContext
+) => {
+  context.messages = [...inputMessages, functionMessage ?? { role: 'assistant', content: output }]
+  context.functions = inputFunctions
+
+  const exportMessageContent = (message: Message) =>
+    typeof message.content === 'string' ? message.content : JSON.stringify(message)
+
+  return [...inputMessages, ...inputFunctions].map(exportMessageContent).join('\n')
+}
 
 const buildPromptMessages = (
   previousMessages: any[],
@@ -236,14 +247,8 @@ async function complete(
     )
 
     const { output, functionMessage } = await processStreamedResponses(response, wrapFunctionMessage, streamChunks)
-
-    const [cost, inputTokens, outputTokens] = CostForModel(
-      model,
-      [...inputMessages, ...inputFunctions].map(exportMessageContent).join('\n'),
-      output
-    )
-    context.messages = [...inputMessages, functionMessage ?? { role: 'assistant', content: output }]
-    context.functions = inputFunctions
+    const inputForCostCalculation = postProcessContext(inputMessages, inputFunctions, output, functionMessage, context)
+    const [cost, inputTokens, outputTokens] = CostForModel(model, inputForCostCalculation, output)
 
     return { output, cost, inputTokens, outputTokens, functionCall: extractFunction(functionMessage)?.name ?? null }
   } catch (error: any) {
