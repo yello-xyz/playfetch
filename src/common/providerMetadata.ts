@@ -355,9 +355,9 @@ export const DescriptionForModel = (model: LanguageModel, providers: AvailableMo
     case 'command':
       return 'An instruction-following conversational model by Cohere that performs language tasks with high quality and reliability while providing longer context compared to generative models.'
     case 'mistral-small-latest':
-      return 'Mistral Small is optimized for simpe tasks that one can do in bulk, like classification, customer support, or text generation. It offers performance at an affordable price point.'
+      return 'Mistral Small is optimized for simpe tasks that one can do in bulk, like classification, customer support, or text generation. It offers performance at an affordable price point (mistral-small-latest).'
     case 'mistral-large-latest':
-      return 'Mistral Large is optimized for complex tasks that require large reasoning capabilities or are highly specialized, like synthetic text generation, code generation, or agents.'
+      return 'Mistral Large is optimized for complex tasks that require large reasoning capabilities or are highly specialized, like synthetic text generation, code generation, or agents (mistral-large-latest).'
     case 'meta-llama/Llama-2-70b-chat-hf':
       return 'Llama 2 is a collection of pretrained and fine-tuned generative text models developed and publicly released by Meta. This is the the 70B fine-tuned model, optimized for dialogue use cases and converted for the Hugging Face Transformers format (meta-llama/Llama-2-70b-chat-hf).'
     default:
