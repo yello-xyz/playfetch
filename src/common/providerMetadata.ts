@@ -139,7 +139,7 @@ export const IsModelDisabled = (model: LanguageModel, providers: AvailableModelP
 }
 
 export const IsModelAvailable = (
-  model: LanguageModel | EmbeddingModel, 
+  model: LanguageModel | EmbeddingModel,
   providers: AvailableModelProvider[]
 ): boolean =>
   isCustomModel(model)
