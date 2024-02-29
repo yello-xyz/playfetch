@@ -139,7 +139,7 @@ export const IsModelDisabled = (model: LanguageModel, providers: AvailableModelP
 }
 
 export const IsModelAvailable = (
-  model: LanguageModel | EmbeddingModel,
+  model: LanguageModel | EmbeddingModel, 
   providers: AvailableModelProvider[]
 ): boolean =>
   isCustomModel(model)
@@ -292,6 +292,11 @@ export const LabelForModel = (model: LanguageModel, providers: AvailableModelPro
       return 'Mistral Large'
     case 'meta-llama/Llama-2-70b-chat-hf':
       return 'Meta Llama 2'
+    case 'text-embedding-ada-002':
+    case 'text-embedding-3-small':
+    case 'text-embedding-3-large':
+    case 'mistral-embed':
+      return model
     default:
       return customModelFromProviders(model, providers)?.name ?? '(unavailable)'
   }
