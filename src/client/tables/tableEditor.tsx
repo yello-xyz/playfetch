@@ -173,7 +173,7 @@ export default function TableEditor({
     'absolute top-0 right-0 h-8 border-l border-b border-gray-200 w-7 flex items-center justify-center hover:bg-gray-50'
   return allVariables.length > 0 ? (
     <>
-      <div className='relative w-full'>
+      <div className={`relative w-full ${inModal ? 'h-full flex flex-col' : ''}`}>
         <div
           key={allVariables.join(',')}
           ref={containerRef}
@@ -201,6 +201,7 @@ export default function TableEditor({
           {Array.from({ length: rowCount }, (_, row) => {
             const border = (col: number) => `${gutterColumn || col > 0 ? 'border-l' : ''} border-b border-gray-200`
             const truncate = isRowActive(row) ? '' : 'max-h-[46px] line-clamp-2'
+            const inactiveStyle = (col: number) => `whitespace-pre-wrap break-words ${border(col)} ${truncate}`
             const iconPosition = (col: number) => (col === allVariables.length - 1 ? 'right-3' : 'right-0.5')
             const iconOpacity = (col: number) =>
               isCellActive(row, col) ? 'hover:opacity-100' : 'group-hover:opacity-100'
@@ -224,7 +225,7 @@ export default function TableEditor({
                           />
                         ) : (
                           <div
-                            className={`h-full px-2.5 py-1.5 whitespace-pre-wrap break-words ${border(col)} ${truncate}`}
+                            className={`h-full px-2.5 py-1.5 ${inactiveStyle(col)}`}
                             onMouseDown={event => activateCell(event, row, col)}>
                             {(!entry || inView) && getInputValue(row, variable)}
                           </div>
@@ -244,6 +245,7 @@ export default function TableEditor({
             )
           })}
         </div>
+        {inModal && <div className={`flex-1 ${backgroundColor} border-b border-gray-200`} />}
         <div
           className={`${addRowButtonBaseClass} ${backgroundColor} ${addRowButtonCursor} ${addRowButtonRounded}`}
           onClick={canAddRow ? addRow : undefined}>
