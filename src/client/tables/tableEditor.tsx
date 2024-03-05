@@ -224,7 +224,7 @@ export default function TableEditor({
                           />
                         ) : (
                           <div
-                            className={`h-full px-2.5 py-1.5 whitespace-pre-wrap ${border(col)} ${truncate}`}
+                            className={`h-full px-2.5 py-1.5 whitespace-pre-wrap break-words ${border(col)} ${truncate}`}
                             onMouseDown={event => activateCell(event, row, col)}>
                             {(!entry || inView) && getInputValue(row, variable)}
                           </div>
