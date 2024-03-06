@@ -8,7 +8,7 @@ export default function predict(apiKey: string, model: AnthropicLanguageModel): 
     complete(apiKey, model, prompts.main, temperature, maxTokens, context, useContext, abortSignal, streamChunks)
 }
 
-type Message = { role: 'user' | 'assistant', content: string }
+type Message = { role: 'user' | 'assistant'; content: string }
 
 async function complete(
   apiKey: string,
@@ -25,6 +25,10 @@ async function complete(
     model = 'claude-instant-1.2' as AnthropicLanguageModel
   } else if (model === 'claude-2') {
     model = 'claude-2.1' as AnthropicLanguageModel
+  } else if (model === 'claude-3-sonnet') {
+    model = 'claude-3-sonnet-20240229' as AnthropicLanguageModel
+  } else if (model === 'claude-3-opus') {
+    model = 'claude-3-opus-20240229' as AnthropicLanguageModel
   }
 
   try {
@@ -41,7 +45,7 @@ async function complete(
       },
       { signal: abortSignal }
     )
-     
+
     let output = ''
     for await (const message of stream) {
       if (abortSignal.aborted) {
@@ -51,7 +55,7 @@ async function complete(
       if (message.type === 'content_block_delta') {
         const text = message.delta.text
         output += text
-        streamChunks?.(text)  
+        streamChunks?.(text)
       }
     }
 

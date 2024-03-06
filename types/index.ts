@@ -100,7 +100,7 @@ export type MistralEmbeddingModel = 'mistral-embed'
 export type EmbeddingModel = OpenAIEmbeddingModel | MistralEmbeddingModel
 
 export type OpenAILanguageModel = 'gpt-3.5-turbo' | 'gpt-3.5-turbo-16k' | 'gpt-4' | 'gpt-4-turbo'
-export type AnthropicLanguageModel = 'claude-instant-1' | 'claude-2'
+export type AnthropicLanguageModel = 'claude-instant-1' | 'claude-2' | 'claude-3-sonnet' | 'claude-3-opus'
 export type GoogleLanguageModel = 'text-bison' | 'chat-bison' | 'gemini-pro'
 export type CohereLanguageModel = 'command'
 export type MistralLanguageModel = 'mistral-small-latest' | 'mistral-large-latest'
