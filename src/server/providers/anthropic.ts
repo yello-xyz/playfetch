@@ -10,6 +10,7 @@ export default function predict(apiKey: string, userID: number, model: Anthropic
       userID,
       model,
       prompts.main,
+      prompts.system,
       temperature,
       maxTokens,
       context,
@@ -26,6 +27,7 @@ async function complete(
   userID: number,
   model: AnthropicLanguageModel,
   prompt: string,
+  system: string | undefined,
   temperature: number,
   maxTokens: number,
   context: PromptContext,
@@ -54,6 +56,7 @@ async function complete(
         temperature,
         max_tokens: maxTokens,
         messages: inputMessages,
+        system,
         metadata: { user_id: userID.toString() },
       },
       { signal: abortSignal }
