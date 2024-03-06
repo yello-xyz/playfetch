@@ -8,6 +8,8 @@ export default function predict(apiKey: string, model: AnthropicLanguageModel): 
     complete(apiKey, model, prompts.main, temperature, maxTokens, context, useContext, abortSignal, streamChunks)
 }
 
+type Message = { role: 'user' | 'assistant', content: string }
+
 async function complete(
   apiKey: string,
   model: AnthropicLanguageModel,
@@ -27,29 +29,35 @@ async function complete(
 
   try {
     const anthropic = new Anthropic({ apiKey })
-    const runningContext = usePreviousContext ? context.running ?? '' : ''
-    const inputPrompt = `${runningContext}${Anthropic.HUMAN_PROMPT} ${prompt} ${Anthropic.AI_PROMPT}`
-    const stream = await anthropic.completions.create(
+    const previousMessages: Message[] = usePreviousContext ? context.messages ?? [] : []
+    const promptAsMessage: Message = { role: 'user', content: prompt }
+    const inputMessages = [...previousMessages, promptAsMessage]
+    const stream = anthropic.messages.stream(
       {
         model,
         temperature,
-        max_tokens_to_sample: maxTokens,
-        prompt: inputPrompt,
-        stop_sequences: [Anthropic.HUMAN_PROMPT],
-        stream: true,
+        max_tokens: maxTokens,
+        messages: inputMessages,
       },
       { signal: abortSignal }
     )
-
+     
     let output = ''
     for await (const message of stream) {
-      const text = message.completion
-      output += text
-      streamChunks?.(text)
+      if (abortSignal.aborted) {
+        stream.controller.abort()
+        break
+      }
+      if (message.type === 'content_block_delta') {
+        const text = message.delta.text
+        output += text
+        streamChunks?.(text)  
+      }
     }
 
-    const [cost, inputTokens, outputTokens] = CostForModel(model, inputPrompt, output)
-    context.running = `${inputPrompt}${output}`
+    const inputMessageContent = inputMessages.map(message => message.content).join('\n')
+    const [cost, inputTokens, outputTokens] = CostForModel(model, inputMessageContent, output)
+    context.messages = [...inputMessages, { role: 'assistant', content: output }]
 
     return { output, cost, inputTokens, outputTokens, functionCall: null }
   } catch (error: any) {
