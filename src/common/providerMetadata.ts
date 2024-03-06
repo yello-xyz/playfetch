@@ -277,7 +277,7 @@ export const LabelForModel = (model: LanguageModel, providers: AvailableModelPro
     case 'claude-instant-1':
       return 'Claude Instant'
     case 'claude-2':
-      return 'Claude v2'
+      return 'Claude 2'
     case 'text-bison':
       return 'PaLM 2 for Text'
     case 'chat-bison':
@@ -314,9 +314,9 @@ export const WebsiteLinkForModel = (model: LanguageModel): string => {
     case 'gpt-4-turbo':
       return 'https://platform.openai.com/docs/models/gpt-4'
     case 'claude-instant-1':
-      return 'https://docs.anthropic.com/claude/reference/selecting-a-model'
+      return 'https://docs.anthropic.com/claude/docs/models-overview'
     case 'claude-2':
-      return 'https://docs.anthropic.com/claude/reference/selecting-a-model'
+      return 'https://docs.anthropic.com/claude/docs/models-overview'
     case 'text-bison':
       return 'https://cloud.google.com/vertex-ai/docs/generative-ai/model-reference/text'
     case 'chat-bison':
@@ -419,9 +419,9 @@ export const InputPriceForModel = (model: LanguageModel | EmbeddingModel): numbe
     case 'gpt-4-turbo':
       return 10
     case 'claude-instant-1':
-      return 1.63
+      return 0.8
     case 'claude-2':
-      return 11.02
+      return 8
     case 'command':
       return 15
     case 'mistral-small-latest':
@@ -458,9 +458,9 @@ export const OutputPriceForModel = (model: LanguageModel | EmbeddingModel): numb
     case 'gpt-4-turbo':
       return 30
     case 'claude-instant-1':
-      return 5.51
+      return 2.4
     case 'claude-2':
-      return 32.68
+      return 24
     case 'command':
       return 15
     case 'mistral-small-latest':
