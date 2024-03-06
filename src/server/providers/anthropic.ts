@@ -21,6 +21,8 @@ async function complete(
 ) {
   if (model === 'claude-instant-1') {
     model = 'claude-instant-1.2' as AnthropicLanguageModel
+  } else if (model === 'claude-2') {
+    model = 'claude-2.1' as AnthropicLanguageModel
   }
 
   try {

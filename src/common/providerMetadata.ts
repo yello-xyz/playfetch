@@ -350,7 +350,7 @@ export const DescriptionForModel = (model: LanguageModel, providers: AvailableMo
     case 'claude-instant-1':
       return 'A faster, cheaper yet still very capable version of Claude, which can handle a range of tasks including casual dialogue, text analysis, summarization, and document comprehension (claude-instant-1.2).'
     case 'claude-2':
-      return 'Anthropic’s most powerful model that excels at a wide range of tasks from sophisticated dialogue and creative content generation to detailed instruction (claude-2). It is good for complex reasoning, creativity, thoughtful dialogue, coding, and detailed content creation.'
+      return 'Anthropic’s most powerful model that excels at a wide range of tasks from sophisticated dialogue and creative content generation to detailed instruction (claude-2.1). It is good for complex reasoning, creativity, thoughtful dialogue, coding, and detailed content creation.'
     case 'text-bison':
       return 'Google’s foundation model optimized for a variety of natural language tasks such as sentiment analysis, entity extraction, and content creation (text-bison). Fine-tuned for tasks that can be completed with one response, without the need for continuous conversation.'
     case 'chat-bison':
