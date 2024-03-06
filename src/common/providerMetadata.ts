@@ -367,13 +367,13 @@ export const DescriptionForModel = (model: LanguageModel, providers: AvailableMo
     case 'gpt-4-turbo':
       return 'Preview of OpenAI’s most advanced model, offering a 128K context window and knowledge of world events up to April 2023 (gpt-4-0125-preview). Suitable for testing and evaluations, not recommended for production usage due to restrictive rate limits under preview.'
     case 'claude-instant-1':
-      return 'A faster, cheaper yet still very capable version of Claude, which can handle a range of tasks including casual dialogue, text analysis, summarization, and document comprehension (claude-instant-1.2).'
+      return 'A faster, cheaper version of Claude, which can handle a range of tasks including casual dialogue, text analysis, summarization, and document comprehension (claude-instant-1.2).'
     case 'claude-2':
-      return 'Anthropic’s most powerful model that excels at a wide range of tasks from sophisticated dialogue and creative content generation to detailed instruction (claude-2.1). It is good for complex reasoning, creativity, thoughtful dialogue, coding, and detailed content creation.'
+      return 'The predecessor to Claude 3, offering strong performance across a variety of tasks (claude-2.1).'
     case 'claude-3-sonnet':
-      return '(claude-3-sonnet-20240229)'
+      return 'Anthropic’s most balanced model between intelligence and speed, a great choice for enterprise workloads and scaled AI deployments (claude-3-sonnet-20240229).'
     case 'claude-3-opus':
-      return '(claude-3-opus-20240229)'
+      return 'Anthropic’s most powerful model, delivering state-of-the-art performance on highly complex tasks and demonstrating fluency and human-like understanding (claude-3-opus-20240229).'
     case 'text-bison':
       return 'Google’s foundation model optimized for a variety of natural language tasks such as sentiment analysis, entity extraction, and content creation (text-bison). Fine-tuned for tasks that can be completed with one response, without the need for continuous conversation.'
     case 'chat-bison':
