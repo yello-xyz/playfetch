@@ -23,7 +23,7 @@
     "format": "npx prettier -w '**/*.ts' '**/*.tsx' '**/*.css'"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.5.3",
+    "@anthropic-ai/sdk": "^0.16.1",
     "@dnd-kit/core": "^6.1.0",
     "@google-cloud/aiplatform": "^2.14.0",
     "@google-cloud/datastore": "^8.5.0",
