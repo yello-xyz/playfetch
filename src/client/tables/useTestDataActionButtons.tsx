@@ -48,7 +48,7 @@ export default function useTestDataActionButtons(
             setTestConfig,
             reload: () => setTimeout(expandTestData),
           },
-          { top: 0, left: 100, right: 100, bottom: 0 }
+          { top: 50, left: 100, right: 100, bottom: 50 }
         )
       )
       return inputValues

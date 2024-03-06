@@ -1,6 +1,6 @@
 {
   "name": "playfetch",
-  "version": "0.25.1",
+  "version": "0.26.0",
   "author": "Yello XYZ Ltd",
   "private": true,
   "repository": {
@@ -23,7 +23,7 @@
     "format": "npx prettier -w '**/*.ts' '**/*.tsx' '**/*.css'"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.5.3",
+    "@anthropic-ai/sdk": "^0.16.1",
     "@dnd-kit/core": "^6.1.0",
     "@google-cloud/aiplatform": "^2.14.0",
     "@google-cloud/datastore": "^8.5.0",
@@ -31,6 +31,7 @@
     "@google-cloud/vertexai": "^0.2.1",
     "@huggingface/inference": "^2.6.4",
     "@linear/sdk": "^13.0.0",
+    "@mistralai/mistralai": "github:yello-xyz/mistral-client-js",
     "@notionhq/client": "^2.2.13",
     "@pinecone-database/pinecone": "^1.1.0",
     "@react-hook/resize-observer": "^1.2.6",

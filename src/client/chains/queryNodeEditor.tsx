@@ -5,8 +5,14 @@ import { EmbeddingModel, QueryChainItem, QueryProvider } from '@/types'
 import TextInput from '@/src/client/components/textInput'
 import Label from '@/src/client/components/label'
 import DropdownMenu from '@/src/client/components/dropdownMenu'
-import { EmbeddingModels, QueryProviders, LabelForProvider, ProviderForModel } from '@/src/common/providerMetadata'
-import { useCheckProviderAvailable } from '@/src/client/settings/providerContext'
+import {
+  EmbeddingModels,
+  QueryProviders,
+  LabelForProvider,
+  ProviderForModel,
+  FullLabelForModel,
+} from '@/src/common/providerMetadata'
+import useAvailableModelProviders, { useCheckProviderAvailable } from '@/src/client/settings/providerContext'
 import RangeInput from '@/src/client/components/rangeInput'
 import { ProviderWarning } from '@/src/client/prompts/modelUnavailableWarning'
 
@@ -25,6 +31,7 @@ export default function QueryNodeEditor({
   const updateTopK = (topK: number) => updateItem({ ...item, topK })
   const updateQuery = (query: string) => updateItem({ ...item, query })
 
+  const availableProviders = useAvailableModelProviders()
   const checkProviderAvailable = useCheckProviderAvailable()
   const isVectorStoreAvailable = checkProviderAvailable(item.provider)
   const isEmbeddingProviderAvailable = checkProviderAvailable(ProviderForModel(item.model))
@@ -51,7 +58,7 @@ export default function QueryNodeEditor({
             <DropdownMenu value={item.model} onChange={value => updateModel(value as EmbeddingModel)}>
               {EmbeddingModels.map(model => (
                 <option key={model} value={model} disabled={!checkProviderAvailable(ProviderForModel(model))}>
-                  {model}
+                  {FullLabelForModel(model, availableProviders)}
                 </option>
               ))}
             </DropdownMenu>

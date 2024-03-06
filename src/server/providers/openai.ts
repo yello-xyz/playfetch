@@ -8,8 +8,8 @@ import {
 import OpenAI from 'openai'
 import { Predictor, PromptContext } from '@/src/server/evaluationEngine/promptEngine'
 import { CostForModel } from './integration'
-import { ChatCompletionCreateParams } from 'openai/resources/chat'
 import { SupportsJsonMode } from '@/src/common/providerMetadata'
+import { buildFunctionInputs, postProcessFunctionMessage, processFunctionResponse } from './functions'
 
 export default function predict(
   apiKey: string,
@@ -47,27 +47,12 @@ export default function predict(
     )
 }
 
-const getFunctionResponseMessage = (lastMessage?: any, inputs?: PromptInputs) => {
-  if (lastMessage && inputs && lastMessage.role === 'assistant' && lastMessage.function_call?.name) {
-    const name = lastMessage.function_call.name
-    const response = inputs[name]
-    if (response) {
-      const content = typeof response === 'string' ? response : JSON.stringify(response)
-      return { role: 'function', name, content }
-    }
-  }
-  return undefined
-}
-
-const buildPromptMessages = (previousMessages: any[], prompt: string, system?: string, inputs?: PromptInputs) => {
-  const dropSystemPrompt =
-    !system || previousMessages.some(message => message.role === 'system' && message.content === system)
-  const lastMessage = previousMessages.slice(-1)[0]
-  return [
-    ...(dropSystemPrompt ? [] : [{ role: 'system', content: system }]),
-    getFunctionResponseMessage(lastMessage, inputs) ?? { role: 'user', content: prompt },
-  ]
-}
+const extractFunction = (message?: any) => message?.function_call
+const wrapFunction = (name: string, args: string) => ({
+  role: 'assistant',
+  content: null,
+  function_call: { name, arguments: args },
+})
 
 async function complete(
   apiKey: string,
@@ -86,38 +71,33 @@ async function complete(
   streamChunks?: (chunk: string) => void,
   continuationInputs?: PromptInputs
 ) {
-  let functions = [] as ChatCompletionCreateParams.Function[]
-  if (functionsPrompt) {
-    try {
-      functions = JSON.parse(functionsPrompt)
-      if (!Array.isArray(functions)) {
-        functions = [functions]
-      }
-    } catch (error: any) {
-      return { error: `Failed to parse functions as JSON array.\n${error?.message ?? ''}` }
-    }
+  if (model === 'gpt-3.5-turbo-16k') {
+    // TODO remove this when the former points to the latter (should be February 16 2024)
+    model = 'gpt-3.5-turbo-0125'
+  } else if (model === 'gpt-3.5-turbo') {
+    // TODO starting February 16 2024, both aliases will point to the latest model (cheaper 16k).
+    // There is probably not much point in keeping gpt-3.5-turbo around after that (or using it),
+    // but for now we keep it pointing to the same model as before (to be discontinued in June).
+    model = 'gpt-3.5-turbo-0613'
+  } else if (model === 'gpt-4-turbo') {
+    // TODO remove this once the model is generally available (also update model description)
+    model = 'gpt-4-0125-preview'
   }
 
   try {
     const api = new OpenAI({ apiKey })
-    const previousMessages = useContext ? context?.messages ?? [] : []
-    const promptMessages = buildPromptMessages(previousMessages, prompt, system, continuationInputs)
-    const inputMessages = [...previousMessages, ...promptMessages]
-    const previousFunctions: any[] = useContext ? context?.functions ?? [] : []
-    const serializedPreviousFunctions = new Set(previousFunctions.map(f => JSON.stringify(f)))
-    const newFunctions = functions.filter(f => !serializedPreviousFunctions.has(JSON.stringify(f)))
-    const inputFunctions = [...previousFunctions, ...newFunctions]
-    if (model === 'gpt-3.5-turbo-16k') {
-      // TODO remove this when the former points to the latter (should be February 16 2024)
-      model = 'gpt-3.5-turbo-0125'
-    } else if (model === 'gpt-3.5-turbo') {
-      // TODO starting February 16 2024, both aliases will point to the latest model (cheaper 16k).
-      // There is probably not much point in keeping gpt-3.5-turbo around after that (or using it),
-      // but for now we keep it pointing to the same model as before (to be discontinued in June).
-      model = 'gpt-3.5-turbo-0613'
-    } else if (model === 'gpt-4-turbo') {
-      // TODO remove this once the model is generally available (also update model description)
-      model = 'gpt-4-0125-preview'
+    const { inputMessages, inputFunctions, error } = buildFunctionInputs(
+      prompt,
+      system,
+      functionsPrompt,
+      context,
+      useContext,
+      continuationInputs,
+      'function',
+      extractFunction
+    )
+    if (!inputMessages || !inputFunctions) {
+      return { error }
     }
     const response = await api.chat.completions.create(
       {
@@ -134,51 +114,22 @@ async function complete(
       { timeout: 30 * 1000, signal: abortSignal }
     )
 
-    let output = ''
-    let isFunctionCall = false
-    for await (const message of response) {
-      let text = ''
-
-      const choice = message.choices[0]
-      const functionCall = choice.delta?.function_call
-
-      if (functionCall) {
-        isFunctionCall = true
-        if (functionCall.name) {
-          text = `{\n  "function": {\n    "name": "${functionCall.name}",\n    "arguments": `
-        }
-        text += functionCall.arguments?.replaceAll('\n', '\n    ')
-      } else {
-        text = choice.delta?.content ?? ''
-      }
-
-      output += text
-      streamChunks?.(text)
-    }
-
-    let functionMessage = undefined
-    if (isFunctionCall) {
-      const suffix = '\n  }\n}\n'
-      output += suffix
-      streamChunks?.(suffix)
-      const functionCall = JSON.parse(output).function
-      functionMessage = {
-        role: 'assistant',
-        content: null,
-        function_call: { name: functionCall.name, arguments: JSON.stringify(functionCall.arguments) },
-      }
-    }
-
-    const extractContent = (obj: any) => (typeof obj.content === 'string' ? obj.content : JSON.stringify(obj))
-    const [cost, inputTokens, outputTokens] = CostForModel(
-      model,
-      [...inputMessages, ...inputFunctions].map(extractContent).join('\n'),
-      output
+    const { output, functionMessage } = await processFunctionResponse(
+      response,
+      extractFunction,
+      wrapFunction,
+      streamChunks
     )
-    context.messages = [...inputMessages, functionMessage ?? { role: 'assistant', content: output }]
-    context.functions = inputFunctions
+    const inputForCostCalculation = postProcessFunctionMessage(
+      inputMessages,
+      inputFunctions,
+      output,
+      functionMessage,
+      context
+    )
+    const [cost, inputTokens, outputTokens] = CostForModel(model, inputForCostCalculation, output)
 
-    return { output, cost, inputTokens, outputTokens, functionCall: functionMessage?.function_call?.name ?? null }
+    return { output, cost, inputTokens, outputTokens, functionCall: extractFunction(functionMessage)?.name ?? null }
   } catch (error: any) {
     return { error: error?.message ?? 'Unknown error' }
   }

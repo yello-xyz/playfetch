@@ -8,16 +8,19 @@ import {
   GoogleLanguageModel,
   HuggingFaceLanguageModel,
   LanguageModel,
+  MistralEmbeddingModel,
+  MistralLanguageModel,
   ModelProvider,
   OpenAIEmbeddingModel,
   OpenAILanguageModel,
 } from '@/types'
 import { encode } from 'gpt-3-encoder'
 import { getProviderCredentials } from '@/src/server/datastore/providers'
-import openai, { createEmbedding, loadExtraModels } from './openai'
+import openai, { createEmbedding as openaiEmbed, loadExtraModels } from './openai'
 import anthropic from './anthropic'
 import vertexai from './vertexai'
 import cohere from './cohere'
+import mistral, { createEmbedding as mistralEmbed } from './mistral'
 import huggingface from './huggingface'
 import { updateScopedModelCost } from '@/src/server/datastore/costs'
 import { checkBudgetForScope, incrementCostForScope } from '@/src/server/datastore/budgets'
@@ -41,6 +44,7 @@ export const CredentialsForProvider = async (scopeIDs: number[], provider: Model
     case 'openai':
     case 'anthropic':
     case 'cohere':
+    case 'mistral':
     case 'huggingface':
       const { scopeID, providerID, apiKey } = await getProviderCredentials(scopeIDs, provider, modelToCheck)
       return { scopeID, providerID, apiKey }
@@ -54,6 +58,7 @@ export const CheckBudgetForProvider = async (scopeID: number | null, provider: M
     case 'openai':
     case 'anthropic':
     case 'cohere':
+    case 'mistral':
     case 'huggingface':
       return !!scopeID && checkBudgetForScope(scopeID)
   }
@@ -79,6 +84,7 @@ export const ExtraModelsForProvider = (
     case 'google':
     case 'anthropic':
     case 'cohere':
+    case 'mistral':
     case 'huggingface':
       return Promise.resolve({ customModels: [], gatedModels: [] })
     case 'openai':
@@ -99,8 +105,10 @@ export const CreateEmbedding = (
     case 'cohere':
     case 'huggingface':
       throw new Error('Provider does not support embeddings yet')
+    case 'mistral':
+      return mistralEmbed(apiKey, model as MistralEmbeddingModel, input)
     case 'openai':
-      return createEmbedding(apiKey, userID, model as OpenAIEmbeddingModel, input)
+      return openaiEmbed(apiKey, userID, model as OpenAIEmbeddingModel, input)
   }
 }
 
@@ -111,9 +119,11 @@ export const GetPredictor = (provider: ModelProvider, apiKey: string, userID: nu
     case 'openai':
       return openai(apiKey, userID, model as OpenAILanguageModel | CustomLanguageModel)
     case 'anthropic':
-      return anthropic(apiKey, model as AnthropicLanguageModel)
+      return anthropic(apiKey, userID, model as AnthropicLanguageModel)
     case 'cohere':
       return cohere(apiKey, model as CohereLanguageModel)
+    case 'mistral':
+      return mistral(apiKey, model as MistralLanguageModel)
     case 'huggingface':
       return huggingface(apiKey, model as HuggingFaceLanguageModel)
   }
