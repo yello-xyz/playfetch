@@ -19,6 +19,10 @@ async function complete(
   abortSignal: AbortSignal,
   streamChunks?: (text: string) => void
 ) {
+  if (model === 'claude-instant-1') {
+    model = 'claude-instant-1.2' as AnthropicLanguageModel
+  }
+
   try {
     const anthropic = new Anthropic({ apiKey })
     const runningContext = usePreviousContext ? context.running ?? '' : ''

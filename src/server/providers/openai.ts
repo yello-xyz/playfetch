@@ -71,6 +71,19 @@ async function complete(
   streamChunks?: (chunk: string) => void,
   continuationInputs?: PromptInputs
 ) {
+  if (model === 'gpt-3.5-turbo-16k') {
+    // TODO remove this when the former points to the latter (should be February 16 2024)
+    model = 'gpt-3.5-turbo-0125'
+  } else if (model === 'gpt-3.5-turbo') {
+    // TODO starting February 16 2024, both aliases will point to the latest model (cheaper 16k).
+    // There is probably not much point in keeping gpt-3.5-turbo around after that (or using it),
+    // but for now we keep it pointing to the same model as before (to be discontinued in June).
+    model = 'gpt-3.5-turbo-0613'
+  } else if (model === 'gpt-4-turbo') {
+    // TODO remove this once the model is generally available (also update model description)
+    model = 'gpt-4-0125-preview'
+  }
+
   try {
     const api = new OpenAI({ apiKey })
     const { inputMessages, inputFunctions, error } = buildFunctionInputs(
@@ -85,18 +98,6 @@ async function complete(
     )
     if (!inputMessages || !inputFunctions) {
       return { error }
-    }
-    if (model === 'gpt-3.5-turbo-16k') {
-      // TODO remove this when the former points to the latter (should be February 16 2024)
-      model = 'gpt-3.5-turbo-0125'
-    } else if (model === 'gpt-3.5-turbo') {
-      // TODO starting February 16 2024, both aliases will point to the latest model (cheaper 16k).
-      // There is probably not much point in keeping gpt-3.5-turbo around after that (or using it),
-      // but for now we keep it pointing to the same model as before (to be discontinued in June).
-      model = 'gpt-3.5-turbo-0613'
-    } else if (model === 'gpt-4-turbo') {
-      // TODO remove this once the model is generally available (also update model description)
-      model = 'gpt-4-0125-preview'
     }
     const response = await api.chat.completions.create(
       {
