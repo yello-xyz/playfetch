@@ -1,5 +1,11 @@
 ## PlayFetch Changelog
 
+### v0.26 - 2024-03-06
+- Add support for Mistral AI (Small, Large)
+- Add support for Anthropic Claude 3 (Sonnet, Opus)
+- Add support for system prompt in Anthropic models
+- Add support for Mistral embedding model (mistral-embed)
+
 ### v0.25 - 2024-02-15
 - Support for latest GPT-3.5 Turbo and GPT-4 Turbo Preview models (0125)
 - Support for new OpenAI embedding models (text-embedding-3-small, text-embedding-3-large)
