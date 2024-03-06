@@ -119,7 +119,7 @@ export const GetPredictor = (provider: ModelProvider, apiKey: string, userID: nu
     case 'openai':
       return openai(apiKey, userID, model as OpenAILanguageModel | CustomLanguageModel)
     case 'anthropic':
-      return anthropic(apiKey, model as AnthropicLanguageModel)
+      return anthropic(apiKey, userID, model as AnthropicLanguageModel)
     case 'cohere':
       return cohere(apiKey, model as CohereLanguageModel)
     case 'mistral':

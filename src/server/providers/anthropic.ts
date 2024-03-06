@@ -3,15 +3,27 @@ import Anthropic from '@anthropic-ai/sdk'
 import { Predictor, PromptContext } from '@/src/server/evaluationEngine/promptEngine'
 import { CostForModel } from './integration'
 
-export default function predict(apiKey: string, model: AnthropicLanguageModel): Predictor {
+export default function predict(apiKey: string, userID: number, model: AnthropicLanguageModel): Predictor {
   return (prompts, temperature, maxTokens, context, useContext, streamChunks, abortSignal) =>
-    complete(apiKey, model, prompts.main, temperature, maxTokens, context, useContext, abortSignal, streamChunks)
+    complete(
+      apiKey,
+      userID,
+      model,
+      prompts.main,
+      temperature,
+      maxTokens,
+      context,
+      useContext,
+      abortSignal,
+      streamChunks
+    )
 }
 
 type Message = { role: 'user' | 'assistant'; content: string }
 
 async function complete(
   apiKey: string,
+  userID: number,
   model: AnthropicLanguageModel,
   prompt: string,
   temperature: number,
@@ -42,6 +54,7 @@ async function complete(
         temperature,
         max_tokens: maxTokens,
         messages: inputMessages,
+        metadata: { user_id: userID.toString() },
       },
       { signal: abortSignal }
     )
