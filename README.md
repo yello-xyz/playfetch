@@ -43,6 +43,10 @@ Or just **Open with GitHub Desktop** and clone to a local directory (recommended
 
 In order to access the Google Cloud Datastore from your local machine, you will need to install the Google Cloud CLI initialize it as explained [here](https://cloud.google.com/sdk/docs/install-sdk) (you can skip the other steps). Run the following commands to log in with your individual Google account (which should be added to the dev@yello.xyz group).
 
+`gcloud auth login`
+
+`gcloud init`
+
 `gcloud auth application-default login`
 
 `gcloud init`
