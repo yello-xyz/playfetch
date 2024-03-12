@@ -12,6 +12,17 @@ const getContainer = (element : HTMLElement, identifier: string) => {
   return container
 }
 
+const gatherChildren = (element: HTMLElement) => {
+  const children: HTMLElement[] = []
+  for (const child of element.children) {
+    if (child instanceof HTMLElement) {
+      children.push(child)
+      children.push(...gatherChildren(child))
+    }
+  }
+  return children
+}
+
 const extractSelection = (identifier: string): CommentSelection | undefined => {
   const selection = document.getSelection()
   if (!selection || selection.rangeCount === 0) {
@@ -31,7 +42,7 @@ const extractSelection = (identifier: string): CommentSelection | undefined => {
     return undefined
   }
 
-  const spans = [...startContainer.children]
+  const spans = gatherChildren(startContainer)
   const startElementIndex = spans.indexOf(selectionStartElement)
   const endElementIndex = spans.indexOf(selectionEndElement)
   const selectionElement = startElementIndex <= endElementIndex ? selectionStartElement : selectionEndElement
