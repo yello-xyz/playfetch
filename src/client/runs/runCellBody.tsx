@@ -1,13 +1,17 @@
 import { BorderedSection, RoleHeader } from './runCellContinuation'
 import { ActiveChain, ActivePrompt, ChainVersion, IsProperRun, PartialRun, PromptVersion, Run } from '@/types'
-import { MouseEvent, useCallback } from 'react'
+import { useCallback, useRef } from 'react'
 import { CommentsPopup, CommentsPopupProps } from '@/src/client/comments/commentPopupMenu'
 import { AvailableLabelColorsForItem } from '@/src/client/labels/labelsPopup'
 import useGlobalPopup from '@/src/client/components/globalPopupContext'
-import CommentInputPopup, { CommentInputProps, CommentSelection, useExtractCommentSelection } from './commentInputPopup'
+import CommentInputPopup, {
+  CommentInputProps,
+  CommentSelection,
+  CreateSpansFromRanges,
+  useExtractCommentSelection,
+} from './commentInputPopup'
 import { useLoggedInUser } from '@/src/client/users/userContext'
 import { IdentifierForRun } from '@/src/client/runs/runMerging'
-import RunSpan from './runSpan'
 
 export default function RunCellBody({
   run,
@@ -24,7 +28,7 @@ export default function RunCellBody({
 
   const setPopup = useGlobalPopup<CommentInputProps | CommentsPopupProps>()
 
-  const selectComment = (event: MouseEvent, startIndex: number) => {
+  const selectComment = (event: { clientX: number; clientY: number }, startIndex: number) => {
     if (version && activeItem) {
       const popupComments = comments.filter(comment => comment.startIndex === startIndex)
       setPopup(
@@ -98,25 +102,12 @@ export default function RunCellBody({
 
   useExtractCommentSelection(IsProperRun(run) ? IdentifierForRun(run.id) : null, onUpdateSelection)
 
-  const spans = []
-
-  let index = 0
-  for (const { startIndex, endIndex } of selectionRanges.sort((a, b) => a.startIndex - b.startIndex)) {
-    if (startIndex < index) {
-      continue
+  const didCreateRanges = useRef(false)
+  const onLoaded = (node: HTMLElement | null) => {
+    if (node && !didCreateRanges.current) {
+      didCreateRanges.current = true
+      CreateSpansFromRanges(node, selectionRanges, selectComment)
     }
-    if (startIndex > index) {
-      spans.push(<RunSpan key={index}>{run.output.substring(index, startIndex)}</RunSpan>)
-    }
-    spans.push(
-      <RunSpan key={startIndex} onSelect={event => selectComment(event, startIndex)}>
-        {run.output.substring(startIndex, endIndex)}
-      </RunSpan>
-    )
-    index = endIndex
-  }
-  if (index < run.output.length) {
-    spans.push(<RunSpan key={index}>{run.output.substring(index)}</RunSpan>)
   }
 
   const user = useLoggedInUser()
@@ -126,8 +117,8 @@ export default function RunCellBody({
       {isContinuation &&
         (IsProperRun(run) || !run.userID ? <RoleHeader onCancel={run.onCancel} /> : <RoleHeader user={user} />)}
       <BorderedSection border={isContinuation}>
-        <div className='flex-1' id={IdentifierForRun(run.id)}>
-          {spans}
+        <div className='flex-1 break-words' id={IdentifierForRun(run.id)} ref={onLoaded}>
+          {run.output}
         </div>
       </BorderedSection>
     </>
