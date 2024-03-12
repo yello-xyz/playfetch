@@ -7,6 +7,7 @@ import useGlobalPopup from '@/src/client/components/globalPopupContext'
 import CommentInputPopup, { CommentInputProps, CommentSelection, useExtractCommentSelection } from './commentInputPopup'
 import { useLoggedInUser } from '@/src/client/users/userContext'
 import { IdentifierForRun } from '@/src/client/runs/runMerging'
+import RunSpan from './runSpan'
 
 export default function RunCellBody({
   run,
@@ -105,28 +106,17 @@ export default function RunCellBody({
       continue
     }
     if (startIndex > index) {
-      spans.push(
-        <span className='break-words' key={index}>
-          {run.output.substring(index, startIndex)}
-        </span>
-      )
+      spans.push(<RunSpan key={index}>{run.output.substring(index, startIndex)}</RunSpan>)
     }
     spans.push(
-      <span
-        key={startIndex}
-        className='underline break-words cursor-pointer bg-blue-50 decoration-blue-100 decoration-2 underline-offset-2'
-        onClick={event => selectComment(event, startIndex)}>
+      <RunSpan key={startIndex} onSelect={event => selectComment(event, startIndex)}>
         {run.output.substring(startIndex, endIndex)}
-      </span>
+      </RunSpan>
     )
     index = endIndex
   }
   if (index < run.output.length) {
-    spans.push(
-      <span className='break-words' key={index}>
-        {run.output.substring(index)}
-      </span>
-    )
+    spans.push(<RunSpan key={index}>{run.output.substring(index)}</RunSpan>)
   }
 
   const user = useLoggedInUser()
