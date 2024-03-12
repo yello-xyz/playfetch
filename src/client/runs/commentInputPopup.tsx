@@ -4,6 +4,14 @@ import { useCallback, useEffect, useState } from 'react'
 
 export type CommentSelection = { text: string; startIndex: number; popupPoint: { x: number; y: number } }
 
+const getContainer = (element : HTMLElement, identifier: string) => {
+  let container: HTMLElement | null = element
+  while (container && container.id !== identifier) {
+    container = container.parentElement
+  }
+  return container
+}
+
 const extractSelection = (identifier: string): CommentSelection | undefined => {
   const selection = document.getSelection()
   if (!selection || selection.rangeCount === 0) {
@@ -17,9 +25,9 @@ const extractSelection = (identifier: string): CommentSelection | undefined => {
     return undefined
   }
 
-  const startContainer = selectionStartElement.parentElement
-  const endContainer = selectionEndElement.parentElement
-  if (startContainer?.id !== identifier || endContainer?.id !== identifier) {
+  const startContainer = getContainer(selectionStartElement, identifier)
+  const endContainer = getContainer(selectionEndElement, identifier)
+  if (!startContainer || !endContainer) {
     return undefined
   }
 
