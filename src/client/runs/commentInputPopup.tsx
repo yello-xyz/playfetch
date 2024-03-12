@@ -26,6 +26,31 @@ const gatherLeaveNodes = (element: HTMLElement) => {
   return leaveNodes
 }
 
+export const CreateContainerRange = (
+  container: HTMLElement,
+  startIndex: number,
+  endIndex: number
+): Range | undefined => {
+  for (const node of gatherLeaveNodes(container)) {
+    const length = node.textContent?.length ?? 0
+    if (startIndex < length && endIndex < length) {
+      const childNode = node.childNodes[0]
+      if (childNode && childNode instanceof Text && childNode.length >= endIndex) {
+        const range = document.createRange()
+        range.setStart(childNode, startIndex)
+        range.setEnd(childNode, endIndex)
+        return range
+      }
+    }
+    startIndex -= length
+    endIndex -= length
+    if (startIndex < 0) {
+      break
+    }
+  }
+  return undefined
+}
+
 const extractSelection = (identifier: string): CommentSelection | undefined => {
   const selection = document.getSelection()
   if (!selection || selection.rangeCount === 0) {
@@ -79,8 +104,6 @@ export function useExtractCommentSelection(
       document.removeEventListener('mouseup', updateSelection)
     }
   }, [identifier, updateSelection])
-
-  return selection
 }
 
 export type CommentInputProps = {
