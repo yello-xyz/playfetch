@@ -13,7 +13,7 @@ const extractSelection = (identifier: string): CommentSelection | undefined => {
   const text = selection.toString().trim()
   const selectionStartElement = selection?.anchorNode?.parentElement
   const selectionEndElement = selection?.focusNode?.parentElement
-  if (text.length === 0 || !selectionStartElement || !selectionEndElement) {
+  if (text.length === 0 || !selectionStartElement || selectionEndElement !== selectionStartElement) {
     return undefined
   }
 
