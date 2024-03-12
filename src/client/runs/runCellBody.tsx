@@ -123,6 +123,7 @@ export default function RunCellBody({
             components={{
               ol: ({ children }) => <ol className='ml-4 list-decimal'>{children}</ol>,
               ul: ({ children }) => <ul className='ml-4 list-disc'>{children}</ul>,
+              pre: ({ children }) => <pre className='p-4 bg-white border border-gray-200 rounded-lg'>{children}</pre>,
             }}>
             {run.output}
           </Markdown>
