@@ -118,7 +118,14 @@ export default function RunCellBody({
         (IsProperRun(run) || !run.userID ? <RoleHeader onCancel={run.onCancel} /> : <RoleHeader user={user} />)}
       <BorderedSection border={isContinuation}>
         <div key={selectionRanges.length} className='flex-1 break-words' id={IdentifierForRun(run.id)} ref={onLoaded}>
-          <Markdown remarkPlugins={[remarkGfm]}>{run.output}</Markdown>
+          <Markdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              ol: ({ children }) => <ol className='ml-4 list-decimal'>{children}</ol>,
+              ul: ({ children }) => <ul className='ml-4 list-disc'>{children}</ul>,
+            }}>
+            {run.output}
+          </Markdown>
         </div>
       </BorderedSection>
     </>
