@@ -102,10 +102,8 @@ export default function RunCellBody({
 
   useExtractCommentSelection(IsProperRun(run) ? IdentifierForRun(run.id) : null, onUpdateSelection)
 
-  const didCreateRanges = useRef(false)
   const onLoaded = (node: HTMLElement | null) => {
-    if (node && !didCreateRanges.current) {
-      didCreateRanges.current = true
+    if (node) {
       CreateSpansFromRanges(node, selectionRanges, selectComment)
     }
   }
@@ -117,7 +115,7 @@ export default function RunCellBody({
       {isContinuation &&
         (IsProperRun(run) || !run.userID ? <RoleHeader onCancel={run.onCancel} /> : <RoleHeader user={user} />)}
       <BorderedSection border={isContinuation}>
-        <div className='flex-1 break-words' id={IdentifierForRun(run.id)} ref={onLoaded}>
+        <div key={selectionRanges.length} className='flex-1 break-words' id={IdentifierForRun(run.id)} ref={onLoaded}>
           {run.output}
         </div>
       </BorderedSection>
