@@ -1,6 +1,6 @@
 import { BorderedSection, RoleHeader } from './runCellContinuation'
 import { ActiveChain, ActivePrompt, ChainVersion, IsProperRun, PartialRun, PromptVersion, Run } from '@/types'
-import { useCallback, useRef } from 'react'
+import { useCallback } from 'react'
 import { CommentsPopup, CommentsPopupProps } from '@/src/client/comments/commentPopupMenu'
 import { AvailableLabelColorsForItem } from '@/src/client/labels/labelsPopup'
 import useGlobalPopup from '@/src/client/components/globalPopupContext'
@@ -12,6 +12,7 @@ import CommentInputPopup, {
 } from './commentInputPopup'
 import { useLoggedInUser } from '@/src/client/users/userContext'
 import { IdentifierForRun } from '@/src/client/runs/runMerging'
+import Markdown from 'react-markdown'
 
 export default function RunCellBody({
   run,
@@ -116,7 +117,7 @@ export default function RunCellBody({
         (IsProperRun(run) || !run.userID ? <RoleHeader onCancel={run.onCancel} /> : <RoleHeader user={user} />)}
       <BorderedSection border={isContinuation}>
         <div key={selectionRanges.length} className='flex-1 break-words' id={IdentifierForRun(run.id)} ref={onLoaded}>
-          {run.output}
+          <Markdown>{run.output}</Markdown>
         </div>
       </BorderedSection>
     </>
