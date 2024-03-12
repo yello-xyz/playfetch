@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 
 export type CommentSelection = { text: string; startIndex: number; popupPoint: { x: number; y: number } }
 
-const getContainer = (element : HTMLElement, identifier: string) => {
+const getContainer = (element: HTMLElement, identifier: string) => {
   let container: HTMLElement | null = element
   while (container && container.id !== identifier) {
     container = container.parentElement
@@ -12,15 +12,18 @@ const getContainer = (element : HTMLElement, identifier: string) => {
   return container
 }
 
-const gatherChildren = (element: HTMLElement) => {
-  const children: HTMLElement[] = []
-  for (const child of element.children) {
-    if (child instanceof HTMLElement) {
-      children.push(child)
-      children.push(...gatherChildren(child))
+const gatherLeaveNodes = (element: HTMLElement) => {
+  const leaveNodes: HTMLElement[] = []
+  if (element.children.length === 0) {
+    leaveNodes.push(element)
+  } else {
+    for (const child of element.children) {
+      if (child instanceof HTMLElement) {
+        leaveNodes.push(...gatherLeaveNodes(child))
+      }
     }
   }
-  return children
+  return leaveNodes
 }
 
 const extractSelection = (identifier: string): CommentSelection | undefined => {
@@ -42,7 +45,7 @@ const extractSelection = (identifier: string): CommentSelection | undefined => {
     return undefined
   }
 
-  const spans = gatherChildren(startContainer)
+  const spans = gatherLeaveNodes(startContainer)
   const startElementIndex = spans.indexOf(selectionStartElement)
   const endElementIndex = spans.indexOf(selectionEndElement)
   const selectionElement = startElementIndex <= endElementIndex ? selectionStartElement : selectionEndElement
