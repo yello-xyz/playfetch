@@ -13,6 +13,7 @@ import CommentInputPopup, {
 import { useLoggedInUser } from '@/src/client/users/userContext'
 import { IdentifierForRun } from '@/src/client/runs/runMerging'
 import Markdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 export default function RunCellBody({
   run,
@@ -117,7 +118,7 @@ export default function RunCellBody({
         (IsProperRun(run) || !run.userID ? <RoleHeader onCancel={run.onCancel} /> : <RoleHeader user={user} />)}
       <BorderedSection border={isContinuation}>
         <div key={selectionRanges.length} className='flex-1 break-words' id={IdentifierForRun(run.id)} ref={onLoaded}>
-          <Markdown>{run.output}</Markdown>
+          <Markdown remarkPlugins={[remarkGfm]}>{run.output}</Markdown>
         </div>
       </BorderedSection>
     </>
