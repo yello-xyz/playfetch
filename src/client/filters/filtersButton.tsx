@@ -9,6 +9,7 @@ import PopupMenu, { PopupSectionTitle } from '@/src/client/components/popupMenu'
 import Icon from '@/src/client/components/icon'
 import { Filter, FilterItem, IsTextFilter, LabelsFromFilters, StatusesFromFilters, UserIDsFromFilters } from './filters'
 import FilterPopupItem, { FilterCategoryItem, SortOptionItem } from './filterPopupItem'
+import { ColorForLogStatus } from '../endpoints/logStatus'
 
 export function FiltersButton<SortOption extends string>({
   users,
@@ -152,7 +153,7 @@ export function FiltersButton<SortOption extends string>({
           {menuState === 'status' &&
             availableStatuses.map((status, index) => (
               <FilterPopupItem key={index} onClick={() => addFilter({ status })}>
-                <div className={`w-2 h-2 m-1 rounded-full}`} />
+                <div className={`w-2 h-2 m-1 rounded-full ${ColorForLogStatus(status)}`} />
                 <div className='grow'>{status}</div>
                 <div className='pr-2'>{countForStatus(status)}</div>
               </FilterPopupItem>

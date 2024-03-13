@@ -13,6 +13,7 @@ import {
   TextFilter,
   UserFilter,
 } from './filters'
+import { ColorForLogStatus } from '../endpoints/logStatus'
 
 export default function FilterCells<SortOption extends string>({
   users,
@@ -106,7 +107,7 @@ const LabelFilterCell = ({ filter, labelColors }: { filter: LabelFilter; labelCo
 
 const StatusFilterCell = ({ filter }: { filter: StatusFilter }) => (
   <>
-    status: <div className={`w-1.5 h-1.5 rounded-full`} />
+    status: <div className={`w-1.5 h-1.5 rounded-full ${ColorForLogStatus(filter.status)}`} />
     {filter.status}
   </>
 )
