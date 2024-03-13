@@ -146,7 +146,10 @@ export default function Home({
   }
 
   const [analytics, setAnalytics] = useState(initialAnalytics ?? undefined)
-  const refreshAnalytics = (dayRange?: number) => api.getAnalytics(activeProject.id, dayRange).then(setAnalytics)
+  const refreshAnalytics = (
+    dayRange = analytics?.recentUsage?.length,
+    logEntryCursors = analytics?.logEntryCursors?.slice(0, -1) ?? []
+  ) => api.getAnalytics(activeProject.id, dayRange, logEntryCursors).then(setAnalytics)
 
   const [availableProviders, setAvailableProviders] = useState(initialAvailableProviders)
   const [scopedProviders, setScopedProviders] = useState(initialScopedProviders)

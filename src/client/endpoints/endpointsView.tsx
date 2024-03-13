@@ -45,7 +45,7 @@ export default function EndpointsView({
   refreshAnalytics,
 }: {
   analytics?: Analytics
-  refreshAnalytics: (dayRange: number) => void
+  refreshAnalytics: (dayRange?: number, cursors?: string[]) => void
 }) {
   const router = useRouter()
   const { l: showLogs, p: newParentID, v: newVersionID } = ParseNumberQuery(router.query)
@@ -161,9 +161,20 @@ export default function EndpointsView({
         ? ExtractUnboundChainInputs(activeVersion.items, false)
         : []
       : activeVersion?.prompts && activeVersion?.config
-        ? ExtractPromptVariables(activeVersion.prompts, activeVersion.config, false)
-        : []
+      ? ExtractPromptVariables(activeVersion.prompts, activeVersion.config, false)
+      : []
     : []
+
+  // TODO detect last page with sentinel null cursor?
+  const fetchNextLogEntriesPage =
+    analytics && analytics.logEntryCursors.length > 0
+      ? () => refreshAnalytics(undefined, analytics.logEntryCursors)
+      : undefined
+
+  const fetchPreviousLogEntriesPage =
+    analytics && analytics.logEntryCursors.length > 1
+      ? () => refreshAnalytics(undefined, analytics.logEntryCursors.slice(0, -2))
+      : undefined
 
   const minWidth = 460
   const maxWidth = 680
@@ -232,6 +243,8 @@ export default function EndpointsView({
               endpoints={endpoints}
               activeIndex={activeLogEntryIndex}
               setActiveIndex={updateActiveLogEntryIndex}
+              onNextPage={fetchNextLogEntriesPage}
+              onPreviousPage={fetchPreviousLogEntriesPage}
             />
           </div>
         </Allotment.Pane>

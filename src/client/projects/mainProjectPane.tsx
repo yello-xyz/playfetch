@@ -58,7 +58,7 @@ export default function MainProjectPane({
   saveChain: (items: ChainItemWithInputs[], onSaved?: OnSavedChain) => Promise<number | undefined>
   focusRunID: number | undefined
   analytics: Analytics | undefined
-  refreshAnalytics: (dayRange?: number) => Promise<void>
+  refreshAnalytics: (dayRange?: number, cursors?: string[]) => Promise<void>
   scopedProviders: AvailableProvider[]
   refreshProviders: () => void
   showComments: boolean

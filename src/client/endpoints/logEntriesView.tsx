@@ -27,12 +27,16 @@ export default function LogEntriesView({
   endpoints,
   activeIndex,
   setActiveIndex,
+  onNextPage,
+  onPreviousPage,
 }: {
   tabSelector: (children?: ReactNode) => ReactNode
   logEntries: LogEntry[]
   endpoints: ResolvedEndpoint[]
   activeIndex?: number
   setActiveIndex: (index: number) => void
+  onNextPage?: () => void
+  onPreviousPage?: () => void
 }) {
   const [filters, setFilters] = useState<Filter[]>([])
   const logEntryFilter = (entry: LogEntry, entries: LogEntry[]) =>

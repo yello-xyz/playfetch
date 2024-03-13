@@ -80,8 +80,8 @@ export async function getAnalyticsForProject(
   const recentUsage = recentDays.map(day => usageMap[day.getTime()] ?? emptyUsage)
 
   const cutoff = DaysAgo(today, 2 * dayRange - 1)
-  const previous30Days = analyticsData.filter(usage => usage.createdAt >= cutoff && usage.createdAt < recentDays[0])
-  const aggregatePreviousUsage = previous30Days.reduce(
+  const previousRangeDays = analyticsData.filter(usage => usage.createdAt >= cutoff && usage.createdAt < recentDays[0])
+  const aggregatePreviousUsage = previousRangeDays.reduce(
     (acc, usage) => ({
       requests: acc.requests + usage.requests,
       cost: acc.cost + usage.cost,
