@@ -91,6 +91,15 @@ const defaultLimitForType = (type: EntityType) => {
   }
 }
 
+const runQuery = (
+  type: EntityType,
+  filter: EntityFilter | undefined,
+  limit: number,
+  sortKeys: string[],
+  selectKeys: string[],
+  transaction: Transaction | undefined
+) => (transaction ?? getDatastore()).runQuery(buildQuery(type, filter, limit, undefined, sortKeys, selectKeys))
+
 const getInternalFilteredEntities = (
   type: EntityType,
   filter?: EntityFilter,
@@ -98,10 +107,7 @@ const getInternalFilteredEntities = (
   sortKeys = [] as string[],
   selectKeys = [] as string[],
   transaction?: Transaction
-) =>
-  (transaction ?? getDatastore())
-    .runQuery(buildQuery(type, filter, limit, undefined, sortKeys, selectKeys))
-    .then(([entities]) => entities)
+) => runQuery(type, filter, limit, sortKeys, selectKeys, transaction).then(([entities]) => entities)
 
 export const afterDateFilter = (since: Date, key = 'createdAt', inclusive = false) =>
   new PropertyFilter(key, inclusive ? '>=' : '>', since)
