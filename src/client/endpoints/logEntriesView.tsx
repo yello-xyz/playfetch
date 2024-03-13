@@ -17,7 +17,7 @@ const continuationCount = (entry: LogEntry, index: number, entries: LogEntry[]) 
   entries.slice(index).filter(sameSequence(entry)).length
 
 export const sameContinuationEntries = (entry: LogEntry, entries: LogEntry[]) =>
-  entry.continuationID ? entries.filter(logEntry => logEntry.continuationID === entry.continuationID) : [entry]
+  entry.continuationID ? entries.filter(sameSequence(entry)) : [entry]
 
 export default function LogEntriesView({
   tabSelector,
