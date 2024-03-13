@@ -1,6 +1,5 @@
 import { LogEntry, PromptInputs } from '@/types'
 import { Entity, buildKey, getDatastore, getID, getOrderedEntities, getTimestamp } from './datastore'
-import { ensureProjectAccess } from './projects'
 
 export async function migrateLogs(postMerge: boolean) {
   if (postMerge) {
@@ -32,10 +31,7 @@ export async function migrateLogs(postMerge: boolean) {
   }
 }
 
-export async function getLogEntriesForProject(userID: number, projectID: number, trusted = false): Promise<LogEntry[]> {
-  if (!trusted) {
-    await ensureProjectAccess(userID, projectID)
-  }
+export async function getTrustedLogEntriesForProject(projectID: number): Promise<LogEntry[]> {
   const logEntries = await getOrderedEntities(Entity.LOG, 'projectID', projectID)
   return logEntries.map(logData => toLogEntry(logData))
 }

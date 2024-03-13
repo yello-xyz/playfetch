@@ -12,7 +12,7 @@ import {
 import { Analytics, Usage } from '@/types'
 import { ensureProjectAccess } from './projects'
 import { toUsage } from './usage'
-import { getLogEntriesForProject } from './logs'
+import { getTrustedLogEntriesForProject } from './logs'
 import { DaysAgo } from '@/src/common/formatting'
 
 export async function migrateAnalytics(postMerge: boolean) {
@@ -50,7 +50,7 @@ export async function getAnalyticsForProject(
     await ensureProjectAccess(userID, projectID)
   }
 
-  const recentLogEntries = await getLogEntriesForProject(userID, projectID, true)
+  const recentLogEntries = await getTrustedLogEntriesForProject(projectID)
   const analyticsData = await getOrderedEntities(Entity.ANALYTICS, 'projectID', projectID, ['createdAt'], 2 * dayRange)
 
   const today = new Date()
