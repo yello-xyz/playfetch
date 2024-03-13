@@ -59,7 +59,7 @@ export default function LogEntryDetailsPane({
           <span className='flex justify-end'>{logEntry.flavor}</span>
           <span>Status</span>
           <div className='flex justify-end'>
-            <LogStatus padding='px-1.5 py-[3px]' isError={!!logEntry.error} />
+            <LogStatus padding='px-1.5 py-[3px]' error={logEntry.error} />
           </div>
           {failedAttempts > 0 && (
             <>

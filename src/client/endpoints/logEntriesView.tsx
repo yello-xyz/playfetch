@@ -100,7 +100,7 @@ function LogEntryRow({
       <TableCell {...props}>{endpoint.flavor}</TableCell>
       <TableCell {...props}>{formattedDate}</TableCell>
       <TableCell last {...props}>
-        <LogStatus isError={!!logEntry.error} />
+        <LogStatus error={logEntry.error} />
       </TableCell>
     </div>
   ) : null
