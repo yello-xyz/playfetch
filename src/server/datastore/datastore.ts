@@ -63,16 +63,22 @@ const projectQuery = (query: Query, keys: string[]) => (keys.length > 0 ? query.
 const orderQuery = (query: Query, sortKeys: string[]) =>
   sortKeys.reduce((q, sortKey) => q.order(sortKey, { descending: true }), query)
 
+const cursorQuery = (query: Query, cursor: string | undefined) => (cursor ? query.start(cursor) : query)
+
 const buildQuery = (
   type: EntityType,
   filter: EntityFilter | undefined,
   limit: number,
+  cursor: string | undefined,
   sortKeys: string[],
   selectKeys: string[],
   transaction?: Transaction
 ) =>
   projectQuery(
-    orderQuery(filterQuery((transaction ?? getDatastore()).createQuery(type), filter).limit(limit), sortKeys),
+    orderQuery(
+      cursorQuery(filterQuery((transaction ?? getDatastore()).createQuery(type), filter).limit(limit), cursor),
+      sortKeys
+    ),
     selectKeys
   )
 
@@ -94,7 +100,7 @@ const getInternalFilteredEntities = (
   transaction?: Transaction
 ) =>
   (transaction ?? getDatastore())
-    .runQuery(buildQuery(type, filter, limit, sortKeys, selectKeys))
+    .runQuery(buildQuery(type, filter, limit, undefined, sortKeys, selectKeys))
     .then(([entities]) => entities)
 
 export const afterDateFilter = (since: Date, key = 'createdAt', inclusive = false) =>
@@ -105,10 +111,10 @@ const dateFilter = (key: string, since?: Date, before?: Date, pagingBackwards = 
   since && before
     ? and([afterDateFilter(since, key, !pagingBackwards), beforeDateFilter(before, key, pagingBackwards)])
     : since
-      ? afterDateFilter(since, key, !pagingBackwards)
-      : before
-        ? beforeDateFilter(before, key, pagingBackwards)
-        : undefined
+    ? afterDateFilter(since, key, !pagingBackwards)
+    : before
+    ? beforeDateFilter(before, key, pagingBackwards)
+    : undefined
 
 export const getRecentEntities = (
   type: EntityType,
