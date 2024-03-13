@@ -3,6 +3,7 @@ import { ReactNode, useState } from 'react'
 import promptIcon from '@/public/prompt.svg'
 import chainIcon from '@/public/chain.svg'
 import pageIcon from '@/public/collapse.svg'
+import dotsIcon from '@/public/dots.svg'
 import Icon from '@/src/client/components/icon'
 import TableCell, { TableHeader } from '@/src/client/components/tableCell'
 import { FormatDate } from '@/src/common/formatting'
@@ -11,6 +12,8 @@ import LogStatus, { ColorForLogStatus, LogStatusForError } from './logStatus'
 import FiltersHeader from '../filters/filtersHeader'
 import { BuildFilter, Filter, FilterItem } from '../filters/filters'
 import IconButton from '../components/iconButton'
+import GlobalPopupMenu from '../components/globalPopupMenu'
+import LogEntriesPopupMenu, { LogEntriesPopupMenuProps } from './logEntriesPopupMenu'
 
 const sameSequence = (a: LogEntry) => (b: LogEntry) => !!a.continuationID && a.continuationID === b.continuationID
 
@@ -44,6 +47,11 @@ export default function LogEntriesView({
   const logEntryFilter = (entry: LogEntry, entries: LogEntry[]) =>
     BuildFilter(filters)(filterItemFromLogEntry(entry, entries))
 
+  const showPopupMenu = (): [typeof LogEntriesPopupMenu, LogEntriesPopupMenuProps] => [
+    LogEntriesPopupMenu,
+    { logEntries },
+  ]
+
   const gridConfig = 'grid grid-cols-[minmax(80px,2fr)_minmax(120px,1fr)_minmax(120px,1fr)_minmax(100px,1fr)]'
   return (
     <div className='flex flex-col h-full'>
@@ -52,7 +60,13 @@ export default function LogEntriesView({
         colorForStatus={ColorForLogStatus}
         filters={filters}
         setFilters={setFilters}
-        tabSelector={tabSelector}
+        tabSelector={children =>
+          tabSelector(
+            <div className='flex items-center'>
+              {children} <GlobalPopupMenu icon={dotsIcon} iconClassName='rotate-90' loadPopup={showPopupMenu} />
+            </div>
+          )
+        }
       />
       <div className='overflow-y-auto'>
         <div className={`${gridConfig} relative p-4 w-full`}>
