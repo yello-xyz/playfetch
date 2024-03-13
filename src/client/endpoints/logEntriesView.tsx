@@ -6,7 +6,7 @@ import Icon from '@/src/client/components/icon'
 import TableCell, { TableHeader } from '@/src/client/components/tableCell'
 import { FormatDate } from '@/src/common/formatting'
 import useFormattedDate from '@/src/client/components/useFormattedDate'
-import LogStatus from './logStatus'
+import LogStatus, { LogStatusForError } from './logStatus'
 import FiltersHeader from '../filters/filtersHeader'
 import { BuildFilter, Filter, FilterItem } from '../filters/filters'
 
@@ -41,7 +41,13 @@ export default function LogEntriesView({
   const gridConfig = 'grid grid-cols-[minmax(80px,2fr)_minmax(120px,1fr)_minmax(120px,1fr)_minmax(100px,1fr)]'
   return (
     <div className='flex flex-col h-full'>
-      <FiltersHeader filters={filters} setFilters={setFilters} tabSelector={tabSelector} />
+      <FiltersHeader
+        includeStatusFilter
+        items={logEntries.map(entry => filterItemFromLogEntry(entry, logEntries))}
+        filters={filters}
+        setFilters={setFilters}
+        tabSelector={tabSelector}
+      />
       <div className='overflow-y-auto'>
         <div className={`${gridConfig} p-4 w-full`}>
           <TableHeader first>Endpoint</TableHeader>
@@ -111,6 +117,7 @@ const filterItemFromLogEntry = (entry: LogEntry, allEntries: LogEntry[]): Filter
   return {
     userIDs: [],
     labels: [],
+    statuses: entries.map(entry => LogStatusForError(entry.error)),
     contents: [
       ...entries.map(entry => JSON.stringify(entry.output)),
       ...entries.flatMap(entry => Object.entries(entry.inputs).flat()),
