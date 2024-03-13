@@ -3,8 +3,6 @@ import {
   Entity,
   allocateID,
   buildKey,
-  decrypt,
-  encrypt,
   getDatastore,
   getEntities,
   getEntityCount,
@@ -15,6 +13,7 @@ import {
   getRecentEntities,
   getTimestamp,
 } from './datastore'
+import { decrypt, encrypt } from '@/src/server/encryption'
 import { ActiveProject, PendingProject, PendingUser, Project, ProjectMetrics, RecentProject, User } from '@/types'
 import ShortUniqueId from 'short-unique-id'
 import {

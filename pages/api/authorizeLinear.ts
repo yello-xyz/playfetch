@@ -1,5 +1,5 @@
 import buildURLForRoute from '@/src/server/routing'
-import { decrypt, encrypt } from '@/src/server/datastore/datastore'
+import { decrypt, encrypt } from '@/src/server/encryption'
 import { withLoggedInUserRoute } from '@/src/server/session'
 import { User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'

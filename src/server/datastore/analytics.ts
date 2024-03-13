@@ -8,14 +8,13 @@ import {
   buildFilter,
   getFilteredEntity,
   getOrderedEntities,
-  encrypt,
-  decrypt,
 } from './datastore'
 import { Analytics, Usage } from '@/types'
 import { ensureProjectAccess } from './projects'
 import { toUsage } from './usage'
 import { getTrustedLogEntriesForProject } from './logs'
 import { DaysAgo } from '@/src/common/formatting'
+import { encrypt, decrypt } from '@/src/server/encryption'
 
 export async function migrateAnalytics(postMerge: boolean) {
   if (postMerge) {
