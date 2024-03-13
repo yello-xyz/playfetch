@@ -8,6 +8,8 @@ import {
   buildFilter,
   getFilteredEntity,
   getOrderedEntities,
+  encrypt,
+  decrypt,
 } from './datastore'
 import { Analytics, Usage } from '@/types'
 import { ensureProjectAccess } from './projects'
@@ -51,10 +53,10 @@ export async function getAnalyticsForProject(
     await ensureProjectAccess(userID, projectID)
   }
 
-  const logEntryCursor = logEntryCursors.slice(-1)[0]
+  const logEntryCursor = logEntryCursors.length > 0 ? decrypt(logEntryCursors.slice(-1)[0]) : undefined
   const [recentLogEntries, cursor] = await getTrustedLogEntriesForProject(projectID, logEntryCursor)
   if (cursor) {
-    logEntryCursors.push(cursor)
+    logEntryCursors.push(encrypt(cursor))
   }
   const analyticsData = await getOrderedEntities(Entity.ANALYTICS, 'projectID', projectID, ['createdAt'], 2 * dayRange)
 
