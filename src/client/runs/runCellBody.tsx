@@ -135,6 +135,11 @@ export default function RunCellBody({
                 h4: ({ children }) => <h4 className='text-base font-bold'>{children}</h4>,
                 h5: ({ children }) => <h5 className='text-base font-bold'>{children}</h5>,
                 h6: ({ children }) => <h6 className='text-base font-bold'>{children}</h6>,
+                a: ({ children, href }) => (
+                  <a href={href} target='_blank' className='font-medium text-blue-500 underline'>
+                    {children}
+                  </a>
+                ),
                 ol: ({ children }) => <ol className='ml-4 list-decimal'>{children}</ol>,
                 ul: ({ children }) => <ul className='ml-4 list-disc'>{children}</ul>,
                 pre: ({ children }) => <pre className='p-4 bg-white border border-gray-200 rounded-lg'>{children}</pre>,
