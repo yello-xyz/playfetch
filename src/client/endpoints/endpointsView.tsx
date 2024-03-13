@@ -8,7 +8,6 @@ import {
   PromptVersion,
   ChainVersion,
   Analytics,
-  LogEntry,
 } from '@/types'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
@@ -17,7 +16,7 @@ import EndpointsTable from './endpointsTable'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
 import TabsHeader, { SingleTabHeader } from '@/src/client/components/tabsHeader'
-import LogEntriesView from './logEntriesView'
+import LogEntriesView, { sameContinuationEntries } from './logEntriesView'
 import LogEntryDetailsPane from './logEntryDetailsPane'
 import IconButton from '@/src/client/components/iconButton'
 import collapseIcon from '@/public/collapse.svg'
@@ -250,9 +249,6 @@ export default function EndpointsView({
     </Allotment>
   )
 }
-
-const sameContinuationEntries = (entry: LogEntry, entries: LogEntry[]) =>
-  entry.continuationID ? entries.filter(logEntry => logEntry.continuationID === entry.continuationID) : [entry]
 
 function SettingsPaneHeader({
   label,
