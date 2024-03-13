@@ -2,7 +2,17 @@ import { User } from '@/types'
 import clearIcon from '@/public/clear.svg'
 import UserAvatar from '@/src/client/users/userAvatar'
 import Icon from '@/src/client/components/icon'
-import { Filter, IsLabelFilter, IsTextFilter, IsUserFilter, LabelFilter, TextFilter, UserFilter } from './filters'
+import {
+  Filter,
+  IsLabelFilter,
+  IsStatusFilter,
+  IsTextFilter,
+  IsUserFilter,
+  LabelFilter,
+  StatusFilter,
+  TextFilter,
+  UserFilter,
+} from './filters'
 
 export default function FilterCells<SortOption extends string>({
   users,
@@ -74,6 +84,7 @@ function FilterCell<SortOption extends string>({
         <>
           {IsTextFilter(filter) && <TextFilterCell filter={filter} />}
           {IsLabelFilter(filter) && <LabelFilterCell filter={filter} labelColors={labelColors} />}
+          {IsStatusFilter(filter) && <StatusFilterCell filter={filter} />}
           {IsUserFilter(filter) && <UserFilterCell filter={filter} users={users} />}
         </>
       )}
@@ -90,6 +101,13 @@ const LabelFilterCell = ({ filter, labelColors }: { filter: LabelFilter; labelCo
   <>
     label: <div className={`w-1.5 h-1.5 rounded-full ${labelColors[filter.label]}`} />
     {filter.label}
+  </>
+)
+
+const StatusFilterCell = ({ filter }: { filter: StatusFilter }) => (
+  <>
+    status: <div className={`w-1.5 h-1.5 rounded-full`} />
+    {filter.status}
   </>
 )
 

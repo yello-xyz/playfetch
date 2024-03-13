@@ -7,6 +7,7 @@ import FilterCells from './filterCells'
 export default function FiltersHeader<SortOption extends string>({
   users,
   labelColors,
+  includeStatusFilter,
   items,
   filters,
   setFilters,
@@ -17,6 +18,7 @@ export default function FiltersHeader<SortOption extends string>({
 }: {
   users?: User[]
   labelColors?: Record<string, string>
+  includeStatusFilter?: boolean
   items?: FilterItem[]
   filters: Filter[]
   setFilters: (filters: Filter[]) => void
@@ -31,6 +33,7 @@ export default function FiltersHeader<SortOption extends string>({
         <FiltersButton
           users={users}
           labelColors={labelColors}
+          includeStatusFilter={includeStatusFilter}
           items={items}
           filters={filters}
           setFilters={setFilters}

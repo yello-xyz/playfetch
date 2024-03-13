@@ -55,6 +55,7 @@ export const FilterItemFromRun = (run: Run): FilterItem => {
   return {
     userIDs: properRuns.map(run => run.userID),
     labels: properRuns.flatMap(run => run.labels),
+    statuses: [],
     contents: [...runs.map(run => run.output), ...properRuns.flatMap(run => Object.entries(run.inputs).flat())],
   }
 }

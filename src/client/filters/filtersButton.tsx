@@ -7,12 +7,13 @@ import UserAvatar from '@/src/client/users/userAvatar'
 import { useRef, useState } from 'react'
 import PopupMenu, { PopupSectionTitle } from '@/src/client/components/popupMenu'
 import Icon from '@/src/client/components/icon'
-import { Filter, FilterItem, IsTextFilter, LabelsFromFilters, UserIDsFromFilters } from './filters'
+import { Filter, FilterItem, IsTextFilter, LabelsFromFilters, StatusesFromFilters, UserIDsFromFilters } from './filters'
 import FilterPopupItem, { FilterCategoryItem, SortOptionItem } from './filterPopupItem'
 
 export function FiltersButton<SortOption extends string>({
   users,
   labelColors,
+  includeStatusFilter = false,
   items,
   filters,
   setFilters,
@@ -22,6 +23,7 @@ export function FiltersButton<SortOption extends string>({
 }: {
   users?: User[]
   labelColors?: Record<string, string>
+  includeStatusFilter?: boolean
   items?: FilterItem[]
   filters: Filter[]
   setFilters: (filters: Filter[]) => void
@@ -45,8 +47,17 @@ export function FiltersButton<SortOption extends string>({
     label => !activeLabels.includes(label) && countForLabel(label) < filterItems.length
   )
 
+  const activeStatuses = StatusesFromFilters(filters)
+  const itemStatuses = filterItems.map(item => item.statuses)
+  const countForStatus = (status: string) => itemStatuses.filter(statuses => statuses.includes(status)).length
+  const availableStatuses = [...new Set(itemStatuses.flat())].filter(
+    status => !activeStatuses.includes(status) && countForStatus(status) < filterItems.length
+  )
+
   const [text, setText] = useState('')
-  const [menuState, setMenuState] = useState<'collapsed' | 'expanded' | 'user' | 'label' | 'text'>('collapsed')
+  const [menuState, setMenuState] = useState<'collapsed' | 'expanded' | 'user' | 'label' | 'status' | 'text'>(
+    'collapsed'
+  )
 
   const addFilter = (filter: Filter) => {
     setMenuState('collapsed')
@@ -102,6 +113,14 @@ export function FiltersButton<SortOption extends string>({
                   disabled={!availableLabels.length}
                 />
               )}
+              {includeStatusFilter && (
+                <FilterCategoryItem
+                  title='Status'
+                  icon={labelIcon}
+                  onClick={() => setMenuState('status')}
+                  disabled={!availableStatuses.length}
+                />
+              )}
               <FilterCategoryItem title='Contains' icon={textIcon} onClick={() => setMenuState('text')} />
               {sortOptions.length > 0 && <PopupSectionTitle>Sort by</PopupSectionTitle>}
               {sortOptions.map((option, index) => (
@@ -114,6 +133,14 @@ export function FiltersButton<SortOption extends string>({
               ))}
             </>
           )}
+          {menuState === 'user' &&
+            availableUsers.map((user, index) => (
+              <FilterPopupItem key={index} onClick={() => addFilter({ userID: user.id })}>
+                <UserAvatar user={user} size='sm' />
+                <div className='grow'>{user.fullName}</div>
+                <div className='pr-2'>{countForUserID(user.id)}</div>
+              </FilterPopupItem>
+            ))}
           {menuState === 'label' &&
             availableLabels.map((label, index) => (
               <FilterPopupItem key={index} onClick={() => addFilter({ label })}>
@@ -122,12 +149,12 @@ export function FiltersButton<SortOption extends string>({
                 <div className='pr-2'>{countForLabel(label)}</div>
               </FilterPopupItem>
             ))}
-          {menuState === 'user' &&
-            availableUsers.map((user, index) => (
-              <FilterPopupItem key={index} onClick={() => addFilter({ userID: user.id })}>
-                <UserAvatar user={user} size='sm' />
-                <div className='grow'>{user.fullName}</div>
-                <div className='pr-2'>{countForUserID(user.id)}</div>
+          {menuState === 'status' &&
+            availableStatuses.map((status, index) => (
+              <FilterPopupItem key={index} onClick={() => addFilter({ status })}>
+                <div className={`w-2 h-2 m-1 rounded-full}`} />
+                <div className='grow'>{status}</div>
+                <div className='pr-2'>{countForStatus(status)}</div>
               </FilterPopupItem>
             ))}
           {menuState === 'text' && (
