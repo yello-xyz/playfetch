@@ -97,8 +97,15 @@ const runQuery = (
   limit: number,
   sortKeys: string[],
   selectKeys: string[],
+  cursor: string | undefined,
   transaction: Transaction | undefined
-) => (transaction ?? getDatastore()).runQuery(buildQuery(type, filter, limit, undefined, sortKeys, selectKeys))
+) => (transaction ?? getDatastore()).runQuery(buildQuery(type, filter, limit, cursor, sortKeys, selectKeys))
+
+export const getPagedEntities = (type: EntityType, key: string, value: {}, cursor: string | undefined) =>
+  runQuery(type, buildFilter(key, value), defaultLimitForType(type), ['createdAt'], [], cursor, undefined).then(
+    ([entities, info]) =>
+      [entities, info.moreResults !== Datastore.NO_MORE_RESULTS ? info.endCursor : undefined] as const
+  )
 
 const getInternalFilteredEntities = (
   type: EntityType,
@@ -107,7 +114,7 @@ const getInternalFilteredEntities = (
   sortKeys = [] as string[],
   selectKeys = [] as string[],
   transaction?: Transaction
-) => runQuery(type, filter, limit, sortKeys, selectKeys, transaction).then(([entities]) => entities)
+) => runQuery(type, filter, limit, sortKeys, selectKeys, undefined, transaction).then(([entities]) => entities)
 
 export const afterDateFilter = (since: Date, key = 'createdAt', inclusive = false) =>
   new PropertyFilter(key, inclusive ? '>=' : '>', since)
