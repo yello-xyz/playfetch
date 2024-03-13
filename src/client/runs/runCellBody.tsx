@@ -112,27 +112,36 @@ export default function RunCellBody({
 
   const user = useLoggedInUser()
 
+  // TODO Migrate legacy comments to compensate for whitespace trimming in markdown rendering.
+  const hasLegacyInlineComments = comments.some(
+    comment => comment.startIndex !== undefined && comment.quote && comment.timestamp < new Date('2024-03-12').getTime()
+  )
+
   return (
     <>
       {isContinuation &&
         (IsProperRun(run) || !run.userID ? <RoleHeader onCancel={run.onCancel} /> : <RoleHeader user={user} />)}
       <BorderedSection border={isContinuation}>
         <div key={selectionRanges.length} className='flex-1 break-words' id={IdentifierForRun(run.id)} ref={onLoaded}>
-          <Markdown
-            remarkPlugins={[remarkGfm]}
-            components={{
-              h1: ({ children }) => <h1 className='text-xl font-bold'>{children}</h1>,
-              h2: ({ children }) => <h2 className='text-lg font-bold'>{children}</h2>,
-              h3: ({ children }) => <h3 className='text-base font-bold'>{children}</h3>,
-              h4: ({ children }) => <h4 className='text-base font-bold'>{children}</h4>,
-              h5: ({ children }) => <h5 className='text-base font-bold'>{children}</h5>,
-              h6: ({ children }) => <h6 className='text-base font-bold'>{children}</h6>,
-              ol: ({ children }) => <ol className='ml-4 list-decimal'>{children}</ol>,
-              ul: ({ children }) => <ul className='ml-4 list-disc'>{children}</ul>,
-              pre: ({ children }) => <pre className='p-4 bg-white border border-gray-200 rounded-lg'>{children}</pre>,
-            }}>
-            {run.output}
-          </Markdown>
+          {hasLegacyInlineComments ? (
+            run.output
+          ) : (
+            <Markdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                h1: ({ children }) => <h1 className='text-xl font-bold'>{children}</h1>,
+                h2: ({ children }) => <h2 className='text-lg font-bold'>{children}</h2>,
+                h3: ({ children }) => <h3 className='text-base font-bold'>{children}</h3>,
+                h4: ({ children }) => <h4 className='text-base font-bold'>{children}</h4>,
+                h5: ({ children }) => <h5 className='text-base font-bold'>{children}</h5>,
+                h6: ({ children }) => <h6 className='text-base font-bold'>{children}</h6>,
+                ol: ({ children }) => <ol className='ml-4 list-decimal'>{children}</ol>,
+                ul: ({ children }) => <ul className='ml-4 list-disc'>{children}</ul>,
+                pre: ({ children }) => <pre className='p-4 bg-white border border-gray-200 rounded-lg'>{children}</pre>,
+              }}>
+              {run.output}
+            </Markdown>
+          )}
         </div>
       </BorderedSection>
     </>
