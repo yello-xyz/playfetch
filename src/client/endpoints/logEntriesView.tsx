@@ -47,9 +47,11 @@ export default function LogEntriesView({
   const logEntryFilter = (entry: LogEntry, entries: LogEntry[]) =>
     BuildFilter(filters)(filterItemFromLogEntry(entry, entries))
 
+  const filteredLogEntries = logEntries.filter(logEntry => logEntryFilter(logEntry, logEntries))
+
   const showPopupMenu = (): [typeof LogEntriesPopupMenu, LogEntriesPopupMenuProps] => [
     LogEntriesPopupMenu,
-    { logEntries },
+    { logEntries: filteredLogEntries },
   ]
 
   const gridConfig = 'grid grid-cols-[minmax(80px,2fr)_minmax(120px,1fr)_minmax(120px,1fr)_minmax(100px,1fr)]'
@@ -84,20 +86,18 @@ export default function LogEntriesView({
               <IconButton className={onNextPage ? '' : 'opacity-50'} icon={pageIcon} onClick={onNextPage} />
             </div>
           )}
-          {logEntries
-            .filter(logEntry => logEntryFilter(logEntry, logEntries))
-            .map((logEntry, index, entries) =>
-              isLastContinuation(logEntry, index, entries) ? null : (
-                <LogEntryRow
-                  key={index}
-                  logEntry={logEntry}
-                  continuationCount={continuationCount(logEntry, index, entries)}
-                  endpoint={endpoints.find(endpoint => endpoint.id === logEntry.endpointID)}
-                  isActive={index === activeIndex}
-                  setActive={() => setActiveIndex(index)}
-                />
-              )
-            )}
+          {filteredLogEntries.map((logEntry, index, entries) =>
+            isLastContinuation(logEntry, index, entries) ? null : (
+              <LogEntryRow
+                key={index}
+                logEntry={logEntry}
+                continuationCount={continuationCount(logEntry, index, entries)}
+                endpoint={endpoints.find(endpoint => endpoint.id === logEntry.endpointID)}
+                isActive={index === activeIndex}
+                setActive={() => setActiveIndex(index)}
+              />
+            )
+          )}
         </div>
       </div>
     </div>
