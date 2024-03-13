@@ -1,5 +1,5 @@
 import { LogEntry, ResolvedEndpoint } from '@/types'
-import { ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
 import promptIcon from '@/public/prompt.svg'
 import chainIcon from '@/public/chain.svg'
 import Icon from '@/src/client/components/icon'
@@ -7,6 +7,8 @@ import TableCell, { TableHeader } from '@/src/client/components/tableCell'
 import { FormatDate } from '@/src/common/formatting'
 import useFormattedDate from '@/src/client/components/useFormattedDate'
 import LogStatus from './logStatus'
+import FiltersHeader from '../filters/filtersHeader'
+import { Filter } from '../filters/filters'
 
 const sameSequence = (a: LogEntry) => (b: LogEntry) => !!a.continuationID && a.continuationID === b.continuationID
 
@@ -32,10 +34,12 @@ export default function LogEntriesView({
   activeIndex?: number
   setActiveIndex: (index: number) => void
 }) {
+  const [filters, setFilters] = useState<Filter[]>([])
+
   const gridConfig = 'grid grid-cols-[minmax(80px,2fr)_minmax(120px,1fr)_minmax(120px,1fr)_minmax(100px,1fr)]'
   return (
     <div className='flex flex-col h-full'>
-      {tabSelector()}
+      <FiltersHeader filters={filters} setFilters={setFilters} tabSelector={tabSelector} />
       <div className='overflow-y-auto'>
         <div className={`${gridConfig} p-4 w-full`}>
           <TableHeader first>Endpoint</TableHeader>
