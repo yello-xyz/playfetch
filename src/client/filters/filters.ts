@@ -14,8 +14,7 @@ export const IsTextFilter = (filter: Filter): filter is TextFilter => 'text' in 
 export const UserIDsFromFilters = (filters: Filter[]) => filters.filter(IsUserFilter).map(filter => filter.userID)
 export const LabelsFromFilters = (filters: Filter[]) => filters.filter(IsLabelFilter).map(filter => filter.label)
 export const StatusesFromFilters = (filters: Filter[]) => filters.filter(IsStatusFilter).map(filter => filter.status)
-const ContentsFromFilters = (filters: Filter[]) =>
-  filters.filter(IsTextFilter).map(filter => filter.text.toLowerCase())
+const ContentsFromFilters = (filters: Filter[]) => filters.filter(IsTextFilter).map(filter => filter.text.toLowerCase())
 
 export const BuildFilter = (filters: Filter[]) => (item: FilterItem) => {
   const userIDs = UserIDsFromFilters(filters)

@@ -26,11 +26,7 @@ const gatherLeaveNodes = (element: HTMLElement) => {
   return leaveNodes
 }
 
-const createContainerRange = (
-  container: HTMLElement,
-  startIndex: number,
-  endIndex: number
-): Range | undefined => {
+const createContainerRange = (container: HTMLElement, startIndex: number, endIndex: number): Range | undefined => {
   for (const node of gatherLeaveNodes(container)) {
     const length = node.textContent?.length ?? 0
     if (startIndex < length && endIndex < length) {
