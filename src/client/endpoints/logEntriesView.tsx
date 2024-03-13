@@ -65,15 +65,9 @@ export default function LogEntriesView({
               <IconButton
                 className={`rotate-180 ${onPreviousPage ? '' : 'opacity-50'}`}
                 icon={pageIcon}
-                disabled={!onPreviousPage}
-                onClick={onPreviousPage ?? (() => {})}
+                onClick={onPreviousPage}
               />
-              <IconButton
-                className={onNextPage ? '' : 'opacity-50'}
-                icon={pageIcon}
-                disabled={!onNextPage}
-                onClick={onNextPage ?? (() => {})}
-              />
+              <IconButton className={onNextPage ? '' : 'opacity-50'} icon={pageIcon} onClick={onNextPage} />
             </div>
           )}
           {logEntries
