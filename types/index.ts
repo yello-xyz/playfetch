@@ -373,6 +373,7 @@ export type CostUsage = {
 
 export type Analytics = {
   recentLogEntries: LogEntry[]
+  logEntryCursors: string[]
   recentUsage: Usage[]
   aggregatePreviousUsage: Usage
 }

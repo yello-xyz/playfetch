@@ -44,13 +44,18 @@ export async function getAnalyticsForProject(
   userID: number,
   projectID: number,
   trusted = false,
-  dayRange = 30
+  dayRange = 30,
+  logEntryCursors: string[] = []
 ): Promise<Analytics> {
   if (!trusted) {
     await ensureProjectAccess(userID, projectID)
   }
 
-  const recentLogEntries = await getTrustedLogEntriesForProject(projectID)
+  const logEntryCursor = logEntryCursors.slice(-1)[0]
+  const [recentLogEntries, cursor] = await getTrustedLogEntriesForProject(projectID, logEntryCursor)
+  if (cursor) {
+    logEntryCursors.push(cursor)
+  }
   const analyticsData = await getOrderedEntities(Entity.ANALYTICS, 'projectID', projectID, ['createdAt'], 2 * dayRange)
 
   const today = new Date()
@@ -88,7 +93,7 @@ export async function getAnalyticsForProject(
     emptyUsage
   )
 
-  return { recentLogEntries, recentUsage, aggregatePreviousUsage }
+  return { recentLogEntries, logEntryCursors, recentUsage, aggregatePreviousUsage }
 }
 
 export async function updateAnalytics(
