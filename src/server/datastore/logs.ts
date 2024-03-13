@@ -34,7 +34,7 @@ export async function migrateLogs(postMerge: boolean) {
 export async function getTrustedLogEntriesForProject(
   projectID: number,
   cursor?: string
-): Promise<[LogEntry[], string | undefined]> {
+): Promise<readonly [LogEntry[], string | undefined]> {
   const [logEntries, newCursor] = await getPagedEntities(Entity.LOG, 'projectID', projectID, cursor)
   return [logEntries.map(logData => toLogEntry(logData)), newCursor] as const
 }
