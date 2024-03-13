@@ -2,6 +2,7 @@ import { LogEntry, ResolvedEndpoint } from '@/types'
 import { ReactNode, useState } from 'react'
 import promptIcon from '@/public/prompt.svg'
 import chainIcon from '@/public/chain.svg'
+import pageIcon from '@/public/collapse.svg'
 import Icon from '@/src/client/components/icon'
 import TableCell, { TableHeader } from '@/src/client/components/tableCell'
 import { FormatDate } from '@/src/common/formatting'
@@ -9,6 +10,7 @@ import useFormattedDate from '@/src/client/components/useFormattedDate'
 import LogStatus, { ColorForLogStatus, LogStatusForError } from './logStatus'
 import FiltersHeader from '../filters/filtersHeader'
 import { BuildFilter, Filter, FilterItem } from '../filters/filters'
+import IconButton from '../components/iconButton'
 
 const sameSequence = (a: LogEntry) => (b: LogEntry) => !!a.continuationID && a.continuationID === b.continuationID
 
@@ -53,11 +55,27 @@ export default function LogEntriesView({
         tabSelector={tabSelector}
       />
       <div className='overflow-y-auto'>
-        <div className={`${gridConfig} p-4 w-full`}>
+        <div className={`${gridConfig} relative p-4 w-full`}>
           <TableHeader first>Endpoint</TableHeader>
           <TableHeader>Environment</TableHeader>
           <TableHeader>Time</TableHeader>
           <TableHeader last>Status</TableHeader>
+          {(onNextPage || onPreviousPage) && (
+            <div className='absolute flex items-center justify-center px-1 border-l border-gray-200 h-9 top-4 right-4'>
+              <IconButton
+                className={`rotate-180 ${onPreviousPage ? '' : 'opacity-50'}`}
+                icon={pageIcon}
+                disabled={!onPreviousPage}
+                onClick={onPreviousPage ?? (() => {})}
+              />
+              <IconButton
+                className={onNextPage ? '' : 'opacity-50'}
+                icon={pageIcon}
+                disabled={!onNextPage}
+                onClick={onNextPage ?? (() => {})}
+              />
+            </div>
+          )}
           {logEntries
             .filter(logEntry => logEntryFilter(logEntry, logEntries))
             .map((logEntry, index, entries) =>
