@@ -8,7 +8,7 @@ import { FormatDate } from '@/src/common/formatting'
 import useFormattedDate from '@/src/client/components/useFormattedDate'
 import LogStatus from './logStatus'
 import FiltersHeader from '../filters/filtersHeader'
-import { Filter } from '../filters/filters'
+import { BuildFilter, Filter, FilterItem } from '../filters/filters'
 
 const sameSequence = (a: LogEntry) => (b: LogEntry) => !!a.continuationID && a.continuationID === b.continuationID
 
@@ -35,6 +35,8 @@ export default function LogEntriesView({
   setActiveIndex: (index: number) => void
 }) {
   const [filters, setFilters] = useState<Filter[]>([])
+  const logEntryFilter = (entry: LogEntry, entries: LogEntry[]) =>
+    BuildFilter(filters)(filterItemFromLogEntry(entry, entries))
 
   const gridConfig = 'grid grid-cols-[minmax(80px,2fr)_minmax(120px,1fr)_minmax(120px,1fr)_minmax(100px,1fr)]'
   return (
@@ -46,18 +48,20 @@ export default function LogEntriesView({
           <TableHeader>Environment</TableHeader>
           <TableHeader>Time</TableHeader>
           <TableHeader last>Status</TableHeader>
-          {logEntries.map((logEntry, index, entries) =>
-            isLastContinuation(logEntry, index, entries) ? null : (
-              <LogEntryRow
-                key={index}
-                logEntry={logEntry}
-                continuationCount={continuationCount(logEntry, index, entries)}
-                endpoint={endpoints.find(endpoint => endpoint.id === logEntry.endpointID)}
-                isActive={index === activeIndex}
-                setActive={() => setActiveIndex(index)}
-              />
-            )
-          )}
+          {logEntries
+            .filter(logEntry => logEntryFilter(logEntry, logEntries))
+            .map((logEntry, index, entries) =>
+              isLastContinuation(logEntry, index, entries) ? null : (
+                <LogEntryRow
+                  key={index}
+                  logEntry={logEntry}
+                  continuationCount={continuationCount(logEntry, index, entries)}
+                  endpoint={endpoints.find(endpoint => endpoint.id === logEntry.endpointID)}
+                  isActive={index === activeIndex}
+                  setActive={() => setActiveIndex(index)}
+                />
+              )
+            )}
         </div>
       </div>
     </div>
@@ -100,4 +104,19 @@ function LogEntryRow({
       </TableCell>
     </div>
   ) : null
+}
+
+const filterItemFromLogEntry = (entry: LogEntry, allEntries: LogEntry[]): FilterItem => {
+  const entries = sameContinuationEntries(entry, allEntries)
+  return {
+    userIDs: [],
+    labels: [],
+    contents: [
+      ...entries.map(entry => JSON.stringify(entry.output)),
+      ...entries.flatMap(entry => Object.entries(entry.inputs).flat()),
+      ...entries.map(entry => entry.error ?? ''),
+      ...entries.map(entry => entry.flavor),
+      ...entries.map(entry => entry.urlPath),
+    ],
+  }
 }
