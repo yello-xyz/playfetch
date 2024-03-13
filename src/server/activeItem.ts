@@ -81,6 +81,6 @@ const analyticsFromQuery = (query: ParsedUrlQuery, endpoints: ResolvedEndpoint[]
       urlPath: endpoints[entry.endpointID].urlPath,
       timestamp: new Date(entry.timestamp).getTime(),
     })),
-    logEntryCursors: [],
+    logEntryCursors: [null],
   }
 }

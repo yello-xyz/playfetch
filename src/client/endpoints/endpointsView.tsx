@@ -161,19 +161,18 @@ export default function EndpointsView({
         ? ExtractUnboundChainInputs(activeVersion.items, false)
         : []
       : activeVersion?.prompts && activeVersion?.config
-      ? ExtractPromptVariables(activeVersion.prompts, activeVersion.config, false)
-      : []
+        ? ExtractPromptVariables(activeVersion.prompts, activeVersion.config, false)
+        : []
     : []
 
-  // TODO detect last page with sentinel null cursor?
   const fetchNextLogEntriesPage =
-    analytics && analytics.logEntryCursors.length > 0
-      ? () => refreshAnalytics(undefined, analytics.logEntryCursors)
+    analytics && analytics.logEntryCursors.length > 0 && analytics.logEntryCursors.slice(-1)[0] !== null
+      ? () => refreshAnalytics(undefined, analytics.logEntryCursors as string[])
       : undefined
 
   const fetchPreviousLogEntriesPage =
     analytics && analytics.logEntryCursors.length > 1
-      ? () => refreshAnalytics(undefined, analytics.logEntryCursors.slice(0, -2))
+      ? () => refreshAnalytics(undefined, analytics.logEntryCursors.slice(0, -2) as string[])
       : undefined
 
   const minWidth = 460

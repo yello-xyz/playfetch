@@ -54,9 +54,6 @@ export async function getAnalyticsForProject(
 
   const logEntryCursor = logEntryCursors.length > 0 ? decrypt(logEntryCursors.slice(-1)[0]) : undefined
   const [recentLogEntries, cursor] = await getTrustedLogEntriesForProject(projectID, logEntryCursor)
-  if (cursor) {
-    logEntryCursors.push(encrypt(cursor))
-  }
   const analyticsData = await getOrderedEntities(Entity.ANALYTICS, 'projectID', projectID, ['createdAt'], 2 * dayRange)
 
   const today = new Date()
@@ -94,7 +91,12 @@ export async function getAnalyticsForProject(
     emptyUsage
   )
 
-  return { recentLogEntries, logEntryCursors, recentUsage, aggregatePreviousUsage }
+  return {
+    recentLogEntries,
+    logEntryCursors: [...logEntryCursors, cursor ? encrypt(cursor) : null],
+    recentUsage,
+    aggregatePreviousUsage,
+  }
 }
 
 export async function updateAnalytics(
