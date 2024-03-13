@@ -15,9 +15,9 @@ export default function FiltersHeader<SortOption extends string>({
   setActiveSortOption,
   tabSelector,
 }: {
-  users: User[]
-  labelColors: Record<string, string>
-  items: FilterItem[]
+  users?: User[]
+  labelColors?: Record<string, string>
+  items?: FilterItem[]
   filters: Filter[]
   setFilters: (filters: Filter[]) => void
   sortOptions?: SortOption[]
@@ -40,8 +40,8 @@ export default function FiltersHeader<SortOption extends string>({
         />
       )}
       <FilterCells
-        users={users}
-        labelColors={labelColors}
+        users={users ?? []}
+        labelColors={labelColors ?? {}}
         filters={filters}
         setFilters={setFilters}
         sortOptions={sortOptions}
