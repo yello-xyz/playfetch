@@ -13,11 +13,11 @@ import {
   TextFilter,
   UserFilter,
 } from './filters'
-import { ColorForLogStatus } from '../endpoints/logStatus'
 
 export default function FilterCells<SortOption extends string>({
   users,
   labelColors,
+  colorForStatus,
   filters,
   setFilters,
   sortOptions = [],
@@ -26,6 +26,7 @@ export default function FilterCells<SortOption extends string>({
 }: {
   users: User[]
   labelColors: Record<string, string>
+  colorForStatus: (status: string) => string
   filters: Filter[]
   setFilters: (filters: Filter[]) => void
   sortOptions?: SortOption[]
@@ -49,11 +50,18 @@ export default function FilterCells<SortOption extends string>({
           filter={filter}
           users={users}
           labelColors={labelColors}
+          colorForStatus={colorForStatus}
           onClick={() => setFilters(filters.filter((_, i) => i !== index))}
         />
       ))}
       {isCustomSortOption && (
-        <FilterCell filter={activeSortOption} users={users} labelColors={labelColors} onClick={resetSortOption} />
+        <FilterCell
+          filter={activeSortOption}
+          users={users}
+          labelColors={labelColors}
+          colorForStatus={colorForStatus}
+          onClick={resetSortOption}
+        />
       )}
       {hasFilters && (
         <div
@@ -70,11 +78,13 @@ function FilterCell<SortOption extends string>({
   filter,
   users,
   labelColors,
+  colorForStatus,
   onClick,
 }: {
   filter: Filter | SortOption
   users: User[]
   labelColors: Record<string, string>
+  colorForStatus: (status: string) => string
   onClick: () => void
 }) {
   return (
@@ -85,7 +95,7 @@ function FilterCell<SortOption extends string>({
         <>
           {IsTextFilter(filter) && <TextFilterCell filter={filter} />}
           {IsLabelFilter(filter) && <LabelFilterCell filter={filter} labelColors={labelColors} />}
-          {IsStatusFilter(filter) && <StatusFilterCell filter={filter} />}
+          {IsStatusFilter(filter) && <StatusFilterCell filter={filter} colorForStatus={colorForStatus} />}
           {IsUserFilter(filter) && <UserFilterCell filter={filter} users={users} />}
         </>
       )}
@@ -105,9 +115,15 @@ const LabelFilterCell = ({ filter, labelColors }: { filter: LabelFilter; labelCo
   </>
 )
 
-const StatusFilterCell = ({ filter }: { filter: StatusFilter }) => (
+const StatusFilterCell = ({
+  filter,
+  colorForStatus,
+}: {
+  filter: StatusFilter
+  colorForStatus: (status: string) => string
+}) => (
   <>
-    status: <div className={`w-1.5 h-1.5 rounded-full ${ColorForLogStatus(filter.status)}`} />
+    status: <div className={`w-1.5 h-1.5 rounded-full ${colorForStatus(filter.status)}`} />
     {filter.status}
   </>
 )

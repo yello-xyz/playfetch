@@ -9,12 +9,11 @@ import PopupMenu, { PopupSectionTitle } from '@/src/client/components/popupMenu'
 import Icon from '@/src/client/components/icon'
 import { Filter, FilterItem, IsTextFilter, LabelsFromFilters, StatusesFromFilters, UserIDsFromFilters } from './filters'
 import FilterPopupItem, { FilterCategoryItem, SortOptionItem } from './filterPopupItem'
-import { ColorForLogStatus } from '../endpoints/logStatus'
 
 export function FiltersButton<SortOption extends string>({
   users,
   labelColors,
-  includeStatusFilter = false,
+  colorForStatus,
   items,
   filters,
   setFilters,
@@ -24,7 +23,7 @@ export function FiltersButton<SortOption extends string>({
 }: {
   users?: User[]
   labelColors?: Record<string, string>
-  includeStatusFilter?: boolean
+  colorForStatus?: (status: string) => string
   items?: FilterItem[]
   filters: Filter[]
   setFilters: (filters: Filter[]) => void
@@ -114,7 +113,7 @@ export function FiltersButton<SortOption extends string>({
                   disabled={!availableLabels.length}
                 />
               )}
-              {includeStatusFilter && (
+              {colorForStatus !== undefined && (
                 <FilterCategoryItem
                   title='Status'
                   icon={labelIcon}
@@ -153,7 +152,7 @@ export function FiltersButton<SortOption extends string>({
           {menuState === 'status' &&
             availableStatuses.map((status, index) => (
               <FilterPopupItem key={index} onClick={() => addFilter({ status })}>
-                <div className={`w-2 h-2 m-1 rounded-full ${ColorForLogStatus(status)}`} />
+                <div className={`w-2 h-2 m-1 rounded-full ${colorForStatus?.(status)}`} />
                 <div className='grow'>{status}</div>
                 <div className='pr-2'>{countForStatus(status)}</div>
               </FilterPopupItem>

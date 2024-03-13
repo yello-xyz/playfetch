@@ -6,7 +6,7 @@ import Icon from '@/src/client/components/icon'
 import TableCell, { TableHeader } from '@/src/client/components/tableCell'
 import { FormatDate } from '@/src/common/formatting'
 import useFormattedDate from '@/src/client/components/useFormattedDate'
-import LogStatus, { LogStatusForError } from './logStatus'
+import LogStatus, { ColorForLogStatus, LogStatusForError } from './logStatus'
 import FiltersHeader from '../filters/filtersHeader'
 import { BuildFilter, Filter, FilterItem } from '../filters/filters'
 
@@ -42,8 +42,8 @@ export default function LogEntriesView({
   return (
     <div className='flex flex-col h-full'>
       <FiltersHeader
-        includeStatusFilter
         items={logEntries.map(entry => filterItemFromLogEntry(entry, logEntries))}
+        colorForStatus={ColorForLogStatus}
         filters={filters}
         setFilters={setFilters}
         tabSelector={tabSelector}
