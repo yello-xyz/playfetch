@@ -12,9 +12,22 @@ import dynamic from 'next/dynamic'
 const MainAdminPane = dynamic(() => import('@/src/client/admin/mainAdminPane'))
 const AdminSidebar = dynamic(() => import('@/src/client/admin/adminSidebar'))
 
-export const getServerSideProps = withAdminSession(async ({ query }) => ({
-  props: await loadAdminItem(query),
-}))
+export const getServerSideProps = withAdminSession(async ({ query }) => {
+  const props: AdminProps = await loadAdminItem(query)
+  return { props }
+})
+
+type AdminProps = {
+  initialAdminItem: AdminItem
+  initialUserMetrics: UserMetrics | null
+  initialProjectMetrics: ProjectMetrics | null
+  initialWorkspaceMetrics: WorkspaceMetrics | null
+  initialActiveUsers: ActiveUser[]
+  waitlistUsers: User[]
+  recentProjects: RecentProject[]
+  analyticsLinks: string[][]
+  debugLinks: string[][]
+}
 
 export default function Admin({
   initialAdminItem,
@@ -26,17 +39,7 @@ export default function Admin({
   waitlistUsers,
   analyticsLinks,
   debugLinks,
-}: {
-  initialAdminItem: AdminItem
-  initialUserMetrics: UserMetrics | null
-  initialProjectMetrics: ProjectMetrics | null
-  initialWorkspaceMetrics: WorkspaceMetrics | null
-  initialActiveUsers: ActiveUser[]
-  waitlistUsers: User[]
-  recentProjects: RecentProject[]
-  analyticsLinks: [string, string]
-  debugLinks: [string, string]
-}) {
+}: AdminProps) {
   const [adminItem, setAdminItem] = useState(initialAdminItem)
   const [userMetrics, setUserMetrics] = useState(initialUserMetrics)
   const [projectMetrics, setProjectMetrics] = useState(initialProjectMetrics)
@@ -54,10 +57,10 @@ export default function Admin({
         item === WaitlistItem
           ? '?w=1'
           : item === RecentProjectsItem
-            ? '?p=1'
-            : item !== ActiveUsersItem
-              ? `?i=${item}`
-              : ''
+          ? '?p=1'
+          : item !== ActiveUsersItem
+          ? `?i=${item}`
+          : ''
       }${isWorkspace ? '&s=1' : ''}`,
       undefined,
       {
@@ -73,10 +76,10 @@ export default function Admin({
   const currentQueryState = waitlist
     ? WaitlistItem
     : projects
-      ? RecentProjectsItem
-      : isWorkspace
-        ? `${itemID}s`
-        : itemID ?? ActiveUsersItem
+    ? RecentProjectsItem
+    : isWorkspace
+    ? `${itemID}s`
+    : itemID ?? ActiveUsersItem
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
     const knownUsers = [
