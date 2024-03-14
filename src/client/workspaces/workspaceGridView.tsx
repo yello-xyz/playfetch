@@ -76,24 +76,24 @@ export default function WorkspaceGridView({
       />
       {showSettings || activeWorkspace.projects.length > 0 ? (
         <>
-          <div className='border-b border-gray-100 text-gray-700 font-medium pt-1.5 pb-2.5 mx-5 mb-1'>
-            {showSettings ? (
-              <div className='flex -m-2'>
-                <HeaderItem active={false} className='cursor-pointer' onClick={() => toggleSettings(false)}>
-                  <Icon className='rotate-90 -mr-0.5' icon={chevronIcon} />
-                  {activeWorkspace.name} /
-                </HeaderItem>
-                <HeaderItem className='-mx-2.5'>Settings</HeaderItem>
-              </div>
-            ) : (
+          {showSettings ? (
+            <div className='flex border-b border-gray-100'>
+              <HeaderItem active={false} className='cursor-pointer' onClick={() => toggleSettings(false)}>
+                <Icon className='rotate-90 -mr-0.5' icon={chevronIcon} />
+                {activeWorkspace.name} /
+              </HeaderItem>
+              <HeaderItem className='-mx-2.5'>Settings</HeaderItem>
+            </div>
+          ) : (
+            <div className='border-b border-gray-100 text-gray-700 font-medium pt-1.5 pb-2.5 mx-5 mb-1'>
               <span>Project name</span>
-            )}
-          </div>
-          <div className='flex flex-col overflow-y-auto h-full px-6 gap-3.5 pt-3.5 pb-5'>
-            {showSettings ? (
-              <SettingsView providers={scopedProviders} refresh={refreshProviders} />
-            ) : (
-              activeWorkspace.projects.map((project, index) => (
+            </div>
+          )}
+          {showSettings ? (
+            <SettingsView providers={scopedProviders} refresh={refreshProviders} />
+          ) : (
+            <div className='flex flex-col overflow-y-auto h-full px-6 gap-3.5 pt-3.5 pb-5'>
+              {activeWorkspace.projects.map((project, index) => (
                 <ProjectCell
                   key={index}
                   project={project}
@@ -104,9 +104,9 @@ export default function WorkspaceGridView({
                   workspaces={workspaces}
                   onRespondToInvite={accept => onRespondToProjectInvite(project.id, accept)}
                 />
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </>
       ) : (
         <EmptyWorkspaceView workspace={activeWorkspace} isUserWorkspace={isUserWorkspace} onAddProject={onAddProject} />
