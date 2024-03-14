@@ -1,7 +1,6 @@
-import { AvailableModelProvider, CostUsage } from '@/types'
+import { AvailableModelProvider, CostUsage, Scope } from '@/types'
 import CostDashboard from './costDashboard'
 import BudgetPane from './budgetPane'
-import { SettingsScope } from './activeSettingsPane'
 
 export default function UsageSettings({
   scope,
@@ -10,7 +9,7 @@ export default function UsageSettings({
   availableProviders,
   onRefresh,
 }: {
-  scope: SettingsScope
+  scope: Scope
   scopeID: number
   costUsage: CostUsage
   availableProviders: AvailableModelProvider[]

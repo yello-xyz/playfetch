@@ -1,7 +1,7 @@
 import { DefaultProvider } from '@/src/common/defaults'
 import { ModelProviders, QueryProviders } from '@/src/common/providerMetadata'
 import ProviderSettings from './providerSettings'
-import { ActiveProject, ActiveWorkspace, AvailableProvider, CostUsage, IsModelProvider } from '@/types'
+import { ActiveProject, ActiveWorkspace, AvailableProvider, CostUsage, IsModelProvider, Scope } from '@/types'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import SettingsPane from './settingsPane'
 import api from '@/src/client/api'
@@ -25,7 +25,6 @@ import {
   IssueTrackerPane,
   ProvidersPane,
   ScopeDescriptionForSettingsPane,
-  SettingsScope,
   SourceControlPane,
   TeamPane,
   TitleForSettingsPane,
@@ -48,7 +47,7 @@ export default function SettingsView({
   refreshProject?: () => void
 }) {
   const user = useLoggedInUser()
-  const scope: SettingsScope = activeWorkspace ? 'workspace' : activeProject ? 'project' : 'user'
+  const scope: Scope = activeWorkspace ? 'workspace' : activeProject ? 'project' : 'user'
   const scopeID = activeWorkspace?.id ?? activeProject?.id ?? user.id
 
   const router = useRouter()

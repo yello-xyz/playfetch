@@ -135,6 +135,8 @@ export type CustomModel = {
   enabled: boolean
 }
 
+export type Scope = 'user' | 'project' | 'workspace'
+
 export type AvailableModelProvider = {
   provider: ModelProvider
   customModels: CustomModel[]

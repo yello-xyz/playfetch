@@ -1,10 +1,9 @@
-import { CostUsage } from '@/types'
+import { CostUsage, Scope } from '@/types'
 import Label from '@/src/client/components/label'
 import PercentagePieChart from '@/src/client/endpoints/percentagePieChart'
 import { Capitalize, FormatCost } from '@/src/common/formatting'
 import { ReactNode, RefObject, useRef, useState } from 'react'
 import api from '@/src/client/api'
-import { SettingsScope } from './activeSettingsPane'
 
 export default function BudgetPane({
   scope,
@@ -12,7 +11,7 @@ export default function BudgetPane({
   costUsage,
   onRefresh,
 }: {
-  scope: SettingsScope
+  scope: Scope
   scopeID: number
   costUsage: CostUsage
   onRefresh: () => Promise<any>

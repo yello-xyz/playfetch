@@ -1,3 +1,4 @@
+import { Scope } from '@/types'
 import ActiveSettingsPane from './settingsPane'
 import { Capitalize } from '@/src/common/formatting'
 
@@ -33,9 +34,7 @@ export const TitleForSettingsPane = (pane: ActiveSettingsPane) => {
   }
 }
 
-export type SettingsScope = 'user' | 'project' | 'workspace'
-
-export const DescriptionForSettingsPane = (pane: ActiveSettingsPane, scope: SettingsScope) => {
+export const DescriptionForSettingsPane = (pane: ActiveSettingsPane, scope: Scope) => {
   switch (pane) {
     case ProvidersPane:
       return (
@@ -68,14 +67,14 @@ export const DescriptionForSettingsPane = (pane: ActiveSettingsPane, scope: Sett
   }
 }
 
-const scopeDescription = (targetType: 'providers' | 'connectors', scope: SettingsScope) =>
+const scopeDescription = (targetType: 'providers' | 'connectors', scope: Scope) =>
   `${Capitalize(
     targetType
   )} configured here will be available to anyone with ${scope} access to be used within the context of this ${scope} only. ${Capitalize(
     scope
   )} members can still use their own API keys within this ${scope} for ${targetType} that are not configured here.`
 
-export const ScopeDescriptionForSettingsPane = (pane: ActiveSettingsPane, scope: SettingsScope) => {
+export const ScopeDescriptionForSettingsPane = (pane: ActiveSettingsPane, scope: Scope) => {
   switch (pane) {
     case ProvidersPane:
       return scope === 'user' ? undefined : scopeDescription('providers', scope)
