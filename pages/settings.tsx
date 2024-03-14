@@ -15,11 +15,13 @@ const SettingsView = dynamic(() => import('@/src/client/settings/settingsView'))
 
 export const getServerSideProps = withLoggedInSession(async ({ user }) => {
   const initialProviders = await loadScopedProviders(user.id)
-
-  return { props: { user, initialProviders } }
+  const props: SettingsProps = { user, initialProviders }
+  return { props }
 })
 
-export default function Settings({ user, initialProviders }: { user: User; initialProviders: AvailableProvider[] }) {
+type SettingsProps = { user: User; initialProviders: AvailableProvider[] }
+
+export default function Settings({ user, initialProviders }: SettingsProps) {
   const router = useRouter()
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
 
