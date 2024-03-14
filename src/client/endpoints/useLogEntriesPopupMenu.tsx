@@ -8,7 +8,7 @@ import useModalDialogPrompt from '../components/modalDialogContext'
 import { useRef } from 'react'
 import api from '../api'
 
-export const exportLogEntries = (logEntries: LogEntry[]) => {
+const exportLogEntries = (logEntries: LogEntry[]) => {
   const rows: string[][] = [
     ['Time', 'Endpoint', 'Environment', 'Cost', 'Duration', 'Inputs', 'Output', 'Error', 'Attempts', 'Cache Hit'],
     ...logEntries.map(entry => [
@@ -33,12 +33,12 @@ export const exportLogEntries = (logEntries: LogEntry[]) => {
 }
 
 type LogEntriesPopupMenuProps = {
-  logEntries: LogEntry[]
+  exportCurrentView: () => void
   exportAllLogs: () => void
 }
 
 function LogEntriesPopupMenu({
-  logEntries,
+  exportCurrentView,
   exportAllLogs,
   withDismiss,
 }: LogEntriesPopupMenuProps & WithDismiss) {
@@ -46,13 +46,15 @@ function LogEntriesPopupMenu({
 
   return (
     <PopupContent className='w-44'>
-      <PopupMenuItem title='Export View as CSV' callback={dismiss(() => exportLogEntries(logEntries))} />
+      <PopupMenuItem title='Export View as CSV' callback={dismiss(exportCurrentView)} />
       <PopupMenuItem title='Export All Logs as CSV' callback={dismiss(exportAllLogs)} />
     </PopupContent>
   )
 }
 
 export default function useLogEntriesPopupMenu(logEntries: LogEntry[]) {
+  const exportCurrentView = () => exportLogEntries(logEntries)
+
   const activeProject = useActiveProject()
   const setDialogPrompt = useModalDialogPrompt()
   const cancelledExport = useRef(false)
@@ -88,7 +90,7 @@ export default function useLogEntriesPopupMenu(logEntries: LogEntry[]) {
 
   const showPopupMenu = (): [typeof LogEntriesPopupMenu, LogEntriesPopupMenuProps] => [
     LogEntriesPopupMenu,
-    { logEntries, exportAllLogs },
+    { exportCurrentView, exportAllLogs },
   ]
 
   return showPopupMenu
