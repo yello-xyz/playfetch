@@ -68,7 +68,7 @@ export default function WorkspaceGridView({
         onShowSettings={() => toggleSettings(true)}
         onDeleted={resetWorkspaces}
       />
-      {activeWorkspace.projects.length > 0 ? (
+      {showSettings || activeWorkspace.projects.length > 0 ? (
         <>
           <div className='border-b border-gray-100 text-gray-700 font-medium pt-1.5 pb-2.5 mx-5 mb-1'>
             {showSettings ? (
