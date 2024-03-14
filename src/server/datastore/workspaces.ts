@@ -9,7 +9,7 @@ import {
   getOrderedEntities,
 } from './datastore'
 import { ActiveUser, ActiveWorkspace, PendingUser, PendingWorkspace, User, Workspace, WorkspaceMetrics } from '@/types'
-import { getRecentProjects, toProject } from './projects'
+import { filterObjects, getRecentProjects, toProject } from './projects'
 import {
   getAccessibleObjectIDs,
   getAccessingUserIDs,
@@ -124,7 +124,11 @@ export const getWorkspacesForUser = (userID: number): Promise<[Workspace[], Pend
   getPendingAccessObjects(userID, 'workspace', Entity.WORKSPACE, toWorkspace).then(([u, p]) => [u, p])
 
 export const getWorkspaceUsers = (workspaceID: number): Promise<[User[], PendingUser[], User[]]> =>
-  getPendingAccessObjects(workspaceID, 'workspace', Entity.USER, toUser)
+  getPendingAccessObjects(workspaceID, 'workspace', Entity.USER, toUser).then(([users, pendingUsers, owners]) => [
+    [...owners, ...filterObjects(users, owners)],
+    pendingUsers,
+    owners,
+  ])
 
 export async function getPendingAccessObjects<T>(
   sourceID: number,

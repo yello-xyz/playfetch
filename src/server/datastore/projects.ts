@@ -311,8 +311,8 @@ export async function updateProjectWorkspace(userID: number, projectID: number, 
   await updateProject({ ...projectData, workspaceID }, true)
 }
 
-const filterObjects = <T extends { id: number }, U extends { id: number }>(source: T[], filter: U[]) =>
-  source.filter(user => !filter.some(u => u.id === user.id))
+export const filterObjects = <T extends { id: number }, U extends { id: number }>(source: T[], filter: U[]) =>
+  source.filter(a => !filter.some(b => b.id === a.id))
 
 export async function getSharedProjectsForUser(
   userID: number,
