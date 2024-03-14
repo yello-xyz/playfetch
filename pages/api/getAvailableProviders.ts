@@ -4,7 +4,7 @@ import { AvailableProvider, User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 async function getAvailableProviders(req: NextApiRequest, res: NextApiResponse<AvailableProvider[]>, user: User) {
-  const availableProviders = await loadAvailableProviders([req.body.projectID, user.id])
+  const availableProviders = await loadAvailableProviders([req.body.projectID, req.body.workspaceID, user.id])
   res.json(availableProviders)
 }
 

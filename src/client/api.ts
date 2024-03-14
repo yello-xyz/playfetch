@@ -334,8 +334,8 @@ const api = {
   updateLayoutConfig: function (layoutConfig: Partial<LayoutConfig>) {
     return post(this.updateLayoutConfig, { layoutConfig })
   },
-  getAvailableProviders: function (projectID: number): Promise<AvailableProvider[]> {
-    return post(this.getAvailableProviders, { projectID })
+  getAvailableProviders: function (projectID: number, workspaceID: number): Promise<AvailableProvider[]> {
+    return post(this.getAvailableProviders, { projectID, workspaceID })
   },
   getScopedProviders: function (projectID?: number): Promise<AvailableProvider[]> {
     return post(this.getScopedProviders, { projectID })

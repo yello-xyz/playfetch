@@ -158,7 +158,7 @@ export default function Project({
   const [scopedProviders, setScopedProviders] = useState(initialScopedProviders)
   const refreshProviders = () => {
     api.getScopedProviders(activeProject.id).then(setScopedProviders)
-    api.getAvailableProviders(activeProject.id).then(setAvailableProviders)
+    api.getAvailableProviders(activeProject.id, activeProject.workspaceID).then(setAvailableProviders)
   }
 
   const selectCompare = () => {

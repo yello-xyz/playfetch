@@ -31,18 +31,22 @@ export default async function loadActiveItem(user: User, query: ParsedUrlQuery) 
   const initialActiveItem: ActiveItem | null = compare
     ? CompareItem
     : endpoints
-      ? EndpointsItem
-      : settings
-        ? SettingsItem
-        : promptID
-          ? await getPromptForUser(user.id, promptID).then(BuildActivePrompt(initialActiveProject))
-          : chainID
-            ? await getChainForUser(user.id, chainID).then(BuildActiveChain(initialActiveProject))
-            : tableID
-              ? await getTableForUser(user.id, tableID).then(BuildActiveTable)
-              : null
+    ? EndpointsItem
+    : settings
+    ? SettingsItem
+    : promptID
+    ? await getPromptForUser(user.id, promptID).then(BuildActivePrompt(initialActiveProject))
+    : chainID
+    ? await getChainForUser(user.id, chainID).then(BuildActiveChain(initialActiveProject))
+    : tableID
+    ? await getTableForUser(user.id, tableID).then(BuildActiveTable)
+    : null
 
-  const initialAvailableProviders = await loadAvailableProviders([projectID!, user.id])
+  const initialAvailableProviders = await loadAvailableProviders([
+    initialActiveProject.id,
+    initialActiveProject.workspaceID,
+    user.id,
+  ])
   const initialScopedProviders = await loadScopedProviders(projectID!)
   const initialUserPresets = await getPresetsForUser(user.id)
 
