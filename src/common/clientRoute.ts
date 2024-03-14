@@ -90,7 +90,7 @@ export const WorkspaceSettingsRoute = (
   workspaceID: number,
   userID: number,
   activePane: ActiveSettingsPane = ProvidersPane
-) => `${WorkspaceRoute(workspaceID, userID)}?s=1${activePaneSuffix(activePane)}`
+) => `${WorkspaceRoute(workspaceID, userID)}&s=1${activePaneSuffix(activePane)}`
 
 const activePaneSuffix = (activePane: ActiveSettingsPane, append = true) =>
   activePane !== ProvidersPane ? `${append ? '&' : '?'}t=${paneToShortString[activePane]}` : ''
