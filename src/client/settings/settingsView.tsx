@@ -25,6 +25,7 @@ import {
   IssueTrackerPane,
   ProvidersPane,
   ScopeDescriptionForSettingsPane,
+  SettingsScope,
   SourceControlPane,
   TeamPane,
   TitleForSettingsPane,
@@ -43,7 +44,7 @@ export default function SettingsView({
   refresh: () => void
 }) {
   const user = useLoggedInUser()
-  const scope = activeWorkspace ? 'workspace' : activeProject ? 'project' : 'user'
+  const scope: SettingsScope = activeWorkspace ? 'workspace' : activeProject ? 'project' : 'user'
   const scopeID = activeWorkspace?.id ?? activeProject?.id ?? user.id
 
   const router = useRouter()
@@ -120,6 +121,7 @@ export default function SettingsView({
           )}
           {activePane === UsagePane && !!costUsage && (
             <UsageSettings
+              scope={scope}
               scopeID={scopeID}
               costUsage={costUsage}
               availableProviders={availableModelProviders}

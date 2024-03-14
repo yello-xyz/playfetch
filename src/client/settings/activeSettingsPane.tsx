@@ -33,7 +33,7 @@ export const TitleForSettingsPane = (pane: ActiveSettingsPane) => {
   }
 }
 
-type SettingsScope = 'user' | 'project' | 'workspace'
+export type SettingsScope = 'user' | 'project' | 'workspace'
 
 export const DescriptionForSettingsPane = (pane: ActiveSettingsPane, scope: SettingsScope) => {
   switch (pane) {

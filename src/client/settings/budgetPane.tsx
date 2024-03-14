@@ -4,19 +4,20 @@ import PercentagePieChart from '@/src/client/endpoints/percentagePieChart'
 import { Capitalize, FormatCost } from '@/src/common/formatting'
 import { ReactNode, RefObject, useRef, useState } from 'react'
 import api from '@/src/client/api'
-import { useLoggedInUser } from '@/src/client/users/userContext'
+import { SettingsScope } from './activeSettingsPane'
 
 export default function BudgetPane({
+  scope,
   scopeID,
   costUsage,
   onRefresh,
 }: {
+  scope: SettingsScope
   scopeID: number
   costUsage: CostUsage
   onRefresh: () => Promise<any>
 }) {
-  const user = useLoggedInUser()
-  const recipient = scopeID === user.id ? 'you' : 'project owners'
+  const recipient = recipientForScope(scope)
 
   const [limit, setLimit, limitInputRef, editingLimit, editLimit, updateLimit] = useBudgetEditor(
     scopeID,
@@ -79,6 +80,17 @@ export default function BudgetPane({
       </RoundedSection>
     </>
   )
+}
+
+const recipientForScope = (scope: 'workspace' | 'project' | 'user') => {
+  switch (scope) { 
+    case 'workspace':
+      return 'workspace owners'
+    case 'project':
+      return 'project owners'
+    case 'user':
+      return 'you'
+  }
 }
 
 const useBudgetEditor = (
