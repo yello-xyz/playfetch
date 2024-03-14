@@ -98,9 +98,9 @@ export default function MainProjectPane({
         {activeItem === EndpointsItem && <EndpointsView analytics={analytics} refreshAnalytics={refreshAnalytics} />}
         {activeItem === SettingsItem && (
           <SettingsView
-            activeProject={activeProject}
             providers={scopedProviders}
-            refresh={refreshProviders}
+            refreshProviders={refreshProviders}
+            activeProject={activeProject}
             refreshProject={refreshProject}
           />
         )}

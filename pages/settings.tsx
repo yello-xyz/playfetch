@@ -26,7 +26,7 @@ export default function Settings({ user, initialProviders }: SettingsProps) {
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
 
   const [scopedProviders, setScopedProviders] = useState(initialProviders)
-  const refresh = () => api.getScopedProviders(user.id).then(setScopedProviders)
+  const refreshProviders = () => api.getScopedProviders(user.id).then(setScopedProviders)
 
   return (
     <>
@@ -39,7 +39,7 @@ export default function Settings({ user, initialProviders }: SettingsProps) {
               <TopBarAccessoryItem />
             </TopBar>
             <Suspense>
-              <SettingsView providers={scopedProviders} refresh={refresh} />
+              <SettingsView providers={scopedProviders} refreshProviders={refreshProviders} />
             </Suspense>
           </main>
         </ModalDialogContext.Provider>

@@ -34,15 +34,17 @@ import {
 
 export default function SettingsView({
   providers,
+  refreshProviders,
   activeWorkspace,
   activeProject,
-  refresh,
+  refreshWorkspace,
   refreshProject,
 }: {
   providers: AvailableProvider[]
+  refreshProviders: () => void
   activeWorkspace?: ActiveWorkspace
   activeProject?: ActiveProject
-  refresh: () => void
+  refreshWorkspace?: () => void
   refreshProject?: () => void
 }) {
   const user = useLoggedInUser()
@@ -118,7 +120,7 @@ export default function SettingsView({
               scopeID={scopeID}
               providers={allModelProviders}
               availableProviders={availableModelProviders}
-              onRefresh={refresh}
+              onRefresh={refreshProviders}
             />
           )}
           {activePane === UsagePane && !!costUsage && (
@@ -137,7 +139,7 @@ export default function SettingsView({
               providers={QueryProviders}
               availableProviders={availableQueryProviders}
               includeEnvironment
-              onRefresh={refresh}
+              onRefresh={refreshProviders}
             />
           )}
           {activePane === SourceControlPane && (
@@ -145,7 +147,7 @@ export default function SettingsView({
               activeProject={activeProject}
               scopeID={scopeID}
               provider={providers.find(provider => provider.provider === 'github')}
-              onRefresh={refresh}
+              onRefresh={refreshProviders}
               onRefreshProject={refreshProject}
             />
           )}
@@ -154,7 +156,7 @@ export default function SettingsView({
               activeProject={activeProject}
               scopeID={scopeID}
               provider={providers.find(provider => provider.provider === 'linear')}
-              onRefresh={refresh}
+              onRefresh={refreshProviders}
             />
           )}
         </SettingsPane>
