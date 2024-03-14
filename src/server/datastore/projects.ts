@@ -206,11 +206,6 @@ export async function toggleOwnershipForProject(userID: number, memberID: number
   }
 }
 
-export async function checkProject(projectID: number, apiKey: string): Promise<number | undefined> {
-  const projectData = await getTrustedProjectData(projectID)
-  return projectData && projectData.apiKeyHash === hashAPIKey(apiKey)
-}
-
 async function updateProject(projectData: any, updateLastEditedTimestamp: boolean) {
   await getDatastore().save(
     toProjectData(
@@ -237,7 +232,7 @@ const getTrustedProjectData = (projectID: number) => getKeyedEntity(Entity.PROJE
 
 export const getProjectName = (projectID: number) => getTrustedProjectData(projectID).then(data => data.name)
 
-export const getVerifiedUserProjectData = async (userID: number, projectID: number) => {
+const getVerifiedUserProjectData = async (userID: number, projectID: number) => {
   const projectData = await getTrustedProjectData(projectID)
   if (!projectData) {
     throw new Error(`Project with ID ${projectID} does not exist or user has no access`)
@@ -247,6 +242,14 @@ export const getVerifiedUserProjectData = async (userID: number, projectID: numb
     await ensureWorkspaceAccess(userID, projectData.workspaceID)
   }
   return projectData
+}
+
+export const getVerifiedUserProjectWorkspaceID = (userID: number, projectID: number) =>
+  getVerifiedUserProjectData(userID, projectID).then(projectData => projectData.workspaceID)
+
+export async function tryGetVerifiedAPIProjectWorkspaceID(apiKey: string, projectID: number) {
+  const projectData = await getTrustedProjectData(projectID)
+  return projectData && projectData.apiKeyHash === hashAPIKey(apiKey) ? projectData.workspaceID : undefined
 }
 
 export const getProjectUserForEmail = async (projectID: number, email: string) => {

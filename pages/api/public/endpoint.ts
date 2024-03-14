@@ -1,7 +1,7 @@
 import { ParseQuery } from '@/src/common/clientRoute'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getActiveEndpointFromPath } from '@/src/server/datastore/endpoints'
-import { checkProject } from '@/src/server/datastore/projects'
+import { tryGetVerifiedAPIProjectWorkspaceID } from '@/src/server/datastore/projects'
 import { updateUsage } from '@/src/server/datastore/usage'
 import { Endpoint, PromptInputs } from '@/types'
 import { loadConfigsFromVersion } from '../runVersion'
@@ -77,12 +77,13 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
   const projectID = Number(projectIDFromPath)
 
   if (projectID && endpointName) {
-    const apiKey = req.headers['x-api-key'] as string
+    const apiKey = req.headers['x-api-key'] as string | undefined
     const flavor = req.headers['x-environment'] as string | undefined
     const continuationHeaderKey = 'x-continuation-key'
     const continuationKey = req.headers['x-continuation-key'] as string | undefined
 
-    if (apiKey && (await checkProject(projectID, apiKey))) {
+    const verifiedWorkspaceID = apiKey ? await tryGetVerifiedAPIProjectWorkspaceID(apiKey, projectID) : undefined
+    if (verifiedWorkspaceID) {
       const endpoint = await getActiveEndpointFromPath(projectID, endpointName, flavor)
       if (endpoint && endpoint.enabled) {
         const clientID = getClientID(req, res)
@@ -123,6 +124,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           const abortController = detectRequestClosed(req)
           response = await runChain(
             endpoint.userID,
+            verifiedWorkspaceID,
             projectID,
             version,
             configs,
