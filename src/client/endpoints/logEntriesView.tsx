@@ -13,7 +13,7 @@ import FiltersHeader from '@/src/client/filters/filtersHeader'
 import { BuildFilter, Filter, FilterItem } from '@/src/client/filters/filters'
 import IconButton from '@/src/client/components/iconButton'
 import GlobalPopupMenu from '@/src/client/components/globalPopupMenu'
-import useLogEntriesPopupMenuProps from './logEntriesPopupMenu'
+import useLogEntriesPopupMenuProps from './useLogEntriesPopupMenu'
 
 const sameSequence = (a: LogEntry) => (b: LogEntry) => !!a.continuationID && a.continuationID === b.continuationID
 
