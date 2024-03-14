@@ -35,20 +35,12 @@ const MainProjectPane = dynamic(() => import('@/src/client/projects/mainProjectP
 const ProjectSidebar = dynamic(() => import('@/src/client/projects/projectSidebar'))
 const ProjectTopBar = dynamic(() => import('@/src/client/projects/projectTopBar'))
 
-export const getServerSideProps = withLoggedInSession(async ({ user, query }) => ({
-  props: await loadActiveItem(user, query),
-}))
+export const getServerSideProps = withLoggedInSession(async ({ user, query }) => {
+  const props: ProjectProps = await loadActiveItem(user, query)
+  return { props }
+})
 
-export default function Home({
-  user,
-  workspaces,
-  initialActiveProject,
-  initialActiveItem,
-  initialAnalytics,
-  initialAvailableProviders,
-  initialScopedProviders,
-  initialUserPresets,
-}: {
+type ProjectProps = {
   user: User
   workspaces: Workspace[]
   initialActiveProject: ActiveProject
@@ -57,7 +49,18 @@ export default function Home({
   initialAvailableProviders: AvailableProvider[]
   initialScopedProviders: AvailableProvider[]
   initialUserPresets: UserPresets
-}) {
+}
+
+export default function Project({
+  user,
+  workspaces,
+  initialActiveProject,
+  initialActiveItem,
+  initialAnalytics,
+  initialAvailableProviders,
+  initialScopedProviders,
+  initialUserPresets,
+}: ProjectProps) {
   useDocumentationCookie('set')
   const [
     activeProject,
@@ -194,10 +197,10 @@ export default function Home({
   const currentQueryState = compare
     ? CompareItem
     : endpoints
-      ? EndpointsItem
-      : settings
-        ? SettingsItem
-        : promptID ?? chainID ?? tableID
+    ? EndpointsItem
+    : settings
+    ? SettingsItem
+    : promptID ?? chainID ?? tableID
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
     if (compare) {
