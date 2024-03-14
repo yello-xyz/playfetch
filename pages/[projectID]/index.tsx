@@ -197,10 +197,10 @@ export default function Project({
   const currentQueryState = compare
     ? CompareItem
     : endpoints
-    ? EndpointsItem
-    : settings
-    ? SettingsItem
-    : promptID ?? chainID ?? tableID
+      ? EndpointsItem
+      : settings
+        ? SettingsItem
+        : promptID ?? chainID ?? tableID
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
     if (compare) {

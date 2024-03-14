@@ -65,8 +65,8 @@ export default function SettingsView({
         activeWorkspace
           ? WorkspaceSettingsRoute(scopeID, user.id, pane)
           : activeProject
-          ? ProjectSettingsRoute(scopeID, pane)
-          : UserSettingsRoute(pane),
+            ? ProjectSettingsRoute(scopeID, pane)
+            : UserSettingsRoute(pane),
         undefined,
         {
           shallow: true,

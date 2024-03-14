@@ -51,7 +51,7 @@ export async function sendBudgetNotificationEmails(scopeID: number, limit: numbe
   }
 }
 
-export async function sendBudgetNotificationEmail(
+async function sendBudgetNotificationEmail(
   userID: number,
   settingsRoute: string,
   projectName: string | null,
