@@ -226,6 +226,8 @@ export default function Home({
                         activeWorkspace={activeWorkspace}
                         isUserWorkspace={activeWorkspace.id === user.id}
                         isSharedProjects={IsSharedProjects(activeWorkspace)}
+                        showSettings={showSettings}
+                        toggleSettings={toggleSettings}
                         onRespondToProjectInvite={respondToProjectInvite}
                         onAddProject={addProject}
                         onSelectProject={navigateToProject}

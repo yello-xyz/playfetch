@@ -10,12 +10,14 @@ export default function WorkspacePopupMenu({
   isMenuExpanded,
   setMenuExpanded,
   onRenamed,
+  onShowSettings,
   onDeleted,
 }: {
   workspace: ActiveWorkspace
   isMenuExpanded: boolean
   setMenuExpanded: (isExpanded: boolean) => void
   onRenamed: () => void
+  onShowSettings: () => void
   onDeleted: () => void
 }) {
   const setDialogPrompt = useModalDialogPrompt()
@@ -53,6 +55,7 @@ export default function WorkspacePopupMenu({
     <>
       <PopupMenu className='w-48' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
         <PopupMenuItem title='Rename Workspace…' callback={withDismiss(() => setShowPickNamePrompt(true))} first />
+        {isOwner && <PopupMenuItem title='Settings' callback={withDismiss(onShowSettings)} />}
         {canLeave && (
           <PopupMenuItem
             separated

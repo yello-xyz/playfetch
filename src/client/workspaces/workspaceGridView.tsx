@@ -16,6 +16,8 @@ export default function WorkspaceGridView({
   activeWorkspace,
   isUserWorkspace,
   isSharedProjects,
+  showSettings,
+  toggleSettings,
   onRespondToProjectInvite,
   onAddProject,
   onSelectProject,
@@ -27,6 +29,8 @@ export default function WorkspaceGridView({
   activeWorkspace: ActiveWorkspace
   isUserWorkspace: boolean
   isSharedProjects: boolean
+  showSettings: boolean
+  toggleSettings: (show: boolean) => void
   onRespondToProjectInvite: (projectID: number, accept: boolean) => void
   onAddProject: () => Promise<void>
   onSelectProject: (projectID: number) => void
@@ -58,6 +62,7 @@ export default function WorkspaceGridView({
         onAddProject={onAddProject}
         onInviteMembers={inviteMembers}
         onRenamed={refresh}
+        onShowSettings={() => toggleSettings(true)}
         onDeleted={resetWorkspaces}
       />
       {activeWorkspace.projects.length > 0 ? (
