@@ -17,6 +17,7 @@ import ClientRoute, {
   Redirect,
   SharedProjectsWorkspaceID,
   WorkspaceRoute,
+  WorkspaceSettingsRoute,
 } from '@/src/common/clientRoute'
 import ModalDialog, { DialogPrompt } from '@/src/client/components/modalDialog'
 import { ModalDialogContext } from '@/src/client/components/modalDialogContext'
@@ -50,7 +51,7 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
     return Redirect(ClientRoute.Onboarding)
   }
 
-  const { w: workspaceID } = ParseNumberQuery(query)
+  const { w: workspaceID, s: settings } = ParseNumberQuery(query)
 
   const [initialWorkspaces, initialPendingWorkspaces] = await getWorkspacesForUser(user.id)
 
@@ -70,6 +71,7 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
       initialWorkspaces,
       initialPendingWorkspaces,
       initialActiveWorkspace,
+      initialShowSettings: !!settings,
     },
   }
 })
@@ -80,12 +82,14 @@ export default function Home({
   initialWorkspaces,
   initialPendingWorkspaces,
   initialActiveWorkspace,
+  initialShowSettings,
 }: {
   user: User
   initialSharedProjects?: ActiveWorkspace
   initialWorkspaces: Workspace[]
   initialPendingWorkspaces: PendingWorkspace[]
   initialActiveWorkspace: ActiveWorkspace | PendingWorkspace
+  initialShowSettings: boolean
 }) {
   useDocumentationCookie('set')
   const router = useRouter()
@@ -97,6 +101,7 @@ export default function Home({
   const [sharedProjects, setSharedProjects] = useState(initialSharedProjects)
 
   const [activeWorkspace, setActiveWorkspace] = useState(initialActiveWorkspace)
+  const [showSettings, setShowSettings] = useState(initialShowSettings)
 
   const refreshWorkspace = (workspaceID: number) =>
     workspaceID === SharedProjectsWorkspaceID
@@ -111,14 +116,33 @@ export default function Home({
       : api.getWorkspace(workspaceID).then(setActiveWorkspace)
 
   const selectWorkspace = async (workspaceID: number) => {
-    if (workspaceID !== activeWorkspace.id) {
-      const pendingWorkspace = pendingWorkspaces.find(workspace => workspace.id === workspaceID)
-      if (pendingWorkspace) {
-        setActiveWorkspace(pendingWorkspace)
+    if (settings || workspaceID !== activeWorkspace.id) {
+      if (settings) {
+        setShowSettings(false)
       } else {
-        await refreshWorkspace(workspaceID)
+        const pendingWorkspace = pendingWorkspaces.find(workspace => workspace.id === workspaceID)
+        if (pendingWorkspace) {
+          setActiveWorkspace(pendingWorkspace)
+        } else {
+          await refreshWorkspace(workspaceID)
+        }
       }
       router.push(WorkspaceRoute(workspaceID, user.id), undefined, { shallow: true })
+    }
+  }
+
+  const selectSettings = () => {
+    setShowSettings(true)
+    if (!settings) {
+      router.push(WorkspaceSettingsRoute(activeWorkspace.id, user.id), undefined, { shallow: true })
+    }
+  }
+
+  const toggleSettings = (show: boolean) => {
+    if (show) {
+      selectSettings()
+    } else {
+      selectWorkspace(activeWorkspace.id)
     }
   }
 
@@ -154,11 +178,15 @@ export default function Home({
       }
     })
 
-  const { w: workspaceID } = ParseNumberQuery(router.query)
-  const currentQueryState = workspaceID
+  const { w: workspaceID, s: settings } = ParseNumberQuery(router.query)
+  const currentQueryState = `${workspaceID}-${settings}`
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
-    selectWorkspace(workspaceID ?? user.id)
+    if (settings) {
+      selectSettings()
+    } else {
+      selectWorkspace(workspaceID ?? user.id)
+    }
     setQuery(currentQueryState)
   }
 
