@@ -34,7 +34,7 @@ export default function TeamSettings({
 
   const toggleOwnership = (userID: number, isOwner: boolean) =>
     isWorkspace
-      ? api.toggleProjectOwnership(activeItem.id, userID, isOwner).then(refreshItem) // TODO toggleWorkspaceOwnership
+      ? api.toggleWorkspaceOwnership(activeItem.id, userID, isOwner).then(refreshItem)
       : api.toggleProjectOwnership(activeItem.id, userID, isOwner).then(refreshItem)
 
   const owners = isWorkspace ? activeItem.owners : activeItem.projectOwners

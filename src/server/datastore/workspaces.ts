@@ -95,6 +95,18 @@ export async function revokeMemberAccessForWorkspace(userID: number, memberID: n
   await revokeUserAccess(memberID, workspaceID)
 }
 
+export async function toggleOwnershipForWorkspace(
+  userID: number,
+  memberID: number,
+  workspaceID: number,
+  isOwner: boolean
+) {
+  if (userID !== memberID) {
+    await ensureWorkspaceOwnership(userID, workspaceID)
+    await grantUserAccess(userID, memberID, workspaceID, 'workspace', isOwner ? 'owner' : 'default')
+  }
+}
+
 async function updateWorkspace(workspaceData: any) {
   await getDatastore().save(
     toWorkspaceData(workspaceData.userID, workspaceData.name, workspaceData.createdAt, getID(workspaceData))

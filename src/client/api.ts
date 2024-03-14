@@ -92,6 +92,9 @@ const api = {
   revokeWorkspaceAccess: function (workspaceID: number, memberID?: number) {
     return post(this.revokeWorkspaceAccess, { workspaceID, memberID })
   },
+  toggleWorkspaceOwnership: function (workspaceID: number, memberID: number, isOwner: boolean) {
+    return post(this.toggleWorkspaceOwnership, { workspaceID, memberID, isOwner })
+  },
   inviteToWorkspace: function (workspaceID: number, emails: string[]) {
     return post(this.inviteToWorkspace, { workspaceID, emails })
   },
