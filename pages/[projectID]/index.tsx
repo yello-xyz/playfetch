@@ -301,6 +301,7 @@ export default function Project({
                               addPrompt,
                               savePrompt: savePromptCallback,
                               saveChain,
+                              refreshProject,
                               focusRunID,
                               analytics,
                               refreshAnalytics,

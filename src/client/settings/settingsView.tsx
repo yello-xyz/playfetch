@@ -37,11 +37,13 @@ export default function SettingsView({
   activeWorkspace,
   activeProject,
   refresh,
+  refreshProject,
 }: {
   providers: AvailableProvider[]
   activeWorkspace?: ActiveWorkspace
   activeProject?: ActiveProject
   refresh: () => void
+  refreshProject?: () => void
 }) {
   const user = useLoggedInUser()
   const scope: SettingsScope = activeWorkspace ? 'workspace' : activeProject ? 'project' : 'user'
@@ -144,6 +146,7 @@ export default function SettingsView({
               scopeID={scopeID}
               provider={providers.find(provider => provider.provider === 'github')}
               onRefresh={refresh}
+              onRefreshProject={refreshProject}
             />
           )}
           {activePane === IssueTrackerPane && (

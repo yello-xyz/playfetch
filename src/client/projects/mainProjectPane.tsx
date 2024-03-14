@@ -34,6 +34,7 @@ export default function MainProjectPane({
   addPrompt,
   savePrompt,
   saveChain,
+  refreshProject,
   focusRunID,
   analytics,
   refreshAnalytics,
@@ -56,6 +57,7 @@ export default function MainProjectPane({
   addPrompt: () => Promise<void>
   savePrompt: () => Promise<number>
   saveChain: (items: ChainItemWithInputs[], onSaved?: OnSavedChain) => Promise<number | undefined>
+  refreshProject: () => Promise<void>
   focusRunID: number | undefined
   analytics: Analytics | undefined
   refreshAnalytics: (dayRange?: number, cursors?: string[]) => Promise<void>
@@ -95,7 +97,12 @@ export default function MainProjectPane({
         )}
         {activeItem === EndpointsItem && <EndpointsView analytics={analytics} refreshAnalytics={refreshAnalytics} />}
         {activeItem === SettingsItem && (
-          <SettingsView activeProject={activeProject} providers={scopedProviders} refresh={refreshProviders} />
+          <SettingsView
+            activeProject={activeProject}
+            providers={scopedProviders}
+            refresh={refreshProviders}
+            refreshProject={refreshProject}
+          />
         )}
         {!activeItem && <EmptyProjectView onAddPrompt={addPrompt} />}
       </Allotment.Pane>
