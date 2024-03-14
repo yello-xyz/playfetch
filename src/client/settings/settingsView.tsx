@@ -36,6 +36,7 @@ export default function SettingsView({
   refresh: () => void
 }) {
   const user = useLoggedInUser()
+  const scope = activeProject ? 'project' : 'user'
   const scopeID = activeProject?.id ?? user.id
 
   const router = useRouter()
@@ -92,8 +93,8 @@ export default function SettingsView({
       <div className='flex flex-col items-start flex-1 gap-3 text-gray-500 max-w-[680px] overflow-y-auto'>
         <SettingsPane
           title={TitleForSettingsPane(activePane)}
-          description={DescriptionForSettingsPane(activePane, !!activeProject)}
-          scopeDescription={ScopeDescriptionForSettingsPane(activePane, !!activeProject)}>
+          description={DescriptionForSettingsPane(activePane, scope)}
+          scopeDescription={ScopeDescriptionForSettingsPane(activePane, scope)}>
           {activePane === ProvidersPane && (
             <ProviderSettings
               scopeID={scopeID}

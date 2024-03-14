@@ -33,22 +33,24 @@ export const TitleForSettingsPane = (pane: ActiveSettingsPane) => {
   }
 }
 
-export const DescriptionForSettingsPane = (pane: ActiveSettingsPane, isProjectScope: boolean) => {
+type SettingsScope = 'user' | 'project'
+
+export const DescriptionForSettingsPane = (pane: ActiveSettingsPane, scope: SettingsScope) => {
   switch (pane) {
     case ProvidersPane:
       return (
         'Provide your API credentials here to enable integration with LLM providers' +
-        (isProjectScope ? ' within this project. ' : '. ') +
+        (scope === 'project' ? ' within this project. ' : '. ') +
         'To get started, you’ll need to sign up for an account and get an API key from them. ' +
         'All API keys are encrypted and stored securely.'
       )
     case UsagePane:
       return (
         'Limit your API expenditure by setting a monthly spending limit' +
-        (isProjectScope
+        (scope === 'project'
           ? ' for providers configured in this project. '
           : ' for providers that are not configured within the scope of a project. ') +
-        (isProjectScope ? 'Notification emails will be dispatched to project members with the “Owner” role. ' : '') +
+        (scope === 'project' ? 'Notification emails will be dispatched to project members with the “Owner” role. ' : '') +
         'Please be aware that you remain accountable for any exceeding costs in case of delays in enforcing the limits.'
       )
     case TeamPane:
@@ -56,7 +58,7 @@ export const DescriptionForSettingsPane = (pane: ActiveSettingsPane, isProjectSc
     case ConnectorsPane:
       return (
         'Provide your API credentials here to enable integration with vector stores' +
-        (isProjectScope ? ' within this project. ' : '. ') +
+        (scope === 'project' ? ' within this project. ' : '. ') +
         'All API keys are encrypted and stored securely.'
       )
     case SourceControlPane:
@@ -71,12 +73,12 @@ const projectScopeDescription = (targetType: 'providers' | 'connectors') =>
     targetType
   )} configured here will be available to anyone with project access to be used within the context of this project only. Project members can still use their own API keys within this project for ${targetType} that are not configured here.`
 
-export const ScopeDescriptionForSettingsPane = (pane: ActiveSettingsPane, isProjectScope: boolean) => {
+export const ScopeDescriptionForSettingsPane = (pane: ActiveSettingsPane, scope: SettingsScope) => {
   switch (pane) {
     case ProvidersPane:
-      return isProjectScope ? projectScopeDescription('providers') : undefined
+      return scope === 'project' ? projectScopeDescription('providers') : undefined
     case ConnectorsPane:
-      return isProjectScope ? projectScopeDescription('connectors') : undefined
+      return scope === 'project' ? projectScopeDescription('connectors') : undefined
     case UsagePane:
     case TeamPane:
     case SourceControlPane:
