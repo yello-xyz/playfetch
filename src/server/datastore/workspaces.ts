@@ -54,10 +54,12 @@ async function loadActiveWorkspace(userID: number, workspace: Workspace): Promis
   const projects = projectData.map(project => toProject(project, userID, ownedProjectIDs.includes(getID(project))))
   const [users, pendingUsers, owners] = await getWorkspaceUsers(workspace.id)
 
+  const owner = owners.find(user => user.id === userID)
+
   return {
     ...workspace,
     projects: [...projects.filter(project => project.favorited), ...projects.filter(project => !project.favorited)],
-    owners,
+    owners: owner ? [owner, ...filterObjects(owners, [owner])] : [],
     users,
     pendingUsers,
   }
