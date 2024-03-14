@@ -13,7 +13,11 @@ import FiltersHeader from '@/src/client/filters/filtersHeader'
 import { BuildFilter, Filter, FilterItem } from '@/src/client/filters/filters'
 import IconButton from '@/src/client/components/iconButton'
 import GlobalPopupMenu from '@/src/client/components/globalPopupMenu'
-import LogEntriesPopupMenu, { LogEntriesPopupMenuProps } from './logEntriesPopupMenu'
+import LogEntriesPopupMenu, { LogEntriesPopupMenuProps, exportLogEntries } from './logEntriesPopupMenu'
+import { useActiveProject } from '../projects/projectContext'
+import api from '../api'
+import useModalDialogPrompt from '../components/modalDialogContext'
+import { useRef } from 'react'
 
 const sameSequence = (a: LogEntry) => (b: LogEntry) => !!a.continuationID && a.continuationID === b.continuationID
 
@@ -49,9 +53,42 @@ export default function LogEntriesView({
 
   const filteredLogEntries = logEntries.filter(logEntry => logEntryFilter(logEntry, logEntries))
 
+  const activeProject = useActiveProject()
+  const setDialogPrompt = useModalDialogPrompt()
+  const cancelledExport = useRef(false)
+
+  const exportAllLogs = async () => {
+    cancelledExport.current = false
+
+    setDialogPrompt({
+      title: 'Exporting All Logs',
+      content: 'Exporting endpoint log entries for project. This could take a while…',
+      confirmTitle: 'Cancel',
+      callback: () => {
+        cancelledExport.current = true
+      },
+      cancellable: false,
+      dismissable: false,
+      destructive: true,
+    })
+
+    const allLogEntries: LogEntry[] = []
+    let cursors: (string | null)[] = []
+    while (cursors.slice(-1)[0] !== null && !cancelledExport.current) {
+      const analytics = await api.getAnalytics(activeProject.id, 1, cursors as string[])
+      allLogEntries.push(...analytics.recentLogEntries)
+      cursors = analytics.logEntryCursors
+    }
+
+    if (!cancelledExport.current) {
+      exportLogEntries(allLogEntries)
+      setDialogPrompt(undefined)
+    }
+  }
+
   const showPopupMenu = (): [typeof LogEntriesPopupMenu, LogEntriesPopupMenuProps] => [
     LogEntriesPopupMenu,
-    { logEntries: filteredLogEntries },
+    { logEntries: filteredLogEntries, exportAllLogs },
   ]
 
   const gridConfig = 'grid grid-cols-[minmax(80px,2fr)_minmax(120px,1fr)_minmax(120px,1fr)_minmax(100px,1fr)]'
