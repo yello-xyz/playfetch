@@ -68,18 +68,28 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
 
   const initialProviders = await loadScopedProviders(workspaceID ?? user.id)
 
-  return {
-    props: {
-      user,
-      initialSharedProjects,
-      initialWorkspaces,
-      initialPendingWorkspaces,
-      initialActiveWorkspace,
-      initialProviders,
-      initialShowSettings: !!settings,
-    },
+  const props: HomeProps = {
+    user,
+    initialSharedProjects,
+    initialWorkspaces,
+    initialPendingWorkspaces,
+    initialActiveWorkspace,
+    initialProviders,
+    initialShowSettings: !!settings,
   }
+
+  return { props }
 })
+
+type HomeProps = {
+  user: User
+  initialSharedProjects: ActiveWorkspace | null
+  initialWorkspaces: Workspace[]
+  initialPendingWorkspaces: PendingWorkspace[]
+  initialActiveWorkspace: ActiveWorkspace | PendingWorkspace
+  initialProviders: AvailableProvider[]
+  initialShowSettings: boolean
+}
 
 export default function Home({
   user,
@@ -89,15 +99,7 @@ export default function Home({
   initialActiveWorkspace,
   initialProviders,
   initialShowSettings,
-}: {
-  user: User
-  initialSharedProjects?: ActiveWorkspace
-  initialWorkspaces: Workspace[]
-  initialPendingWorkspaces: PendingWorkspace[]
-  initialActiveWorkspace: ActiveWorkspace | PendingWorkspace
-  initialProviders: AvailableProvider[]
-  initialShowSettings: boolean
-}) {
+}: HomeProps) {
   useDocumentationCookie('set')
   const router = useRouter()
 
@@ -105,7 +107,7 @@ export default function Home({
 
   const [workspaces, setWorkspaces] = useState(initialWorkspaces)
   const [pendingWorkspaces, setPendingWorkspaces] = useState(initialPendingWorkspaces)
-  const [sharedProjects, setSharedProjects] = useState(initialSharedProjects)
+  const [sharedProjects, setSharedProjects] = useState(initialSharedProjects ?? undefined)
 
   const [activeWorkspace, setActiveWorkspace] = useState(initialActiveWorkspace)
   const [showSettings, setShowSettings] = useState(initialShowSettings)
