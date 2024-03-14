@@ -10,6 +10,7 @@ import {
   PendingWorkspace,
   IsPendingWorkspace,
   PendingProject,
+  AvailableProvider,
 } from '@/types'
 import ClientRoute, {
   ParseNumberQuery,
@@ -29,6 +30,7 @@ import GlobalPopup from '@/src/client/components/globalPopup'
 import { useDocumentationCookie } from '@/src/client/cookies/cookieBanner'
 
 import dynamic from 'next/dynamic'
+import { loadScopedProviders } from '@/src/server/datastore/providers'
 const WorkspaceSidebar = dynamic(() => import('@/src/client/workspaces/workspaceSidebar'))
 const WorkspaceInvite = dynamic(() => import('@/src/client/workspaces/workspaceInvite'))
 const WorkspaceGridView = dynamic(() => import('@/src/client/workspaces/workspaceGridView'))
@@ -64,6 +66,8 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
       : initialPendingWorkspaces.find(workspace => workspace.id === workspaceID) ??
         (await getActiveWorkspace(user.id, workspaceID ?? user.id))
 
+  const initialProviders = await loadScopedProviders(workspaceID ?? user.id)
+
   return {
     props: {
       user,
@@ -71,6 +75,7 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
       initialWorkspaces,
       initialPendingWorkspaces,
       initialActiveWorkspace,
+      initialProviders,
       initialShowSettings: !!settings,
     },
   }
@@ -82,6 +87,7 @@ export default function Home({
   initialWorkspaces,
   initialPendingWorkspaces,
   initialActiveWorkspace,
+  initialProviders,
   initialShowSettings,
 }: {
   user: User
@@ -89,6 +95,7 @@ export default function Home({
   initialWorkspaces: Workspace[]
   initialPendingWorkspaces: PendingWorkspace[]
   initialActiveWorkspace: ActiveWorkspace | PendingWorkspace
+  initialProviders: AvailableProvider[]
   initialShowSettings: boolean
 }) {
   useDocumentationCookie('set')
@@ -225,6 +232,7 @@ export default function Home({
                         activeWorkspace={activeWorkspace}
                         isUserWorkspace={activeWorkspace.id === user.id}
                         isSharedProjects={IsSharedProjects(activeWorkspace)}
+                        initialProviders={initialProviders}
                         showSettings={showSettings}
                         toggleSettings={toggleSettings}
                         onRespondToProjectInvite={respondToProjectInvite}

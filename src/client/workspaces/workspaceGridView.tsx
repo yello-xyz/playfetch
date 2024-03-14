@@ -1,4 +1,4 @@
-import { ActiveWorkspace, IsPendingProject, PendingProject, Project, Workspace } from '@/types'
+import { ActiveWorkspace, AvailableProvider, IsPendingProject, PendingProject, Project, Workspace } from '@/types'
 import { useState } from 'react'
 import api from '@/src/client/api'
 import IconButton from '@/src/client/components/iconButton'
@@ -13,12 +13,14 @@ import useFormattedDate from '@/src/client/components/useFormattedDate'
 import { InviteCell } from './inviteCell'
 import { HeaderItem } from '../components/headerItem'
 import Icon from '../components/icon'
+import SettingsView from '../settings/settingsView'
 
 export default function WorkspaceGridView({
   workspaces,
   activeWorkspace,
   isUserWorkspace,
   isSharedProjects,
+  initialProviders,
   showSettings,
   toggleSettings,
   onRespondToProjectInvite,
@@ -32,6 +34,7 @@ export default function WorkspaceGridView({
   activeWorkspace: ActiveWorkspace
   isUserWorkspace: boolean
   isSharedProjects: boolean
+  initialProviders: AvailableProvider[]
   showSettings: boolean
   toggleSettings: (show: boolean) => void
   onRespondToProjectInvite: (projectID: number, accept: boolean) => void
@@ -41,6 +44,9 @@ export default function WorkspaceGridView({
   onRefreshWorkspace: () => void
   onRefreshWorkspaces: () => void
 }) {
+  const [scopedProviders, setScopedProviders] = useState(initialProviders)
+  const refreshProviders = () => api.getScopedProviders(activeWorkspace.id).then(setScopedProviders)
+
   const inviteMembers = async (emails: string[]) => {
     await api.inviteToWorkspace(activeWorkspace.id, emails)
     onRefreshWorkspace()
@@ -84,18 +90,22 @@ export default function WorkspaceGridView({
             )}
           </div>
           <div className='flex flex-col overflow-y-auto h-full px-6 gap-3.5 pt-3.5 pb-5'>
-            {activeWorkspace.projects.map((project, index) => (
-              <ProjectCell
-                key={index}
-                project={project}
-                isSharedProjects={isSharedProjects}
-                onSelectProject={onSelectProject}
-                onRefreshWorkspace={onRefreshWorkspace}
-                onDeleted={onRefreshWorkspace}
-                workspaces={workspaces}
-                onRespondToInvite={accept => onRespondToProjectInvite(project.id, accept)}
-              />
-            ))}
+            {showSettings ? (
+              <SettingsView providers={scopedProviders} refresh={refreshProviders} />
+            ) : (
+              activeWorkspace.projects.map((project, index) => (
+                <ProjectCell
+                  key={index}
+                  project={project}
+                  isSharedProjects={isSharedProjects}
+                  onSelectProject={onSelectProject}
+                  onRefreshWorkspace={onRefreshWorkspace}
+                  onDeleted={onRefreshWorkspace}
+                  workspaces={workspaces}
+                  onRespondToInvite={accept => onRespondToProjectInvite(project.id, accept)}
+                />
+              ))
+            )}
           </div>
         </>
       ) : (
