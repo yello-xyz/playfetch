@@ -3,6 +3,10 @@ import { LogEntry } from '@/types'
 import { WithDismiss } from '@/src/client/components/globalPopupContext'
 import { FormatCost, FormatDate, FormatDuration } from '@/src/common/formatting'
 import { stringify } from 'csv-stringify/sync'
+import { useActiveProject } from '../projects/projectContext'
+import useModalDialogPrompt from '../components/modalDialogContext'
+import { useRef } from 'react'
+import api from '../api'
 
 export const exportLogEntries = (logEntries: LogEntry[]) => {
   const rows: string[][] = [
@@ -28,12 +32,12 @@ export const exportLogEntries = (logEntries: LogEntry[]) => {
   element.click()
 }
 
-export type LogEntriesPopupMenuProps = {
+type LogEntriesPopupMenuProps = {
   logEntries: LogEntry[]
   exportAllLogs: () => void
 }
 
-export default function LogEntriesPopupMenu({
+function LogEntriesPopupMenu({
   logEntries,
   exportAllLogs,
   withDismiss,
@@ -46,4 +50,46 @@ export default function LogEntriesPopupMenu({
       <PopupMenuItem title='Export All Logs as CSV' callback={dismiss(exportAllLogs)} />
     </PopupContent>
   )
+}
+
+export default function useLogEntriesPopupMenu(logEntries: LogEntry[]) {
+  const activeProject = useActiveProject()
+  const setDialogPrompt = useModalDialogPrompt()
+  const cancelledExport = useRef(false)
+
+  const exportAllLogs = async () => {
+    cancelledExport.current = false
+
+    setDialogPrompt({
+      title: 'Exporting All Logs',
+      content: 'Exporting endpoint log entries for project. This could take a while…',
+      confirmTitle: 'Cancel',
+      callback: () => {
+        cancelledExport.current = true
+      },
+      cancellable: false,
+      dismissable: false,
+      destructive: true,
+    })
+
+    const allLogEntries: LogEntry[] = []
+    let cursors: (string | null)[] = []
+    while (cursors.slice(-1)[0] !== null && !cancelledExport.current) {
+      const analytics = await api.getAnalytics(activeProject.id, 1, cursors as string[])
+      allLogEntries.push(...analytics.recentLogEntries)
+      cursors = analytics.logEntryCursors
+    }
+
+    if (!cancelledExport.current) {
+      exportLogEntries(allLogEntries)
+      setDialogPrompt(undefined)
+    }
+  }
+
+  const showPopupMenu = (): [typeof LogEntriesPopupMenu, LogEntriesPopupMenuProps] => [
+    LogEntriesPopupMenu,
+    { logEntries, exportAllLogs },
+  ]
+
+  return showPopupMenu
 }
