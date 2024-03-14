@@ -129,16 +129,13 @@ export const getVerifiedUserChainData = async (userID: number, chainID: number) 
 export const getVerifiedUserChain = (userID: number, chainID: number) =>
   getVerifiedUserChainData(userID, chainID).then(toChain)
 
-export const getVerifiedUserPromptOrChainData = async (userID: number, parentID: number) =>
-  getVerifiedProjectScopedData(userID, [Entity.PROMPT, Entity.CHAIN], parentID)
+export const ensureChainAccess = (userID: number, chainID: number) => getVerifiedUserChainData(userID, chainID)
 
 export const getTrustedPromptOrChainData = async (parentID: number) =>
   getTrustedProjectScopedData([Entity.PROMPT, Entity.CHAIN], parentID)
 
-export const ensureChainAccess = (userID: number, chainID: number) => getVerifiedUserChainData(userID, chainID)
-
 export const ensurePromptOrChainAccess = (userID: number, parentID: number) =>
-  getVerifiedUserPromptOrChainData(userID, parentID)
+  getVerifiedProjectScopedData(userID, [Entity.PROMPT, Entity.CHAIN], parentID)
 
 export async function updateChainName(userID: number, chainID: number, name: string) {
   const chainData = await getVerifiedUserChainData(userID, chainID)

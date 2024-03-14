@@ -237,7 +237,7 @@ const getTrustedProjectData = (projectID: number) => getKeyedEntity(Entity.PROJE
 
 export const getProjectName = (projectID: number) => getTrustedProjectData(projectID).then(data => data.name)
 
-const getVerifiedUserProjectData = async (userID: number, projectID: number) => {
+export const getVerifiedUserProjectData = async (userID: number, projectID: number) => {
   const projectData = await getTrustedProjectData(projectID)
   if (!projectData) {
     throw new Error(`Project with ID ${projectID} does not exist or user has no access`)

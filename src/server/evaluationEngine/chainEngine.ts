@@ -29,6 +29,7 @@ const MaxLoopIterations = 10 // TODO make this configurable (on individual branc
 
 export default async function runChain(
   userID: number,
+  workspaceID: number,
   projectID: number,
   version: RawPromptVersion | RawChainVersion,
   configs: (RunConfig | CodeConfig)[],
@@ -88,6 +89,7 @@ export default async function runChain(
       lastResponse = await runChainStep(
         runPromptWithConfig(
           userID,
+          workspaceID,
           projectID,
           prompts,
           promptVersion.config,
@@ -101,7 +103,7 @@ export default async function runChain(
     } else if (isQueryConfig(config)) {
       const query = resolvePrompt(config.query, inputs, useCamelCase)
       lastResponse = await runChainStep(
-        runQuery(userID, projectID, config.provider, config.model, config.indexName, query, config.topK)
+        runQuery(userID, workspaceID, projectID, config.provider, config.model, config.indexName, query, config.topK)
       )
     } else if (isCodeConfig(config) || isBranchConfig(config)) {
       lastResponse = await runChainStep(runCodeWithInputs(config.code, inputs))

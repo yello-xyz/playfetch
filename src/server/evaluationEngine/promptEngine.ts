@@ -43,6 +43,7 @@ const isValidPredictionResponse = (response: PredictionResponse) =>
 
 export default async function runPromptWithConfig(
   userID: number,
+  workspaceID: number,
   projectID: number,
   prompts: Prompts,
   config: PromptConfig,
@@ -52,7 +53,7 @@ export default async function runPromptWithConfig(
   abortSignal: AbortSignal,
   continuationInputs: PromptInputs
 ): Promise<RunResponse> {
-  const scopeIDs = [projectID, userID]
+  const scopeIDs = [projectID, workspaceID, userID]
   const provider = ProviderForModel(config.model)
   const modelToCheck = (PublicLanguageModels as string[]).includes(config.model) ? undefined : config.model
   const { scopeID, providerID, apiKey } = await CredentialsForProvider(scopeIDs, provider, modelToCheck)
