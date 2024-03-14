@@ -55,7 +55,7 @@ export const RunEvent = (
 export const EndpointEvent = (parentID: number, failed: boolean, cost: number, duration: number) =>
   RunEvent(parentID, failed, cost, duration, 'api')
 
-export const BudgetEvent = (scope: 'user' | 'project', scopeID: number, cost: number): Event => ({
+export const BudgetEvent = (scope: 'user' | 'project' | 'workspace', scopeID: number, cost: number): Event => ({
   name: 'budget',
   params: { content_type: scope, item_id: scopeID.toString(), cost },
 })

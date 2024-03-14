@@ -20,13 +20,14 @@ export default function BudgetPane({
   const recipient = recipientForScope(scope)
 
   const [limit, setLimit, limitInputRef, editingLimit, editLimit, updateLimit] = useBudgetEditor(
+    scope,
     scopeID,
     costUsage,
     'limit',
     onRefresh
   )
   const [threshold, setThreshold, thresholdInputRef, editingThreshold, editThreshold, updateThreshold] =
-    useBudgetEditor(scopeID, costUsage, 'threshold', onRefresh)
+    useBudgetEditor(scope, scopeID, costUsage, 'threshold', onRefresh)
 
   return (
     <>
@@ -83,7 +84,7 @@ export default function BudgetPane({
 }
 
 const recipientForScope = (scope: 'workspace' | 'project' | 'user') => {
-  switch (scope) { 
+  switch (scope) {
     case 'workspace':
       return 'workspace owners'
     case 'project':
@@ -94,6 +95,7 @@ const recipientForScope = (scope: 'workspace' | 'project' | 'user') => {
 }
 
 const useBudgetEditor = (
+  scope: string,
   scopeID: number,
   costUsage: CostUsage,
   fieldToEdit: 'limit' | 'threshold',
@@ -113,6 +115,7 @@ const useBudgetEditor = (
   const update = () =>
     api
       .updateBudget(
+        scope,
         scopeID,
         isThreshold ? costUsage.limit ?? undefined : updateValue,
         isThreshold ? updateValue : costUsage.threshold ?? undefined
