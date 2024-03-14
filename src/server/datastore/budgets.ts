@@ -8,6 +8,7 @@ import {
   getID,
 } from './datastore'
 import { ensureScopeOwnership } from './providers'
+import { Scope } from '@/types'
 
 export async function migrateBudgets(postMerge: boolean) {
   if (postMerge) {
@@ -86,7 +87,7 @@ export async function checkBudgetForScope(scopeID: number): Promise<boolean> {
   return budgetData.limit === null || budgetData.cost < budgetData.limit
 }
 
-export async function incrementCostForScope(scopeID: number, incrementalCost: number) {
+export async function incrementCostForScope(scope: Scope, scopeID: number, incrementalCost: number) {
   const [cost, threshold, limit] = await runTransactionWithExponentialBackoff(async transaction => {
     const budgetData = await getKeyedEntity(Entity.BUDGET, scopeID, transaction)
     const limit = budgetData?.limit ?? null
@@ -107,9 +108,9 @@ export async function incrementCostForScope(scopeID: number, incrementalCost: nu
   })
   const reachedLimit = (limit: number | null) => limit !== null && cost - incrementalCost < limit && cost >= limit
   if (reachedLimit(limit)) {
-    sendBudgetNotificationEmails(scopeID, limit!)
+    sendBudgetNotificationEmails(scope, scopeID, limit!)
   } else if (reachedLimit(threshold)) {
-    sendBudgetNotificationEmails(scopeID, threshold!, limit)
+    sendBudgetNotificationEmails(scope, scopeID, threshold!, limit)
   }
 }
 

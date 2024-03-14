@@ -43,7 +43,7 @@ export const runQuery = async (
       model,
       query
     )
-    IncrementProviderCost(scopeID, providerID, model, cost)
+    IncrementProviderCost(scopeID, projectID, userID, providerID, model, cost)
 
     const result = await runVectorQuery(apiKey, environment, indexName, embedding, topK)
 

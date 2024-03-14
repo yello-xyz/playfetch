@@ -127,8 +127,7 @@ const getVerifiedUserWorkspaceData = async (userID: number, workspaceID: number)
 
 const getTrustedWorkspaceData = async (workspaceID: number) => getKeyedEntity(Entity.WORKSPACE, workspaceID)
 
-export const getWorkspaceNameForID = (workspaceID: number) =>
-  getTrustedWorkspaceData(workspaceID).then(data => data.name)
+export const getWorkspaceName = (workspaceID: number) => getTrustedWorkspaceData(workspaceID).then(data => data.name)
 
 export async function updateWorkspaceName(userID: number, workspaceID: number, name: string) {
   if (workspaceID === userID) {

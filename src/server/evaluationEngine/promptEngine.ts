@@ -89,7 +89,7 @@ export default async function runPromptWithConfig(
   }
 
   if (!isErrorPredictionResponse(result)) {
-    IncrementProviderCost(scopeID, providerID, config.model, result.cost)
+    IncrementProviderCost(scopeID, projectID, userID, providerID, config.model, result.cost)
   }
 
   return {

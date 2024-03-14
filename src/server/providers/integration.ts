@@ -66,13 +66,15 @@ export const CheckBudgetForProvider = async (scopeID: number | null, provider: M
 
 export const IncrementProviderCost = (
   scopeID: number | null,
+  projectID: number,
+  userID: number,
   providerID: number | null,
   model: string,
   cost: number
 ) => {
   if (scopeID && providerID && cost > 0) {
     updateScopedModelCost(scopeID, model, cost)
-    incrementCostForScope(scopeID, cost)
+    incrementCostForScope(scopeID === projectID ? 'project' : scopeID === userID ? 'user' : 'workspace', scopeID, cost)
   }
 }
 
