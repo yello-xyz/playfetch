@@ -13,10 +13,13 @@ import { useDocumentationCookie } from '@/src/client/cookies/cookieBanner'
 
 export const getServerSideProps = withLoggedOutSession(async context => {
   const tokenCSRF = (await getCsrfToken(context)) ?? null
-  return { props: { tokenCSRF } }
+  const props: LoginProps = { tokenCSRF }
+  return { props }
 })
 
-export default function Login({ tokenCSRF }: { tokenCSRF: string }) {
+type LoginProps = { tokenCSRF: string | null }
+
+export default function Login({ tokenCSRF }: LoginProps) {
   useDocumentationCookie('remove')
   const router = useRouter()
   const { w: joinedWaitList } = ParseNumberQuery(router.query)
@@ -49,7 +52,7 @@ export default function Login({ tokenCSRF }: { tokenCSRF: string }) {
       </div>
       <div className='flex flex-col w-full gap-3 p-8 bg-white rounded-lg border border-gray-200 max-w-[450px]'>
         <form className='flex flex-col w-full' method='POST' action='/api/auth/signin/email'>
-          <input name='csrfToken' type='hidden' defaultValue={tokenCSRF} />
+          {tokenCSRF && <input name='csrfToken' type='hidden' defaultValue={tokenCSRF} />}
           <label className='mb-2 text-sm font-medium text-gray-700' htmlFor='email'>
             Email Address
           </label>
