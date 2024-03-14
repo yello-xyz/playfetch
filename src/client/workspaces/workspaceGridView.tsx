@@ -5,11 +5,14 @@ import IconButton from '@/src/client/components/iconButton'
 import starIcon from '@/public/star.svg'
 import filledStarIcon from '@/public/filledStar.svg'
 import dotsIcon from '@/public/dots.svg'
+import chevronIcon from '@/public/chevron.svg'
 import { FormatRelativeDate } from '@/src/common/formatting'
 import ProjectPopupMenu from '@/src/client/projects/projectPopupMenu'
 import WorkspaceTopBar, { AddProjectButton } from './workspaceTopBar'
 import useFormattedDate from '@/src/client/components/useFormattedDate'
 import { InviteCell } from './inviteCell'
+import { HeaderItem } from '../components/headerItem'
+import Icon from '../components/icon'
 
 export default function WorkspaceGridView({
   workspaces,
@@ -68,7 +71,17 @@ export default function WorkspaceGridView({
       {activeWorkspace.projects.length > 0 ? (
         <>
           <div className='border-b border-gray-100 text-gray-700 font-medium pt-1.5 pb-2.5 mx-5 mb-1'>
-            <span>Project name</span>
+            {showSettings ? (
+              <div className='flex -m-2'>
+                <HeaderItem active={false} className='cursor-pointer' onClick={() => toggleSettings(false)}>
+                  <Icon className='rotate-90 -mr-0.5' icon={chevronIcon} />
+                  {activeWorkspace.name} /
+                </HeaderItem>
+                <HeaderItem className='-mx-2.5'>Settings</HeaderItem>
+              </div>
+            ) : (
+              <span>Project name</span>
+            )}
           </div>
           <div className='flex flex-col overflow-y-auto h-full px-6 gap-3.5 pt-3.5 pb-5'>
             {activeWorkspace.projects.map((project, index) => (
