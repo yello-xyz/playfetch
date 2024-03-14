@@ -11,9 +11,9 @@ import ProjectPopupMenu from '@/src/client/projects/projectPopupMenu'
 import WorkspaceTopBar, { AddProjectButton } from './workspaceTopBar'
 import useFormattedDate from '@/src/client/components/useFormattedDate'
 import { InviteCell } from './inviteCell'
-import { HeaderItem } from '../components/headerItem'
-import Icon from '../components/icon'
-import SettingsView from '../settings/settingsView'
+import { HeaderItem } from '@/src/client/components/headerItem'
+import Icon from '@/src/client/components/icon'
+import SettingsView from '@/src/client/settings/settingsView'
 
 export default function WorkspaceGridView({
   workspaces,
