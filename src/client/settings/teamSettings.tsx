@@ -28,7 +28,7 @@ export default function TeamSettings({
       destructive: true,
       callback: () =>
         isWorkspace
-          ? api.revokeProjectAccess(activeItem.id, userID).then(refreshItem) // TODO implement revokeWorkspaceAccess
+          ? api.revokeWorkspaceAccess(activeItem.id, userID).then(refreshItem)
           : api.revokeProjectAccess(activeItem.id, userID).then(refreshItem),
     })
 
