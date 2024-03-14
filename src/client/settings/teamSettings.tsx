@@ -18,7 +18,7 @@ export default function TeamSettings({
 
   const inviteMembers = (emails: string[]) =>
     isWorkspace
-      ? api.inviteToProject(activeItem.id, emails).then(refreshItem) // TODO implement inviteToWorkspace
+      ? api.inviteToWorkspace(activeItem.id, emails).then(refreshItem)
       : api.inviteToProject(activeItem.id, emails).then(refreshItem)
 
   const revokeMemberAccess = (userID: number) =>

@@ -88,8 +88,11 @@ export async function inviteMembersToWorkspace(userID: number, workspaceID: numb
   await grantUsersAccess(userID, emails, workspaceID, 'workspace')
 }
 
-export async function revokeMemberAccessForWorkspace(userID: number, workspaceID: number) {
-  await revokeUserAccess(userID, workspaceID)
+export async function revokeMemberAccessForWorkspace(userID: number, memberID: number, workspaceID: number) {
+  if (userID !== memberID) {
+    await ensureWorkspaceOwnership(userID, workspaceID)
+  }
+  await revokeUserAccess(memberID, workspaceID)
 }
 
 async function updateWorkspace(workspaceData: any) {
