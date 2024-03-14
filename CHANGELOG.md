@@ -1,5 +1,11 @@
 ## PlayFetch Changelog
 
+### v0.27 - 2024-03-15
+- Workspace wide API keys, cost tracking and usage limits
+- Workspace roles (owner vs member)
+- Markdown rendering for run responses
+- Paging, filtering and CSV export for endpoint logs
+
 ### v0.26 - 2024-03-06
 - Add support for Mistral AI (Small, Large)
 - Add support for Anthropic Claude 3 (Sonnet, Opus)
