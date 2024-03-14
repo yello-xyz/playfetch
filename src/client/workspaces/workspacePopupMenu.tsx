@@ -46,14 +46,24 @@ export default function WorkspacePopupMenu({
     })
   }
 
+  const canLeaveWorkspace = workspace.owners.length !== 1
+  const canDeleteWorkspace = workspace.owners.length > 0
+
   return (
     <>
       <PopupMenu className='w-48' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
         <PopupMenuItem title='Rename Workspace…' callback={withDismiss(() => setShowPickNamePrompt(true))} first />
-        {workspace.users.length === 1 ? (
+        {canLeaveWorkspace && (
+          <PopupMenuItem
+            separated
+            destructive
+            title='Leave Workspace'
+            callback={withDismiss(promptLeave)}
+            last={!canDeleteWorkspace}
+          />
+        )}
+        {canDeleteWorkspace && (
           <PopupMenuItem separated destructive title='Delete Workspace' callback={withDismiss(promptDelete)} last />
-        ) : (
-          <PopupMenuItem separated destructive title='Leave Workspace' callback={withDismiss(promptLeave)} last />
         )}
       </PopupMenu>
       {showPickNamePrompt && (

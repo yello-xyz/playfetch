@@ -11,6 +11,7 @@ import {
 import { ActiveUser, ActiveWorkspace, PendingUser, PendingWorkspace, User, Workspace, WorkspaceMetrics } from '@/types'
 import { filterObjects, getRecentProjects, toProject } from './projects'
 import {
+  checkUserOwnership,
   getAccessibleObjectIDs,
   getAccessingUserIDs,
   grantUserAccess,
@@ -183,14 +184,12 @@ export async function getPendingAccessObjects<T>(
   ]
 }
 
+const ensureWorkspaceOwnership = (userID: number, workspaceID: number) => checkUserOwnership(userID, workspaceID)
+
 export async function deleteWorkspaceForUser(userID: number, workspaceID: number) {
-  await ensureWorkspaceAccess(userID, workspaceID)
+  await ensureWorkspaceOwnership(userID, workspaceID)
   if (workspaceID === userID) {
     throw new Error('Cannot delete Drafts workspace')
-  }
-  const [users] = await getWorkspaceUsers(workspaceID)
-  if (users.some(user => user.id !== userID)) {
-    throw new Error('Cannot delete multi-user workspace')
   }
   const projectKeys = await getEntityKeys(Entity.PROJECT, 'workspaceID', workspaceID, 1000)
   await deleteEntities([buildKey(Entity.WORKSPACE, workspaceID), ...projectKeys])
