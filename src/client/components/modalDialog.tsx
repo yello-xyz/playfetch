@@ -11,6 +11,7 @@ export type DialogPrompt = {
   destructive?: boolean
   disabled?: boolean
   cancellable?: boolean
+  dismissable?: boolean
 }
 
 export default function ModalDialog({
@@ -45,7 +46,7 @@ export default function ModalDialog({
         (prompt?.destructive !== true || event.altKey || event.metaKey || event.shiftKey || event.ctrlKey)
       ) {
         confirm()
-      } else if (event.key === 'Escape') {
+      } else if (event.key === 'Escape' && prompt?.dismissable !== false) {
         onDismiss()
       }
     },
@@ -59,7 +60,7 @@ export default function ModalDialog({
 
   return prompt ? (
     <div
-      onClick={dismiss}
+      onClick={prompt.dismissable !== false ? dismiss : undefined}
       className='fixed inset-0 z-40 flex items-center justify-center w-full h-full bg-gray-600 bg-opacity-50'>
       <div onClick={event => event.stopPropagation()} className='p-4 bg-white rounded-lg w-72 drop-shadow'>
         <div className='flex flex-col gap-4'>
