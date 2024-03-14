@@ -3,6 +3,8 @@ import { LogEntry } from '@/types'
 import { WithDismiss } from '@/src/client/components/globalPopupContext'
 import { FormatCost, FormatDate, FormatDuration } from '@/src/common/formatting'
 import { stringify } from 'csv-stringify/sync'
+import { useActiveProject } from '../projects/projectContext'
+import api from '../api'
 
 export type LogEntriesPopupMenuProps = {
   logEntries: LogEntry[]
@@ -11,7 +13,7 @@ export type LogEntriesPopupMenuProps = {
 export default function LogEntriesPopupMenu({ logEntries, withDismiss }: LogEntriesPopupMenuProps & WithDismiss) {
   const dismiss = (callback?: () => void) => (callback ? withDismiss(callback) : undefined)
 
-  const exportLogEntries = () => {
+  const exportLogEntries = (logEntries: LogEntry[]) => {
     const rows: string[][] = [
       ['Time', 'Endpoint', 'Environment', 'Cost', 'Duration', 'Inputs', 'Output', 'Error', 'Attempts', 'Cache Hit'],
       ...logEntries.map(entry => [
@@ -35,9 +37,22 @@ export default function LogEntriesPopupMenu({ logEntries, withDismiss }: LogEntr
     element.click()
   }
 
+  const activeProject = useActiveProject()
+  const exportAllLogEntries = async () => {
+    const allLogEntries: LogEntry[] = []
+    let cursors: (string | null)[] = []
+    while (cursors.slice(-1)[0] !== null) {
+      const analytics = await api.getAnalytics(activeProject.id, 1, cursors as string[])
+      allLogEntries.push(...analytics.recentLogEntries)
+      cursors = analytics.logEntryCursors
+    }
+    exportLogEntries(allLogEntries)
+  }
+
   return (
     <PopupContent className='w-44'>
-      <PopupMenuItem title='Export as CSV' callback={dismiss(exportLogEntries)} />
+      <PopupMenuItem title='Export View as CSV' callback={dismiss(() => exportLogEntries(logEntries))} />
+      <PopupMenuItem title='Export All Logs as CSV' callback={dismiss(exportAllLogEntries)} />
     </PopupContent>
   )
 }
