@@ -117,9 +117,7 @@ export default function Home({
 
   const selectWorkspace = async (workspaceID: number) => {
     if (settings || workspaceID !== activeWorkspace.id) {
-      if (settings) {
-        setShowSettings(false)
-      } else {
+      if (workspaceID !== activeWorkspace.id) {
         const pendingWorkspace = pendingWorkspaces.find(workspace => workspace.id === workspaceID)
         if (pendingWorkspace) {
           setActiveWorkspace(pendingWorkspace)
@@ -127,6 +125,7 @@ export default function Home({
           await refreshWorkspace(workspaceID)
         }
       }
+      setShowSettings(false)
       router.push(WorkspaceRoute(workspaceID, user.id), undefined, { shallow: true })
     }
   }
