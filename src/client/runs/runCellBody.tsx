@@ -114,7 +114,7 @@ export default function RunCellBody({
 
   // TODO Migrate legacy comments to compensate for whitespace trimming in markdown rendering.
   const hasLegacyInlineComments = comments.some(
-    comment => comment.startIndex !== undefined && comment.quote && comment.timestamp < new Date('2024-03-12').getTime()
+    comment => comment.startIndex !== undefined && comment.quote && comment.timestamp < new Date('2024-03-15').getTime()
   )
 
   return (
