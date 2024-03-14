@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 import { CheckValidEmail, FormatRelativeDate } from '@/src/common/formatting'
 import Button from '@/src/client/components/button'
 import { PendingUser, User } from '@/types'

@@ -102,6 +102,9 @@ export default function SettingsView({
     ...(activeWorkspace ? [] : [IssueTrackerPane]),
   ]
 
+  const activeItem = activeWorkspace ?? activeProject
+  const refreshItem = refreshWorkspace ?? refreshProject
+
   return activeWorkspace?.owners?.length || activeProject?.isOwner || (!activeWorkspace && !activeProject) ? (
     <div className='flex h-full gap-10 p-8 overflow-hidden bg-gray-25'>
       <SettingsSidebar
@@ -132,7 +135,9 @@ export default function SettingsView({
               onRefresh={refreshUsage}
             />
           )}
-          {activePane === TeamPane && <TeamSettings />}
+          {activePane === TeamPane && activeItem && refreshItem && (
+            <TeamSettings activeItem={activeItem} refreshItem={refreshItem} />
+          )}
           {activePane === ConnectorsPane && (
             <ProviderSettings
               scopeID={scopeID}
