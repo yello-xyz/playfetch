@@ -86,6 +86,15 @@ export const UserSettingsRoute = (activePane: ActiveSettingsPane = ProvidersPane
 export const ProjectSettingsRoute = (projectID: number, activePane: ActiveSettingsPane = ProvidersPane) =>
   `${ProjectRoute(projectID)}?s=1${activePane !== ProvidersPane ? `&t=${paneToShortString[activePane]}` : ''}`
 
+export const WorkspaceSettingsRoute = (
+  workspaceID: number,
+  userID: number,
+  activePane: ActiveSettingsPane = ProvidersPane
+) =>
+  `${WorkspaceRoute(workspaceID, userID)}?s=1${
+    activePane !== ProvidersPane ? `&t=${paneToShortString[activePane]}` : ''
+  }`
+
 export const ParseActiveSettingsPaneQuery = (query: any): ActiveSettingsPane => {
   const { t: activeTab } = ParseQuery(query)
   const shortStringToPane = Object.fromEntries(
