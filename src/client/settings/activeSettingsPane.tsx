@@ -71,7 +71,7 @@ export const DescriptionForSettingsPane = (pane: ActiveSettingsPane, scope: Sett
 const scopeDescription = (targetType: 'providers' | 'connectors', scope: SettingsScope) =>
   `${Capitalize(
     targetType
-  )} configured here will be available to anyone with ${scope} access to be used within the context of this ${scope} only. $${Capitalize(
+  )} configured here will be available to anyone with ${scope} access to be used within the context of this ${scope} only. ${Capitalize(
     scope
   )} members can still use their own API keys within this ${scope} for ${targetType} that are not configured here.`
 

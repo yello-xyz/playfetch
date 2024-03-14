@@ -1,7 +1,7 @@
 import { DefaultProvider } from '@/src/common/defaults'
 import { ModelProviders, QueryProviders } from '@/src/common/providerMetadata'
 import ProviderSettings from './providerSettings'
-import { ActiveProject, AvailableProvider, CostUsage, IsModelProvider } from '@/types'
+import { ActiveProject, ActiveWorkspace, AvailableProvider, CostUsage, IsModelProvider } from '@/types'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import SettingsPane from './settingsPane'
 import api from '@/src/client/api'
@@ -9,7 +9,12 @@ import UsageSettings from './usageSettings'
 import { useLoggedInUser } from '@/src/client/users/userContext'
 import SettingsSidebar from './settingsSidebar'
 import TeamSettings from './teamSettings'
-import { ParseActiveSettingsPaneQuery, ProjectSettingsRoute, UserSettingsRoute } from '@/src/common/clientRoute'
+import {
+  ParseActiveSettingsPaneQuery,
+  ProjectSettingsRoute,
+  UserSettingsRoute,
+  WorkspaceSettingsRoute,
+} from '@/src/common/clientRoute'
 import { useRouter } from 'next/router'
 import GitHubSettings from './githubSettings'
 import LinearSettings from './linearSettings'
@@ -28,16 +33,18 @@ import {
 
 export default function SettingsView({
   providers,
+  activeWorkspace,
   activeProject,
   refresh,
 }: {
   providers: AvailableProvider[]
+  activeWorkspace?: ActiveWorkspace
   activeProject?: ActiveProject
   refresh: () => void
 }) {
   const user = useLoggedInUser()
-  const scope = activeProject ? 'project' : 'user'
-  const scopeID = activeProject?.id ?? user.id
+  const scope = activeWorkspace ? 'workspace' : activeProject ? 'project' : 'user'
+  const scopeID = activeWorkspace?.id ?? activeProject?.id ?? user.id
 
   const router = useRouter()
   const activePaneFromQuery = ParseActiveSettingsPaneQuery(router.query)
@@ -49,9 +56,17 @@ export default function SettingsView({
 
   const updateActivePane = (pane: ActiveSettingsPane) => {
     if (pane !== activePane) {
-      router.push(activeProject ? ProjectSettingsRoute(scopeID, pane) : UserSettingsRoute(pane), undefined, {
-        shallow: true,
-      })
+      router.push(
+        activeWorkspace
+          ? WorkspaceSettingsRoute(scopeID, user.id, pane)
+          : activeProject
+          ? ProjectSettingsRoute(scopeID, pane)
+          : UserSettingsRoute(pane),
+        undefined,
+        {
+          shallow: true,
+        }
+      )
       setActivePane(pane)
     }
   }
@@ -76,13 +91,13 @@ export default function SettingsView({
   const availablePanes = [
     ProvidersPane,
     UsagePane,
-    ...(activeProject ? [TeamPane] : []),
+    ...(activeWorkspace || activeProject ? [TeamPane] : []),
     ConnectorsPane,
-    SourceControlPane,
-    IssueTrackerPane,
+    ...(activeWorkspace ? [] : [SourceControlPane]),
+    ...(activeWorkspace ? [] : [IssueTrackerPane]),
   ]
 
-  return !activeProject || activeProject.isOwner ? (
+  return activeWorkspace?.owners?.length || activeProject?.isOwner || (!activeWorkspace && !activeProject) ? (
     <div className='flex h-full gap-10 p-8 overflow-hidden bg-gray-25'>
       <SettingsSidebar
         panes={availablePanes as ActiveSettingsPane[]}

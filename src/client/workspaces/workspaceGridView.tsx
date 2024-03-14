@@ -90,7 +90,7 @@ export default function WorkspaceGridView({
             </div>
           )}
           {showSettings ? (
-            <SettingsView providers={scopedProviders} refresh={refreshProviders} />
+            <SettingsView activeWorkspace={activeWorkspace} providers={scopedProviders} refresh={refreshProviders} />
           ) : (
             <div className='flex flex-col overflow-y-auto h-full px-6 gap-3.5 pt-3.5 pb-5'>
               {activeWorkspace.projects.map((project, index) => (
