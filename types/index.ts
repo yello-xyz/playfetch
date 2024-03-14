@@ -24,6 +24,7 @@ export type PendingWorkspace = Workspace & PendingAttributes
 
 export type ActiveWorkspace = Workspace & {
   projects: Project[]
+  owners: User[]
   users: User[]
   pendingUsers: PendingUser[]
 }

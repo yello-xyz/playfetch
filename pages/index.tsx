@@ -40,6 +40,7 @@ export const SharedProjectsWorkspace = (
   id: SharedProjectsWorkspaceID,
   name: 'Shared Projects',
   projects: [...pendingProjects, ...projects],
+  owners: [],
   users: [],
   pendingUsers: [],
 })

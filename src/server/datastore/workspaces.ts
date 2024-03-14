@@ -52,11 +52,12 @@ async function loadActiveWorkspace(userID: number, workspace: Workspace): Promis
   const projectData = await getOrderedEntities(Entity.PROJECT, 'workspaceID', workspace.id, ['lastEditedAt'])
   const [ownedProjectIDs] = await getAccessibleObjectIDs(userID, 'project')
   const projects = projectData.map(project => toProject(project, userID, ownedProjectIDs.includes(getID(project))))
-  const [users, pendingUsers] = await getWorkspaceUsers(workspace.id)
+  const [users, pendingUsers, owners] = await getWorkspaceUsers(workspace.id)
 
   return {
     ...workspace,
     projects: [...projects.filter(project => project.favorited), ...projects.filter(project => !project.favorited)],
+    owners,
     users,
     pendingUsers,
   }
@@ -122,8 +123,8 @@ export async function updateWorkspaceName(userID: number, workspaceID: number, n
 export const getWorkspacesForUser = (userID: number): Promise<[Workspace[], PendingWorkspace[]]> =>
   getPendingAccessObjects(userID, 'workspace', Entity.WORKSPACE, toWorkspace).then(([u, p]) => [u, p])
 
-export const getWorkspaceUsers = (workspaceID: number): Promise<[User[], PendingUser[]]> =>
-  getPendingAccessObjects(workspaceID, 'workspace', Entity.USER, toUser).then(([u, p]) => [u, p])
+export const getWorkspaceUsers = (workspaceID: number): Promise<[User[], PendingUser[], User[]]> =>
+  getPendingAccessObjects(workspaceID, 'workspace', Entity.USER, toUser)
 
 export async function getPendingAccessObjects<T>(
   sourceID: number,
