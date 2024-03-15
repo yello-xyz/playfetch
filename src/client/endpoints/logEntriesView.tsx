@@ -89,8 +89,8 @@ export default function LogEntriesView({
                 logEntry={logEntry}
                 continuationCount={continuationCount(logEntry, index, entries)}
                 endpoint={endpoints.find(endpoint => endpoint.id === logEntry.endpointID)}
-                isActive={index === activeIndex}
-                setActive={() => setActiveIndex(index)}
+                isActive={logEntries.indexOf(logEntry) === activeIndex}
+                setActive={() => setActiveIndex(logEntries.indexOf(logEntry))}
               />
             )
           )}
