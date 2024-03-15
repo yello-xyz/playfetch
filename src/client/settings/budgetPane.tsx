@@ -1,31 +1,32 @@
-import { CostUsage } from '@/types'
+import { CostUsage, Scope } from '@/types'
 import Label from '@/src/client/components/label'
 import PercentagePieChart from '@/src/client/endpoints/percentagePieChart'
 import { Capitalize, FormatCost } from '@/src/common/formatting'
 import { ReactNode, RefObject, useRef, useState } from 'react'
 import api from '@/src/client/api'
-import { useLoggedInUser } from '@/src/client/users/userContext'
 
 export default function BudgetPane({
+  scope,
   scopeID,
   costUsage,
   onRefresh,
 }: {
+  scope: Scope
   scopeID: number
   costUsage: CostUsage
   onRefresh: () => Promise<any>
 }) {
-  const user = useLoggedInUser()
-  const recipient = scopeID === user.id ? 'you' : 'project owners'
+  const recipient = recipientForScope(scope)
 
   const [limit, setLimit, limitInputRef, editingLimit, editLimit, updateLimit] = useBudgetEditor(
+    scope,
     scopeID,
     costUsage,
     'limit',
     onRefresh
   )
   const [threshold, setThreshold, thresholdInputRef, editingThreshold, editThreshold, updateThreshold] =
-    useBudgetEditor(scopeID, costUsage, 'threshold', onRefresh)
+    useBudgetEditor(scope, scopeID, costUsage, 'threshold', onRefresh)
 
   return (
     <>
@@ -81,7 +82,19 @@ export default function BudgetPane({
   )
 }
 
+const recipientForScope = (scope: 'workspace' | 'project' | 'user') => {
+  switch (scope) {
+    case 'workspace':
+      return 'workspace owners'
+    case 'project':
+      return 'project owners'
+    case 'user':
+      return 'you'
+  }
+}
+
 const useBudgetEditor = (
+  scope: string,
   scopeID: number,
   costUsage: CostUsage,
   fieldToEdit: 'limit' | 'threshold',
@@ -101,6 +114,7 @@ const useBudgetEditor = (
   const update = () =>
     api
       .updateBudget(
+        scope,
         scopeID,
         isThreshold ? costUsage.limit ?? undefined : updateValue,
         isThreshold ? updateValue : costUsage.threshold ?? undefined

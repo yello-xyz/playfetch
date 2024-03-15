@@ -24,6 +24,7 @@ export type PendingWorkspace = Workspace & PendingAttributes
 
 export type ActiveWorkspace = Workspace & {
   projects: Project[]
+  owners: User[]
   users: User[]
   pendingUsers: PendingUser[]
 }
@@ -133,6 +134,8 @@ export type CustomModel = {
   description: string
   enabled: boolean
 }
+
+export type Scope = 'user' | 'project' | 'workspace'
 
 export type AvailableModelProvider = {
   provider: ModelProvider
@@ -373,6 +376,7 @@ export type CostUsage = {
 
 export type Analytics = {
   recentLogEntries: LogEntry[]
+  logEntryCursors: (string | null)[]
   recentUsage: Usage[]
   aggregatePreviousUsage: Usage
 }

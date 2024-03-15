@@ -18,6 +18,7 @@ export default function WorkspaceTopBar({
   onAddProject,
   onInviteMembers,
   onRenamed,
+  onShowSettings,
   onDeleted,
 }: {
   activeWorkspace: ActiveWorkspace | PendingWorkspace
@@ -26,6 +27,7 @@ export default function WorkspaceTopBar({
   onAddProject?: () => Promise<void>
   onInviteMembers?: (emails: string[]) => void
   onRenamed?: () => void
+  onShowSettings?: () => void
   onDeleted?: () => void
 }) {
   const [isMenuExpanded, setMenuExpanded] = useState(false)
@@ -41,7 +43,7 @@ export default function WorkspaceTopBar({
         {hasIcon && <Icon icon={isUserWorkspace ? fileIcon : folderIcon} />}
         <div className='flex items-center gap-0'>
           <span className='text-lg font-medium leading-8 text-gray-700'>{activeWorkspace.name}</span>
-          {hasPopupMenu && onRenamed && onDeleted && (
+          {hasPopupMenu && onRenamed && onShowSettings && onDeleted && (
             <>
               <Icon icon={chevronIcon} />
               <div className='absolute shadow-sm -left-1 top-10'>
@@ -50,6 +52,7 @@ export default function WorkspaceTopBar({
                   isMenuExpanded={isMenuExpanded}
                   setMenuExpanded={setMenuExpanded}
                   onRenamed={onRenamed}
+                  onShowSettings={onShowSettings}
                   onDeleted={onDeleted}
                 />
               </div>

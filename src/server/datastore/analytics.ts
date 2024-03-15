@@ -12,8 +12,9 @@ import {
 import { Analytics, Usage } from '@/types'
 import { ensureProjectAccess } from './projects'
 import { toUsage } from './usage'
-import { getLogEntriesForProject } from './logs'
+import { getTrustedLogEntriesForProject } from './logs'
 import { DaysAgo } from '@/src/common/formatting'
+import { encrypt, decrypt } from '@/src/server/encryption'
 
 export async function migrateAnalytics(postMerge: boolean) {
   if (postMerge) {
@@ -44,13 +45,15 @@ export async function getAnalyticsForProject(
   userID: number,
   projectID: number,
   trusted = false,
-  dayRange = 30
+  dayRange = 30,
+  logEntryCursors: string[] = []
 ): Promise<Analytics> {
   if (!trusted) {
     await ensureProjectAccess(userID, projectID)
   }
 
-  const recentLogEntries = await getLogEntriesForProject(userID, projectID, true)
+  const logEntryCursor = logEntryCursors.length > 0 ? decrypt(logEntryCursors.slice(-1)[0]) : undefined
+  const [recentLogEntries, cursor] = await getTrustedLogEntriesForProject(projectID, logEntryCursor)
   const analyticsData = await getOrderedEntities(Entity.ANALYTICS, 'projectID', projectID, ['createdAt'], 2 * dayRange)
 
   const today = new Date()
@@ -74,8 +77,8 @@ export async function getAnalyticsForProject(
   const recentUsage = recentDays.map(day => usageMap[day.getTime()] ?? emptyUsage)
 
   const cutoff = DaysAgo(today, 2 * dayRange - 1)
-  const previous30Days = analyticsData.filter(usage => usage.createdAt >= cutoff && usage.createdAt < recentDays[0])
-  const aggregatePreviousUsage = previous30Days.reduce(
+  const previousRangeDays = analyticsData.filter(usage => usage.createdAt >= cutoff && usage.createdAt < recentDays[0])
+  const aggregatePreviousUsage = previousRangeDays.reduce(
     (acc, usage) => ({
       requests: acc.requests + usage.requests,
       cost: acc.cost + usage.cost,
@@ -88,7 +91,12 @@ export async function getAnalyticsForProject(
     emptyUsage
   )
 
-  return { recentLogEntries, recentUsage, aggregatePreviousUsage }
+  return {
+    recentLogEntries,
+    logEntryCursors: [...logEntryCursors, cursor ? encrypt(cursor) : null],
+    recentUsage,
+    aggregatePreviousUsage,
+  }
 }
 
 export async function updateAnalytics(

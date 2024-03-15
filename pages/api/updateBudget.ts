@@ -8,7 +8,7 @@ async function updateBudget(req: NextApiRequest, res: NextApiResponse, user: Use
   const scopeID = req.body.scopeID
   const limit = req.body.limit
   const threshold = req.body.threshold
-  logUserRequest(req, res, user.id, BudgetEvent(scopeID === user.id ? 'user' : 'project', scopeID, limit ?? 0))
+  logUserRequest(req, res, user.id, BudgetEvent(req.body.scope, scopeID, limit ?? 0))
   await updateBudgetForScope(user.id, scopeID, limit ?? null, threshold ?? null)
   res.json({})
 }

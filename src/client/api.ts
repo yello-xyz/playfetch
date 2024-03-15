@@ -89,8 +89,11 @@ const api = {
   deleteWorkspace: function (workspaceID: number) {
     return post(this.deleteWorkspace, { workspaceID })
   },
-  leaveWorkspace: function (workspaceID: number) {
-    return post(this.leaveWorkspace, { workspaceID })
+  revokeWorkspaceAccess: function (workspaceID: number, memberID?: number) {
+    return post(this.revokeWorkspaceAccess, { workspaceID, memberID })
+  },
+  toggleWorkspaceOwnership: function (workspaceID: number, memberID: number, isOwner: boolean) {
+    return post(this.toggleWorkspaceOwnership, { workspaceID, memberID, isOwner })
   },
   inviteToWorkspace: function (workspaceID: number, emails: string[]) {
     return post(this.inviteToWorkspace, { workspaceID, emails })
@@ -281,14 +284,14 @@ const api = {
   deleteEndpoint: function (endpointID: number) {
     return post(this.deleteEndpoint, { endpointID })
   },
-  getAnalytics: function (projectID: number, dayRange = 30): Promise<Analytics> {
-    return post(this.getAnalytics, { projectID, dayRange })
+  getAnalytics: function (projectID: number, dayRange = 30, logEntryCursors: string[] = []): Promise<Analytics> {
+    return post(this.getAnalytics, { projectID, dayRange, logEntryCursors })
   },
   getCostUsage: function (scopeID: number): Promise<CostUsage> {
     return post(this.getCostUsage, { scopeID })
   },
-  updateBudget: function (scopeID: number, limit?: number, threshold?: number) {
-    return post(this.updateBudget, { scopeID, limit, threshold })
+  updateBudget: function (scope: string, scopeID: number, limit?: number, threshold?: number) {
+    return post(this.updateBudget, { scope, scopeID, limit, threshold })
   },
   addComment: function (
     versionID: number,
@@ -331,8 +334,8 @@ const api = {
   updateLayoutConfig: function (layoutConfig: Partial<LayoutConfig>) {
     return post(this.updateLayoutConfig, { layoutConfig })
   },
-  getAvailableProviders: function (projectID: number): Promise<AvailableProvider[]> {
-    return post(this.getAvailableProviders, { projectID })
+  getAvailableProviders: function (projectID: number, workspaceID: number): Promise<AvailableProvider[]> {
+    return post(this.getAvailableProviders, { projectID, workspaceID })
   },
   getScopedProviders: function (projectID?: number): Promise<AvailableProvider[]> {
     return post(this.getScopedProviders, { projectID })

@@ -8,7 +8,6 @@ import {
   PromptVersion,
   ChainVersion,
   Analytics,
-  LogEntry,
 } from '@/types'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
@@ -17,7 +16,7 @@ import EndpointsTable from './endpointsTable'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
 import TabsHeader, { SingleTabHeader } from '@/src/client/components/tabsHeader'
-import LogEntriesView from './logEntriesView'
+import LogEntriesView, { sameContinuationEntries } from './logEntriesView'
 import LogEntryDetailsPane from './logEntryDetailsPane'
 import IconButton from '@/src/client/components/iconButton'
 import collapseIcon from '@/public/collapse.svg'
@@ -46,7 +45,7 @@ export default function EndpointsView({
   refreshAnalytics,
 }: {
   analytics?: Analytics
-  refreshAnalytics: (dayRange: number) => void
+  refreshAnalytics: (dayRange?: number, cursors?: string[]) => void
 }) {
   const router = useRouter()
   const { l: showLogs, p: newParentID, v: newVersionID } = ParseNumberQuery(router.query)
@@ -166,6 +165,16 @@ export default function EndpointsView({
         : []
     : []
 
+  const fetchNextLogEntriesPage =
+    analytics && analytics.logEntryCursors.length > 0 && analytics.logEntryCursors.slice(-1)[0] !== null
+      ? () => refreshAnalytics(undefined, analytics.logEntryCursors as string[])
+      : undefined
+
+  const fetchPreviousLogEntriesPage =
+    analytics && analytics.logEntryCursors.length > 1
+      ? () => refreshAnalytics(undefined, analytics.logEntryCursors.slice(0, -2) as string[])
+      : undefined
+
   const minWidth = 460
   const maxWidth = 680
   const isEditingClass = isEditing ? 'pl-2' : ''
@@ -233,6 +242,8 @@ export default function EndpointsView({
               endpoints={endpoints}
               activeIndex={activeLogEntryIndex}
               setActiveIndex={updateActiveLogEntryIndex}
+              onNextPage={fetchNextLogEntriesPage}
+              onPreviousPage={fetchPreviousLogEntriesPage}
             />
           </div>
         </Allotment.Pane>
@@ -250,9 +261,6 @@ export default function EndpointsView({
     </Allotment>
   )
 }
-
-const sameContinuationEntries = (entry: LogEntry, entries: LogEntry[]) =>
-  entry.continuationID ? entries.filter(logEntry => logEntry.continuationID === entry.continuationID) : [entry]
 
 function SettingsPaneHeader({
   label,

@@ -7,7 +7,6 @@ import TextInput from '@/src/client/components/textInput'
 import { useSourceControlProvider } from '@/src/client/settings/providerContext'
 import Link from 'next/link'
 import DropdownMenu from '@/src/client/components/dropdownMenu'
-import { useRefreshProject } from '@/src/client/projects/projectContext'
 import { useLoggedInUser } from '@/src/client/users/userContext'
 import AppSettings from './appSettings'
 
@@ -16,11 +15,13 @@ export default function GitHubSettings({
   scopeID,
   provider,
   onRefresh,
+  onRefreshProject,
 }: {
   activeProject?: ActiveProject
   scopeID: number
   provider?: AvailableProvider
   onRefresh: () => void
+  onRefreshProject?: () => void
 }) {
   const user = useLoggedInUser()
   const availableProvider = useSourceControlProvider()
@@ -35,8 +36,6 @@ export default function GitHubSettings({
   const [repository, setRepository] = useState(scopedRepository || repositories[0])
   const [rootDirectory, setRootDirectory] = useState(scopedRootDirectory)
 
-  const refreshProject = useRefreshProject()
-
   const [isProcessing, setProcessing] = useState(false)
 
   const setDialogPrompt = useModalDialogPrompt()
@@ -47,7 +46,7 @@ export default function GitHubSettings({
         'This will look for compatible YAML files in the GitHub repository and import them in the project, either as new prompts, or as new versions of previously imported & exported prompts if changes are detected.',
       callback: async () => {
         setProcessing(true)
-        await api.importPrompts(scopeID).then(refreshProject)
+        await api.importPrompts(scopeID).then(onRefreshProject)
         setProcessing(false)
       },
     })

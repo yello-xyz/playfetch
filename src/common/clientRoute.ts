@@ -81,10 +81,19 @@ export const ParseActiveItemQuery = (query: any, project: ActiveProject) => {
 }
 
 export const UserSettingsRoute = (activePane: ActiveSettingsPane = ProvidersPane) =>
-  `${ClientRoute.Settings}${activePane !== ProvidersPane ? `?t=${paneToShortString[activePane]}` : ''}`
+  `${ClientRoute.Settings}${activePaneSuffix(activePane, false)}`
 
 export const ProjectSettingsRoute = (projectID: number, activePane: ActiveSettingsPane = ProvidersPane) =>
-  `${ProjectRoute(projectID)}?s=1${activePane !== ProvidersPane ? `&t=${paneToShortString[activePane]}` : ''}`
+  `${ProjectRoute(projectID)}?s=1${activePaneSuffix(activePane)}`
+
+export const WorkspaceSettingsRoute = (
+  workspaceID: number,
+  userID: number,
+  activePane: ActiveSettingsPane = ProvidersPane
+) => `${WorkspaceRoute(workspaceID, userID)}&s=1${activePaneSuffix(activePane)}`
+
+const activePaneSuffix = (activePane: ActiveSettingsPane, append = true) =>
+  activePane !== ProvidersPane ? `${append ? '&' : '?'}t=${paneToShortString[activePane]}` : ''
 
 export const ParseActiveSettingsPaneQuery = (query: any): ActiveSettingsPane => {
   const { t: activeTab } = ParseQuery(query)

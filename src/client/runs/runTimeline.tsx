@@ -78,7 +78,8 @@ export default function RunTimeline({
   const [filters, setFilters] = useState<Filter[]>([])
 
   const inputMap = BuildInputMap(inputs, runSortOption ?? sortOption)
-  const mergedRuns = MergeRuns(SortRuns(runs)).filter(BuildRunFilter(runFilters ?? filters))
+  const runFilter = BuildRunFilter(runFilters ?? filters)
+  const mergedRuns = MergeRuns(SortRuns(runs)).filter(runFilter)
 
   const lastPartialRunID = mergedRuns.filter(run => !('inputs' in run)).slice(-1)[0]?.id
   const [previousLastRunID, setPreviousLastRunID] = useState(lastPartialRunID)

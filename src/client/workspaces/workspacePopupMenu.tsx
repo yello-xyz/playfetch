@@ -10,12 +10,14 @@ export default function WorkspacePopupMenu({
   isMenuExpanded,
   setMenuExpanded,
   onRenamed,
+  onShowSettings,
   onDeleted,
 }: {
   workspace: ActiveWorkspace
   isMenuExpanded: boolean
   setMenuExpanded: (isExpanded: boolean) => void
   onRenamed: () => void
+  onShowSettings: () => void
   onDeleted: () => void
 }) {
   const setDialogPrompt = useModalDialogPrompt()
@@ -46,14 +48,31 @@ export default function WorkspacePopupMenu({
     })
   }
 
+  const isOwner = workspace.owners.length > 0
+  const canLeave = !isOwner || workspace.owners.length > 1
+
   return (
     <>
       <PopupMenu className='w-48' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
         <PopupMenuItem title='Rename Workspace…' callback={withDismiss(() => setShowPickNamePrompt(true))} first />
-        {workspace.users.length === 1 ? (
-          <PopupMenuItem separated destructive title='Delete Workspace' callback={withDismiss(promptDelete)} last />
-        ) : (
-          <PopupMenuItem separated destructive title='Leave Workspace' callback={withDismiss(promptLeave)} last />
+        {isOwner && <PopupMenuItem title='Settings' callback={withDismiss(onShowSettings)} />}
+        {canLeave && (
+          <PopupMenuItem
+            separated
+            destructive
+            title='Leave Workspace'
+            callback={withDismiss(promptLeave)}
+            last={!isOwner}
+          />
+        )}
+        {isOwner && (
+          <PopupMenuItem
+            separated={!canLeave}
+            destructive
+            title='Delete Workspace'
+            callback={withDismiss(promptDelete)}
+            last
+          />
         )}
       </PopupMenu>
       {showPickNamePrompt && (

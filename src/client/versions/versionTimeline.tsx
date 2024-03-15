@@ -15,6 +15,7 @@ const FilterItemFromVersion = <Version extends PromptVersion | ChainVersion>(
 ): FilterItem => ({
   userIDs: [version.userID],
   labels: version.labels,
+  statuses: [],
   contents: IsPromptVersion(version)
     ? FilterContentsForPromptVersion(version)
     : itemCache

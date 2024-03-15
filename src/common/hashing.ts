@@ -1,3 +1,5 @@
+export const SaltValue = (value: number | bigint, salt: number | bigint) => BigInt(value) ^ BigInt(salt)
+
 const HashValue = (value: string, seed = 0) => {
   let h1 = 0xdeadbeef ^ seed,
     h2 = 0x41c6ce57 ^ seed

@@ -1,7 +1,7 @@
 import { DefaultProvider } from '@/src/common/defaults'
 import { ModelProviders, QueryProviders } from '@/src/common/providerMetadata'
 import ProviderSettings from './providerSettings'
-import { ActiveProject, AvailableProvider, CostUsage, IsModelProvider } from '@/types'
+import { ActiveProject, ActiveWorkspace, AvailableProvider, CostUsage, IsModelProvider, Scope } from '@/types'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import SettingsPane from './settingsPane'
 import api from '@/src/client/api'
@@ -9,7 +9,12 @@ import UsageSettings from './usageSettings'
 import { useLoggedInUser } from '@/src/client/users/userContext'
 import SettingsSidebar from './settingsSidebar'
 import TeamSettings from './teamSettings'
-import { ParseActiveSettingsPaneQuery, ProjectSettingsRoute, UserSettingsRoute } from '@/src/common/clientRoute'
+import {
+  ParseActiveSettingsPaneQuery,
+  ProjectSettingsRoute,
+  UserSettingsRoute,
+  WorkspaceSettingsRoute,
+} from '@/src/common/clientRoute'
 import { useRouter } from 'next/router'
 import GitHubSettings from './githubSettings'
 import LinearSettings from './linearSettings'
@@ -28,15 +33,22 @@ import {
 
 export default function SettingsView({
   providers,
+  refreshProviders,
+  activeWorkspace,
   activeProject,
-  refresh,
+  refreshWorkspace,
+  refreshProject,
 }: {
   providers: AvailableProvider[]
+  refreshProviders: () => void
+  activeWorkspace?: ActiveWorkspace
   activeProject?: ActiveProject
-  refresh: () => void
+  refreshWorkspace?: () => void
+  refreshProject?: () => void
 }) {
   const user = useLoggedInUser()
-  const scopeID = activeProject?.id ?? user.id
+  const scope: Scope = activeWorkspace ? 'workspace' : activeProject ? 'project' : 'user'
+  const scopeID = activeWorkspace?.id ?? activeProject?.id ?? user.id
 
   const router = useRouter()
   const activePaneFromQuery = ParseActiveSettingsPaneQuery(router.query)
@@ -48,9 +60,17 @@ export default function SettingsView({
 
   const updateActivePane = (pane: ActiveSettingsPane) => {
     if (pane !== activePane) {
-      router.push(activeProject ? ProjectSettingsRoute(scopeID, pane) : UserSettingsRoute(pane), undefined, {
-        shallow: true,
-      })
+      router.push(
+        activeWorkspace
+          ? WorkspaceSettingsRoute(scopeID, user.id, pane)
+          : activeProject
+            ? ProjectSettingsRoute(scopeID, pane)
+            : UserSettingsRoute(pane),
+        undefined,
+        {
+          shallow: true,
+        }
+      )
       setActivePane(pane)
     }
   }
@@ -75,13 +95,16 @@ export default function SettingsView({
   const availablePanes = [
     ProvidersPane,
     UsagePane,
-    ...(activeProject ? [TeamPane] : []),
+    ...(activeWorkspace || activeProject ? [TeamPane] : []),
     ConnectorsPane,
-    SourceControlPane,
-    IssueTrackerPane,
+    ...(activeWorkspace ? [] : [SourceControlPane]),
+    ...(activeWorkspace ? [] : [IssueTrackerPane]),
   ]
 
-  return !activeProject || activeProject.isOwner ? (
+  const activeItem = activeWorkspace ?? activeProject
+  const refreshItem = refreshWorkspace ?? refreshProject
+
+  return activeWorkspace?.owners?.length || activeProject?.isOwner || (!activeWorkspace && !activeProject) ? (
     <div className='flex h-full gap-10 p-8 overflow-hidden bg-gray-25'>
       <SettingsSidebar
         panes={availablePanes as ActiveSettingsPane[]}
@@ -92,32 +115,35 @@ export default function SettingsView({
       <div className='flex flex-col items-start flex-1 gap-3 text-gray-500 max-w-[680px] overflow-y-auto'>
         <SettingsPane
           title={TitleForSettingsPane(activePane)}
-          description={DescriptionForSettingsPane(activePane, !!activeProject)}
-          scopeDescription={ScopeDescriptionForSettingsPane(activePane, !!activeProject)}>
+          description={DescriptionForSettingsPane(activePane, scope)}
+          scopeDescription={ScopeDescriptionForSettingsPane(activePane, scope)}>
           {activePane === ProvidersPane && (
             <ProviderSettings
               scopeID={scopeID}
               providers={allModelProviders}
               availableProviders={availableModelProviders}
-              onRefresh={refresh}
+              onRefresh={refreshProviders}
             />
           )}
           {activePane === UsagePane && !!costUsage && (
             <UsageSettings
+              scope={scope}
               scopeID={scopeID}
               costUsage={costUsage}
               availableProviders={availableModelProviders}
               onRefresh={refreshUsage}
             />
           )}
-          {activePane === TeamPane && <TeamSettings />}
+          {activePane === TeamPane && activeItem && refreshItem && (
+            <TeamSettings activeItem={activeItem} refreshItem={refreshItem} />
+          )}
           {activePane === ConnectorsPane && (
             <ProviderSettings
               scopeID={scopeID}
               providers={QueryProviders}
               availableProviders={availableQueryProviders}
               includeEnvironment
-              onRefresh={refresh}
+              onRefresh={refreshProviders}
             />
           )}
           {activePane === SourceControlPane && (
@@ -125,7 +151,8 @@ export default function SettingsView({
               activeProject={activeProject}
               scopeID={scopeID}
               provider={providers.find(provider => provider.provider === 'github')}
-              onRefresh={refresh}
+              onRefresh={refreshProviders}
+              onRefreshProject={refreshProject}
             />
           )}
           {activePane === IssueTrackerPane && (
@@ -133,7 +160,7 @@ export default function SettingsView({
               activeProject={activeProject}
               scopeID={scopeID}
               provider={providers.find(provider => provider.provider === 'linear')}
-              onRefresh={refresh}
+              onRefresh={refreshProviders}
             />
           )}
         </SettingsPane>

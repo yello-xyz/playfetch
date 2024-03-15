@@ -1,7 +1,7 @@
 import { ParseQuery } from '@/src/common/clientRoute'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getActiveEndpointFromPath } from '@/src/server/datastore/endpoints'
-import { checkProject } from '@/src/server/datastore/projects'
+import { tryGetVerifiedAPIProjectWorkspaceID } from '@/src/server/datastore/projects'
 import { updateUsage } from '@/src/server/datastore/usage'
 import { Endpoint, PromptInputs } from '@/types'
 import { loadConfigsFromVersion } from '../runVersion'
@@ -14,6 +14,7 @@ import { EndpointEvent, getClientID, logUnknownUserEvent } from '@/src/server/an
 import { updateAnalytics } from '@/src/server/datastore/analytics'
 import { DefaultChatContinuationInputKey } from '@/src/common/formatting'
 import { detectRequestClosed } from '../cancelRun'
+import { SaltValue } from '@/src/common/hashing'
 
 const logResponse = (
   clientID: string,
@@ -77,12 +78,13 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
   const projectID = Number(projectIDFromPath)
 
   if (projectID && endpointName) {
-    const apiKey = req.headers['x-api-key'] as string
+    const apiKey = req.headers['x-api-key'] as string | undefined
     const flavor = req.headers['x-environment'] as string | undefined
     const continuationHeaderKey = 'x-continuation-key'
     const continuationKey = req.headers['x-continuation-key'] as string | undefined
 
-    if (apiKey && (await checkProject(projectID, apiKey))) {
+    const verifiedWorkspaceID = apiKey ? await tryGetVerifiedAPIProjectWorkspaceID(apiKey, projectID) : undefined
+    if (verifiedWorkspaceID) {
       const endpoint = await getActiveEndpointFromPath(projectID, endpointName, flavor)
       if (endpoint && endpoint.enabled) {
         const clientID = getClientID(req, res)
@@ -93,7 +95,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           res.setHeader('Content-Type', 'application/json')
         }
 
-        const salt = (value: number | bigint) => BigInt(value) ^ BigInt(endpoint.id)
+        const salt = (value: number | bigint) => SaltValue(value, endpoint.id)
         const continuationID = continuationKey ? Number(salt(BigInt(continuationKey))) : undefined
         const versionID = endpoint.versionID
         const inputs =
@@ -123,6 +125,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           const abortController = detectRequestClosed(req)
           response = await runChain(
             endpoint.userID,
+            verifiedWorkspaceID,
             projectID,
             version,
             configs,

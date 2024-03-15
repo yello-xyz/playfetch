@@ -42,7 +42,11 @@ export default async function loadActiveItem(user: User, query: ParsedUrlQuery) 
               ? await getTableForUser(user.id, tableID).then(BuildActiveTable)
               : null
 
-  const initialAvailableProviders = await loadAvailableProviders([projectID!, user.id])
+  const initialAvailableProviders = await loadAvailableProviders([
+    initialActiveProject.id,
+    initialActiveProject.workspaceID,
+    user.id,
+  ])
   const initialScopedProviders = await loadScopedProviders(projectID!)
   const initialUserPresets = await getPresetsForUser(user.id)
 
@@ -81,5 +85,6 @@ const analyticsFromQuery = (query: ParsedUrlQuery, endpoints: ResolvedEndpoint[]
       urlPath: endpoints[entry.endpointID].urlPath,
       timestamp: new Date(entry.timestamp).getTime(),
     })),
+    logEntryCursors: [null],
   }
 }

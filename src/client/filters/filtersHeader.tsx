@@ -7,6 +7,7 @@ import FilterCells from './filterCells'
 export default function FiltersHeader<SortOption extends string>({
   users,
   labelColors,
+  colorForStatus,
   items,
   filters,
   setFilters,
@@ -15,9 +16,10 @@ export default function FiltersHeader<SortOption extends string>({
   setActiveSortOption,
   tabSelector,
 }: {
-  users: User[]
-  labelColors: Record<string, string>
-  items: FilterItem[]
+  users?: User[]
+  labelColors?: Record<string, string>
+  colorForStatus?: (status: string) => string
+  items?: FilterItem[]
   filters: Filter[]
   setFilters: (filters: Filter[]) => void
   sortOptions?: SortOption[]
@@ -31,6 +33,7 @@ export default function FiltersHeader<SortOption extends string>({
         <FiltersButton
           users={users}
           labelColors={labelColors}
+          colorForStatus={colorForStatus}
           items={items}
           filters={filters}
           setFilters={setFilters}
@@ -40,8 +43,9 @@ export default function FiltersHeader<SortOption extends string>({
         />
       )}
       <FilterCells
-        users={users}
-        labelColors={labelColors}
+        users={users ?? []}
+        labelColors={labelColors ?? {}}
+        colorForStatus={colorForStatus ?? (() => '')}
         filters={filters}
         setFilters={setFilters}
         sortOptions={sortOptions}

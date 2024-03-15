@@ -13,8 +13,8 @@ export default function AdminSidebar({
   onSelectWaitlist: () => void
   onSelectActiveUsers: () => void
   onSelectRecentProjects: () => void
-  analyticsLinks: [string, string]
-  debugLinks: [string, string]
+  analyticsLinks: string[][]
+  debugLinks: string[][]
 }) {
   return (
     <>

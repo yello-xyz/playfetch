@@ -12,6 +12,7 @@ import { EmptyRunResponse, ErrorRunResponse, RunResponse } from './runResponse'
 
 export const runQuery = async (
   userID: number,
+  workspaceID: number,
   projectID: number,
   provider: QueryProvider,
   model: EmbeddingModel,
@@ -20,7 +21,7 @@ export const runQuery = async (
   topK: number
 ): Promise<RunResponse> => {
   try {
-    const scopeIDs = [projectID, userID]
+    const scopeIDs = [projectID, workspaceID, userID]
     const { apiKey, environment } = await getProviderCredentials(scopeIDs, provider)
     if (!apiKey || !environment) {
       throw new Error('Missing vector store credentials')
@@ -42,7 +43,7 @@ export const runQuery = async (
       model,
       query
     )
-    IncrementProviderCost(scopeID, providerID, model, cost)
+    IncrementProviderCost(scopeID, projectID, userID, providerID, model, cost)
 
     const result = await runVectorQuery(apiKey, environment, indexName, embedding, topK)
 

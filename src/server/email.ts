@@ -3,9 +3,14 @@ import { readFileSync } from 'fs'
 import path from 'path'
 import { getUserForID } from './datastore/users'
 import { getProjectName } from './datastore/projects'
-import ClientRoute, { ProjectSettingsRoute, UserSettingsRoute, WorkspaceRoute } from '@/src/common/clientRoute'
-import { getWorkspaceNameForID } from './datastore/workspaces'
-import { User } from '@/types'
+import ClientRoute, {
+  ProjectSettingsRoute,
+  UserSettingsRoute,
+  WorkspaceRoute,
+  WorkspaceSettingsRoute,
+} from '@/src/common/clientRoute'
+import { getWorkspaceName } from './datastore/workspaces'
+import { Scope, User } from '@/types'
 import { Capitalize, FormatCost, FormatDate } from '@/src/common/formatting'
 import { getAccessingUserIDs } from './datastore/access'
 import buildURLForRoute from './routing'
@@ -38,42 +43,49 @@ function resolveContent(fileName: string, fileType: 'txt' | 'html', variables: {
   return content
 }
 
-export async function sendBudgetNotificationEmails(scopeID: number, limit: number, hardLimit: number | null = null) {
-  const [ownerIDs] = await getAccessingUserIDs(scopeID, 'project')
+export async function sendBudgetNotificationEmails(
+  scope: Scope,
+  scopeID: number,
+  limit: number,
+  hardLimit: number | null = null
+) {
+  const [ownerIDs] = scope === 'user' ? [[]] : await getAccessingUserIDs(scopeID, scope)
   if (ownerIDs.length > 0) {
-    const projectName = await getProjectName(scopeID)
-    const settingsRoute = ProjectSettingsRoute(scopeID, 'usage')
+    const name = scope === 'project' ? await getProjectName(scopeID) : await getWorkspaceName(scopeID)
     for (const ownerID of ownerIDs) {
-      await sendBudgetNotificationEmail(ownerID, settingsRoute, projectName, limit, hardLimit)
+      const settingsRoute =
+        scope === 'project' ? ProjectSettingsRoute(scopeID, 'usage') : WorkspaceSettingsRoute(scopeID, ownerID, 'usage')
+      await sendBudgetNotificationEmail(scope, ownerID, settingsRoute, name, limit, hardLimit)
     }
   } else {
-    await sendBudgetNotificationEmail(scopeID, UserSettingsRoute('usage'), null, limit, hardLimit)
+    await sendBudgetNotificationEmail(scope, scopeID, UserSettingsRoute('usage'), null, limit, hardLimit)
   }
 }
 
-export async function sendBudgetNotificationEmail(
+async function sendBudgetNotificationEmail(
+  scope: Scope,
   userID: number,
   settingsRoute: string,
-  projectName: string | null,
+  name: string | null,
   limit: number,
   hardLimit: number | null = null
 ) {
   const user = await getUserForID(userID)
 
   const limitName = hardLimit ? 'usage threshold' : 'usage limit'
-  const projectSuffix = projectName ? ` for project “${projectName}”` : ''
-  const plainProjectSuffix = projectSuffix.replaceAll('“', '"').replaceAll('”', '"')
-  const subject = `Monthly ${limitName} reached${plainProjectSuffix}`
+  const suffix = name ? ` for ${scope} “${name}”` : ''
+  const plainSuffix = suffix.replaceAll('“', '"').replaceAll('”', '"')
+  const subject = `Monthly ${limitName} reached${plainSuffix}`
 
   const title = `You have reached a ${limitName} on PlayFetch`
   const paragraphs = [
-    `The monthly ${limitName} of ${FormatCost(limit)} has now been reached ${projectSuffix}.`,
+    `The monthly ${limitName} of ${FormatCost(limit)} has now been reached ${suffix}.`,
     hardLimit
       ? `Requests will continue to be processed unless you reach the usage limit of ${FormatCost(hardLimit)}.`
       : `Subsequent request will not be processed until the end of the month unless you increase your limit.`,
-    `You can increase your ${limitName} in the ${projectName ? 'Project' : 'User'} Settings.`,
+    `You can increase your ${limitName} in the ${Capitalize(scope)} Settings.`,
   ]
-  const configurator = projectName ? 'a project owner' : 'you'
+  const configurator = scope === 'user' ? 'you' : `a ${scope} owner`
 
   const variables = {
     __TITLE__: title,
@@ -99,7 +111,7 @@ export async function sendInviteEmail(
   kind: 'project' | 'workspace'
 ) {
   const inviter = await getUserForID(fromUserID)
-  const objectName = kind === 'project' ? await getProjectName(objectID) : await getWorkspaceNameForID(objectID)
+  const objectName = kind === 'project' ? await getProjectName(objectID) : await getWorkspaceName(objectID)
   const inviteRoute = kind === 'project' ? ClientRoute.SharedProjects : WorkspaceRoute(objectID, 0)
 
   const variables = {

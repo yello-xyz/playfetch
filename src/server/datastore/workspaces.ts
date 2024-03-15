@@ -9,8 +9,9 @@ import {
   getOrderedEntities,
 } from './datastore'
 import { ActiveUser, ActiveWorkspace, PendingUser, PendingWorkspace, User, Workspace, WorkspaceMetrics } from '@/types'
-import { getRecentProjects, toProject } from './projects'
+import { filterObjects, getRecentProjects, toProject } from './projects'
 import {
+  checkUserOwnership,
   getAccessibleObjectIDs,
   getAccessingUserIDs,
   grantUserAccess,
@@ -52,11 +53,14 @@ async function loadActiveWorkspace(userID: number, workspace: Workspace): Promis
   const projectData = await getOrderedEntities(Entity.PROJECT, 'workspaceID', workspace.id, ['lastEditedAt'])
   const [ownedProjectIDs] = await getAccessibleObjectIDs(userID, 'project')
   const projects = projectData.map(project => toProject(project, userID, ownedProjectIDs.includes(getID(project))))
-  const [users, pendingUsers] = await getWorkspaceUsers(workspace.id)
+  const [users, pendingUsers, owners] = await getWorkspaceUsers(workspace.id)
+
+  const owner = owners.find(user => user.id === userID)
 
   return {
     ...workspace,
     projects: [...projects.filter(project => project.favorited), ...projects.filter(project => !project.favorited)],
+    owners: owner ? [owner, ...filterObjects(owners, [owner])] : [],
     users,
     pendingUsers,
   }
@@ -84,8 +88,23 @@ export async function inviteMembersToWorkspace(userID: number, workspaceID: numb
   await grantUsersAccess(userID, emails, workspaceID, 'workspace')
 }
 
-export async function revokeMemberAccessForWorkspace(userID: number, workspaceID: number) {
-  await revokeUserAccess(userID, workspaceID)
+export async function revokeMemberAccessForWorkspace(userID: number, memberID: number, workspaceID: number) {
+  if (userID !== memberID) {
+    await ensureWorkspaceOwnership(userID, workspaceID)
+  }
+  await revokeUserAccess(memberID, workspaceID)
+}
+
+export async function toggleOwnershipForWorkspace(
+  userID: number,
+  memberID: number,
+  workspaceID: number,
+  isOwner: boolean
+) {
+  if (userID !== memberID) {
+    await ensureWorkspaceOwnership(userID, workspaceID)
+    await grantUserAccess(userID, memberID, workspaceID, 'workspace', isOwner ? 'owner' : 'default')
+  }
 }
 
 async function updateWorkspace(workspaceData: any) {
@@ -108,8 +127,7 @@ const getVerifiedUserWorkspaceData = async (userID: number, workspaceID: number)
 
 const getTrustedWorkspaceData = async (workspaceID: number) => getKeyedEntity(Entity.WORKSPACE, workspaceID)
 
-export const getWorkspaceNameForID = (workspaceID: number) =>
-  getTrustedWorkspaceData(workspaceID).then(data => data.name)
+export const getWorkspaceName = (workspaceID: number) => getTrustedWorkspaceData(workspaceID).then(data => data.name)
 
 export async function updateWorkspaceName(userID: number, workspaceID: number, name: string) {
   if (workspaceID === userID) {
@@ -122,8 +140,12 @@ export async function updateWorkspaceName(userID: number, workspaceID: number, n
 export const getWorkspacesForUser = (userID: number): Promise<[Workspace[], PendingWorkspace[]]> =>
   getPendingAccessObjects(userID, 'workspace', Entity.WORKSPACE, toWorkspace).then(([u, p]) => [u, p])
 
-export const getWorkspaceUsers = (workspaceID: number): Promise<[User[], PendingUser[]]> =>
-  getPendingAccessObjects(workspaceID, 'workspace', Entity.USER, toUser).then(([u, p]) => [u, p])
+export const getWorkspaceUsers = (workspaceID: number): Promise<[User[], PendingUser[], User[]]> =>
+  getPendingAccessObjects(workspaceID, 'workspace', Entity.USER, toUser).then(([users, pendingUsers, owners]) => [
+    [...owners, ...filterObjects(users, owners)],
+    pendingUsers,
+    owners,
+  ])
 
 export async function getPendingAccessObjects<T>(
   sourceID: number,
@@ -176,14 +198,12 @@ export async function getPendingAccessObjects<T>(
   ]
 }
 
+const ensureWorkspaceOwnership = (userID: number, workspaceID: number) => checkUserOwnership(userID, workspaceID)
+
 export async function deleteWorkspaceForUser(userID: number, workspaceID: number) {
-  await ensureWorkspaceAccess(userID, workspaceID)
+  await ensureWorkspaceOwnership(userID, workspaceID)
   if (workspaceID === userID) {
     throw new Error('Cannot delete Drafts workspace')
-  }
-  const [users] = await getWorkspaceUsers(workspaceID)
-  if (users.some(user => user.id !== userID)) {
-    throw new Error('Cannot delete multi-user workspace')
   }
   const projectKeys = await getEntityKeys(Entity.PROJECT, 'workspaceID', workspaceID, 1000)
   await deleteEntities([buildKey(Entity.WORKSPACE, workspaceID), ...projectKeys])

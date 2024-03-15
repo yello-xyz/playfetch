@@ -1,3 +1,4 @@
+import { Scope } from '@/types'
 import ActiveSettingsPane from './settingsPane'
 import { Capitalize } from '@/src/common/formatting'
 
@@ -33,50 +34,52 @@ export const TitleForSettingsPane = (pane: ActiveSettingsPane) => {
   }
 }
 
-export const DescriptionForSettingsPane = (pane: ActiveSettingsPane, isProjectScope: boolean) => {
+export const DescriptionForSettingsPane = (pane: ActiveSettingsPane, scope: Scope) => {
   switch (pane) {
     case ProvidersPane:
       return (
         'Provide your API credentials here to enable integration with LLM providers' +
-        (isProjectScope ? ' within this project. ' : '. ') +
+        (scope === 'user' ? '. ' : ` within this ${scope}. `) +
         'To get started, you’ll need to sign up for an account and get an API key from them. ' +
         'All API keys are encrypted and stored securely.'
       )
     case UsagePane:
       return (
         'Limit your API expenditure by setting a monthly spending limit' +
-        (isProjectScope
-          ? ' for providers configured in this project. '
-          : ' for providers that are not configured within the scope of a project. ') +
-        (isProjectScope ? 'Notification emails will be dispatched to project members with the “Owner” role. ' : '') +
+        (scope === 'user'
+          ? ' for providers that are not configured within the scope of a workspace or project. '
+          : ` for providers configured in this ${scope}. `) +
+        (scope === 'user' ? '' : `Notification emails will be dispatched to ${scope} members with the “Owner” role. `) +
         'Please be aware that you remain accountable for any exceeding costs in case of delays in enforcing the limits.'
       )
     case TeamPane:
-      return 'Manage who has access to this project, change role assignments or remove members.'
+      return `Manage who has access to this ${scope}, change role assignments or remove members.`
     case ConnectorsPane:
       return (
         'Provide your API credentials here to enable integration with vector stores' +
-        (isProjectScope ? ' within this project. ' : '. ') +
+        (scope === 'user' ? '. ' : ` within this ${scope}. `) +
         'All API keys are encrypted and stored securely.'
       )
     case SourceControlPane:
-      return 'Synchronise prompt files between your PlayFetch project and your source control system.'
+      return `Synchronise prompt files between your PlayFetch ${scope} and your source control system.`
     case IssueTrackerPane:
       return 'Integrate PlayFetch with your issue tracking system.'
   }
 }
 
-const projectScopeDescription = (targetType: 'providers' | 'connectors') =>
+const scopeDescription = (targetType: 'providers' | 'connectors', scope: Scope) =>
   `${Capitalize(
     targetType
-  )} configured here will be available to anyone with project access to be used within the context of this project only. Project members can still use their own API keys within this project for ${targetType} that are not configured here.`
+  )} configured here will be available to anyone with ${scope} access to be used within the context of this ${scope} only. ${Capitalize(
+    scope
+  )} members can still use their own API keys within this ${scope} for ${targetType} that are not configured here.`
 
-export const ScopeDescriptionForSettingsPane = (pane: ActiveSettingsPane, isProjectScope: boolean) => {
+export const ScopeDescriptionForSettingsPane = (pane: ActiveSettingsPane, scope: Scope) => {
   switch (pane) {
     case ProvidersPane:
-      return isProjectScope ? projectScopeDescription('providers') : undefined
+      return scope === 'user' ? undefined : scopeDescription('providers', scope)
     case ConnectorsPane:
-      return isProjectScope ? projectScopeDescription('connectors') : undefined
+      return scope === 'user' ? undefined : scopeDescription('connectors', scope)
     case UsagePane:
     case TeamPane:
     case SourceControlPane:

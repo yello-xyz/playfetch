@@ -13,10 +13,11 @@ import {
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 import runChain from '@/src/server/evaluationEngine/chainEngine'
 import logUserRequest, { RunEvent } from '@/src/server/analytics'
-import { getVerifiedUserPromptOrChainData } from '@/src/server/datastore/chains'
+import { getTrustedPromptOrChainData } from '@/src/server/datastore/chains'
 import { generateAutoResponse, predictRatingForRun } from '@/src/server/providers/playfetch'
 import { TimedRunResponse } from '@/src/server/evaluationEngine/runResponse'
 import { detectRequestClosed } from './cancelRun'
+import { getVerifiedUserProjectWorkspaceID } from '@/src/server/datastore/projects'
 
 export const loadConfigsFromVersion = (version: RawPromptVersion | RawChainVersion): (RunConfig | CodeConfig)[] =>
   (version.items as (RunConfig | CodeConfig)[] | undefined) ?? [{ versionID: version.id, branch: 0 }]
@@ -61,7 +62,8 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
 
   const version = await getTrustedVersion(versionID, true)
   const saveIntermediateRuns = !IsRawPromptVersion(version)
-  const parentData = await getVerifiedUserPromptOrChainData(user.id, version.parentID)
+  const parentData = await getTrustedPromptOrChainData(version.parentID)
+  const workspaceID = await getVerifiedUserProjectWorkspaceID(user.id, parentData.projectID)
   const configs = loadConfigsFromVersion(version)
 
   res.setHeader('X-Accel-Buffering', 'no')
@@ -94,6 +96,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
       multipleInputs.map(async (inputs, inputIndex) =>
         runChain(
           user.id,
+          workspaceID,
           parentData.projectID,
           version,
           configs,

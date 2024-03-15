@@ -63,16 +63,22 @@ const projectQuery = (query: Query, keys: string[]) => (keys.length > 0 ? query.
 const orderQuery = (query: Query, sortKeys: string[]) =>
   sortKeys.reduce((q, sortKey) => q.order(sortKey, { descending: true }), query)
 
+const cursorQuery = (query: Query, cursor: string | undefined) => (cursor ? query.start(cursor) : query)
+
 const buildQuery = (
   type: EntityType,
   filter: EntityFilter | undefined,
   limit: number,
+  cursor: string | undefined,
   sortKeys: string[],
   selectKeys: string[],
   transaction?: Transaction
 ) =>
   projectQuery(
-    orderQuery(filterQuery((transaction ?? getDatastore()).createQuery(type), filter).limit(limit), sortKeys),
+    orderQuery(
+      cursorQuery(filterQuery((transaction ?? getDatastore()).createQuery(type), filter).limit(limit), cursor),
+      sortKeys
+    ),
     selectKeys
   )
 
@@ -85,6 +91,22 @@ const defaultLimitForType = (type: EntityType) => {
   }
 }
 
+const runQuery = (
+  type: EntityType,
+  filter: EntityFilter | undefined,
+  limit: number,
+  sortKeys: string[],
+  selectKeys: string[],
+  cursor: string | undefined,
+  transaction: Transaction | undefined
+) => (transaction ?? getDatastore()).runQuery(buildQuery(type, filter, limit, cursor, sortKeys, selectKeys))
+
+export const getPagedEntities = (type: EntityType, key: string, value: {}, cursor: string | undefined) =>
+  runQuery(type, buildFilter(key, value), defaultLimitForType(type), ['createdAt'], [], cursor, undefined).then(
+    ([entities, info]) =>
+      [entities, info.moreResults !== Datastore.NO_MORE_RESULTS ? info.endCursor : undefined] as const
+  )
+
 const getInternalFilteredEntities = (
   type: EntityType,
   filter?: EntityFilter,
@@ -92,10 +114,7 @@ const getInternalFilteredEntities = (
   sortKeys = [] as string[],
   selectKeys = [] as string[],
   transaction?: Transaction
-) =>
-  (transaction ?? getDatastore())
-    .runQuery(buildQuery(type, filter, limit, sortKeys, selectKeys))
-    .then(([entities]) => entities)
+) => runQuery(type, filter, limit, sortKeys, selectKeys, undefined, transaction).then(([entities]) => entities)
 
 export const afterDateFilter = (since: Date, key = 'createdAt', inclusive = false) =>
   new PropertyFilter(key, inclusive ? '>=' : '>', since)
@@ -225,25 +244,4 @@ export const runTransactionWithExponentialBackoff = async <T>(
       throw error
     }
   }
-}
-
-const algorithm = 'aes-256-cbc'
-const ivLength = 16
-const getEncryptionKey = () => Buffer.from(process.env.ENCRYPTION_KEY ?? '', 'hex')
-
-export const encrypt = (value: string) => {
-  const iv = crypto.randomBytes(ivLength)
-  let cipher = crypto.createCipheriv(algorithm, Buffer.from(getEncryptionKey()), iv)
-  let encrypted = cipher.update(value)
-
-  return Buffer.concat([iv, encrypted, cipher.final()]).toString('hex')
-}
-
-export const decrypt = (value: string) => {
-  let iv = Buffer.from(value.substring(0, 2 * ivLength), 'hex')
-  let encrypted = Buffer.from(value.substring(2 * ivLength), 'hex')
-  let decipher = crypto.createDecipheriv(algorithm, Buffer.from(getEncryptionKey()), iv)
-  let decrypted = decipher.update(encrypted)
-
-  return Buffer.concat([decrypted, decipher.final()]).toString()
 }

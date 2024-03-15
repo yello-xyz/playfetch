@@ -35,20 +35,12 @@ const MainProjectPane = dynamic(() => import('@/src/client/projects/mainProjectP
 const ProjectSidebar = dynamic(() => import('@/src/client/projects/projectSidebar'))
 const ProjectTopBar = dynamic(() => import('@/src/client/projects/projectTopBar'))
 
-export const getServerSideProps = withLoggedInSession(async ({ user, query }) => ({
-  props: await loadActiveItem(user, query),
-}))
+export const getServerSideProps = withLoggedInSession(async ({ user, query }) => {
+  const props: ProjectProps = await loadActiveItem(user, query)
+  return { props }
+})
 
-export default function Home({
-  user,
-  workspaces,
-  initialActiveProject,
-  initialActiveItem,
-  initialAnalytics,
-  initialAvailableProviders,
-  initialScopedProviders,
-  initialUserPresets,
-}: {
+type ProjectProps = {
   user: User
   workspaces: Workspace[]
   initialActiveProject: ActiveProject
@@ -57,7 +49,18 @@ export default function Home({
   initialAvailableProviders: AvailableProvider[]
   initialScopedProviders: AvailableProvider[]
   initialUserPresets: UserPresets
-}) {
+}
+
+export default function Project({
+  user,
+  workspaces,
+  initialActiveProject,
+  initialActiveItem,
+  initialAnalytics,
+  initialAvailableProviders,
+  initialScopedProviders,
+  initialUserPresets,
+}: ProjectProps) {
   useDocumentationCookie('set')
   const [
     activeProject,
@@ -146,13 +149,16 @@ export default function Home({
   }
 
   const [analytics, setAnalytics] = useState(initialAnalytics ?? undefined)
-  const refreshAnalytics = (dayRange?: number) => api.getAnalytics(activeProject.id, dayRange).then(setAnalytics)
+  const refreshAnalytics = (
+    dayRange = analytics?.recentUsage?.length,
+    logEntryCursors = analytics?.logEntryCursors?.slice(0, -1) ?? []
+  ) => api.getAnalytics(activeProject.id, dayRange, logEntryCursors as string[]).then(setAnalytics)
 
   const [availableProviders, setAvailableProviders] = useState(initialAvailableProviders)
   const [scopedProviders, setScopedProviders] = useState(initialScopedProviders)
   const refreshProviders = () => {
     api.getScopedProviders(activeProject.id).then(setScopedProviders)
-    api.getAvailableProviders(activeProject.id).then(setAvailableProviders)
+    api.getAvailableProviders(activeProject.id, activeProject.workspaceID).then(setAvailableProviders)
   }
 
   const selectCompare = () => {
@@ -295,6 +301,7 @@ export default function Home({
                               addPrompt,
                               savePrompt: savePromptCallback,
                               saveChain,
+                              refreshProject,
                               focusRunID,
                               analytics,
                               refreshAnalytics,

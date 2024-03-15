@@ -7,7 +7,7 @@ export default function useWorkspaceActions(onRenamed: () => void | Promise<void
 
   const deleteWorkspace = (workspace: Workspace) => api.deleteWorkspace(workspace.id).then(onDeleted)
 
-  const leaveWorkspace = (workspace: Workspace) => api.leaveWorkspace(workspace.id).then(onDeleted)
+  const leaveWorkspace = (workspace: Workspace) => api.revokeWorkspaceAccess(workspace.id).then(onDeleted)
 
   return [renameWorkspace, deleteWorkspace, leaveWorkspace] as const
 }

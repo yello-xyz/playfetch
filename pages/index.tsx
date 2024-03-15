@@ -10,6 +10,7 @@ import {
   PendingWorkspace,
   IsPendingWorkspace,
   PendingProject,
+  AvailableProvider,
 } from '@/types'
 import ClientRoute, {
   ParseNumberQuery,
@@ -17,6 +18,7 @@ import ClientRoute, {
   Redirect,
   SharedProjectsWorkspaceID,
   WorkspaceRoute,
+  WorkspaceSettingsRoute,
 } from '@/src/common/clientRoute'
 import ModalDialog, { DialogPrompt } from '@/src/client/components/modalDialog'
 import { ModalDialogContext } from '@/src/client/components/modalDialogContext'
@@ -28,6 +30,7 @@ import GlobalPopup from '@/src/client/components/globalPopup'
 import { useDocumentationCookie } from '@/src/client/cookies/cookieBanner'
 
 import dynamic from 'next/dynamic'
+import { loadScopedProviders } from '@/src/server/datastore/providers'
 const WorkspaceSidebar = dynamic(() => import('@/src/client/workspaces/workspaceSidebar'))
 const WorkspaceInvite = dynamic(() => import('@/src/client/workspaces/workspaceInvite'))
 const WorkspaceGridView = dynamic(() => import('@/src/client/workspaces/workspaceGridView'))
@@ -40,6 +43,7 @@ export const SharedProjectsWorkspace = (
   id: SharedProjectsWorkspaceID,
   name: 'Shared Projects',
   projects: [...pendingProjects, ...projects],
+  owners: [],
   users: [],
   pendingUsers: [],
 })
@@ -49,7 +53,7 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
     return Redirect(ClientRoute.Onboarding)
   }
 
-  const { w: workspaceID } = ParseNumberQuery(query)
+  const { w: workspaceID, s: settings } = ParseNumberQuery(query)
 
   const [initialWorkspaces, initialPendingWorkspaces] = await getWorkspacesForUser(user.id)
 
@@ -62,16 +66,30 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
       : initialPendingWorkspaces.find(workspace => workspace.id === workspaceID) ??
         (await getActiveWorkspace(user.id, workspaceID ?? user.id))
 
-  return {
-    props: {
-      user,
-      initialSharedProjects,
-      initialWorkspaces,
-      initialPendingWorkspaces,
-      initialActiveWorkspace,
-    },
+  const initialProviders = await loadScopedProviders(workspaceID ?? user.id)
+
+  const props: HomeProps = {
+    user,
+    initialSharedProjects,
+    initialWorkspaces,
+    initialPendingWorkspaces,
+    initialActiveWorkspace,
+    initialProviders,
+    initialShowSettings: !!settings,
   }
+
+  return { props }
 })
+
+type HomeProps = {
+  user: User
+  initialSharedProjects: ActiveWorkspace | null
+  initialWorkspaces: Workspace[]
+  initialPendingWorkspaces: PendingWorkspace[]
+  initialActiveWorkspace: ActiveWorkspace | PendingWorkspace
+  initialProviders: AvailableProvider[]
+  initialShowSettings: boolean
+}
 
 export default function Home({
   user,
@@ -79,13 +97,9 @@ export default function Home({
   initialWorkspaces,
   initialPendingWorkspaces,
   initialActiveWorkspace,
-}: {
-  user: User
-  initialSharedProjects?: ActiveWorkspace
-  initialWorkspaces: Workspace[]
-  initialPendingWorkspaces: PendingWorkspace[]
-  initialActiveWorkspace: ActiveWorkspace | PendingWorkspace
-}) {
+  initialProviders,
+  initialShowSettings,
+}: HomeProps) {
   useDocumentationCookie('set')
   const router = useRouter()
 
@@ -93,9 +107,10 @@ export default function Home({
 
   const [workspaces, setWorkspaces] = useState(initialWorkspaces)
   const [pendingWorkspaces, setPendingWorkspaces] = useState(initialPendingWorkspaces)
-  const [sharedProjects, setSharedProjects] = useState(initialSharedProjects)
+  const [sharedProjects, setSharedProjects] = useState(initialSharedProjects ?? undefined)
 
   const [activeWorkspace, setActiveWorkspace] = useState(initialActiveWorkspace)
+  const [showSettings, setShowSettings] = useState(initialShowSettings)
 
   const refreshWorkspace = (workspaceID: number) =>
     workspaceID === SharedProjectsWorkspaceID
@@ -110,14 +125,32 @@ export default function Home({
       : api.getWorkspace(workspaceID).then(setActiveWorkspace)
 
   const selectWorkspace = async (workspaceID: number) => {
-    if (workspaceID !== activeWorkspace.id) {
-      const pendingWorkspace = pendingWorkspaces.find(workspace => workspace.id === workspaceID)
-      if (pendingWorkspace) {
-        setActiveWorkspace(pendingWorkspace)
-      } else {
-        await refreshWorkspace(workspaceID)
+    if (settings || workspaceID !== activeWorkspace.id) {
+      if (workspaceID !== activeWorkspace.id) {
+        const pendingWorkspace = pendingWorkspaces.find(workspace => workspace.id === workspaceID)
+        if (pendingWorkspace) {
+          setActiveWorkspace(pendingWorkspace)
+        } else {
+          await refreshWorkspace(workspaceID)
+        }
       }
+      setShowSettings(false)
       router.push(WorkspaceRoute(workspaceID, user.id), undefined, { shallow: true })
+    }
+  }
+
+  const selectSettings = () => {
+    setShowSettings(true)
+    if (!settings) {
+      router.push(WorkspaceSettingsRoute(activeWorkspace.id, user.id), undefined, { shallow: true })
+    }
+  }
+
+  const toggleSettings = (show: boolean) => {
+    if (show) {
+      selectSettings()
+    } else {
+      selectWorkspace(activeWorkspace.id)
     }
   }
 
@@ -153,11 +186,15 @@ export default function Home({
       }
     })
 
-  const { w: workspaceID } = ParseNumberQuery(router.query)
-  const currentQueryState = workspaceID
+  const { w: workspaceID, s: settings } = ParseNumberQuery(router.query)
+  const currentQueryState = `${workspaceID}-${settings}`
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
-    selectWorkspace(workspaceID ?? user.id)
+    if (settings) {
+      selectSettings()
+    } else {
+      selectWorkspace(workspaceID ?? user.id)
+    }
     setQuery(currentQueryState)
   }
 
@@ -197,6 +234,9 @@ export default function Home({
                         activeWorkspace={activeWorkspace}
                         isUserWorkspace={activeWorkspace.id === user.id}
                         isSharedProjects={IsSharedProjects(activeWorkspace)}
+                        initialProviders={initialProviders}
+                        showSettings={showSettings}
+                        toggleSettings={toggleSettings}
                         onRespondToProjectInvite={respondToProjectInvite}
                         onAddProject={addProject}
                         onSelectProject={navigateToProject}

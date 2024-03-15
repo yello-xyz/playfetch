@@ -14,7 +14,7 @@ export default function IconButton({
   hoverType?: HoverType
   className?: string
   icon: StaticImageData
-  onClick: () => void
+  onClick?: () => void
   disabled?: boolean
 }) {
   const hoverTypeClass = (type: HoverType) => {
@@ -31,9 +31,9 @@ export default function IconButton({
   return (
     <Icon
       icon={icon}
-      className={`${className} ${disabled ? '' : hoverTypeClass(hoverType)}`}
+      className={`${className} ${disabled || !onClick ? '' : hoverTypeClass(hoverType)}`}
       onClick={
-        disabled
+        disabled || !onClick
           ? undefined
           : (event: MouseEvent) => {
               event.stopPropagation()

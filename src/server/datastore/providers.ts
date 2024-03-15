@@ -1,5 +1,6 @@
 import { PropertyFilter, and } from '@google-cloud/datastore'
-import { Entity, buildFilter, buildKey, decrypt, encrypt, getDatastore, getFilteredEntities, getID } from './datastore'
+import { Entity, buildFilter, buildKey, getDatastore, getFilteredEntities, getID } from './datastore'
+import { decrypt, encrypt } from '@/src/server/encryption'
 import { DefaultProvider } from '@/src/common/defaults'
 import {
   AvailableModelProvider,

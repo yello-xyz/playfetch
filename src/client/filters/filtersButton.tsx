@@ -7,44 +7,57 @@ import UserAvatar from '@/src/client/users/userAvatar'
 import { useRef, useState } from 'react'
 import PopupMenu, { PopupSectionTitle } from '@/src/client/components/popupMenu'
 import Icon from '@/src/client/components/icon'
-import { Filter, FilterItem, IsTextFilter, LabelsFromFilters, UserIDsFromFilters } from './filters'
+import { Filter, FilterItem, IsTextFilter, LabelsFromFilters, StatusesFromFilters, UserIDsFromFilters } from './filters'
 import FilterPopupItem, { FilterCategoryItem, SortOptionItem } from './filterPopupItem'
 
 export function FiltersButton<SortOption extends string>({
   users,
   labelColors,
-  items: items,
+  colorForStatus,
+  items,
   filters,
   setFilters,
   sortOptions = [],
   activeSortOption,
   setActiveSortOption,
 }: {
-  users: User[]
-  labelColors: Record<string, string>
-  items: FilterItem[]
+  users?: User[]
+  labelColors?: Record<string, string>
+  colorForStatus?: (status: string) => string
+  items?: FilterItem[]
   filters: Filter[]
   setFilters: (filters: Filter[]) => void
   sortOptions?: SortOption[]
   activeSortOption?: SortOption
   setActiveSortOption?: (option: SortOption) => void
 }) {
+  const filterItems = items ?? []
   const activeUserIDs = UserIDsFromFilters(filters)
-  const itemUserIDs = items.flatMap(item => item.userIDs)
+  const itemUserIDs = filterItems.flatMap(item => item.userIDs)
   const countForUserID = (userID: number) => itemUserIDs.filter(id => id === userID).length
-  const availableUsers = users.filter(
-    user => !activeUserIDs.includes(user.id) && countForUserID(user.id) > 0 && countForUserID(user.id) < items.length
+  const availableUsers = (users ?? []).filter(
+    user =>
+      !activeUserIDs.includes(user.id) && countForUserID(user.id) > 0 && countForUserID(user.id) < filterItems.length
   )
 
   const activeLabels = LabelsFromFilters(filters)
-  const itemLabels = items.map(item => item.labels)
+  const itemLabels = filterItems.map(item => item.labels)
   const countForLabel = (label: string) => itemLabels.filter(labels => labels.includes(label)).length
   const availableLabels = [...new Set(itemLabels.flat())].filter(
-    label => !activeLabels.includes(label) && countForLabel(label) < items.length
+    label => !activeLabels.includes(label) && countForLabel(label) < filterItems.length
+  )
+
+  const activeStatuses = StatusesFromFilters(filters)
+  const itemStatuses = filterItems.map(item => item.statuses)
+  const countForStatus = (status: string) => itemStatuses.filter(statuses => statuses.includes(status)).length
+  const availableStatuses = [...new Set(itemStatuses.flat())].filter(
+    status => !activeStatuses.includes(status) && countForStatus(status) < filterItems.length
   )
 
   const [text, setText] = useState('')
-  const [menuState, setMenuState] = useState<'collapsed' | 'expanded' | 'user' | 'label' | 'text'>('collapsed')
+  const [menuState, setMenuState] = useState<'collapsed' | 'expanded' | 'user' | 'label' | 'status' | 'text'>(
+    'collapsed'
+  )
 
   const addFilter = (filter: Filter) => {
     setMenuState('collapsed')
@@ -84,18 +97,30 @@ export function FiltersButton<SortOption extends string>({
           {menuState === 'expanded' && (
             <>
               {sortOptions.length > 0 && <PopupSectionTitle>Filter</PopupSectionTitle>}
-              <FilterCategoryItem
-                title='Created by'
-                icon={userIcon}
-                onClick={() => setMenuState('user')}
-                disabled={!availableUsers.length}
-              />
-              <FilterCategoryItem
-                title='Label'
-                icon={labelIcon}
-                onClick={() => setMenuState('label')}
-                disabled={!availableLabels.length}
-              />
+              {users !== undefined && (
+                <FilterCategoryItem
+                  title='Created by'
+                  icon={userIcon}
+                  onClick={() => setMenuState('user')}
+                  disabled={!availableUsers.length}
+                />
+              )}
+              {labelColors !== undefined && (
+                <FilterCategoryItem
+                  title='Label'
+                  icon={labelIcon}
+                  onClick={() => setMenuState('label')}
+                  disabled={!availableLabels.length}
+                />
+              )}
+              {colorForStatus !== undefined && (
+                <FilterCategoryItem
+                  title='Status'
+                  icon={labelIcon}
+                  onClick={() => setMenuState('status')}
+                  disabled={!availableStatuses.length}
+                />
+              )}
               <FilterCategoryItem title='Contains' icon={textIcon} onClick={() => setMenuState('text')} />
               {sortOptions.length > 0 && <PopupSectionTitle>Sort by</PopupSectionTitle>}
               {sortOptions.map((option, index) => (
@@ -108,20 +133,28 @@ export function FiltersButton<SortOption extends string>({
               ))}
             </>
           )}
-          {menuState === 'label' &&
-            availableLabels.map((label, index) => (
-              <FilterPopupItem key={index} onClick={() => addFilter({ label })}>
-                <div className={`w-2 h-2 m-1 rounded-full ${labelColors[label]}`} />
-                <div className='grow'>{label}</div>
-                <div className='pr-2'>{countForLabel(label)}</div>
-              </FilterPopupItem>
-            ))}
           {menuState === 'user' &&
             availableUsers.map((user, index) => (
               <FilterPopupItem key={index} onClick={() => addFilter({ userID: user.id })}>
                 <UserAvatar user={user} size='sm' />
                 <div className='grow'>{user.fullName}</div>
                 <div className='pr-2'>{countForUserID(user.id)}</div>
+              </FilterPopupItem>
+            ))}
+          {menuState === 'label' &&
+            availableLabels.map((label, index) => (
+              <FilterPopupItem key={index} onClick={() => addFilter({ label })}>
+                <div className={`w-2 h-2 m-1 rounded-full ${labelColors?.[label]}`} />
+                <div className='grow'>{label}</div>
+                <div className='pr-2'>{countForLabel(label)}</div>
+              </FilterPopupItem>
+            ))}
+          {menuState === 'status' &&
+            availableStatuses.map((status, index) => (
+              <FilterPopupItem key={index} onClick={() => addFilter({ status })}>
+                <div className={`w-2 h-2 m-1 rounded-full ${colorForStatus?.(status)}`} />
+                <div className='grow'>{status}</div>
+                <div className='pr-2'>{countForStatus(status)}</div>
               </FilterPopupItem>
             ))}
           {menuState === 'text' && (

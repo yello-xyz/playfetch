@@ -3,8 +3,6 @@ import {
   Entity,
   allocateID,
   buildKey,
-  decrypt,
-  encrypt,
   getDatastore,
   getEntities,
   getEntityCount,
@@ -15,6 +13,7 @@ import {
   getRecentEntities,
   getTimestamp,
 } from './datastore'
+import { decrypt, encrypt } from '@/src/server/encryption'
 import { ActiveProject, PendingProject, PendingUser, Project, ProjectMetrics, RecentProject, User } from '@/types'
 import ShortUniqueId from 'short-unique-id'
 import {
@@ -207,11 +206,6 @@ export async function toggleOwnershipForProject(userID: number, memberID: number
   }
 }
 
-export async function checkProject(projectID: number, apiKey: string): Promise<number | undefined> {
-  const projectData = await getTrustedProjectData(projectID)
-  return projectData && projectData.apiKeyHash === hashAPIKey(apiKey)
-}
-
 async function updateProject(projectData: any, updateLastEditedTimestamp: boolean) {
   await getDatastore().save(
     toProjectData(
@@ -248,6 +242,14 @@ const getVerifiedUserProjectData = async (userID: number, projectID: number) => 
     await ensureWorkspaceAccess(userID, projectData.workspaceID)
   }
   return projectData
+}
+
+export const getVerifiedUserProjectWorkspaceID = (userID: number, projectID: number) =>
+  getVerifiedUserProjectData(userID, projectID).then(projectData => projectData.workspaceID)
+
+export async function tryGetVerifiedAPIProjectWorkspaceID(apiKey: string, projectID: number) {
+  const projectData = await getTrustedProjectData(projectID)
+  return projectData && projectData.apiKeyHash === hashAPIKey(apiKey) ? projectData.workspaceID : undefined
 }
 
 export const getProjectUserForEmail = async (projectID: number, email: string) => {
@@ -312,8 +314,8 @@ export async function updateProjectWorkspace(userID: number, projectID: number, 
   await updateProject({ ...projectData, workspaceID }, true)
 }
 
-const filterObjects = <T extends { id: number }, U extends { id: number }>(source: T[], filter: U[]) =>
-  source.filter(user => !filter.some(u => u.id === user.id))
+export const filterObjects = <T extends { id: number }, U extends { id: number }>(source: T[], filter: U[]) =>
+  source.filter(a => !filter.some(b => b.id === a.id))
 
 export async function getSharedProjectsForUser(
   userID: number,

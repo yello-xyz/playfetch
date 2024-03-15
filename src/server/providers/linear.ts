@@ -1,12 +1,12 @@
-import { getProviderCredentials } from '../datastore/providers'
+import { getProviderCredentials } from '@/src/server/datastore/providers'
 import { IssueHistory, LinearClient } from '@linear/sdk'
 import { ChainRoute, PromptRoute } from '@/src/common/clientRoute'
-import { getTrustedPromptOrChainData } from '../datastore/chains'
-import buildURLForRoute from '../routing'
-import { getUserForID } from '../datastore/users'
-import { getPendingTaskIdentifiersForVersion, saveNewTask } from '../datastore/tasks'
+import { getTrustedPromptOrChainData } from '@/src/server/datastore/chains'
+import buildURLForRoute from '@/src/server/routing'
+import { getUserForID } from '@/src/server/datastore/users'
+import { getPendingTaskIdentifiersForVersion, saveNewTask } from '@/src/server/datastore/tasks'
 import { IsRawPromptVersion, IssueTrackerConfig, RawChainVersion, RawPromptVersion, User } from '@/types'
-import { ensureProjectAccess } from '../datastore/projects'
+import { ensureProjectAccess } from '@/src/server/datastore/projects'
 
 const getClient = async (projectID: number) => {
   const { apiKey: accessToken } = await getProviderCredentials([projectID], 'linear')

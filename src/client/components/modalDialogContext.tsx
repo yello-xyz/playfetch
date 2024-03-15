@@ -2,7 +2,7 @@ import { createContext, useContext } from 'react'
 import { DialogPrompt } from './modalDialog'
 
 type ModalDialogContextType = {
-  setDialogPrompt: (prompt: DialogPrompt) => void
+  setDialogPrompt: (prompt: DialogPrompt | undefined) => void
 }
 
 export const ModalDialogContext = createContext<ModalDialogContextType>({ setDialogPrompt: _ => {} })
