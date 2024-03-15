@@ -1,5 +1,5 @@
 import { ActiveWorkspace, AvailableProvider, IsPendingProject, PendingProject, Project, Workspace } from '@/types'
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import api from '@/src/client/api'
 import IconButton from '@/src/client/components/iconButton'
 import starIcon from '@/public/star.svg'
@@ -45,7 +45,18 @@ export default function WorkspaceGridView({
   onRefreshWorkspaces: () => void
 }) {
   const [scopedProviders, setScopedProviders] = useState(initialProviders)
-  const refreshProviders = () => api.getScopedProviders(activeWorkspace.id).then(setScopedProviders)
+  const refreshProviders = useCallback(
+    () => api.getScopedProviders(activeWorkspace.id).then(setScopedProviders),
+    [activeWorkspace.id]
+  )
+
+  const [providersWorkspaceID, setProvidersWorkspaceID] = useState(activeWorkspace.id)
+  useEffect(() => {
+    if (activeWorkspace.id !== providersWorkspaceID) {
+      setProvidersWorkspaceID(activeWorkspace.id)
+      refreshProviders()
+    }
+  }, [activeWorkspace.id, providersWorkspaceID, refreshProviders])
 
   const inviteMembers = async (emails: string[]) => {
     await api.inviteToWorkspace(activeWorkspace.id, emails)
