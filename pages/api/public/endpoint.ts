@@ -14,6 +14,7 @@ import { EndpointEvent, getClientID, logUnknownUserEvent } from '@/src/server/an
 import { updateAnalytics } from '@/src/server/datastore/analytics'
 import { DefaultChatContinuationInputKey } from '@/src/common/formatting'
 import { detectRequestClosed } from '../cancelRun'
+import { SaltValue } from '@/src/common/hashing'
 
 const logResponse = (
   clientID: string,
@@ -94,7 +95,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           res.setHeader('Content-Type', 'application/json')
         }
 
-        const salt = (value: number | bigint) => BigInt(value) ^ BigInt(endpoint.id)
+        const salt = (value: number | bigint) => SaltValue(value, endpoint.id)
         const continuationID = continuationKey ? Number(salt(BigInt(continuationKey))) : undefined
         const versionID = endpoint.versionID
         const inputs =
