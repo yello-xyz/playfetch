@@ -10,11 +10,24 @@ import api from '../api'
 
 const exportLogEntries = (logEntries: LogEntry[]) => {
   const rows: string[][] = [
-    ['Time', 'Endpoint', 'Environment', 'Cost', 'Duration', 'Inputs', 'Output', 'Error', 'Attempts', 'Cache Hit'],
+    [
+      'Time',
+      'Endpoint',
+      'Environment',
+      'Continuation Key',
+      'Cost',
+      'Duration',
+      'Inputs',
+      'Output',
+      'Error',
+      'Attempts',
+      'Cache Hit',
+    ],
     ...logEntries.map(entry => [
       FormatDate(entry.timestamp, true, true),
       entry.urlPath,
       entry.flavor,
+      entry.continuationID?.toString() ?? '',
       FormatCost(entry.cost),
       FormatDuration(entry.duration),
       JSON.stringify(entry.inputs),
