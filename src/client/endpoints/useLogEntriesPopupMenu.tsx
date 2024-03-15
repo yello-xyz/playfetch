@@ -7,6 +7,7 @@ import { useActiveProject } from '../projects/projectContext'
 import useModalDialogPrompt from '../components/modalDialogContext'
 import { useRef } from 'react'
 import api from '../api'
+import { SaltValue } from '@/src/common/hashing'
 
 const exportLogEntries = (logEntries: LogEntry[]) => {
   const rows: string[][] = [
@@ -27,7 +28,7 @@ const exportLogEntries = (logEntries: LogEntry[]) => {
       FormatDate(entry.timestamp, true, true),
       entry.urlPath,
       entry.flavor,
-      entry.continuationID?.toString() ?? '',
+      entry.continuationID ? SaltValue(entry.continuationID, entry.endpointID).toString() : '',
       FormatCost(entry.cost),
       FormatDuration(entry.duration),
       JSON.stringify(entry.inputs),
