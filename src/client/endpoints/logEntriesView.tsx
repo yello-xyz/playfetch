@@ -146,7 +146,11 @@ const filterItemFromLogEntry = (entry: LogEntry, allEntries: LogEntry[]): Filter
     statuses: entries.map(entry => LogStatusForError(entry.error)),
     contents: [
       ...entries.map(entry => JSON.stringify(entry.output)),
-      ...entries.flatMap(entry => Object.entries(entry.inputs).flat().filter(value => value)),
+      ...entries.flatMap(entry =>
+        Object.entries(entry.inputs)
+          .flat()
+          .filter(value => value)
+      ),
       ...entries.map(entry => entry.error ?? ''),
       ...entries.map(entry => entry.flavor),
       ...entries.map(entry => entry.urlPath),
