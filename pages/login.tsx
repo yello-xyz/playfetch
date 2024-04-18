@@ -10,14 +10,14 @@ import { useRouter } from 'next/router'
 import logo from '@/public/logo.svg'
 import Image from 'next/image'
 import { useDocumentationCookie } from '@/src/client/cookies/cookieBanner'
-import { IsGitHubAuthenticationSupported, IsGoogleAuthenticationSupported } from '@/pages/api/auth/[...nextauth]'
+import { IsGitHubAuthenticationConfigured, IsGoogleAuthenticationConfigured } from '@/pages/api/auth/[...nextauth]'
 
 export const getServerSideProps = withLoggedOutSession(async context => {
   const tokenCSRF = (await getCsrfToken(context)) ?? null
   const props: LoginProps = {
     tokenCSRF,
-    supportsGoogle: IsGoogleAuthenticationSupported(),
-    supportsGitHub: IsGitHubAuthenticationSupported(),
+    supportsGoogle: IsGoogleAuthenticationConfigured(),
+    supportsGitHub: IsGitHubAuthenticationConfigured(),
   }
   return { props }
 })

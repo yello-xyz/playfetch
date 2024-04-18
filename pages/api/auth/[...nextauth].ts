@@ -16,8 +16,10 @@ import { NextApiRequestCookies } from 'next/dist/server/api-utils'
 
 const getRegisteredUser = async (email?: string | null) => (email ? getUserForEmail(email) : undefined)
 
-export const IsGoogleAuthenticationSupported = () => !!process.env.GOOGLE_CLIENT_ID && !!process.env.GOOGLE_CLIENT_SECRET
-export const IsGitHubAuthenticationSupported = () => !!process.env.GITHUB_CLIENT_ID && !!process.env.GITHUB_CLIENT_SECRET
+export const IsGoogleAuthenticationConfigured = () =>
+  !!process.env.GOOGLE_CLIENT_ID && !!process.env.GOOGLE_CLIENT_SECRET
+export const IsGitHubAuthenticationConfigured = () =>
+  !!process.env.GITHUB_CLIENT_ID && !!process.env.GITHUB_CLIENT_SECRET
 
 export const authOptions = (req: { cookies: NextApiRequestCookies }, res: ServerResponse): NextAuthOptions => ({
   adapter: NextAuthAdapter(),
@@ -29,7 +31,7 @@ export const authOptions = (req: { cookies: NextApiRequestCookies }, res: Server
       server: GetEmailServerConfig(),
       from: GetNoReplyFromAddress(),
     }),
-    ...(IsGoogleAuthenticationSupported()
+    ...(IsGoogleAuthenticationConfigured()
       ? [
           GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID ?? '',
@@ -37,7 +39,7 @@ export const authOptions = (req: { cookies: NextApiRequestCookies }, res: Server
           }),
         ]
       : []),
-    ...(IsGitHubAuthenticationSupported()
+    ...(IsGitHubAuthenticationConfigured()
       ? [
           GitHubProvider({
             clientId: process.env.GITHUB_CLIENT_ID ?? '',

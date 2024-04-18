@@ -2,8 +2,9 @@ import { OnboardingResponse } from '@/types'
 import { saveUser } from './datastore/users'
 import { Client } from '@notionhq/client'
 
-const IsNotionConfigured = () => !!process.env.NOTION_TOKEN
-const getNotionClient = () => IsNotionConfigured() ? new Client({ auth: process.env.NOTION_TOKEN }) : null
+const IsNotionConfigured = () =>
+  !!process.env.NOTION_TOKEN && !!process.env.NOTION_WAITLIST_PAGE_ID && !!process.env.NOTION_ONBOARDING_PAGE_ID
+const getNotionClient = () => (IsNotionConfigured() ? new Client({ auth: process.env.NOTION_TOKEN }) : null)
 
 const addContactToWaitlist = (name: string, email: string) =>
   getNotionClient()?.pages?.create({
