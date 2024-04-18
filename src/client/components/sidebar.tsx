@@ -27,7 +27,13 @@ export function FeedbackSection() {
           link={process.env.NEXT_PUBLIC_DOCS_URL}
         />
       )}
-      <SidebarButton title='Support' icon={feedbackIcon} link='mailto:hello@playfetch.ai?subject=PlayFetch Feedback' />
+      {!!process.env.NEXT_PUBLIC_SUPPORT_EMAIL && (
+        <SidebarButton
+          title='Support'
+          icon={feedbackIcon}
+          link={`mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL}?subject=PlayFetch Feedback`}
+        />
+      )}
     </SidebarSection>
   )
 }
