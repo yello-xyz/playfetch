@@ -26,16 +26,20 @@ export default function AdminSidebar({
           <SidebarButton title='Active Users' icon={userIcon} onClick={onSelectActiveUsers} />
           <SidebarButton title='Active Projects' icon={fileIcon} onClick={onSelectRecentProjects} />
         </SidebarSection>
-        <SidebarSection title='Analytics'>
-          {analyticsLinks.map(([title, link], index) => (
-            <LinkButton key={index} title={title} link={link} />
-          ))}
-        </SidebarSection>
-        <SidebarSection title='Debug'>
-          {debugLinks.map(([title, link], index) => (
-            <LinkButton key={index} title={title} link={link} />
-          ))}
-        </SidebarSection>
+        {analyticsLinks.length > 0 && (
+          <SidebarSection title='Analytics'>
+            {analyticsLinks.map(([title, link], index) => (
+              <LinkButton key={index} title={title} link={link} />
+            ))}
+          </SidebarSection>
+        )}
+        {debugLinks.length > 0 && (
+          <SidebarSection title='Debug'>
+            {debugLinks.map(([title, link], index) => (
+              <LinkButton key={index} title={title} link={link} />
+            ))}
+          </SidebarSection>
+        )}
       </div>
     </>
   )
