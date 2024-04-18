@@ -96,7 +96,7 @@ async function loadEndpoints(projectID: number, apiKeyDev: string) {
   return endpoints
     .map(endpoint => ({
       ...toEndpoint(endpoint),
-      url: `${process.env.API_URL}/${projectID}/${endpoint.urlPath}`,
+      url: `${process.env.API_URL || process.env.NEXTAUTH_URL}/${projectID}/${endpoint.urlPath}`,
       apiKeyDev,
       usage: toUsage(usages.find(usage => getID(usage) === getID(endpoint))),
     }))
