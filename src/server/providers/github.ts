@@ -11,6 +11,13 @@ import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 import { RawPromptVersion } from '@/types'
 
+export const IsGitHubConfigured = () =>
+  !!process.env.GITHUB_APP_ID &&
+  !!process.env.GITHUB_APP_CLIENT_ID &&
+  !!process.env.GITHUB_APP_CLIENT_SECRET &&
+  !!process.env.GITHUB_APP_PRIVATE_KEY &&
+  !!process.env.NEXT_PUBLIC_GITHUB_APP_INSTALL_LINK
+
 const isYamlFile = (file: any) => file.type === 'file' && (file.name.endsWith('.yaml') || file.name.endsWith('.yml'))
 
 const loadGitHubConfigForProject = async (userID: number, projectID: number) => {

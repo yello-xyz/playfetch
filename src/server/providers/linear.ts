@@ -8,6 +8,11 @@ import { getPendingTaskIdentifiersForVersion, saveNewTask } from '@/src/server/d
 import { IsRawPromptVersion, IssueTrackerConfig, RawChainVersion, RawPromptVersion, User } from '@/types'
 import { ensureProjectAccess } from '@/src/server/datastore/projects'
 
+export const IsLinearConfigured = () =>
+  !!process.env.LINEAR_APP_CLIENT_ID &&
+  !!process.env.LINEAR_APP_CLIENT_SECRET &&
+  !!process.env.LINEAR_APP_WEBHOOK_SECRET
+
 const getClient = async (projectID: number) => {
   const { apiKey: accessToken } = await getProviderCredentials([projectID], 'linear')
   return accessToken ? new LinearClient({ accessToken }) : null

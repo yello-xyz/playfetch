@@ -49,6 +49,8 @@ type ProjectProps = {
   initialAvailableProviders: AvailableProvider[]
   initialScopedProviders: AvailableProvider[]
   initialUserPresets: UserPresets
+  supportsSourceControl: boolean
+  supportsIssueTracker: boolean
 }
 
 export default function Project({
@@ -60,6 +62,8 @@ export default function Project({
   initialAvailableProviders,
   initialScopedProviders,
   initialUserPresets,
+  supportsSourceControl,
+  supportsIssueTracker,
 }: ProjectProps) {
   useDocumentationCookie('set')
   const [
@@ -307,6 +311,8 @@ export default function Project({
                               refreshAnalytics,
                               scopedProviders,
                               refreshProviders,
+                              supportsSourceControl,
+                              supportsIssueTracker,
                               showComments,
                               setShowComments,
                               selectComment,

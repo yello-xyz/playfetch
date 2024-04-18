@@ -40,6 +40,8 @@ export default function MainProjectPane({
   refreshAnalytics,
   scopedProviders,
   refreshProviders,
+  supportsSourceControl,
+  supportsIssueTracker,
   showComments,
   setShowComments,
   selectComment,
@@ -63,6 +65,8 @@ export default function MainProjectPane({
   refreshAnalytics: (dayRange?: number, cursors?: string[]) => Promise<void>
   scopedProviders: AvailableProvider[]
   refreshProviders: () => void
+  supportsSourceControl: boolean
+  supportsIssueTracker: boolean
   showComments: boolean
   setShowComments: (show: boolean) => void
   selectComment: (parentID: number, versionID: number, runID?: number) => void
@@ -102,6 +106,8 @@ export default function MainProjectPane({
             refreshProviders={refreshProviders}
             activeProject={activeProject}
             refreshProject={refreshProject}
+            supportsSourceControl={supportsSourceControl}
+            supportsIssueTracker={supportsIssueTracker}
           />
         )}
         {!activeItem && <EmptyProjectView onAddPrompt={addPrompt} />}
