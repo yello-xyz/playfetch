@@ -2,10 +2,11 @@ import { OnboardingResponse } from '@/types'
 import { saveUser } from './datastore/users'
 import { Client } from '@notionhq/client'
 
-const NotionClient = new Client({ auth: process.env.NOTION_TOKEN })
+const IsNotionConfigured = () => !!process.env.NOTION_TOKEN
+const getNotionClient = () => IsNotionConfigured() ? new Client({ auth: process.env.NOTION_TOKEN }) : null
 
 const addContactToWaitlist = (name: string, email: string) =>
-  NotionClient.pages.create({
+  getNotionClient()?.pages?.create({
     parent: { type: 'database_id', database_id: process.env.NOTION_WAITLIST_PAGE_ID ?? '' },
     properties: {
       Name: { type: 'title', title: [{ type: 'text', text: { content: name } }] },
@@ -22,8 +23,10 @@ export default async function signUpNewUser(email: string, fullName: string) {
   }
 }
 
+export const IsOnboardingSupported = () => IsNotionConfigured()
+
 export const addOnboardingResponse = (email: string, name: string, response: OnboardingResponse) =>
-  NotionClient.pages.create({
+  getNotionClient()?.pages?.create({
     parent: { type: 'database_id', database_id: process.env.NOTION_ONBOARDING_PAGE_ID ?? '' },
     properties: {
       Name: { type: 'title', title: [{ type: 'text', text: { content: name } }] },

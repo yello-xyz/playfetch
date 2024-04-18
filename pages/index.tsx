@@ -31,6 +31,7 @@ import { useDocumentationCookie } from '@/src/client/cookies/cookieBanner'
 
 import dynamic from 'next/dynamic'
 import { loadScopedProviders } from '@/src/server/datastore/providers'
+import { IsOnboardingSupported } from '@/src/server/notion'
 const WorkspaceSidebar = dynamic(() => import('@/src/client/workspaces/workspaceSidebar'))
 const WorkspaceInvite = dynamic(() => import('@/src/client/workspaces/workspaceInvite'))
 const WorkspaceGridView = dynamic(() => import('@/src/client/workspaces/workspaceGridView'))
@@ -49,7 +50,7 @@ export const SharedProjectsWorkspace = (
 })
 
 export const getServerSideProps = withLoggedInSession(async ({ query, user }) => {
-  if (!user.didCompleteOnboarding) {
+  if (!user.didCompleteOnboarding && IsOnboardingSupported()) {
     return Redirect(ClientRoute.Onboarding)
   }
 
