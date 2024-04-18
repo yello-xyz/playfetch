@@ -15,7 +15,9 @@ const topLevelCookieProperties: () => CookieSetOptions = () => ({
 })
 
 export const updateCookieConsent = (accept: boolean) => {
-  TagManager.dataLayer({ dataLayer: { event: 'update-consent', consent: accept ? 'granted' : 'denied' } })
+  if (!!process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID) {
+    TagManager.dataLayer({ dataLayer: { event: 'update-consent', consent: accept ? 'granted' : 'denied' } })
+  }
 }
 
 export default function CookieBanner({ children }: any) {
@@ -35,7 +37,7 @@ export default function CookieBanner({ children }: any) {
   useEffect(() => {
     if (cookieStatus !== 'unknown') {
       updateCookieConsent(cookieStatus === 'accepted')
-    } else {
+    } else if (!!process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID) {
       setTimeout(() => setSavedCookieStatus(false), 2000)
     }
   }, [cookieStatus])
