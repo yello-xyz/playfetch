@@ -51,6 +51,7 @@ steps:
       - 'NEXT_PUBLIC_COOKIE_NAME=${_NEXT_PUBLIC_COOKIE_NAME}'
       - 'NEXT_PUBLIC_DOCS_URL=${_NEXT_PUBLIC_DOCS_URL}'
       - 'NEXT_PUBLIC_SUPPORT_EMAIL=${_NEXT_PUBLIC_SUPPORT_EMAIL}'
+      - 'NEXT_PUBLIC_PRIVACY_PAGE_URL=${_NEXT_PUBLIC_PRIVACY_PAGE_URL}'
   - name: node:18
     entrypoint: npm
     args: ['run', 'build']

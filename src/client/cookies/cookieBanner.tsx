@@ -69,8 +69,13 @@ export default function CookieBanner({ children }: any) {
           ) : (
             <div className='text-xs'>
               We use cookies and similar technologies to give you a better experience and to help us improve our
-              services. You can manage your cookie settings at any time. For more information, please see our{' '}
-              <Link href={ClientRoute.Privacy}>Privacy Policy</Link>.
+              services. You can manage your cookie settings at any time.
+              {!!process.env.NEXT_PUBLIC_PRIVACY_PAGE_URL && (
+                <>
+                  {' '}For more information, please see our{' '}
+                  <Link href={process.env.NEXT_PUBLIC_PRIVACY_PAGE_URL} target='_blank'>Privacy Policy</Link>.
+                </>
+              )}
             </div>
           )}
           <div className='flex justify-end gap-2'>
