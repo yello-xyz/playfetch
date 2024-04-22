@@ -72,8 +72,12 @@ export default function CookieBanner({ children }: any) {
               services. You can manage your cookie settings at any time.
               {!!process.env.NEXT_PUBLIC_PRIVACY_PAGE_URL && (
                 <>
-                  {' '}For more information, please see our{' '}
-                  <Link href={process.env.NEXT_PUBLIC_PRIVACY_PAGE_URL} target='_blank'>Privacy Policy</Link>.
+                  {' '}
+                  For more information, please see our{' '}
+                  <Link href={process.env.NEXT_PUBLIC_PRIVACY_PAGE_URL} target='_blank'>
+                    Privacy Policy
+                  </Link>
+                  .
                 </>
               )}
             </div>
