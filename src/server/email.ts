@@ -26,7 +26,7 @@ export const GetEmailServerConfig = () => ({
 })
 
 export const GetNoReplyFromAddress = (deletegatedFrom?: string) =>
-  `"${deletegatedFrom ? `${deletegatedFrom} (via PlayFetch)` : 'PlayFetch'}" <no-reply@playfetch.ai>`
+  `"${deletegatedFrom ? `${deletegatedFrom} (via PlayFetch)` : 'PlayFetch'}" <${process.env.NOREPLY_EMAIL_USER}>`
 
 async function sendMail(to: string, subject: string, text: string, html: string, delegatedFrom?: string) {
   const transporter = nodemailer.createTransport(GetEmailServerConfig())
