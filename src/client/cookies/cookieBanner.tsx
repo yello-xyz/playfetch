@@ -6,7 +6,7 @@ import Checkbox from '@/src/client/components/checkbox'
 import { useCookies } from 'react-cookie'
 import { CookieSetOptions } from 'universal-cookie'
 
-const consentCookieName = () => process.env.NEXT_PUBLIC_COOKIE_NAME ?? 'dev-consent'
+const consentCookieName = () => process.env.NEXT_PUBLIC_COOKIE_NAME || 'dev-consent'
 const topLevelCookieProperties: () => CookieSetOptions = () => ({
   path: '/',
   sameSite: 'lax',
