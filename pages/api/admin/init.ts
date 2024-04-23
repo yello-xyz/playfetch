@@ -33,10 +33,11 @@ async function init(req: NextApiRequest, res: NextApiResponse) {
 
   const workspaceID = await addWorkspaceForUser(adminUser.id, 'Admin')
   const projectID = await addProjectForUser(adminUser.id, workspaceID, 'PlayFetch Features')
-
   const initialPromptID = getID({ key: await getEntityKey(Entity.PROMPT, 'projectID', projectID) })
   await deletePromptForUser(adminUser.id, initialPromptID)
-  await addPredictionEndpoint(adminUser.id, projectID)
+
+  await addPredictionEndpoint(adminUser.id, projectID, 'Predict Rating')
+  await addSuggestionEndpoint(adminUser.id, projectID, 'Suggest Improvement')
 
   await ensureProjectAPIKey(adminUser.id, projectID)
   const project = await getActiveProject(adminUser.id, projectID)
@@ -47,10 +48,10 @@ async function init(req: NextApiRequest, res: NextApiResponse) {
   })
 }
 
-const addPredictionEndpoint = async (userID: number, projectID: number) => {
-  const { promptID, promptVersionID } = await addPrompt(userID, projectID, 'Predict Rating', 'prediction')
+const addPredictionEndpoint = async (userID: number, projectID: number, name: string) => {
+  const { promptID, promptVersionID } = await addPrompt(userID, projectID, name, 'prediction')
 
-  const { chainID, versionID } = await addChainForUser(userID, projectID, 'Predict Rating')
+  const { chainID, versionID } = await addChainForUser(userID, projectID, name)
   const chainVersionID = await saveChainVersionForUser(
     userID,
     chainID,
@@ -80,6 +81,35 @@ const addPredictionEndpoint = async (userID: number, projectID: number) => {
   )
 
   await saveEndpoint(true, userID, projectID, chainID, chainVersionID, 'rate', DefaultEndpointFlavor, false, false)
+}
+
+const addSuggestionEndpoint = async (userID: number, projectID: number, name: string) => {
+  const { promptID, promptVersionID } = await addPrompt(userID, projectID, name, 'suggestion')
+
+  const { chainID, versionID } = await addChainForUser(userID, projectID, name)
+  const chainVersionID = await saveChainVersionForUser(
+    userID,
+    chainID,
+    [
+      {
+        code: loadCodeBlock('suggestion'),
+        branch: 0,
+        output: 'recentRatings',
+        inputs: ['recentRatings'],
+      },
+      {
+        promptID,
+        versionID: promptVersionID,
+        branch: 0,
+        inputs: ['prompt', 'recentRatings'],
+        dynamicInputs: [],
+      },
+    ],
+    versionID,
+    versionID
+  )
+
+  await saveEndpoint(true, userID, projectID, chainID, chainVersionID, 'suggest', DefaultEndpointFlavor, false, false)
 }
 
 const addPrompt = async (userID: number, projectID: number, name: string, type: PromptType) => {
