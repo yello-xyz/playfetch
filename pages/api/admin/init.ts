@@ -12,6 +12,7 @@ import path from 'path'
 import { readFileSync } from 'fs'
 import { deserializeCodeBlock, deserializePromptVersion } from '@/src/server/serialize'
 import { addChainForUser } from '@/src/server/datastore/chains'
+import { DefaultEndpointFlavor, saveEndpoint } from '@/src/server/datastore/endpoints'
 
 async function init(req: NextApiRequest, res: NextApiResponse) {
   const userCount = await getFilteredEntityCount(Entity.USER)
@@ -77,6 +78,8 @@ const addPredictionEndpoint = async (userID: number, projectID: number) => {
     versionID,
     versionID
   )
+
+  await saveEndpoint(true, userID, projectID, chainID, chainVersionID, 'rate', DefaultEndpointFlavor, false, false)
 }
 
 const addPrompt = async (userID: number, projectID: number, name: string, type: PromptType) => {
