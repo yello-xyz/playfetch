@@ -1,7 +1,7 @@
 import { CheckValidEmail } from '@/src/common/formatting'
-import { Entity, getFilteredEntityCount } from '@/src/server/datastore/datastore'
+import { Entity, getEntityKey, getFilteredEntityCount, getID } from '@/src/server/datastore/datastore'
 import { addProjectForUser } from '@/src/server/datastore/projects'
-import { addPromptForUser } from '@/src/server/datastore/prompts'
+import { addPromptForUser, deletePromptForUser } from '@/src/server/datastore/prompts'
 import { getUserForEmail, saveUser } from '@/src/server/datastore/users'
 import { savePromptVersionForUser } from '@/src/server/datastore/versions'
 import { addWorkspaceForUser } from '@/src/server/datastore/workspaces'
@@ -31,6 +31,8 @@ async function init(req: NextApiRequest, res: NextApiResponse) {
 
   const workspaceID = await addWorkspaceForUser(adminUser.id, 'Admin')
   const projectID = await addProjectForUser(adminUser.id, workspaceID, 'PlayFetch Features')
+  const initialPromptID = getID({ key: await getEntityKey(Entity.PROMPT, 'projectID', projectID) })
+  await deletePromptForUser(adminUser.id, initialPromptID)
   const promptVersionID = await addPredictionPrompt(adminUser.id, projectID)
 
   res.json({
