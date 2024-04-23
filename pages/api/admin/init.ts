@@ -3,14 +3,15 @@ import { Entity, getEntityKey, getFilteredEntityCount, getID } from '@/src/serve
 import { addProjectForUser } from '@/src/server/datastore/projects'
 import { addPromptForUser, deletePromptForUser } from '@/src/server/datastore/prompts'
 import { getUserForEmail, saveUser } from '@/src/server/datastore/users'
-import { savePromptVersionForUser } from '@/src/server/datastore/versions'
+import { saveChainVersionForUser, savePromptVersionForUser } from '@/src/server/datastore/versions'
 import { addWorkspaceForUser } from '@/src/server/datastore/workspaces'
-import { getAPIBaseURL } from '@/src/server/routing'
+import { getAPIBaseURLForProject } from '@/src/server/routing'
 import { withErrorRoute } from '@/src/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import path from 'path'
 import { readFileSync } from 'fs'
 import { deserializeCodeBlock, deserializePromptVersion } from '@/src/server/serialize'
+import { addChainForUser } from '@/src/server/datastore/chains'
 
 async function init(req: NextApiRequest, res: NextApiResponse) {
   const userCount = await getFilteredEntityCount(Entity.USER)
@@ -33,26 +34,51 @@ async function init(req: NextApiRequest, res: NextApiResponse) {
   const projectID = await addProjectForUser(adminUser.id, workspaceID, 'PlayFetch Features')
   const initialPromptID = getID({ key: await getEntityKey(Entity.PROMPT, 'projectID', projectID) })
   await deletePromptForUser(adminUser.id, initialPromptID)
-  const promptVersionID = await addPredictionChain(adminUser.id, projectID)
+  await addPredictionEndpoint(adminUser.id, projectID)
 
   res.json({
     _PLAYFETCH_API_KEY: '1234',
-    _PLAYFETCH_ENDPOINT_URL: `${getAPIBaseURL()}/${promptVersionID}`,
+    _PLAYFETCH_ENDPOINT_URL: `${getAPIBaseURLForProject(projectID)}`,
   })
 }
 
-async function addPredictionChain(userID: number, projectID: number) {
-  const { promptID, versionID } = await addPromptForUser(userID, projectID, 'Predict Rating')
-  const { prompts, config } = loadPrompt('prediction')
-  const promptVersionID = await savePromptVersionForUser(userID, promptID, prompts, config, versionID, versionID)
+const addPredictionEndpoint = async (userID: number, projectID: number) => {
+  const { promptID, promptVersionID } = await addPrompt(userID, projectID, 'Predict Rating', 'prediction')
 
-  const prePredictionCode = loadCodeBlock('prePrediction')
-  const postPredictionCode = loadCodeBlock('postPrediction')
-
-  return promptVersionID
+  const { chainID, versionID } = await addChainForUser(userID, projectID, 'Predict Rating')
+  const chainVersionID = await saveChainVersionForUser(userID, chainID, [
+    {
+      code: loadCodeBlock('prePrediction'),
+      branch: 0,
+      output: "recentRatings",
+      inputs: ["recentRatings"],
+    },
+    {
+      promptID,
+      versionID: promptVersionID,
+      branch: 0,
+      output: "response",
+      inputs: ["recentRatings", "inputs", "output"],
+      dynamicInputs: [],
+    },
+    {
+      code: loadCodeBlock('postPrediction'),
+      branch: 0,
+      inputs: ["response"],
+    },
+  ], versionID, versionID)
 }
 
-const loadPrompt = (type: 'prediction' | 'suggestion' | 'generation') =>
+const addPrompt = async (userID: number, projectID: number, name: string, type: PromptType) => {
+  const { promptID, versionID } = await addPromptForUser(userID, projectID, name)
+  const { prompts, config } = loadPrompt(type)
+  const promptVersionID = await savePromptVersionForUser(userID, promptID, prompts, config, versionID, versionID)
+  return { promptID, promptVersionID }
+}
+
+type PromptType = 'prediction' | 'suggestion' | 'generation'
+
+const loadPrompt = (type: PromptType) =>
   deserializePromptVersion(loadTemplate(`${type}Prompt.yaml`))
 
 const loadCodeBlock = (type: 'prePrediction' | 'postPrediction' | 'suggestion') =>

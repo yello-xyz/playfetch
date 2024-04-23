@@ -36,7 +36,7 @@ import { toComment } from './comments'
 import { deleteEntity } from './cleanup'
 import { toTable } from './tables'
 import { DefaultLabels } from '@/src/common/defaults'
-import { getAPIBaseURL } from '../routing'
+import { getAPIBaseURLForProject } from '../routing'
 
 export async function migrateProjects(postMerge: boolean) {
   if (postMerge) {
@@ -97,7 +97,7 @@ async function loadEndpoints(projectID: number, apiKeyDev: string) {
   return endpoints
     .map(endpoint => ({
       ...toEndpoint(endpoint),
-      url: `${getAPIBaseURL()}/${projectID}/${endpoint.urlPath}`,
+      url: `${getAPIBaseURLForProject(projectID)}/${endpoint.urlPath}`,
       apiKeyDev,
       usage: toUsage(usages.find(usage => getID(usage) === getID(endpoint))),
     }))
