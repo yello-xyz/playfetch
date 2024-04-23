@@ -16,8 +16,8 @@ import { getAccessingUserIDs } from './datastore/access'
 import buildURLForRoute from './routing'
 
 export const GetEmailServerConfig = () => ({
-  host: 'smtp.gmail.com',
-  port: 587,
+  host: process.env.NOREPLY_EMAIL_HOST ?? 'smtp.gmail.com',
+  port: Number(process.env.NOREPLY_EMAIL_PORT ?? '587'),
   auth: {
     user: process.env.NOREPLY_EMAIL_USER,
     pass: process.env.NOREPLY_EMAIL_PASSWORD,
