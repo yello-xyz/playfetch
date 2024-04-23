@@ -15,15 +15,19 @@ import { Capitalize, FormatCost, FormatDate } from '@/src/common/formatting'
 import { getAccessingUserIDs } from './datastore/access'
 import buildURLForRoute from './routing'
 
-export const GetEmailServerConfig = () => ({
-  host: process.env.NOREPLY_EMAIL_HOST ?? 'smtp.gmail.com',
-  port: Number(process.env.NOREPLY_EMAIL_PORT ?? '587'),
-  auth: {
-    user: process.env.NOREPLY_EMAIL_USER,
-    pass: process.env.NOREPLY_EMAIL_PASSWORD,
-  },
-  tls: { ciphers: 'SSLv3' },
-})
+export const GetEmailServerConfig = () => {
+  const config = {
+    host: process.env.NOREPLY_EMAIL_HOST ?? 'smtp.gmail.com',
+    port: Number(process.env.NOREPLY_EMAIL_PORT ?? '587'),
+    auth: {
+      user: process.env.NOREPLY_EMAIL_USER,
+      pass: process.env.NOREPLY_EMAIL_PASSWORD,
+    },
+    tls: { ciphers: 'SSLv3' },
+  }
+  console.log(config)
+  return config
+}
 
 export const GetNoReplyFromAddress = (deletegatedFrom?: string) =>
   `"${deletegatedFrom ? `${deletegatedFrom} (via PlayFetch)` : 'PlayFetch'}" <${process.env.NOREPLY_EMAIL_USER}>`
