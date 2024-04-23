@@ -10,7 +10,7 @@ import { withErrorRoute } from '@/src/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import path from 'path'
 import { readFileSync } from 'fs'
-import { deserializePromptVersion } from '@/src/server/serialize'
+import { deserializeCodeBlock, deserializePromptVersion } from '@/src/server/serialize'
 
 async function init(req: NextApiRequest, res: NextApiResponse) {
   const userCount = await getFilteredEntityCount(Entity.USER)
@@ -33,7 +33,7 @@ async function init(req: NextApiRequest, res: NextApiResponse) {
   const projectID = await addProjectForUser(adminUser.id, workspaceID, 'PlayFetch Features')
   const initialPromptID = getID({ key: await getEntityKey(Entity.PROMPT, 'projectID', projectID) })
   await deletePromptForUser(adminUser.id, initialPromptID)
-  const promptVersionID = await addPredictionPrompt(adminUser.id, projectID)
+  const promptVersionID = await addPredictionChain(adminUser.id, projectID)
 
   res.json({
     _PLAYFETCH_API_KEY: '1234',
@@ -41,18 +41,23 @@ async function init(req: NextApiRequest, res: NextApiResponse) {
   })
 }
 
-async function addPredictionPrompt(userID: number, projectID: number) {
+async function addPredictionChain(userID: number, projectID: number) {
   const { promptID, versionID } = await addPromptForUser(userID, projectID, 'Predict Rating')
   const { prompts, config } = loadPrompt('prediction')
   const promptVersionID = await savePromptVersionForUser(userID, promptID, prompts, config, versionID, versionID)
+
+  const prePredictionCode = loadCodeBlock('prePrediction')
+  const postPredictionCode = loadCodeBlock('postPrediction')
+
   return promptVersionID
 }
 
-function loadPrompt(type: 'prediction' | 'suggestion' | 'generation') {
-  const templatePath = path.join(process.cwd(), 'templates', `${type}Prompt.yaml`)
-  let content = readFileSync(templatePath, 'utf8')
-  const { prompts, config } = deserializePromptVersion(content)
-  return { prompts, config }
-}
+const loadPrompt = (type: 'prediction' | 'suggestion' | 'generation') =>
+  deserializePromptVersion(loadTemplate(`${type}Prompt.yaml`))
+
+const loadCodeBlock = (type: 'prePrediction' | 'postPrediction' | 'suggestion') =>
+  deserializeCodeBlock(loadTemplate(`${type}Code.yaml`))
+
+const loadTemplate = (fileName: string) => readFileSync(path.join(process.cwd(), 'templates', fileName), 'utf8')
 
 export default withErrorRoute(init)

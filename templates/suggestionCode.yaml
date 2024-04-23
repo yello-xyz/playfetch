@@ -1,0 +1,11 @@
+code: |-
+  return JSON.parse({{recentRatings}})
+    .map(
+      rating =>
+  `Input: ${JSON.stringify(rating.inputs)}
+  Output: ${rating.output}
+  Rating: ${rating.rating}
+  Reason: ${rating.reason}
+
+
+  `).join('')
