@@ -1,7 +1,6 @@
 import { Datastore, Key, PropertyFilter, Query, Transaction } from '@google-cloud/datastore'
 import { AggregateQuery } from '@google-cloud/datastore/build/src/aggregate'
 import { EntityFilter, and } from '@google-cloud/datastore/build/src/filter'
-import crypto from 'crypto'
 
 let datastore: Datastore
 export const getDatastore = () => {
@@ -206,9 +205,9 @@ export const getKeyedEntities = async (type: EntityType, ids: number[], transact
 export const getKeyedEntity = async (type: EntityType, id: number, transaction?: Transaction) =>
   getKeyedEntities(type, [id], transaction).then(([entity]) => entity)
 
-export const getFilteredEntityCount = async (type: EntityType, filter: EntityFilter) => {
+export const getFilteredEntityCount = async (type: EntityType, filter?: EntityFilter) => {
   const datastore = getDatastore()
-  const query = datastore.createQuery(type).filter(filter)
+  const query = filterQuery(datastore.createQuery(type), filter)
   const [[{ count }]] = await datastore.runAggregationQuery(new AggregateQuery(query).count('count'))
   return count
 }
