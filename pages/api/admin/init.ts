@@ -1,6 +1,6 @@
 import { CheckValidEmail } from '@/src/common/formatting'
 import { Entity, getEntityKey, getFilteredEntityCount, getID } from '@/src/server/datastore/datastore'
-import { addProjectForUser } from '@/src/server/datastore/projects'
+import { addProjectForUser, ensureProjectAPIKey, getActiveProject } from '@/src/server/datastore/projects'
 import { addPromptForUser, deletePromptForUser } from '@/src/server/datastore/prompts'
 import { getUserForEmail, saveUser } from '@/src/server/datastore/users'
 import { saveChainVersionForUser, savePromptVersionForUser } from '@/src/server/datastore/versions'
@@ -32,12 +32,16 @@ async function init(req: NextApiRequest, res: NextApiResponse) {
 
   const workspaceID = await addWorkspaceForUser(adminUser.id, 'Admin')
   const projectID = await addProjectForUser(adminUser.id, workspaceID, 'PlayFetch Features')
+
   const initialPromptID = getID({ key: await getEntityKey(Entity.PROMPT, 'projectID', projectID) })
   await deletePromptForUser(adminUser.id, initialPromptID)
   await addPredictionEndpoint(adminUser.id, projectID)
 
+  await ensureProjectAPIKey(adminUser.id, projectID)
+  const project = await getActiveProject(adminUser.id, projectID)
+
   res.json({
-    _PLAYFETCH_API_KEY: '1234',
+    _PLAYFETCH_API_KEY: project.endpoints[0].apiKeyDev,
     _PLAYFETCH_ENDPOINT_URL: `${getAPIBaseURLForProject(projectID)}`,
   })
 }
@@ -46,27 +50,33 @@ const addPredictionEndpoint = async (userID: number, projectID: number) => {
   const { promptID, promptVersionID } = await addPrompt(userID, projectID, 'Predict Rating', 'prediction')
 
   const { chainID, versionID } = await addChainForUser(userID, projectID, 'Predict Rating')
-  const chainVersionID = await saveChainVersionForUser(userID, chainID, [
-    {
-      code: loadCodeBlock('prePrediction'),
-      branch: 0,
-      output: "recentRatings",
-      inputs: ["recentRatings"],
-    },
-    {
-      promptID,
-      versionID: promptVersionID,
-      branch: 0,
-      output: "response",
-      inputs: ["recentRatings", "inputs", "output"],
-      dynamicInputs: [],
-    },
-    {
-      code: loadCodeBlock('postPrediction'),
-      branch: 0,
-      inputs: ["response"],
-    },
-  ], versionID, versionID)
+  const chainVersionID = await saveChainVersionForUser(
+    userID,
+    chainID,
+    [
+      {
+        code: loadCodeBlock('prePrediction'),
+        branch: 0,
+        output: 'recentRatings',
+        inputs: ['recentRatings'],
+      },
+      {
+        promptID,
+        versionID: promptVersionID,
+        branch: 0,
+        output: 'response',
+        inputs: ['recentRatings', 'inputs', 'output'],
+        dynamicInputs: [],
+      },
+      {
+        code: loadCodeBlock('postPrediction'),
+        branch: 0,
+        inputs: ['response'],
+      },
+    ],
+    versionID,
+    versionID
+  )
 }
 
 const addPrompt = async (userID: number, projectID: number, name: string, type: PromptType) => {
@@ -78,8 +88,7 @@ const addPrompt = async (userID: number, projectID: number, name: string, type: 
 
 type PromptType = 'prediction' | 'suggestion' | 'generation'
 
-const loadPrompt = (type: PromptType) =>
-  deserializePromptVersion(loadTemplate(`${type}Prompt.yaml`))
+const loadPrompt = (type: PromptType) => deserializePromptVersion(loadTemplate(`${type}Prompt.yaml`))
 
 const loadCodeBlock = (type: 'prePrediction' | 'postPrediction' | 'suggestion') =>
   deserializeCodeBlock(loadTemplate(`${type}Code.yaml`))
