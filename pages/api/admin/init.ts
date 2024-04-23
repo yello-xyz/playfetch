@@ -36,6 +36,7 @@ async function init(req: NextApiRequest, res: NextApiResponse) {
   const initialPromptID = getID({ key: await getEntityKey(Entity.PROMPT, 'projectID', projectID) })
   await deletePromptForUser(adminUser.id, initialPromptID)
 
+  await addGenerationEndpoint(adminUser.id, projectID, 'Generate Response')
   await addPredictionEndpoint(adminUser.id, projectID, 'Predict Rating')
   await addSuggestionEndpoint(adminUser.id, projectID, 'Suggest Improvement')
 
@@ -46,6 +47,11 @@ async function init(req: NextApiRequest, res: NextApiResponse) {
     _PLAYFETCH_API_KEY: project.endpoints[0].apiKeyDev,
     _PLAYFETCH_ENDPOINT_URL: `${getAPIBaseURLForProject(projectID)}`,
   })
+}
+
+const addGenerationEndpoint = async (userID: number, projectID: number, name: string) => {
+  const { promptID, promptVersionID } = await addPrompt(userID, projectID, name, 'generation')
+  return addEndpoint(userID, projectID, promptID, promptVersionID, 'respond')
 }
 
 const addPredictionEndpoint = async (userID: number, projectID: number, name: string) => {
@@ -80,7 +86,7 @@ const addPredictionEndpoint = async (userID: number, projectID: number, name: st
     versionID
   )
 
-  await saveEndpoint(true, userID, projectID, chainID, chainVersionID, 'rate', DefaultEndpointFlavor, false, false)
+  return addEndpoint(userID, projectID, chainID, chainVersionID, 'rate')
 }
 
 const addSuggestionEndpoint = async (userID: number, projectID: number, name: string) => {
@@ -109,8 +115,11 @@ const addSuggestionEndpoint = async (userID: number, projectID: number, name: st
     versionID
   )
 
-  await saveEndpoint(true, userID, projectID, chainID, chainVersionID, 'suggest', DefaultEndpointFlavor, false, false)
+  return addEndpoint(userID, projectID, chainID, chainVersionID, 'suggest')
 }
+
+const addEndpoint = (userID: number, projectID: number, parentID: number, versionID: number, name: string) =>
+  saveEndpoint(true, userID, projectID, parentID, versionID, name, DefaultEndpointFlavor, false, false)
 
 const addPrompt = async (userID: number, projectID: number, name: string, type: PromptType) => {
   const { promptID, versionID } = await addPromptForUser(userID, projectID, name)
