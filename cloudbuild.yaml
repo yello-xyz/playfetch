@@ -57,4 +57,8 @@ steps:
     args: ['run', 'build']
   - name: 'gcr.io/cloud-builders/gcloud'
     args: ['app', 'deploy']
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: ['app', 'deploy', 'cron.yaml']
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: ['datastore', 'indexes', 'create', 'index.yaml']
 timeout: '1600s'
