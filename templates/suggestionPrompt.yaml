@@ -1,0 +1,17 @@
+prompt: >-
+  Given the following prompt and ratings for outputs based on inputs, suggest a
+  better prompt that would produce better outputs. Make sure to retain any input
+  variables enclosed in double curly braces:
+
+
+  Prompt: {{prompt}}
+
+
+  {{recentRatings}}
+
+
+  Suggested prompt:
+system: You are an expert linguist
+model: chat-bison
+temperature: 0.5
+maxTokens: 1000

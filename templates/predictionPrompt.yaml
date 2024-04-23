@@ -1,0 +1,19 @@
+prompt: >-
+  Given the following ratings for outputs based on inputs, predict the rating
+  for the next output based on its input. Limit yourself to the same ratings and
+  reasons as the ones provided in the examples:
+
+
+
+  {{recentRatings}}
+
+
+  Inputs: {{inputs}}
+
+  Output: {{output}}
+
+  Rating:
+system: You are a critical QA tester who is concise and predictable
+model: chat-bison
+temperature: 0.5
+maxTokens: 250
