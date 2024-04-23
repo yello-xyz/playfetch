@@ -2,6 +2,8 @@
 
 PlayFetch makes adding Large Language Model features to your app quick and painless.
 
+![playfetch](https://github.com/yello-xyz/playfetch/assets/6898258/98b931ce-3079-4361-b344-9e7766a33409)
+
 ## Context
 
 LLMs have changed the way product teams are working.  Increasingly large parts of applications are now being built with natural language.  There are often non-engineering team members involved in this process — content strategists who care about the tone and delivery of the generated text, domain experts who are bringing highly specialised knowledge to generated content, and designers & product managers who have a deep understanding of their product needs.  With these new team members involved in prototyping, developing and maintaining critical parts of applications along side the engineering team there are lots of new interactions.
