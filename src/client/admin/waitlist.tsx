@@ -1,10 +1,11 @@
-import TextInput from '@/src/client/components/textInput'
 import api from '@/src/client/admin/api'
 import { Fragment, useState } from 'react'
 import { PendingButton } from '@/src/client/components/button'
 import { CheckValidEmail } from '@/src/common/formatting'
 import { User } from '@/types'
 import Label from '@/src/client/components/label'
+import Checkbox from '@/src/client/components/checkbox'
+import TextInput from '@/src/client/components/textInput'
 import ModalDialog, { DialogPrompt } from '@/src/client/components/modalDialog'
 import UserAvatar from '@/src/client/users/userAvatar'
 
@@ -12,11 +13,12 @@ export default function Waitlist({ initialWaitlistUsers }: { initialWaitlistUser
   const [waitlistUsers, setWaitlistUsers] = useState<User[]>(initialWaitlistUsers)
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
+  const [asAdmin, setAsAdmin] = useState(false)
   const [addedEmail, setAddedEmail] = useState('')
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
   const [adding, setAdding] = useState(false)
 
-  const promptAddUser = (email: string, fullName: string, callback?: () => Promise<void>) =>
+  const promptAddUser = (email: string, fullName: string, asAdmin: boolean, callback?: () => Promise<void>) =>
     setDialogPrompt({
       title:
         'Grant user access? They will NOT be notified by email automatically ' +
@@ -24,17 +26,17 @@ export default function Waitlist({ initialWaitlistUsers }: { initialWaitlistUser
       confirmTitle: 'Proceed',
       callback: async () => {
         setAdding(true)
-        await api.addUser(email.trim(), fullName.trim())
+        await api.addUser(email.trim(), fullName.trim(), asAdmin)
         setAddedEmail(email)
         await callback?.()
         setAdding(false)
       },
     })
 
-  const addUser = () => promptAddUser(email, fullName)
+  const addUser = () => promptAddUser(email, fullName, asAdmin)
 
   const grantWaitlistUserAccess = (user: User) =>
-    promptAddUser(user.email, user.fullName, () => api.getWaitlistUsers().then(setWaitlistUsers))
+    promptAddUser(user.email, user.fullName, false, () => api.getWaitlistUsers().then(setWaitlistUsers))
 
   const gridConfig = 'grid grid-cols-[28px_240px_minmax(0,1fr)_160px]'
 
@@ -45,6 +47,7 @@ export default function Waitlist({ initialWaitlistUsers }: { initialWaitlistUser
         <div className='flex items-center gap-2'>
           <TextInput placeholder='Email' value={email} setValue={setEmail} />
           <TextInput placeholder='Full Name (optional)' value={fullName} setValue={setFullName} />
+          <Checkbox label='Admin' checked={asAdmin} setChecked={setAsAdmin} />
           <PendingButton title='Grant Access' disabled={!CheckValidEmail(email) || adding} onClick={addUser} />
         </div>
         {waitlistUsers.length > 0 && (
