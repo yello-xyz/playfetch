@@ -2,7 +2,7 @@
 
 PlayFetch makes adding Large Language Model features to your app quick and painless.
 
-![playfetch](https://github.com/yello-xyz/playfetch/assets/6898258/98b931ce-3079-4361-b344-9e7766a33409)
+![](public/playfetch.gif)
 
 ## Context
 
