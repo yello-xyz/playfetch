@@ -40,11 +40,10 @@ async function init(req: NextApiRequest, res: NextApiResponse) {
   await addPredictionEndpoint(adminUser.id, projectID, 'Predict Rating')
   await addSuggestionEndpoint(adminUser.id, projectID, 'Suggest Improvement')
 
-  await ensureProjectAPIKey(adminUser.id, projectID)
-  const project = await getActiveProject(adminUser.id, projectID)
+  const apiKey = await ensureProjectAPIKey(adminUser.id, projectID)
 
   res.json({
-    _PLAYFETCH_API_KEY: project.endpoints[0].apiKeyDev,
+    _PLAYFETCH_API_KEY: apiKey,
     _PLAYFETCH_ENDPOINT_URL: `${getAPIBaseURLForProject(projectID)}`,
   })
 }
