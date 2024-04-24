@@ -58,11 +58,12 @@ steps:
     entrypoint: npm
     args: ['run', 'build']
   - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: '/bin/bash'
+    args: ['-c', 'gcloud datastore indexes create index.yaml || true']
+  - name: 'gcr.io/cloud-builders/gcloud'
     args: ['app', 'deploy']
   - name: 'gcr.io/cloud-builders/gcloud'
     args: ['app', 'deploy', 'cron.yaml']
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args: ['datastore', 'indexes', 'create', 'index.yaml']
 options:
   logging: CLOUD_LOGGING_ONLY
 timeout: '1600s'
