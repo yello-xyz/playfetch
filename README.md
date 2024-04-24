@@ -134,8 +134,6 @@ You should now be able to navigate to **https://[project-name].appspot.com** and
 
 ## Running PlayFetch locally
 
-*Instructions below assume you are using Terminal on macOS.*
-
 ### Install node and npm
 
 The easiest way to install the latest version of **node** and **npm** is to run the [latest installer](https://nodejs.org/en/download).
@@ -188,10 +186,10 @@ To watch for changes and automatically re-run the relevant test suites:
 
 ## License
 
-PlayFetch is open source under a permissive [MIT](https://github.com/codemirror/dev/blob/master/LICENSE) license. It is being developed on [GitHub](https://github.com/yello-xyz/playfetch). Contributions are welcome.
+PlayFetch is open source under a permissive [MIT](./LICENSE) license. It is being developed on [GitHub](https://github.com/yello-xyz/playfetch). Contributions are welcome.
 
 Please note that PlayFetch uses [CodeMirror](https://codemirror.net) as a dependency. If you are using CodeMirror commercially, there is a social (but no legal) expectation that you [help fund its maintenance](https://marijnhaverbeke.nl/fund/).
 
 ## Contributing
 
-Feel free to open issues or open pull requests when fixing bugs or adding features. To get you started, some inspiration can be found in [TODO.md](http://TODO.md).
+Feel free to open issues or open pull requests when fixing bugs or adding features. To get you started, some inspiration can be found in [TODO.md](./TODO.md).
