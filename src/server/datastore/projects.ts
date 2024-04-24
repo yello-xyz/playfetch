@@ -284,14 +284,16 @@ export async function ensureProjectLabels(projectID: number, labels: string[]) {
   }
 }
 
-export async function ensureProjectAPIKey(userID: number, projectID: number): Promise<void> {
+export async function ensureProjectAPIKey(userID: number, projectID: number): Promise<string> {
   const projectData = await getVerifiedUserProjectData(userID, projectID)
   if (!projectData.encryptedAPIKey) {
     const apiKey = `sk-${new ShortUniqueId({ length: 48, dictionary: 'alphanum' })()}`
     const encryptedAPIKey = encrypt(apiKey)
     const apiKeyHash = hashAPIKey(apiKey)
     await updateProject({ ...projectData, encryptedAPIKey, apiKeyHash }, true)
+    return apiKey
   }
+  return ''
 }
 
 export async function toggleFavoriteProject(userID: number, projectID: number, favorited: boolean) {
