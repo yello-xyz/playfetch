@@ -23,7 +23,11 @@ const escapeHome = () => {
 }
 
 export default function App({ Component, pageProps: { session, ...pageProps } }: AppProps) {
-  useEffect(() => TagManager.initialize({ gtmId: process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID ?? '' }), [])
+  useEffect(() => {
+    if (!!process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID) {
+      TagManager.initialize({ gtmId: process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID })
+    }
+  }, [])
 
   return (
     <>

@@ -31,6 +31,8 @@ steps:
       - 'LINEAR_APP_WEBHOOK_SECRET=${_LINEAR_APP_WEBHOOK_SECRET}'
       - 'NEXTAUTH_SECRET=${_NEXTAUTH_SECRET}'
       - 'NEXTAUTH_URL=${_NEXTAUTH_URL}'
+      - 'NOREPLY_EMAIL_HOST=${_NOREPLY_EMAIL_HOST}'
+      - 'NOREPLY_EMAIL_PORT=${_NOREPLY_EMAIL_PORT}'
       - 'NOREPLY_EMAIL_PASSWORD=${_NOREPLY_EMAIL_PASSWORD}'
       - 'NOREPLY_EMAIL_USER=${_NOREPLY_EMAIL_USER}'
       - 'NOTION_TOKEN=${_NOTION_TOKEN}'
@@ -50,9 +52,17 @@ steps:
       - 'NEXT_PUBLIC_COOKIE_DOMAIN=${_NEXT_PUBLIC_COOKIE_DOMAIN}'
       - 'NEXT_PUBLIC_COOKIE_NAME=${_NEXT_PUBLIC_COOKIE_NAME}'
       - 'NEXT_PUBLIC_DOCS_URL=${_NEXT_PUBLIC_DOCS_URL}'
+      - 'NEXT_PUBLIC_SUPPORT_EMAIL=${_NEXT_PUBLIC_SUPPORT_EMAIL}'
+      - 'NEXT_PUBLIC_PRIVACY_PAGE_URL=${_NEXT_PUBLIC_PRIVACY_PAGE_URL}'
   - name: node:18
     entrypoint: npm
     args: ['run', 'build']
   - name: 'gcr.io/cloud-builders/gcloud'
+    args: ['datastore', 'indexes', 'create', 'index.yaml']
+  - name: 'gcr.io/cloud-builders/gcloud'
     args: ['app', 'deploy']
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: ['app', 'deploy', 'cron.yaml']
+options:
+  logging: CLOUD_LOGGING_ONLY
 timeout: '1600s'

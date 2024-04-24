@@ -18,7 +18,6 @@ enum ClientRoute {
   Settings = '/settings',
   Login = '/login',
   Onboarding = '/onboarding',
-  Privacy = '/privacy',
   Admin = '/admin',
 }
 

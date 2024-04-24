@@ -18,6 +18,8 @@ import { ParseActiveItemQuery, ParseNumberQuery, ParseQuery } from '@/src/common
 import { getAnalyticsForProject } from './datastore/analytics'
 import { getPresetsForUser } from './datastore/users'
 import { getTableForUser } from './datastore/tables'
+import { IsGitHubConfigured } from './providers/github'
+import { IsLinearConfigured } from './providers/linear'
 
 export default async function loadActiveItem(user: User, query: ParsedUrlQuery) {
   const { projectID } = ParseNumberQuery(query)
@@ -65,6 +67,8 @@ export default async function loadActiveItem(user: User, query: ParsedUrlQuery) 
     initialAvailableProviders,
     initialScopedProviders,
     initialUserPresets,
+    supportsSourceControl: IsGitHubConfigured(),
+    supportsIssueTracker: IsLinearConfigured(),
   }
 }
 

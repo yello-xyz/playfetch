@@ -1,4 +1,4 @@
-import ClientRoute, { WaitlistRoute } from '@/src/common/clientRoute'
+import { WaitlistRoute } from '@/src/common/clientRoute'
 import { CheckValidEmail } from '@/src/common/formatting'
 import logUserRequest, { LoginEvent, SignupEvent, logUnknownUserRequest } from '@/src/server/analytics'
 import NextAuthAdapter from '@/src/server/datastore/nextAuthAdapter'
@@ -16,6 +16,11 @@ import { NextApiRequestCookies } from 'next/dist/server/api-utils'
 
 const getRegisteredUser = async (email?: string | null) => (email ? getUserForEmail(email) : undefined)
 
+export const IsGoogleAuthenticationConfigured = () =>
+  !!process.env.GOOGLE_CLIENT_ID && !!process.env.GOOGLE_CLIENT_SECRET
+export const IsGitHubAuthenticationConfigured = () =>
+  !!process.env.GITHUB_CLIENT_ID && !!process.env.GITHUB_CLIENT_SECRET
+
 export const authOptions = (req: { cookies: NextApiRequestCookies }, res: ServerResponse): NextAuthOptions => ({
   adapter: NextAuthAdapter(),
   session: {
@@ -26,14 +31,22 @@ export const authOptions = (req: { cookies: NextApiRequestCookies }, res: Server
       server: GetEmailServerConfig(),
       from: GetNoReplyFromAddress(),
     }),
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID ?? '',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
-    }),
-    GitHubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID ?? '',
-      clientSecret: process.env.GITHUB_CLIENT_SECRET ?? '',
-    }),
+    ...(IsGoogleAuthenticationConfigured()
+      ? [
+          GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID ?? '',
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
+          }),
+        ]
+      : []),
+    ...(IsGitHubAuthenticationConfigured()
+      ? [
+          GitHubProvider({
+            clientId: process.env.GITHUB_CLIENT_ID ?? '',
+            clientSecret: process.env.GITHUB_CLIENT_SECRET ?? '',
+          }),
+        ]
+      : []),
   ],
   callbacks: {
     async signIn({

@@ -10,16 +10,21 @@ import { useRouter } from 'next/router'
 import logo from '@/public/logo.svg'
 import Image from 'next/image'
 import { useDocumentationCookie } from '@/src/client/cookies/cookieBanner'
+import { IsGitHubAuthenticationConfigured, IsGoogleAuthenticationConfigured } from '@/pages/api/auth/[...nextauth]'
 
 export const getServerSideProps = withLoggedOutSession(async context => {
   const tokenCSRF = (await getCsrfToken(context)) ?? null
-  const props: LoginProps = { tokenCSRF }
+  const props: LoginProps = {
+    tokenCSRF,
+    supportsGoogle: IsGoogleAuthenticationConfigured(),
+    supportsGitHub: IsGitHubAuthenticationConfigured(),
+  }
   return { props }
 })
 
-type LoginProps = { tokenCSRF: string | null }
+type LoginProps = { tokenCSRF: string | null; supportsGoogle: boolean; supportsGitHub: boolean }
 
-export default function Login({ tokenCSRF }: LoginProps) {
+export default function Login({ tokenCSRF, supportsGoogle, supportsGitHub }: LoginProps) {
   useDocumentationCookie('remove')
   const router = useRouter()
   const { w: joinedWaitList } = ParseNumberQuery(router.query)
@@ -73,13 +78,15 @@ export default function Login({ tokenCSRF }: LoginProps) {
             Sign in with Email
           </button>
         </form>
-        <div className='flex items-center gap-6'>
-          <div className='flex-1 h-px bg-gray-200' />
-          <span className='py-3 text-sm text-gray-400'>or</span>
-          <div className='flex-1 h-px bg-gray-200' />
-        </div>
-        <SignInButton name='Google' icon={googleIcon} provider='google' />
-        <SignInButton name='GitHub' icon={githubIcon} provider='github' />
+        {(supportsGoogle || supportsGitHub) && (
+          <div className='flex items-center gap-6'>
+            <div className='flex-1 h-px bg-gray-200' />
+            <span className='py-3 text-sm text-gray-400'>or</span>
+            <div className='flex-1 h-px bg-gray-200' />
+          </div>
+        )}
+        {supportsGoogle && <SignInButton name='Google' icon={googleIcon} provider='google' />}
+        {supportsGitHub && <SignInButton name='GitHub' icon={githubIcon} provider='github' />}
       </div>
     </main>
   )

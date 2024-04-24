@@ -513,7 +513,7 @@ export const OutputPriceForModel = (model: LanguageModel | EmbeddingModel): numb
   }
 }
 
-export const IsModelFreeToUse = (model: LanguageModel | EmbeddingModel): boolean => {
+export const IsCloudProviderModel = (model: LanguageModel | EmbeddingModel): boolean => {
   switch (model) {
     case 'text-embedding-ada-002':
     case 'text-embedding-3-small':

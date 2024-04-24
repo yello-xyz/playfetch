@@ -31,6 +31,9 @@ import { useDocumentationCookie } from '@/src/client/cookies/cookieBanner'
 
 import dynamic from 'next/dynamic'
 import { loadScopedProviders } from '@/src/server/datastore/providers'
+import { IsOnboardingSupported } from '@/src/server/notion'
+import { IsGitHubConfigured } from '@/src/server/providers/github'
+import { IsLinearConfigured } from '@/src/server/providers/linear'
 const WorkspaceSidebar = dynamic(() => import('@/src/client/workspaces/workspaceSidebar'))
 const WorkspaceInvite = dynamic(() => import('@/src/client/workspaces/workspaceInvite'))
 const WorkspaceGridView = dynamic(() => import('@/src/client/workspaces/workspaceGridView'))
@@ -49,7 +52,7 @@ export const SharedProjectsWorkspace = (
 })
 
 export const getServerSideProps = withLoggedInSession(async ({ query, user }) => {
-  if (!user.didCompleteOnboarding) {
+  if (!user.didCompleteOnboarding && IsOnboardingSupported()) {
     return Redirect(ClientRoute.Onboarding)
   }
 
@@ -76,6 +79,8 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
     initialActiveWorkspace,
     initialProviders,
     initialShowSettings: !!settings,
+    supportsSourceControl: IsGitHubConfigured(),
+    supportsIssueTracker: IsLinearConfigured(),
   }
 
   return { props }
@@ -89,6 +94,8 @@ type HomeProps = {
   initialActiveWorkspace: ActiveWorkspace | PendingWorkspace
   initialProviders: AvailableProvider[]
   initialShowSettings: boolean
+  supportsSourceControl: boolean
+  supportsIssueTracker: boolean
 }
 
 export default function Home({
@@ -99,6 +106,8 @@ export default function Home({
   initialActiveWorkspace,
   initialProviders,
   initialShowSettings,
+  supportsSourceControl,
+  supportsIssueTracker,
 }: HomeProps) {
   useDocumentationCookie('set')
   const router = useRouter()
@@ -235,6 +244,8 @@ export default function Home({
                         isUserWorkspace={activeWorkspace.id === user.id}
                         isSharedProjects={IsSharedProjects(activeWorkspace)}
                         initialProviders={initialProviders}
+                        supportsSourceControl={supportsSourceControl}
+                        supportsIssueTracker={supportsIssueTracker}
                         showSettings={showSettings}
                         toggleSettings={toggleSettings}
                         onRespondToProjectInvite={respondToProjectInvite}

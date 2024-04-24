@@ -2,12 +2,11 @@ import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import Button from '@/src/client/components/button'
 import TagManager from 'react-gtm-module'
-import ClientRoute from '@/src/common/clientRoute'
 import Checkbox from '@/src/client/components/checkbox'
 import { useCookies } from 'react-cookie'
 import { CookieSetOptions } from 'universal-cookie'
 
-const consentCookieName = () => process.env.NEXT_PUBLIC_COOKIE_NAME ?? 'dev-consent'
+const consentCookieName = () => process.env.NEXT_PUBLIC_COOKIE_NAME || 'dev-consent'
 const topLevelCookieProperties: () => CookieSetOptions = () => ({
   path: '/',
   sameSite: 'lax',
@@ -15,7 +14,9 @@ const topLevelCookieProperties: () => CookieSetOptions = () => ({
 })
 
 export const updateCookieConsent = (accept: boolean) => {
-  TagManager.dataLayer({ dataLayer: { event: 'update-consent', consent: accept ? 'granted' : 'denied' } })
+  if (!!process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID) {
+    TagManager.dataLayer({ dataLayer: { event: 'update-consent', consent: accept ? 'granted' : 'denied' } })
+  }
 }
 
 export default function CookieBanner({ children }: any) {
@@ -35,7 +36,7 @@ export default function CookieBanner({ children }: any) {
   useEffect(() => {
     if (cookieStatus !== 'unknown') {
       updateCookieConsent(cookieStatus === 'accepted')
-    } else {
+    } else if (!!process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID) {
       setTimeout(() => setSavedCookieStatus(false), 2000)
     }
   }, [cookieStatus])
@@ -67,8 +68,17 @@ export default function CookieBanner({ children }: any) {
           ) : (
             <div className='text-xs'>
               We use cookies and similar technologies to give you a better experience and to help us improve our
-              services. You can manage your cookie settings at any time. For more information, please see our{' '}
-              <Link href={ClientRoute.Privacy}>Privacy Policy</Link>.
+              services. You can manage your cookie settings at any time.
+              {!!process.env.NEXT_PUBLIC_PRIVACY_PAGE_URL && (
+                <>
+                  {' '}
+                  For more information, please see our{' '}
+                  <Link href={process.env.NEXT_PUBLIC_PRIVACY_PAGE_URL} target='_blank'>
+                    Privacy Policy
+                  </Link>
+                  .
+                </>
+              )}
             </div>
           )}
           <div className='flex justify-end gap-2'>

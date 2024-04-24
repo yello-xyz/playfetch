@@ -38,6 +38,8 @@ export default function SettingsView({
   activeProject,
   refreshWorkspace,
   refreshProject,
+  supportsSourceControl,
+  supportsIssueTracker,
 }: {
   providers: AvailableProvider[]
   refreshProviders: () => void
@@ -45,6 +47,8 @@ export default function SettingsView({
   activeProject?: ActiveProject
   refreshWorkspace?: () => void
   refreshProject?: () => void
+  supportsSourceControl: boolean
+  supportsIssueTracker: boolean
 }) {
   const user = useLoggedInUser()
   const scope: Scope = activeWorkspace ? 'workspace' : activeProject ? 'project' : 'user'
@@ -97,8 +101,8 @@ export default function SettingsView({
     UsagePane,
     ...(activeWorkspace || activeProject ? [TeamPane] : []),
     ConnectorsPane,
-    ...(activeWorkspace ? [] : [SourceControlPane]),
-    ...(activeWorkspace ? [] : [IssueTrackerPane]),
+    ...(activeWorkspace || !supportsSourceControl ? [] : [SourceControlPane]),
+    ...(activeWorkspace || !supportsIssueTracker ? [] : [IssueTrackerPane]),
   ]
 
   const activeItem = activeWorkspace ?? activeProject

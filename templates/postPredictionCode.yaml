@@ -1,0 +1,20 @@
+code: |-
+  let lines = {{response}}
+    .split('
+  ')
+    .map(line =>
+      line
+        .replace(/Rating:/gi, '')
+        .replace(/Reason:/gi, '')
+        .trim()
+    )
+    .filter(line => line.length > 0)
+
+  if (lines.length === 2) {
+    const [rating, reason] = lines
+    if (rating === 'positive' || rating === 'negative') {
+      return { rating, reason }
+    }
+  }
+
+  return {}

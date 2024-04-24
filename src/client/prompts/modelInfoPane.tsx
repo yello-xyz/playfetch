@@ -5,7 +5,7 @@ import {
   LabelForModel,
   IconForProvider,
   InputPriceForModel,
-  IsModelFreeToUse,
+  IsCloudProviderModel,
   LabelForProvider,
   MaxTokensForModel,
   OutputPriceForModel,
@@ -40,7 +40,10 @@ export default function ModelInfoPane({
   const isModelAvailable = checkModelAvailable(model)
 
   const [showActionMenu, setShowActionMenu] = useState(false)
-  const gridConfig = IsSubscriptionRequiredForModel(model) ? 'grid-cols-[140px_250px]' : 'grid-cols-[140px_180px]'
+  const gridConfig =
+    IsSubscriptionRequiredForModel(model) || IsCloudProviderModel(model)
+      ? 'grid-cols-[140px_250px]'
+      : 'grid-cols-[140px_180px]'
 
   return (
     <PopupContent className='relative p-3 w-[480px] ml-7 flex flex-col gap-1 shadow-sm'>
@@ -65,6 +68,11 @@ export default function ModelInfoPane({
             <span className='font-medium'>Pricing</span>
             <span>Requires Hugging Face Pro subscription</span>
           </>
+        ) : IsCloudProviderModel(model) ? (
+          <>
+            <span className='font-medium'>Pricing</span>
+            <span>Requires Google Cloud subscription</span>
+          </>
         ) : (
           <>
             <span className='font-medium'>Input Pricing</span>
@@ -75,7 +83,6 @@ export default function ModelInfoPane({
             <ModelCost model={model} mode='output' />
           </>
         )}
-        {IsModelFreeToUse(model) && <span className='mt-2'>*Fair use applies</span>}
       </div>
       {!isModelAvailable && (
         <ModelUnavailableWarning
@@ -97,26 +104,16 @@ const HorizontalBorder = () => <div className='h-1 border-b border-gray-200' />
 export const ModelLabel = ({ model }: { model: LanguageModel }) => {
   const [defaultPromptConfig] = useDefaultPromptConfig()
 
-  return IsModelFreeToUse(model) ? (
-    <ModelSuffix label='Free' />
-  ) : model === defaultPromptConfig.model ? (
-    <ModelSuffix label='Default' color='bg-pink-400' />
-  ) : null
+  return model === defaultPromptConfig.model ? <ModelSuffix label='Default' color='bg-pink-400' /> : null
 }
 
 const ModelSuffix = ({ label, color = 'bg-gray-400' }: { label: string; color?: string }) => (
   <span className={`${color} px-1 ml-1 text-[10px] leading-[17px] font-medium text-white rounded`}>{label}</span>
 )
 
-const ModelCost = ({ model, mode }: { model: LanguageModel; mode: 'input' | 'output' }) => {
-  return IsModelFreeToUse(model) ? (
-    <span>
-      <span className='line-through'>{FormatCost(mode === 'input' ? 0.25 : 0.5)}</span> $0 / 1M characters*
-    </span>
-  ) : (
-    <span>{FormatCost(mode === 'input' ? InputPriceForModel(model) : OutputPriceForModel(model))} / 1M tokens</span>
-  )
-}
+const ModelCost = ({ model, mode }: { model: LanguageModel; mode: 'input' | 'output' }) => (
+  <span>{FormatCost(mode === 'input' ? InputPriceForModel(model) : OutputPriceForModel(model))} / 1M tokens</span>
+)
 
 const ActionMenu = ({
   model,

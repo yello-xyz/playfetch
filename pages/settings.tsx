@@ -7,21 +7,38 @@ import { UserContext } from '@/src/client/users/userContext'
 import { loadScopedProviders } from '@/src/server/datastore/providers'
 import TopBar, { TopBarAccessoryItem, TopBarBackItem } from '@/src/client/components/topBar'
 import api from '@/src/client/api'
-
-import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import ClientRoute from '@/src/common/clientRoute'
+import { IsGitHubConfigured } from '@/src/server/providers/github'
+import { IsLinearConfigured } from '@/src/server/providers/linear'
+
+import dynamic from 'next/dynamic'
 const SettingsView = dynamic(() => import('@/src/client/settings/settingsView'))
 
 export const getServerSideProps = withLoggedInSession(async ({ user }) => {
   const initialProviders = await loadScopedProviders(user.id)
-  const props: SettingsProps = { user, initialProviders }
+  const props: SettingsProps = {
+    user,
+    initialProviders,
+    supportsSourceControl: IsGitHubConfigured(),
+    supportsIssueTracker: IsLinearConfigured(),
+  }
   return { props }
 })
 
-type SettingsProps = { user: User; initialProviders: AvailableProvider[] }
+type SettingsProps = {
+  user: User
+  initialProviders: AvailableProvider[]
+  supportsSourceControl: boolean
+  supportsIssueTracker: boolean
+}
 
-export default function Settings({ user, initialProviders }: SettingsProps) {
+export default function Settings({
+  user,
+  initialProviders,
+  supportsSourceControl,
+  supportsIssueTracker,
+}: SettingsProps) {
   const router = useRouter()
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
 
@@ -39,7 +56,12 @@ export default function Settings({ user, initialProviders }: SettingsProps) {
               <TopBarAccessoryItem />
             </TopBar>
             <Suspense>
-              <SettingsView providers={scopedProviders} refreshProviders={refreshProviders} />
+              <SettingsView
+                providers={scopedProviders}
+                refreshProviders={refreshProviders}
+                supportsSourceControl={supportsSourceControl}
+                supportsIssueTracker={supportsIssueTracker}
+              />
             </Suspense>
           </main>
         </ModalDialogContext.Provider>

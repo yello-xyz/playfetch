@@ -45,3 +45,7 @@ export const deserializePromptVersion = (
     },
   }
 }
+
+export const serializeCodeBlock = (code: string): string => stringify({ code })
+
+export const deserializeCodeBlock = (codeBlock: string): string => parse(codeBlock).code

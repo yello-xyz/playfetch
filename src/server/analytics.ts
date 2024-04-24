@@ -79,20 +79,22 @@ export function logUnknownUserEvent(clientID: string, event: Event) {
 }
 
 function logEventInternal(clientID: string, userID: number | undefined, event: Event) {
-  const query = new URLSearchParams()
-  query.set('measurement_id', process.env.GOOGLE_ANALYTICS_MEASUREMENT_ID ?? '')
-  query.set('api_secret', process.env.GOOGLE_ANALYTICS_API_SECRET ?? '')
+  if (!!process.env.GOOGLE_ANALYTICS_MEASUREMENT_ID && !!process.env.GOOGLE_ANALYTICS_API_SECRET) {
+    const query = new URLSearchParams()
+    query.set('measurement_id', process.env.GOOGLE_ANALYTICS_MEASUREMENT_ID)
+    query.set('api_secret', process.env.GOOGLE_ANALYTICS_API_SECRET)
 
-  fetch(`https://www.google-analytics.com/mp/collect?${query.toString()}`, {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-    },
-    body: JSON.stringify({
-      user_id: userID?.toString(),
-      client_id: clientID,
-      non_personalized_ads: true,
-      events: [{ name: event.name, params: { ...event.params, app_version: process.env.npm_package_version } }],
-    }),
-  })
+    fetch(`https://www.google-analytics.com/mp/collect?${query.toString()}`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        user_id: userID?.toString(),
+        client_id: clientID,
+        non_personalized_ads: true,
+        events: [{ name: event.name, params: { ...event.params, app_version: process.env.npm_package_version } }],
+      }),
+    })
+  }
 }

@@ -21,6 +21,8 @@ export default function WorkspaceGridView({
   isUserWorkspace,
   isSharedProjects,
   initialProviders,
+  supportsSourceControl,
+  supportsIssueTracker,
   showSettings,
   toggleSettings,
   onRespondToProjectInvite,
@@ -35,6 +37,8 @@ export default function WorkspaceGridView({
   isUserWorkspace: boolean
   isSharedProjects: boolean
   initialProviders: AvailableProvider[]
+  supportsSourceControl: boolean
+  supportsIssueTracker: boolean
   showSettings: boolean
   toggleSettings: (show: boolean) => void
   onRespondToProjectInvite: (projectID: number, accept: boolean) => void
@@ -106,6 +110,8 @@ export default function WorkspaceGridView({
               refreshProviders={refreshProviders}
               activeWorkspace={activeWorkspace}
               refreshWorkspace={onRefreshWorkspace}
+              supportsSourceControl={supportsSourceControl}
+              supportsIssueTracker={supportsIssueTracker}
             />
           ) : (
             <div className='flex flex-col overflow-y-auto h-full px-6 gap-3.5 pt-3.5 pb-5'>

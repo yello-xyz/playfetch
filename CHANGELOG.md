@@ -1,5 +1,8 @@
 ## PlayFetch Changelog
 
+### v0.28 - 2024-04-24
+- Add support for self-hosting
+
 ### v0.27 - 2024-03-15
 - Workspace wide API keys, cost tracking and usage limits
 - Workspace roles (owner vs member)
