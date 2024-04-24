@@ -26,14 +26,15 @@ PlayFetch has been optimised to run on Google Cloud Platform. Follow the instruc
 ### Configure a new project
 
 - Set up your Google Cloud Platform account on [https://cloud.google.com/](https://cloud.google.com/?hl=en).
+- Access the Cloud Console at [https://console.cloud.google.com](https://console.cloud.google.com/).
 - Click **NEW PROJECT** from the project selector.
 - Pick a unique name (cannot be changed later).
 - Navigate to **Billing** → **Account management** and ensure billing is enabled for the new project.
 
 ### Configure APIs
 
-- Navigate to **APIs & Services** → **Enabled APIs & Services**
-- Click **+ ENABLE APIS AND SERVICES**.
+- Navigate to **APIs & Services** → **Enabled APIs & Services**.
+- Click **ENABLE APIS AND SERVICES**.
 - Search for **App Engine Admin API** and click **ENABLE**.
 - Search for **Cloud Build API** and click **ENABLE**.
 - Search for **Cloud Datastore API** and click **ENABLE**.
@@ -47,41 +48,43 @@ PlayFetch has been optimised to run on Google Cloud Platform. Follow the instruc
 - Navigate to **App Engine** → **Dashboard** and click **CREATE APPLICATION**.
 - Pick a location (cannot be changed later).
 - Leave the service account option open (we’ll use the default).
+- Click **NEXT**.
 - Ignore the deployment panel (click **I’LL DO THIS LATER**).
 
 ### Configure the datastore
 
-- Navigate to **Datastore** and click **+ CREATE DATABASE**
-- Select **Datastore mode** and click **CREATE DATABASE**
-- Select **Time-to-live (TTL)** in the sidebar and click **+ CREATE POLICY**.
+- Navigate to **Datastore** and click **CREATE DATABASE**.
+- Select **Datastore mode** and click **CONTINUE**.
+- Click **CREATE DATABASE**.
+- Select **Time-to-live (TTL)** in the sidebar and click **CREATE POLICY**.
 - Set **Kind** to **_nextauth_token** and **Timestamp property** to **expires** and click **CREATE**.
 - Create another policy with kind **cache** and property **expiresAt**.
-- You may want to enable **Disaster Recovery** in the sidebar as well.
+- *[optional]* You may want to enable **Disaster Recovery** (in the sidebar) as well.
 
 ### Configure the storage bucket
 
 - Navigate to **Cloud Storage** → **Buckets** and select bucket **[project-name].appspot.com**.
-- Under **PERMISSIONS**, click **+ GRANT ACCESS**.
-- Assign role **Storage Object Viewer** to principal **allUsers**.
+- Under **PERMISSIONS**, click **GRANT ACCESS**.
+- Add principal **allUsers** and assign role **Storage Object Viewer**.
 - Click **SAVE** and **ALLOW PUBLIC ACCESS** (this bucket will be used for storing avatars).
 
 ### Create the build service account
 
-- Navigate to **IAM & Admin** → **Service accounts** and click **+ CREATE SERVICE ACCOUNT**
-- Pick a unique name and click **CREATE AND CONTINUE**
-- Select role **Service Account User**
-- Click **+ ADD ANOTHER ROLE** and select **App Engine Deployer**
-- Click **+ ADD ANOTHER ROLE** and select **App Engine flexible environment Service Agent**
-- Click **+ ADD ANOTHER ROLE** and select **App Engine Service Admin**
-- Click **+ ADD ANOTHER ROLE** and select **Cloud Build Service Account**
-- Click **+ ADD ANOTHER ROLE** and select **Cloud Datastore Index Admin**
-- Click **+ ADD ANOTHER ROLE** and select **Cloud Scheduler Admin**
-- Click **CONTINUE** and **DONE**
+- Navigate to **IAM & Admin** → **Service accounts** and click **CREATE SERVICE ACCOUNT**.
+- Pick a unique name and click **CREATE AND CONTINUE**.
+- Select role **Service Account User**.
+- Click **ADD ANOTHER ROLE** and select **App Engine Deployer**.
+- Click **ADD ANOTHER ROLE** and select **App Engine flexible environment Service Agent**.
+- Click **ADD ANOTHER ROLE** and select **App Engine Service Admin**.
+- Click **ADD ANOTHER ROLE** and select **Cloud Build Service Account**.
+- Click **ADD ANOTHER ROLE** and select **Cloud Datastore Index Admin**.
+- Click **ADD ANOTHER ROLE** and select **Cloud Scheduler Admin**.
+- Click **CONTINUE** and **DONE**.
 
 ### *[optional]* Configure custom domain
 
-- Navigate to **App Engine** → **Settings**
-- Select the **CUSTOM DOMAINS** tab and click **ADD A CUSTOM DOMAIN**
+- Navigate to **App Engine** → **Settings**.
+- Under **CUSTOM DOMAINS,** click **ADD A CUSTOM DOMAIN**.
 - Enter the custom domain and subdomains you want to use (following the instructions to verify ownership).
 - Click **CONTINUE** and **DONE**.
 - Add the records shown to the DNS configuration of your custom domain provider.
@@ -92,43 +95,43 @@ PlayFetch has been optimised to run on Google Cloud Platform. Follow the instruc
 - Choose either **Internal** or **External** user type depending on your use case and click **CREATE**.
 - Fill in the required fields, click **SAVE AND CONTINUE**, then click **ADD OR REMOVE SCOPES**.
 - Check scope **.../auth/userinfo.profile** and **.../auth/userinfo.email**, then click **UPDATE** and **SAVE AND CONTINUE**.
-- If you picked **External** user type above, you will need to add some test accounts (or submit an approval request to Google). Make sure to include the email address you want to use for your first admin user.
+- If you picked **External** user type above, you can add some test accounts (before publishing the app to production). Make sure to include the email address you want to use for your first admin user.
 - Click **SAVE AND CONTINUE** and **BACK TO DASHBOARD**.
-- Navigate to **APIs & Services** → **Credentials**, then click **+ CREATE CREDENTIALS** and **OAuth client ID**.
-- Select **Web application** as **Application type** and pick a name
-- Under **Authorized JavaScript origins**, add **http://localhost:3000** and **https://[project-name].appspot.com** (and custom domain if you have one).
-- Under **Authorized redirect URIs**, add **http://localhost:3000/api/auth/callback/google** and **https://[project-name].appspot.com/api/auth/callback/google** (and similar for any custom domain).
+- Select **Credentials** in the sidebar, then click **CREATE CREDENTIALS** and **OAuth client ID**.
+- Select **Web application** as **Application type** and pick a name.
+- Under **Authorized JavaScript origins**, add **https://[project-name].appspot.com** (and custom domain if you have one). If you also want to to use Google Authentication when running the app locally, also add **http://localhost:3000**.
+- Under **Authorized redirect URIs**, add **https://[project-name].appspot.com/api/auth/callback/google** (and a similar URL for any custom domain). If you also want to use Google Authentication when running the app locally, also add **http://localhost:3000/api/auth/callback/google**.
 - Click **CREATE** and copy the generated Client ID and Client secret to use in the build trigger setup below.
 
 ### Configure the build
 
-- Navigate to **Cloud Build** → **Triggers** and click **CREATE TRIGGER**.
-- Pick a name for your build
-- Under **Source** → **Repository**, click **CONNECT TO NEW REPOSITORY**.
-- Choose source **GitHub (Cloud Build GitHub App)** and click **CONTINUE** to authenticate the GitHub account where you forked the repository
-- Select the forked repository and click **CONNECT**.
+- Navigate to **Cloud Build** → **Triggers** and click **CONNECT REPOSITORY**.
+- Choose source **GitHub (Cloud Build GitHub App)** and click **CONTINUE** to authenticate the GitHub account where you forked the repository.
+- Select the forked repository, check the box underneath, and click **CONNECT**.
+- Click **CREATE A TRIGGER**.
+- Pick a name for your build.
 - Under **Configuration**, select **Cloud Build configuration file (yaml or json)**.
-- For a minimum setup, you will need to add the following **Substitution variables** to your build trigger (in the **Advanced** section):
-    - **_ENCRYPTION_KEY**: random string of 64 hexadecimal digits.
+- For a minimum setup, you will need to add the following **Substitution variables** to your build trigger (in the **Advanced** section) by clicking **ADD VARIABLE**:
+    - **_ENCRYPTION_KEY**: random string of 64 *hexadecimal* digits.
     - **_NEXTAUTH_SECRET**: random string of at least 32 characters.
     - **_NEXTAUTH_URL**: public facing URL for your instance, either a custom domain if you have one or otherwise **https://[project-name].appspot.com**.
-    - **_NOREPLY_EMAIL_USER** and **_NOREPLY_EMAIL_PASSWORD**: Gmail account to be used for outgoing emails. Can be a dedicated account in your Google Workspace (with regular password), or a separate Gmail account (with app password). If you need to use another email provider, you can configure the SMTP server with **_NOREPLY_EMAIL_HOST** and **_NOREPLY_EMAIL_PORT**.
+    - **_NOREPLY_EMAIL_USER** and **_NOREPLY_EMAIL_PASSWORD**: Gmail account to be used for outgoing emails. Can be a dedicated account in your Google Workspace (with regular password), or a separate Gmail account (with app password). If you need to use another email provider, you can also configure the SMTP server with **_NOREPLY_EMAIL_HOST** and **_NOREPLY_EMAIL_PORT**.
     - **_GCLOUD_STORAGE_BUCKET**: the name of the Cloud Storage bucket where you allowed public access e.g. **[project-name].appspot.com**.
 - If you configured Google authentication above, you should also add the following variables:
     - **_GOOGLE_CLIENT_ID** and **_GOOGLE_CLIENT_SECRET**: the values you copied above after generating OAuth credentials.
 - Under **Service account**, select the service account you created above.
-- Click **SAVE**.
-- Click **RUN** next to your newly new trigger and then click **RUN TRIGGER.**
-- Navigate to **Cloud Build** → **History** and verify your first build completes successfully.
+- Click **CREATE**.
+- Click **RUN** next to your newly created trigger and then click **RUN TRIGGER.**
+- Select **History** in the sidebar, wait and verify your build completes successfully (could take 10-15 minutes).
 
 ### Initialise your PlayFetch environment
 
-- Pick an email address that will be used as login for the initial admin user (who will then be able to add more admin and regular users).
+- Pick an email address that will be used as login for the initial admin user (who will be able to add additional users later).
 - Open a browser and navigate to **https://[project-name].appspot.com/api/admin/init?admin=[user@domain.com]** (make sure to specify the correct email address in the query).
-- This endpoint will run a script to initialise the datastore (which will take a little while) but you will only be able to run it once (unless you delete the datastore first).
+- This endpoint will run a script to initialise the datastore (which may take a minute) but you will only be able to run it once (unless you recreate the datastore).
 - Once the script completes, copy the values for **_PLAYFETCH_API_KEY** and **_PLAYFETCH_ENDPOINT_URL** that are shown in the response.
 - Navigate to **Cloud Build** → **Triggers**, click the trigger you created, add the two additional **Substitution variables** from the step above, and click **SAVE**.
-- You probably want to run your build trigger again now (with the added variables), but you don’t really need to wait for the build to complete.
+- Run your build trigger again with the added variables. This build will also generate the needed datastore indexes (now that the project has been deployed once before already), so it is best to wait until the build completes again.
 
 You should now be able to navigate to **https://[project-name].appspot.com** and log in with the email address you specified for your first admin user. You can use either Google authentication (if configured) or Email links (provided the **_NOREPLY_EMAIL** variables are set up correctly).
 
