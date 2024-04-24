@@ -2,7 +2,7 @@
   "name": "playfetch",
   "version": "0.28.0",
   "author": "Yello XYZ Ltd",
-  "private": true,
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/yello-xyz/playfetch.git"
