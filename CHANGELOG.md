@@ -1,5 +1,8 @@
 ## PlayFetch Changelog
 
+### v1.0 - 2024-04-25
+- Public release
+
 ### v0.28 - 2024-04-24
 - Add support for self-hosting
 
