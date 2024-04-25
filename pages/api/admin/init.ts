@@ -25,7 +25,7 @@ async function init(req: NextApiRequest, res: NextApiResponse) {
     return res.status(400).json({ error: 'Init script should specify valid email in query admin param.' })
   }
 
-  await saveUser(adminEmail, '', true)
+  await saveUser(adminEmail, '', true, true)
   const adminUser = await getUserForEmail(adminEmail)
   if (!adminUser) {
     return res.status(400).json({ error: 'Failed to add initial admin user.' })
