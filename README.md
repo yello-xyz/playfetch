@@ -59,7 +59,6 @@ PlayFetch has been optimised to run on Google Cloud Platform. Follow the instruc
 - Select **Time-to-live (TTL)** in the sidebar and click **CREATE POLICY**.
 - Set **Kind** to **_nextauth_token** and **Timestamp property** to **expires** and click **CREATE**.
 - Create another policy with kind **cache** and property **expiresAt**.
-- *[optional]* You may want to enable **Disaster Recovery** (in the sidebar) as well.
 
 ### Configure the storage bucket
 
@@ -99,14 +98,14 @@ PlayFetch has been optimised to run on Google Cloud Platform. Follow the instruc
 - Click **SAVE AND CONTINUE** and **BACK TO DASHBOARD**.
 - Select **Credentials** in the sidebar, then click **CREATE CREDENTIALS** and **OAuth client ID**.
 - Select **Web application** as **Application type** and pick a name.
-- Under **Authorized JavaScript origins**, add **https://*[project-name]*.appspot.com** (and custom domain if you have one). If you also want to to use Google Authentication when running the app locally, also add **http://localhost:3000**.
-- Under **Authorized redirect URIs**, add **https://*[project-name]*.appspot.com/api/auth/callback/google** (and a similar URL for any custom domain). If you also want to use Google Authentication when running the app locally, also add **http://localhost:3000/api/auth/callback/google**.
+- Under **Authorized JavaScript origins**, add **https://*[project-name]*.appspot.com** (and custom domain if you have one). If you also want to to use Google Authentication when running the app locally, add **http://localhost:3000** as well.
+- Under **Authorized redirect URIs**, add **https://*[project-name]*.appspot.com/api/auth/callback/google** (and a similar URL for any custom domain). If you also want to use Google Authentication when running the app locally, add **http://localhost:3000/api/auth/callback/google** as well.
 - Click **CREATE** and copy the generated Client ID and Client secret to use in the build trigger setup below.
 
 ### Configure the build
 
 - Navigate to **Cloud Build** → **Triggers** and click **CONNECT REPOSITORY**.
-- Choose source **GitHub (Cloud Build GitHub App)** and click **CONTINUE** to authenticate the GitHub account where you forked the repository.
+- Select source **GitHub (Cloud Build GitHub App)** and click **CONTINUE** to authenticate the GitHub account where you forked the repository (in a popup window).
 - Select the forked repository, check the box underneath, and click **CONNECT**.
 - Click **CREATE A TRIGGER**.
 - Pick a name for your build.
@@ -122,18 +121,18 @@ PlayFetch has been optimised to run on Google Cloud Platform. Follow the instruc
 - Under **Service account**, select the service account you created above.
 - Click **CREATE**.
 - Click **RUN** next to your newly created trigger and then click **RUN TRIGGER.**
-- Select **History** in the sidebar, wait and verify your build completes successfully (could take 10-15 minutes).
+- Select **History** in the sidebar, and wait to verify your build completes successfully (can take 10-15 minutes).
 
 ### Initialise your PlayFetch environment
 
-- Pick an email address that will be used as login for the initial admin user (who will be able to add additional users later).
-- Open a browser and navigate to **https://*[project-name]*.appspot.com/api/admin/init?admin=[user@domain.com]** (make sure to specify the correct email address in the query).
+- Pick an email address that will be used as login for the initial admin user.
+- Open a browser and navigate to **https://*[project-name]*.appspot.com/api/admin/init?admin=*[user@domain.com]*** (make sure to specify the correct email address in the query).
 - This endpoint will run a script to initialise the datastore (which may take a minute) but you will only be able to run it once (unless you recreate the datastore).
 - Once the script completes, copy the values for **_PLAYFETCH_API_KEY** and **_PLAYFETCH_ENDPOINT_URL** that are shown in the response.
 - Navigate to **Cloud Build** → **Triggers**, click the trigger you created, add the two additional **Substitution variables** from the step above, and click **SAVE**.
-- Run your build trigger again with the added variables. This build will also generate the needed datastore indexes, so it is best to wait until it completes again.
+- Run your build trigger again with the added variables. This build may need to generate missing datastore indexes, so it is best to wait until it completes again.
 
-You should now be able to navigate to **https://*[project-name]*.appspot.com** and log in with the email address you specified for your first admin user. You can use either Google authentication (if configured) or Email links (provided the **_NOREPLY_EMAIL** variables are set up correctly).
+You should now be able to navigate to **https://*[project-name]*.appspot.com** and log in with the email address you specified for your first admin user. You can use either Google authentication (if configured) or Email links (provided the **_NOREPLY_EMAIL** variables are set up correctly). Additional users can be granted access in the Admin panel.
 
 ## Running PlayFetch locally
 
