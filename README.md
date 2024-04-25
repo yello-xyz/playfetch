@@ -67,7 +67,7 @@ PlayFetch has been optimised to run on Google Cloud Platform. Follow the instruc
 - Add principal **allUsers** and assign role **Storage Object Viewer**.
 - Click **SAVE** and **ALLOW PUBLIC ACCESS** (this bucket will be used for storing avatars).
 
-### Create the build service account
+### Configure the build service account
 
 - Navigate to **IAM & Admin** → **Service accounts** and click **CREATE SERVICE ACCOUNT**.
 - Pick a unique name and click **CREATE AND CONTINUE**.
@@ -80,7 +80,7 @@ PlayFetch has been optimised to run on Google Cloud Platform. Follow the instruc
 - Click **ADD ANOTHER ROLE** and select **Cloud Scheduler Admin**.
 - Click **CONTINUE** and **DONE**.
 
-### *[optional]* Configure custom domain
+### *[optional]* Configure a custom domain
 
 - Navigate to **App Engine** → **Settings**.
 - Under **CUSTOM DOMAINS,** click **ADD A CUSTOM DOMAIN**.
@@ -185,7 +185,7 @@ In order to extend the minimum setup, you can configure the following environmen
 
 - **_GITHUB_CLIENT_ID**, **_GITHUB_CLIENT_SECRET**: can be used to configure GitHub OAuth authentication (similar to Google). Requires setting up a GitHub OAuth app.
 - **_GITHUB_APP_CLIENT_ID**, **_GITHUB_APP_CLIENT_SECRET**, **_GITHUB_APP_ID**, **_GITHUB_APP_PRIVATE_KEY**, **_NEXT_PUBLIC_GITHUB_APP_INSTALL_LINK**: can be used to configure source control integration. Requires setting up a GitHub app.
-- **_LINEAR_APP_CLIENT_ID**, **_LINEAR_APP_CLIENT_SECRET**, **_LINEAR_APP_WEBHOOK_SECRET**: can be used to configure task management integration. Requires setting up a Linear app as well.
+- **_LINEAR_APP_CLIENT_ID**, **_LINEAR_APP_CLIENT_SECRET**, **_LINEAR_APP_WEBHOOK_SECRET**: can be used to configure task management integration. Requires setting up a Linear app.
 - **_NOTION_TOKEN, _NOTION_ONBOARDING_PAGE_ID, _NOTION_WAITLIST_PAGE_ID**: can be used to automatically synchronise waitlist signups and onboarding survey responses to Notion. Requires setting up a Notion app.
 
 ### Analytics
@@ -195,8 +195,8 @@ In order to extend the minimum setup, you can configure the following environmen
 
 ### Environment
 
-- **_GOOGLE_ANALYTICS_DASHBOARD_URL**, **_GOOGLE_ANALYTICS_REPORTS_URL**, **_GOOGLE_SEARCH_CONSOLE_URL**, **_INTEGRATION_TEST_URL**, **_SERVER_LOGS_URL**: can be used to add various diagnostic links in the Admin panel.
 - **_NEXT_PUBLIC_DOCS_URL**, **_NEXT_PUBLIC_SUPPORT_EMAIL**: can be used to generate the links to Documentation and Support in the workspace and project sidebars.
+- **_GOOGLE_ANALYTICS_DASHBOARD_URL**, **_GOOGLE_ANALYTICS_REPORTS_URL**, **_GOOGLE_SEARCH_CONSOLE_URL**, **_INTEGRATION_TEST_URL**, **_SERVER_LOGS_URL**: can be used to add various diagnostic links in the Admin panel.
 - **_NOREPLY_EMAIL_HOST**, **_NOREPLY_EMAIL_PORT**: can be used to configure an alternative email provider for outgoing transactional emails.
 - **_API_URL**: can be used to split traffic between website and api, e.g. if you have separate subdomains pointing to your instance.
 
