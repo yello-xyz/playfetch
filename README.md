@@ -4,7 +4,7 @@ PlayFetch makes adding Large Language Model features to your app quick and painl
 
 ![](public/playfetch.gif)
 
-## Context
+## Background
 
 LLMs have changed the way product teams are working.  Increasingly large parts of applications are now being built with natural language.  There are often non-engineering team members involved in this process — content strategists who care about the tone and delivery of the generated text, domain experts who are bringing highly specialised knowledge to generated content, and designers & product managers who have a deep understanding of their product needs.  With these new team members involved in prototyping, developing and maintaining critical parts of applications along side the engineering team there are lots of new interactions.
 
@@ -21,7 +21,7 @@ These new interactions between engineers and the rest of the team need new tooli
 
 ## Deploying PlayFetch on Google Cloud
 
-PlayFetch has been optimised to run on Google Cloud Platform. Follow the instructions below to get your own instance up and running. We will assume you have forked the official PlayFetch repository at [https://github.com/yello-xyz/playfetch](https://github.com/yello-xyz/playfetch) (so you can set up continuous integration).
+PlayFetch has been optimised to run on Google Cloud Platform. Follow the instructions below to get your own instance up and running. We will assume you have forked the official PlayFetch repository at [https://github.com/yello-xyz/playfetch](https://github.com/yello-xyz/playfetch) (so you can set up continuous integration). If you plan to make code changes, you can run through these instructions multiple times to set up separate instances for development, staging, and production.
 
 ### Configure a new project
 
@@ -63,7 +63,7 @@ PlayFetch has been optimised to run on Google Cloud Platform. Follow the instruc
 
 ### Configure the storage bucket
 
-- Navigate to **Cloud Storage** → **Buckets** and select bucket **[project-name].appspot.com**.
+- Navigate to **Cloud Storage** → **Buckets** and select bucket ***[project-name]*.appspot.com**.
 - Under **PERMISSIONS**, click **GRANT ACCESS**.
 - Add principal **allUsers** and assign role **Storage Object Viewer**.
 - Click **SAVE** and **ALLOW PUBLIC ACCESS** (this bucket will be used for storing avatars).
@@ -89,7 +89,7 @@ PlayFetch has been optimised to run on Google Cloud Platform. Follow the instruc
 - Click **CONTINUE** and **DONE**.
 - Add the records shown to the DNS configuration of your custom domain provider.
 
-### *[optional but recommended]* Configure Google user authentication
+### *[optional but recommended]* Configure Google OAuth user authentication
 
 - Navigate to **APIs & Services** → **OAuth consent screen**.
 - Choose either **Internal** or **External** user type depending on your use case and click **CREATE**.
@@ -99,8 +99,8 @@ PlayFetch has been optimised to run on Google Cloud Platform. Follow the instruc
 - Click **SAVE AND CONTINUE** and **BACK TO DASHBOARD**.
 - Select **Credentials** in the sidebar, then click **CREATE CREDENTIALS** and **OAuth client ID**.
 - Select **Web application** as **Application type** and pick a name.
-- Under **Authorized JavaScript origins**, add **https://[project-name].appspot.com** (and custom domain if you have one). If you also want to to use Google Authentication when running the app locally, also add **http://localhost:3000**.
-- Under **Authorized redirect URIs**, add **https://[project-name].appspot.com/api/auth/callback/google** (and a similar URL for any custom domain). If you also want to use Google Authentication when running the app locally, also add **http://localhost:3000/api/auth/callback/google**.
+- Under **Authorized JavaScript origins**, add **https://*[project-name]*.appspot.com** (and custom domain if you have one). If you also want to to use Google Authentication when running the app locally, also add **http://localhost:3000**.
+- Under **Authorized redirect URIs**, add **https://*[project-name]*.appspot.com/api/auth/callback/google** (and a similar URL for any custom domain). If you also want to use Google Authentication when running the app locally, also add **http://localhost:3000/api/auth/callback/google**.
 - Click **CREATE** and copy the generated Client ID and Client secret to use in the build trigger setup below.
 
 ### Configure the build
@@ -114,9 +114,9 @@ PlayFetch has been optimised to run on Google Cloud Platform. Follow the instruc
 - For a minimum setup, you will need to add the following **Substitution variables** to your build trigger (in the **Advanced** section) by clicking **ADD VARIABLE**:
     - **_ENCRYPTION_KEY**: random string of 64 *hexadecimal* digits.
     - **_NEXTAUTH_SECRET**: random string of at least 32 characters.
-    - **_NEXTAUTH_URL**: public facing URL for your instance, either a custom domain if you have one or otherwise **https://[project-name].appspot.com**.
-    - **_GCLOUD_STORAGE_BUCKET**: the name of the Cloud Storage bucket where you allowed public access e.g. **[project-name].appspot.com**.
-    - **_NOREPLY_EMAIL_USER** and **_NOREPLY_EMAIL_PASSWORD**: Gmail account to be used for outgoing emails. Can be a dedicated account in your Google Workspace (with regular password), or a separate Gmail account (with app password). If you need to use another email provider, you can also configure the SMTP server with **_NOREPLY_EMAIL_HOST** and **_NOREPLY_EMAIL_PORT**.
+    - **_NEXTAUTH_URL**: public facing URL for your instance, either a custom domain if you have one or otherwise **https://*[project-name]*.appspot.com**.
+    - **_GCLOUD_STORAGE_BUCKET**: the name of the Cloud Storage bucket where you allowed public access e.g. ***[project-name]*.appspot.com**.
+    - **_NOREPLY_EMAIL_USER** and **_NOREPLY_EMAIL_PASSWORD**: Gmail account to be used for outgoing transactional emails. Can be a dedicated account in your Google Workspace (with regular password), or a separate Gmail account (with app password). See instructions below if you need to use another email provider.
 - If you configured Google authentication above, you should also add the following variables:
     - **_GOOGLE_CLIENT_ID** and **_GOOGLE_CLIENT_SECRET**: the values you copied above after generating OAuth credentials.
 - Under **Service account**, select the service account you created above.
@@ -127,15 +127,17 @@ PlayFetch has been optimised to run on Google Cloud Platform. Follow the instruc
 ### Initialise your PlayFetch environment
 
 - Pick an email address that will be used as login for the initial admin user (who will be able to add additional users later).
-- Open a browser and navigate to **https://[project-name].appspot.com/api/admin/init?admin=[user@domain.com]** (make sure to specify the correct email address in the query).
+- Open a browser and navigate to **https://*[project-name]*.appspot.com/api/admin/init?admin=[user@domain.com]** (make sure to specify the correct email address in the query).
 - This endpoint will run a script to initialise the datastore (which may take a minute) but you will only be able to run it once (unless you recreate the datastore).
 - Once the script completes, copy the values for **_PLAYFETCH_API_KEY** and **_PLAYFETCH_ENDPOINT_URL** that are shown in the response.
 - Navigate to **Cloud Build** → **Triggers**, click the trigger you created, add the two additional **Substitution variables** from the step above, and click **SAVE**.
 - Run your build trigger again with the added variables. This build will also generate the needed datastore indexes, so it is best to wait until it completes again.
 
-You should now be able to navigate to **https://[project-name].appspot.com** and log in with the email address you specified for your first admin user. You can use either Google authentication (if configured) or Email links (provided the **_NOREPLY_EMAIL** variables are set up correctly).
+You should now be able to navigate to **https://*[project-name]*.appspot.com** and log in with the email address you specified for your first admin user. You can use either Google authentication (if configured) or Email links (provided the **_NOREPLY_EMAIL** variables are set up correctly).
 
 ## Running PlayFetch locally
+
+If you want to contribute to PlayFetch or debug issues, you can follow the instructions below to get it running on your local machine.
 
 ### Install node and npm
 
@@ -143,7 +145,7 @@ The easiest way to install the latest version of **node** and **npm** is to 
 
 ### Clone the repository
 
-Either **Open with GitHub Desktop** and clone to a local directory or [Connect to GitHub with SSH](https://docs.github.com/en/authentication/connecting-to-github-with-ssh) and run `git clone git@github.com:yello-xyz/playfetch.git`.
+Either **Open with GitHub Desktop** and clone to a local directory or [Connect to GitHub with SSH](https://docs.github.com/en/authentication/connecting-to-github-with-ssh) and run `git clone git@github.com:yello-xyz/playfetch.git`. If you already forked the repository, you can clone that one instead.
 
 ### Configure environment
 
@@ -176,23 +178,35 @@ To watch for changes and automatically re-run the relevant test suites:
 
 `npm run watch` 
 
-## Optional environment variables (in GCP build trigger & .env.local)
+## Optional features
 
-- **_API_URL**: can be used to split traffic between website and api.
-- **_GITHUB_CLIENT_ID**, **_GITHUB_CLIENT_SECRET**: can be used to configure GitHub authentication (similar to Google). Requires setting up a GitHub app.
-- **_GITHUB_APP_CLIENT_ID**, **_GITHUB_APP_CLIENT_SECRET**, **_GITHUB_APP_ID**, **_GITHUB_APP_PRIVATE_KEY**, **_NEXT_PUBLIC_GITHUB_APP_INSTALL_LINK**: can be used to configure source control integration.
-- **_LINEAR_APP_CLIENT_ID**, **_LINEAR_APP_CLIENT_SECRET**, **_LINEAR_APP_WEBHOOK_SECRET**: can be used to configure task management integration.
-- **_GOOGLE_ANALYTICS_API_SECRET**, **_GOOGLE_ANALYTICS_MEASUREMENT_ID**, **_NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID**, **_NEXT_PUBLIC_COOKIE_DOMAIN**, **_NEXT_PUBLIC_COOKIE_NAME**: can be used to configure Google Analytics.
+In order to extend the minimum setup, you can configure the following environment variables (either in your GCP build trigger or in your local .env.local file) to enable some additional features.
+
+### Integrations
+
+- **_GITHUB_CLIENT_ID**, **_GITHUB_CLIENT_SECRET**: can be used to configure GitHub OAuth authentication (similar to Google). Requires setting up a GitHub OAuth app.
+- **_GITHUB_APP_CLIENT_ID**, **_GITHUB_APP_CLIENT_SECRET**, **_GITHUB_APP_ID**, **_GITHUB_APP_PRIVATE_KEY**, **_NEXT_PUBLIC_GITHUB_APP_INSTALL_LINK**: can be used to configure source control integration. Requires setting up a GitHub app.
+- **_LINEAR_APP_CLIENT_ID**, **_LINEAR_APP_CLIENT_SECRET**, **_LINEAR_APP_WEBHOOK_SECRET**: can be used to configure task management integration. Requires setting up a Linear app as well.
+- **_NOTION_TOKEN, _NOTION_ONBOARDING_PAGE_ID, _NOTION_WAITLIST_PAGE_ID**: can be used to automatically synchronise waitlist signups and onboarding survey responses to Notion. Requires setting up a Notion app.
+
+### Analytics
+
+- **_GOOGLE_ANALYTICS_API_SECRET**, **_GOOGLE_ANALYTICS_MEASUREMENT_ID**: can be used to configure server side analytics (GA4).
+- **_NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID**, **_NEXT_PUBLIC_COOKIE_DOMAIN**, **_NEXT_PUBLIC_COOKIE_NAME**: can be used to configure cookies and client side analytics (Google Tag Manager).
+
+### Environment
+
 - **_GOOGLE_ANALYTICS_DASHBOARD_URL**, **_GOOGLE_ANALYTICS_REPORTS_URL**, **_GOOGLE_SEARCH_CONSOLE_URL**, **_INTEGRATION_TEST_URL**, **_SERVER_LOGS_URL**: can be used to add various diagnostic links in the Admin panel.
 - **_NEXT_PUBLIC_DOCS_URL**, **_NEXT_PUBLIC_SUPPORT_EMAIL**: can be used to generate the links to Documentation and Support in the workspace and project sidebars.
-- **_NOTION_TOKEN, _NOTION_ONBOARDING_PAGE_ID, _NOTION_WAITLIST_PAGE_ID**: can be used to automatically synchronise waitlist signups and onboarding survey responses to Notion.
+- **_NOREPLY_EMAIL_HOST**, **_NOREPLY_EMAIL_PORT**: can be used to configure an alternative email provider for outgoing transactional emails.
+- **_API_URL**: can be used to split traffic between website and api, e.g. if you have separate subdomains pointing to your instance.
 
 ## License
 
-PlayFetch is open source under a permissive [MIT](./LICENSE) license. It is being developed on [GitHub](https://github.com/yello-xyz/playfetch). Contributions are welcome.
+PlayFetch is open source under a permissive [MIT](./LICENSE) license.
 
 Please note that PlayFetch uses [CodeMirror](https://codemirror.net) as a dependency. If you are using CodeMirror commercially, there is a social (but no legal) expectation that you [help fund its maintenance](https://marijnhaverbeke.nl/fund/).
 
 ## Contributing
 
-Feel free to open issues or open pull requests when fixing bugs or adding features. To get you started, some inspiration can be found in [TODO.md](./TODO.md).
+PlayFetch is being developed on [GitHub](https://github.com/yello-xyz/playfetch). Contributions are welcome. Feel free to open issues or open pull requests when fixing bugs or adding features. To get you started, some inspiration can be found in [TODO.md](./TODO.md).
